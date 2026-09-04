@@ -78,6 +78,7 @@ import { Route as AuthenticatedAdminSlaChamadosRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
 import { Route as AuthenticatedAdminPaginasEquipamentosRouteImport } from './routes/_authenticated/admin.paginas-equipamentos'
 import { Route as AuthenticatedAdminOrigensLeadRouteImport } from './routes/_authenticated/admin.origens-lead'
+import { Route as AuthenticatedAdminModelosFormularioRouteImport } from './routes/_authenticated/admin.modelos-formulario'
 import { Route as AuthenticatedAdminMineracaoRouteImport } from './routes/_authenticated/admin.mineracao'
 import { Route as AuthenticatedAdminMigrationsRouteImport } from './routes/_authenticated/admin.migrations'
 import { Route as AuthenticatedAdminLogsFiscaisRouteImport } from './routes/_authenticated/admin.logs-fiscais'
@@ -519,6 +520,12 @@ const AuthenticatedAdminOrigensLeadRoute =
     path: '/origens-lead',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminModelosFormularioRoute =
+  AuthenticatedAdminModelosFormularioRouteImport.update({
+    id: '/modelos-formulario',
+    path: '/modelos-formulario',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMineracaoRoute =
   AuthenticatedAdminMineracaoRouteImport.update({
     id: '/mineracao',
@@ -889,6 +896,7 @@ export interface FileRoutesByFullPath {
   '/admin/logs-fiscais': typeof AuthenticatedAdminLogsFiscaisRoute
   '/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
+  '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
   '/admin/origens-lead': typeof AuthenticatedAdminOrigensLeadRoute
   '/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
@@ -1013,6 +1021,7 @@ export interface FileRoutesByTo {
   '/admin/logs-fiscais': typeof AuthenticatedAdminLogsFiscaisRoute
   '/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
+  '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
   '/admin/origens-lead': typeof AuthenticatedAdminOrigensLeadRoute
   '/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
@@ -1138,6 +1147,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/logs-fiscais': typeof AuthenticatedAdminLogsFiscaisRoute
   '/_authenticated/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/_authenticated/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
+  '/_authenticated/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
   '/_authenticated/admin/origens-lead': typeof AuthenticatedAdminOrigensLeadRoute
   '/_authenticated/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
   '/_authenticated/admin/seo': typeof AuthenticatedAdminSeoRoute
@@ -1266,6 +1276,7 @@ export interface FileRouteTypes {
     | '/admin/logs-fiscais'
     | '/admin/migrations'
     | '/admin/mineracao'
+    | '/admin/modelos-formulario'
     | '/admin/origens-lead'
     | '/admin/paginas-equipamentos'
     | '/admin/seo'
@@ -1390,6 +1401,7 @@ export interface FileRouteTypes {
     | '/admin/logs-fiscais'
     | '/admin/migrations'
     | '/admin/mineracao'
+    | '/admin/modelos-formulario'
     | '/admin/origens-lead'
     | '/admin/paginas-equipamentos'
     | '/admin/seo'
@@ -1514,6 +1526,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/logs-fiscais'
     | '/_authenticated/admin/migrations'
     | '/_authenticated/admin/mineracao'
+    | '/_authenticated/admin/modelos-formulario'
     | '/_authenticated/admin/origens-lead'
     | '/_authenticated/admin/paginas-equipamentos'
     | '/_authenticated/admin/seo'
@@ -2117,6 +2130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrigensLeadRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/modelos-formulario': {
+      id: '/_authenticated/admin/modelos-formulario'
+      path: '/modelos-formulario'
+      fullPath: '/admin/modelos-formulario'
+      preLoaderRoute: typeof AuthenticatedAdminModelosFormularioRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/mineracao': {
       id: '/_authenticated/admin/mineracao'
       path: '/mineracao'
@@ -2544,6 +2564,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminLogsFiscaisRoute: typeof AuthenticatedAdminLogsFiscaisRoute
   AuthenticatedAdminMigrationsRoute: typeof AuthenticatedAdminMigrationsRoute
   AuthenticatedAdminMineracaoRoute: typeof AuthenticatedAdminMineracaoRoute
+  AuthenticatedAdminModelosFormularioRoute: typeof AuthenticatedAdminModelosFormularioRoute
   AuthenticatedAdminOrigensLeadRoute: typeof AuthenticatedAdminOrigensLeadRoute
   AuthenticatedAdminPaginasEquipamentosRoute: typeof AuthenticatedAdminPaginasEquipamentosRoute
   AuthenticatedAdminSeoRoute: typeof AuthenticatedAdminSeoRoute
@@ -2570,6 +2591,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminLogsFiscaisRoute: AuthenticatedAdminLogsFiscaisRoute,
   AuthenticatedAdminMigrationsRoute: AuthenticatedAdminMigrationsRoute,
   AuthenticatedAdminMineracaoRoute: AuthenticatedAdminMineracaoRoute,
+  AuthenticatedAdminModelosFormularioRoute:
+    AuthenticatedAdminModelosFormularioRoute,
   AuthenticatedAdminOrigensLeadRoute: AuthenticatedAdminOrigensLeadRoute,
   AuthenticatedAdminPaginasEquipamentosRoute:
     AuthenticatedAdminPaginasEquipamentosRoute,

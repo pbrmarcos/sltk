@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { IntegracoesTab } from "@/components/admin/IntegracoesTab";
 import { GroqConfigCard } from "@/components/admin/GroqConfigCard";
+import { EnriquecimentoLogsTab } from "@/components/admin/EnriquecimentoLogsTab";
 
 const AREAS = Object.keys(AREA_LABEL) as CapabilityArea[];
 
@@ -187,6 +188,13 @@ export function DiagnosticoTab() {
           Provedores fiscais por país
         </h3>
         <IntegracoesTab />
+      </section>
+
+      <section className="space-y-2">
+        <h3 className="text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+          Logs de busca fiscal
+        </h3>
+        <EnriquecimentoLogsTab />
       </section>
     </div>
   );

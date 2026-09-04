@@ -14,7 +14,7 @@ const OLD_TAB_TO_ROUTE: Record<string, string> = {
   mineracao: "/admin/mineracao",
   banco: "/admin/banco",
   seo: "/admin/seo",
-  "enrich-logs": "/admin/logs-fiscais",
+  "enrich-logs": "/admin/diagnostico",
   migrations: "/admin/migrations",
 };
 
@@ -28,8 +28,8 @@ export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   },
   component: () => (
     <AdminSettingsPage
-      title="Configurações"
-      subtitle="Visão administrativa, marca, comunicação, integrações e infraestrutura do sistema."
+      title="Painel"
+      subtitle="Visão administrativa: pendências, filas e atividade recente do sistema."
     >
       <AdministracaoTab />
     </AdminSettingsPage>

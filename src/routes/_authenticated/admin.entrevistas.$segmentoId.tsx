@@ -134,7 +134,7 @@ function AdminEntrevistaEditor() {
   if (!canManage) {
     return (
       <PageContainer>
-        <PageHeader breadcrumbs={[{ label: "Administração", href: "/admin/configuracoes" }, { label: "Entrevistas" }]} title="Formulário de Entrevista" />
+        <PageHeader breadcrumbs={[{ label: "Administração", href: "/admin" }, { label: "Entrevistas" }]} title="Formulário de Entrevista" />
         <Card className="mt-6"><CardContent className="py-12 text-center text-muted-foreground">Acesso restrito a admin e manager.</CardContent></Card>
       </PageContainer>
     );
@@ -160,15 +160,15 @@ function AdminEntrevistaEditor() {
     <PageContainer>
       <PageHeader
         breadcrumbs={[
-          { label: "Administração", href: "/admin/configuracoes" },
-          { label: "Entrevistas", href: "/admin/entrevistas" },
+          { label: "Administração", href: "/admin" },
+          { label: "Modelos de Formulário", href: "/admin/modelos-formulario" },
           { label: seg?.nome_pt ?? "…" },
         ]}
         title={seg?.nome_pt ?? "Carregando…"}
         subtitle="Reordene por arraste, edite os enunciados, ative/desative obrigatoriedade e traduza para ES/EN."
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" asChild><Link to="/admin/entrevistas"><ArrowLeft className="h-4 w-4 mr-2" /> Voltar</Link></Button>
+            <Button variant="outline" asChild><Link to="/admin/modelos-formulario"><ArrowLeft className="h-4 w-4 mr-2" /> Voltar</Link></Button>
             <Button onClick={() => setEditing({ segmento_id: segmentoId, formato: "single_choice", obrigatoria: true, enunciado_pt: "", enunciado_es: "", enunciado_en: "" })}>
               <Plus className="h-4 w-4 mr-2" /> Nova pergunta
             </Button>

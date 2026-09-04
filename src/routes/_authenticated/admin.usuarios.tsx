@@ -57,6 +57,7 @@ import {
 import { ALL_ROLES, UserFormDialog } from "@/components/admin/UserFormDialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PermissoesMatrixTab } from "@/components/admin/PermissoesMatrixTab";
+import { SupportPasswordResetPanel } from "@/components/admin/SupportPasswordResetPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
@@ -72,7 +73,9 @@ function UsuariosPage() {
     { label: "Usuários" },
   ];
 
-  if (role !== "admin") {
+  const allowed = role === "admin" || role === "manager" || role === "engineer";
+
+  if (!allowed) {
     return (
       <PageContainer>
         <PageHeader breadcrumbs={crumbs} title="Usuários & Permissões" />
@@ -80,17 +83,23 @@ function UsuariosPage() {
           <ShieldAlert className="h-10 w-10 text-[var(--danger)]" />
           <h2 className="text-lg font-semibold">Acesso restrito</h2>
           <p className="text-sm text-[var(--text-muted)]">
-            Esta área é exclusiva para administradores.
+            Esta área é exclusiva para administradores, gestores e engenharia.
           </p>
         </div>
       </PageContainer>
     );
   }
 
-  return <UsuariosPanel crumbs={crumbs} />;
+  return <UsuariosPanel crumbs={crumbs} isAdmin={role === "admin"} />;
 }
 
-function UsuariosPanel({ crumbs }: { crumbs: { label: string; href?: string }[] }) {
+function UsuariosPanel({
+  crumbs,
+  isAdmin,
+}: {
+  crumbs: { label: string; href?: string }[];
+  isAdmin: boolean;
+}) {
   const { user } = useAuth();
   const qc = useQueryClient();
 
@@ -98,10 +107,11 @@ function UsuariosPanel({ crumbs }: { crumbs: { label: string; href?: string }[] 
   const [roleFilter, setRoleFilter] = useState<AppRole | "all">("all");
   const [status, setStatus] = useState<"active" | "inactive" | "all">("active");
   const [page, setPage] = useState(1);
-  const [tab, setTab] = useState<"usuarios" | "permissoes">(() => {
+  const [tab, setTab] = useState<"usuarios" | "permissoes" | "senha">(() => {
+    if (!isAdmin) return "senha";
     if (typeof window === "undefined") return "usuarios";
     const p = new URLSearchParams(window.location.search).get("tab");
-    return p === "permissoes" ? "permissoes" : "usuarios";
+    return p === "permissoes" || p === "senha" ? p : "usuarios";
   });
 
   useEffect(() => {
@@ -144,6 +154,7 @@ function UsuariosPanel({ crumbs }: { crumbs: { label: string; href?: string }[] 
       listFn({
         data: { search, role: roleFilter, status, page, pageSize: PAGE_SIZE },
       }),
+    enabled: isAdmin,
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-users"] });
@@ -225,11 +236,17 @@ function UsuariosPanel({ crumbs }: { crumbs: { label: string; href?: string }[] 
         }
       />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as "usuarios" | "permissoes")} className="w-full">
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as "usuarios" | "permissoes" | "senha")}
+        className="w-full"
+      >
         <TabsList>
-          <TabsTrigger value="usuarios">Usuários</TabsTrigger>
-          <TabsTrigger value="permissoes">Permissões</TabsTrigger>
+          {isAdmin && <TabsTrigger value="usuarios">Usuários</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
+          <TabsTrigger value="senha">Redefinir senha</TabsTrigger>
         </TabsList>
+        {isAdmin && (
         <TabsContent value="usuarios" className="mt-4 flex flex-col gap-4">
       <Toolbar>
         <ToolbarSearch
@@ -434,8 +451,14 @@ function UsuariosPanel({ crumbs }: { crumbs: { label: string; href?: string }[] 
         </div>
       )}
         </TabsContent>
+        )}
+        {isAdmin && (
         <TabsContent value="permissoes" className="mt-4">
           <PermissoesMatrixTab />
+        </TabsContent>
+        )}
+        <TabsContent value="senha" className="mt-4">
+          <SupportPasswordResetPanel />
         </TabsContent>
       </Tabs>
 

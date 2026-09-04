@@ -22,7 +22,6 @@ const GROUPS: NavGroup[] = [
       { label: "Banco de Dados", to: "/admin/banco" },
       { label: "Mineração", to: "/admin/mineracao" },
       { label: "Migrations", to: "/admin/migrations" },
-      { label: "Logs de busca fiscal", to: "/admin/logs-fiscais" },
     ],
   },
   {
@@ -39,7 +38,6 @@ const GROUPS: NavGroup[] = [
     items: [
       { label: "Usuários & Permissões", to: "/admin/usuarios" },
       { label: "Auditoria", to: "/admin/auditoria" },
-      { label: "Balcão de Suporte", to: "/admin/suporte" },
     ],
   },
   {
@@ -47,8 +45,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { label: "E-mails automáticos", to: "/admin/emails" },
       { label: "Formulários recebidos", to: "/admin/formularios-recebidos" },
-      { label: "Tipos de Checklist", to: "/admin/checklist-tipos" },
-      { label: "Formulários de Entrevista", to: "/admin/entrevistas" },
+      { label: "Modelos de Formulário", to: "/admin/modelos-formulario" },
       { label: "SLA de Chamados", to: "/admin/sla-chamados" },
     ],
   },

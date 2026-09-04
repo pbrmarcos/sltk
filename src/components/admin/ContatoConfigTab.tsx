@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -137,8 +138,11 @@ export function ContatoConfigTab() {
       <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-6">
         <h3 className="text-sm font-semibold">Mensagens recebidas</h3>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Mensagens do formulário público são registradas em <code>contato_mensagens</code>.
-          A listagem detalhada fica disponível numa próxima entrega.
+          As mensagens enviadas pelo formulário público aparecem na caixa unificada em{" "}
+          <Link to="/admin/formularios-recebidos" className="text-[var(--primary)] hover:underline">
+            Formulários recebidos
+          </Link>
+          , aba "Contato".
         </p>
       </div>
     </section>
