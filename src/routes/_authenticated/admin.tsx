@@ -4,7 +4,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { logAdminLogin, logAdminAccessDenied } from "@/lib/admin-events.functions";
-import { SettingsNav } from "@/components/admin/SettingsNav";
+import { SettingsNav, firstAccessibleAdminRoute } from "@/components/admin/SettingsNav";
 
 const ALLOWED = new Set(["admin", "manager", "engineer"]);
 const LOGIN_FLAG_KEY = "sltk_admin_logged";
@@ -39,13 +39,14 @@ function AdminLayout() {
     }
   }, [loading, roleLoading, allowed, navigate, pathname, role]);
 
-  // /admin agora consolida a visão administrativa dentro de Configurações → aba Administração.
+  // /admin agora consolida a visão administrativa dentro do menu de Configurações —
+  // manda para a primeira seção que o papel do usuário pode realmente abrir.
   useEffect(() => {
     if (loading || roleLoading || !allowed) return;
     if (pathname === "/admin") {
-      void navigate({ to: "/admin/configuracoes", replace: true });
+      void navigate({ to: firstAccessibleAdminRoute(role), replace: true });
     }
-  }, [loading, roleLoading, allowed, pathname, navigate]);
+  }, [loading, roleLoading, allowed, pathname, navigate, role]);
 
   useEffect(() => {
     if (loading || roleLoading || !allowed) return;

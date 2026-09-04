@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAuditServer } from "@/lib/audit.server";
 
 // Carrega todos os .sql em supabase/pending-migrations/ como texto no bundle do server.
 const migrationsGlob = import.meta.glob("/supabase/pending-migrations/*.sql", {
@@ -117,11 +118,26 @@ export const aplicarMigration = createServerFn({ method: "POST" })
     }
 
     const result = await runSql(file.sql);
-    if (!result.ok) return result;
+    if (!result.ok) {
+      await logAuditServer(supabaseAdmin, context.userId, {
+        table_name: "_migrations_applied",
+        record_id: file.name,
+        action: "UPDATE",
+        field_changed: "apply_failed",
+        new_value: { error: result.error },
+      });
+      return result;
+    }
 
     await runSql(
       `INSERT INTO public._migrations_applied(filename) VALUES (${sqlLiteral(file.name)}) ON CONFLICT DO NOTHING;`,
     );
+    await logAuditServer(supabaseAdmin, context.userId, {
+      table_name: "_migrations_applied",
+      record_id: file.name,
+      action: "INSERT",
+      new_value: { sql: file.sql.slice(0, 4000) },
+    });
     return { ok: true as const };
   });
 

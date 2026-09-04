@@ -2,8 +2,18 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, PlayCircle, CheckCircle2, ChevronDown, ChevronRight } from "lucide-react";
+import { Loader2, PlayCircle, CheckCircle2, ChevronDown, ChevronRight, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { listarMigrations, aplicarMigration } from "@/lib/migrations.functions";
 
 export function MigrationsTab() {
@@ -11,6 +21,7 @@ export function MigrationsTab() {
   const aplicar = useServerFn(aplicarMigration);
   const [applyingName, setApplyingName] = useState<string | null>(null);
   const [openSql, setOpenSql] = useState<Record<string, boolean>>({});
+  const [confirmName, setConfirmName] = useState<string | null>(null);
 
   const q = useQuery({
     queryKey: ["admin", "migrations"],
@@ -18,6 +29,7 @@ export function MigrationsTab() {
   });
 
   async function handleApply(name: string) {
+    setConfirmName(null);
     setApplyingName(name);
     try {
       const r = await aplicar({ data: { name } });
@@ -92,7 +104,7 @@ export function MigrationsTab() {
                   ) : (
                     <Button
                       size="sm"
-                      onClick={() => handleApply(m.name)}
+                      onClick={() => setConfirmName(m.name)}
                       disabled={applyingName === m.name}
                     >
                       {applyingName === m.name ? (
@@ -119,6 +131,27 @@ export function MigrationsTab() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!confirmName} onOpenChange={(v) => !v && setConfirmName(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <TriangleAlert className="h-4 w-4 text-[var(--warning)]" /> Aplicar migration em produção
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              O SQL de <code className="font-mono">{confirmName}</code> será executado diretamente no
+              banco de produção via Management API, sem possibilidade de desfazer automaticamente. A
+              aplicação fica registrada em Auditoria com o seu usuário. Confirma?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmName && handleApply(confirmName)}>
+              Aplicar migration
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
