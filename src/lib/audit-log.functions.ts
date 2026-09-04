@@ -14,13 +14,13 @@ export type AuditLogRow = {
   user_name: string | null;
   table_name: string;
   record_id: string;
-  action: "INSERT" | "UPDATE" | "DELETE";
+  action: "INSERT" | "UPDATE" | "DELETE" | "ACCESS";
   field_changed: string | null;
   old_value: Json | null;
   new_value: Json | null;
 };
 
-const ACTIONS = ["INSERT", "UPDATE", "DELETE"] as const;
+const ACTIONS = ["INSERT", "UPDATE", "DELETE", "ACCESS"] as const;
 
 const listInput = z.object({
   search: z.string().max(120).optional().default(""),

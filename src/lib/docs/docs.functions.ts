@@ -684,6 +684,22 @@ export const getSignedUrl = createServerFn({ method: "POST" })
       .from("documentos")
       .createSignedUrl(data.path, data.expiresIn ?? 600);
     if (error) throw new Error(error.message);
+
+    // Auditoria de acesso a documento restrito — só metadados, nunca o conteúdo do arquivo.
+    try {
+      const { getCriticalClient } = await import("@/lib/supabase-client.server");
+      const supabaseAdmin = await getCriticalClient();
+      await (supabaseAdmin as any).from("audit_log").insert({
+        user_id: context.userId,
+        table_name: "documentos",
+        record_id: data.path,
+        action: "ACCESS",
+        new_value: { expiresIn: data.expiresIn ?? 600 },
+      });
+    } catch (e) {
+      console.error("[docs] falha ao registrar acesso ao documento", e);
+    }
+
     return { url: signed?.signedUrl as string };
   });
 

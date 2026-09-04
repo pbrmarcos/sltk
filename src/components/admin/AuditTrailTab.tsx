@@ -42,7 +42,7 @@ type Filters = {
   search: string;
   user_id: string | null;
   user_label: string | null;
-  action: "all" | "INSERT" | "UPDATE" | "DELETE";
+  action: "all" | "INSERT" | "UPDATE" | "DELETE" | "ACCESS";
   table_name: string;
   from: string;
   to: string;
@@ -229,6 +229,7 @@ export function AuditTrailTab() {
             <SelectItem value="INSERT">INSERT</SelectItem>
             <SelectItem value="UPDATE">UPDATE</SelectItem>
             <SelectItem value="DELETE">DELETE</SelectItem>
+            <SelectItem value="ACCESS">ACCESS</SelectItem>
           </SelectContent>
         </Select>
         <Input
@@ -406,11 +407,12 @@ function JsonBlock({ label, value }: { label: string; value: unknown }) {
   );
 }
 
-function ActionBadge({ action }: { action: "INSERT" | "UPDATE" | "DELETE" }) {
+function ActionBadge({ action }: { action: "INSERT" | "UPDATE" | "DELETE" | "ACCESS" }) {
   const styles = {
     INSERT: "bg-emerald-100 text-emerald-700",
     UPDATE: "bg-amber-100 text-amber-700",
     DELETE: "bg-rose-100 text-rose-700",
+    ACCESS: "bg-sky-100 text-sky-700",
   } as const;
   return (
     <span className={"rounded px-2 py-0.5 text-[11px] font-semibold " + styles[action]}>

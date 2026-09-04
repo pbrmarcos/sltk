@@ -9556,7 +9556,7 @@ export type Database = {
         | "assembly"
         | "field"
         | "sales"
-      audit_action: "INSERT" | "UPDATE" | "DELETE"
+      audit_action: "INSERT" | "UPDATE" | "DELETE" | "ACCESS"
       chamado_autor_tipo: "visitante" | "atendente" | "sistema"
       chamado_evento_tipo:
         | "criado"
@@ -9972,7 +9972,7 @@ export const Constants = {
         "field",
         "sales",
       ],
-      audit_action: ["INSERT", "UPDATE", "DELETE"],
+      audit_action: ["INSERT", "UPDATE", "DELETE", "ACCESS"],
       chamado_autor_tipo: ["visitante", "atendente", "sistema"],
       chamado_evento_tipo: [
         "criado",
