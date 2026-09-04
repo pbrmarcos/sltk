@@ -22,8 +22,8 @@ app_version: "0.99.4"
 Em `/contato` o visitante encontra canais diretos (endereço, telefone, WhatsApp, e-mail, horário) e um formulário com nome, e-mail comercial, telefone opcional, assunto e mensagem.
 :::
 
-:::step{n="2" title="Triagem em /admin/contato" img="admin-chamados.png" alt="Caixa unificada de chamados filtrada por origem 'Contato do site' com contador zero"}
-Revise novas mensagens em `/admin/contato` — a caixa unificada mostra origem, prioridade, atendente e SLA de resposta. Classifique origem/prioridade antes de responder.
+:::step{n="2" title="Triagem em /pos-vendas/chamados" img="admin-chamados.png" alt="Caixa unificada de chamados filtrada por origem 'Contato do site' com contador zero"}
+Revise novas mensagens em `/pos-vendas/chamados?origem=contato_site` — a caixa unificada mostra origem, prioridade, atendente e SLA de resposta. Classifique origem/prioridade antes de responder.
 :::
 
 :::step{n="3" title="Qualificar comercialmente"}

@@ -3,10 +3,11 @@ import { useEffect } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { logAdminLogin } from "@/lib/admin-events.functions";
+import { logAdminLogin, logAdminAccessDenied } from "@/lib/admin-events.functions";
 
 const ALLOWED = new Set(["admin", "manager", "engineer"]);
 const LOGIN_FLAG_KEY = "sltk_admin_logged";
+const DENIED_FLAG_KEY = "sltk_admin_denied";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -22,12 +23,20 @@ function AdminLayout() {
   useEffect(() => {
     if (loading || roleLoading) return;
     if (!allowed) {
+      try {
+        if (typeof window !== "undefined" && window.sessionStorage.getItem(DENIED_FLAG_KEY) !== pathname) {
+          window.sessionStorage.setItem(DENIED_FLAG_KEY, pathname);
+          void logAdminAccessDenied({ data: { path: pathname, reason: `role:${role ?? "none"}` } });
+        }
+      } catch {
+        /* sessionStorage indisponível — silencia */
+      }
       const t = setTimeout(() => {
         void navigate({ to: "/dashboard", replace: true });
       }, 1500);
       return () => clearTimeout(t);
     }
-  }, [loading, roleLoading, allowed, navigate]);
+  }, [loading, roleLoading, allowed, navigate, pathname, role]);
 
   // /admin agora consolida a visão administrativa dentro de Configurações → aba Administração.
   useEffect(() => {

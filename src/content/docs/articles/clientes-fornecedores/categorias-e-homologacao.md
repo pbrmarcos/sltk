@@ -20,7 +20,7 @@ app_version: "0.99.4"
 
 ## Categorias
 
-- Cadastradas em `/admin/banco` (aba **Categorias de fornecedor**).
+- Atribuídas por fornecedor em `/fornecedores/$id` (seção **Categorias**) — não há uma tela de catálogo separada.
 - Um fornecedor pode ter múltiplas categorias.
 - Nas cotações, o filtro **Categoria** só sugere fornecedores marcados — evita convidar quem não atua no ramo.
 
@@ -42,7 +42,6 @@ Reprovações repetidas, atraso grave ou perda de certidão → mova para **Susp
 
 - **Cotações** (`/compras/cotacoes`): suspensos ficam ocultos; não homologados aparecem com aviso.
 - **Ordens de compra** (`/compras/ordens`): OC para não homologado exige justificativa e aprovação de `manager`.
-- **Homologação em massa**: `admin` pode reprocessar via `/admin/banco` (auditado).
 
 :::dica
 Registre em **Notas** (`/fornecedores/$id`) avaliações de entrega e qualidade. Elas alimentam o ranking usado no filtro da cotação.

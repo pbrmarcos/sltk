@@ -1,5 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getSupabasePublicConfig } from "@/integrations/supabase/config";
+import { pingSupabaseHealth } from "@/lib/system-diagnostics.server";
+
+async function assertAdmin(supabase: any, userId: string) {
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  if (error) throw new Error(error.message);
+  if (!(data ?? []).some((r: { role: string }) => r.role === "admin")) throw new Error("Acesso restrito.");
+}
 
 function mask(v?: string | null) {
   if (!v) return null;
@@ -13,7 +21,10 @@ function projectRefFromUrl(url?: string | null) {
   return m?.[1] ?? null;
 }
 
-export const getBackendInfo = createServerFn({ method: "GET" }).handler(async () => {
+export const getBackendInfo = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+  await assertAdmin(context.supabase, context.userId);
   const fallback = getSupabasePublicConfig();
   const url = process.env.SUPABASE_URL ?? process.env.DEST_SUPABASE_URL ?? fallback.url ?? null;
   const projectId = process.env.SUPABASE_PROJECT_ID ?? projectRefFromUrl(url);
@@ -25,22 +36,11 @@ export const getBackendInfo = createServerFn({ method: "GET" }).handler(async ()
   const destPublishable = process.env.DEST_SUPABASE_PUBLISHABLE_KEY ?? null;
   const destServiceRole = process.env.DEST_SUPABASE_SERVICE_ROLE_KEY ?? null;
 
-  // Tenta um ping leve no Auth health endpoint (sem dependências) para validar se o projeto está ativo.
+  // Ping leve no Auth health endpoint pra validar se o projeto está ativo — reaproveita o helper do motor de diagnóstico.
   async function ping(target?: string | null) {
     if (!target) return { ok: false, status: 0, error: "URL não configurada" };
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 5000);
-      const r = await fetch(`${target}/auth/v1/health`, {
-        method: "GET",
-        headers: publishable ? { apikey: publishable } : {},
-        signal: ctrl.signal,
-      });
-      clearTimeout(t);
-      return { ok: r.ok, status: r.status, error: r.ok ? null : `HTTP ${r.status}` };
-    } catch (e: any) {
-      return { ok: false, status: 0, error: e?.message ?? "Falha de rede" };
-    }
+    const r = await pingSupabaseHealth(target, publishable);
+    return { ok: r.ok, status: r.status, error: r.ok ? null : (r.erro ?? `HTTP ${r.status}`) };
   }
 
   const activeRef = projectRefFromUrl(url) ?? projectId;

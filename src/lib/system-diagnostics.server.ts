@@ -60,6 +60,17 @@ async function timedFetch(
   }
 }
 
+/** Ping ao Auth health endpoint de um projeto Supabase — reaproveitado pelo probe() e por admin-backend-info.functions.ts. */
+export async function pingSupabaseHealth(
+  url: string,
+  publishableKey?: string | null,
+): Promise<{ ok: boolean; status: number; erro?: string; ms: number }> {
+  const r = await timedFetch(`${url}/auth/v1/health`, {
+    headers: publishableKey ? { apikey: publishableKey } : {},
+  });
+  return { ok: r.ok, status: r.status, erro: r.erro, ms: r.ms };
+}
+
 async function probe(cap: CapabilityDef): Promise<{
   status: CapabilityStatus["status"];
   detalhe: string;
@@ -70,7 +81,7 @@ async function probe(cap: CapabilityDef): Promise<{
       const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
       const key = process.env.SUPABASE_PUBLISHABLE_KEY;
       if (!url) return { status: "ausente", detalhe: "Endereço do projeto não configurado." };
-      const r = await timedFetch(`${url}/auth/v1/health`, { headers: key ? { apikey: key } : {} });
+      const r = await pingSupabaseHealth(url, key);
       return r.ok
         ? { status: "ok", detalhe: "Projeto acessível.", latencia_ms: r.ms }
         : { status: "erro", detalhe: r.erro ?? `Resposta ${r.status} do projeto.`, latencia_ms: r.ms };

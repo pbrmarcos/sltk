@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrocarSenhaRouteImport } from './routes/trocar-senha'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -38,8 +37,6 @@ import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedChangelogRouteImport } from './routes/_authenticated/changelog'
 import { Route as AuthenticatedCentralDocumentosRouteImport } from './routes/_authenticated/central-documentos'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
-import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedPosVendasIndexRouteImport } from './routes/_authenticated/pos-vendas.index'
 import { Route as AuthenticatedKnowHowIndexRouteImport } from './routes/_authenticated/know-how.index'
 import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores.index'
@@ -59,16 +56,13 @@ import { Route as AuthenticatedKnowHowSlugRouteImport } from './routes/_authenti
 import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_authenticated/fornecedores.novo'
 import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authenticated/fornecedores.$id'
 import { Route as AuthenticatedEngenhariaProjetosRouteImport } from './routes/_authenticated/engenharia.projetos'
-import { Route as AuthenticatedEngenhariaMecanicoRouteImport } from './routes/_authenticated/engenharia.mecanico'
 import { Route as AuthenticatedEngenhariaHhRouteImport } from './routes/_authenticated/engenharia.hh'
 import { Route as AuthenticatedEngenhariaEtpRouteImport } from './routes/_authenticated/engenharia.etp'
 import { Route as AuthenticatedEngenhariaEtapasRouteImport } from './routes/_authenticated/engenharia.etapas'
-import { Route as AuthenticatedEngenhariaEletricoRouteImport } from './routes/_authenticated/engenharia.eletrico'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedComprasSolicitacaoRouteImport } from './routes/_authenticated/compras.solicitacao'
 import { Route as AuthenticatedComercialPipelineRouteImport } from './routes/_authenticated/comercial.pipeline'
 import { Route as AuthenticatedComercialMineracaoRouteImport } from './routes/_authenticated/comercial.mineracao'
-import { Route as AuthenticatedComercialFormulariosRfqRouteImport } from './routes/_authenticated/comercial.formularios-rfq'
 import { Route as AuthenticatedComercialEntrevistasRouteImport } from './routes/_authenticated/comercial.entrevistas'
 import { Route as AuthenticatedComercialChecklistsRouteImport } from './routes/_authenticated/comercial.checklists'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes.novo'
@@ -81,17 +75,13 @@ import { Route as AuthenticatedAjudaSplatRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin.usuarios'
 import { Route as AuthenticatedAdminSuporteRouteImport } from './routes/_authenticated/admin.suporte'
 import { Route as AuthenticatedAdminSlaChamadosRouteImport } from './routes/_authenticated/admin.sla-chamados'
-import { Route as AuthenticatedAdminRfqTiposRouteImport } from './routes/_authenticated/admin.rfq-tipos'
 import { Route as AuthenticatedAdminPaginasEquipamentosRouteImport } from './routes/_authenticated/admin.paginas-equipamentos'
 import { Route as AuthenticatedAdminFormulariosRecebidosRouteImport } from './routes/_authenticated/admin.formularios-recebidos'
 import { Route as AuthenticatedAdminEtapasEquipamentosRouteImport } from './routes/_authenticated/admin.etapas-equipamentos'
 import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
-import { Route as AuthenticatedAdminContatoRouteImport } from './routes/_authenticated/admin.contato'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin.configuracoes'
 import { Route as AuthenticatedAdminChecklistTiposRouteImport } from './routes/_authenticated/admin.checklist-tipos'
-import { Route as AuthenticatedAdminBancoRouteImport } from './routes/_authenticated/admin.banco'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin.auditoria'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedQualidadeFatIndexRouteImport } from './routes/_authenticated/qualidade.fat.index'
 import { Route as AuthenticatedPosVendasSatIndexRouteImport } from './routes/_authenticated/pos-vendas.sat.index'
 import { Route as AuthenticatedLogisticaEmbarquesIndexRouteImport } from './routes/_authenticated/logistica.embarques.index'
@@ -149,11 +139,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -286,18 +271,6 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedPosVendasIndexRoute =
   AuthenticatedPosVendasIndexRouteImport.update({
     id: '/',
@@ -408,12 +381,6 @@ const AuthenticatedEngenhariaProjetosRoute =
     path: '/engenharia/projetos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedEngenhariaMecanicoRoute =
-  AuthenticatedEngenhariaMecanicoRouteImport.update({
-    id: '/engenharia/mecanico',
-    path: '/engenharia/mecanico',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedEngenhariaHhRoute =
   AuthenticatedEngenhariaHhRouteImport.update({
     id: '/engenharia/hh',
@@ -430,12 +397,6 @@ const AuthenticatedEngenhariaEtapasRoute =
   AuthenticatedEngenhariaEtapasRouteImport.update({
     id: '/engenharia/etapas',
     path: '/engenharia/etapas',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedEngenhariaEletricoRoute =
-  AuthenticatedEngenhariaEletricoRouteImport.update({
-    id: '/engenharia/eletrico',
-    path: '/engenharia/eletrico',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDocumentosIdRoute =
@@ -460,12 +421,6 @@ const AuthenticatedComercialMineracaoRoute =
   AuthenticatedComercialMineracaoRouteImport.update({
     id: '/comercial/mineracao',
     path: '/comercial/mineracao',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedComercialFormulariosRfqRoute =
-  AuthenticatedComercialFormulariosRfqRouteImport.update({
-    id: '/comercial/formularios-rfq',
-    path: '/comercial/formularios-rfq',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedComercialEntrevistasRoute =
@@ -538,12 +493,6 @@ const AuthenticatedAdminSlaChamadosRoute =
     path: '/sla-chamados',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminRfqTiposRoute =
-  AuthenticatedAdminRfqTiposRouteImport.update({
-    id: '/rfq-tipos',
-    path: '/rfq-tipos',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminPaginasEquipamentosRoute =
   AuthenticatedAdminPaginasEquipamentosRouteImport.update({
     id: '/paginas-equipamentos',
@@ -568,12 +517,6 @@ const AuthenticatedAdminEmailsRoute =
     path: '/emails',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminContatoRoute =
-  AuthenticatedAdminContatoRouteImport.update({
-    id: '/contato',
-    path: '/contato',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminConfiguracoesRoute =
   AuthenticatedAdminConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -586,22 +529,11 @@ const AuthenticatedAdminChecklistTiposRoute =
     path: '/checklist-tipos',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminBancoRoute = AuthenticatedAdminBancoRouteImport.update({
-  id: '/banco',
-  path: '/banco',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
 const AuthenticatedAdminAuditoriaRoute =
   AuthenticatedAdminAuditoriaRouteImport.update({
     id: '/auditoria',
     path: '/auditoria',
     getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
-    getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedQualidadeFatIndexRoute =
   AuthenticatedQualidadeFatIndexRouteImport.update({
@@ -861,12 +793,9 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trocar-senha': typeof TrocarSenhaRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/central-documentos': typeof AuthenticatedCentralDocumentosRoute
   '/changelog': typeof AuthenticatedChangelogRoute
@@ -887,17 +816,13 @@ export interface FileRoutesByFullPath {
   '/suporte/$token': typeof SuporteTokenRoute
   '/equipamentos/': typeof EquipamentosIndexRoute
   '/suporte/': typeof SuporteIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
-  '/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/admin/checklist-tipos': typeof AuthenticatedAdminChecklistTiposRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
-  '/admin/contato': typeof AuthenticatedAdminContatoRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
-  '/admin/rfq-tipos': typeof AuthenticatedAdminRfqTiposRoute
   '/admin/sla-chamados': typeof AuthenticatedAdminSlaChamadosRoute
   '/admin/suporte': typeof AuthenticatedAdminSuporteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -910,16 +835,13 @@ export interface FileRoutesByFullPath {
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
-  '/comercial/formularios-rfq': typeof AuthenticatedComercialFormulariosRfqRoute
   '/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
   '/comercial/pipeline': typeof AuthenticatedComercialPipelineRoute
   '/compras/solicitacao': typeof AuthenticatedComprasSolicitacaoRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
-  '/engenharia/eletrico': typeof AuthenticatedEngenhariaEletricoRoute
   '/engenharia/etapas': typeof AuthenticatedEngenhariaEtapasRoute
   '/engenharia/etp': typeof AuthenticatedEngenhariaEtpRouteWithChildren
   '/engenharia/hh': typeof AuthenticatedEngenhariaHhRoute
-  '/engenharia/mecanico': typeof AuthenticatedEngenhariaMecanicoRoute
   '/engenharia/projetos': typeof AuthenticatedEngenhariaProjetosRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
@@ -988,12 +910,9 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trocar-senha': typeof TrocarSenhaRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/central-documentos': typeof AuthenticatedCentralDocumentosRoute
   '/changelog': typeof AuthenticatedChangelogRoute
@@ -1013,16 +932,12 @@ export interface FileRoutesByTo {
   '/suporte/$token': typeof SuporteTokenRoute
   '/equipamentos': typeof EquipamentosIndexRoute
   '/suporte': typeof SuporteIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
-  '/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/admin/checklist-tipos': typeof AuthenticatedAdminChecklistTiposRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
-  '/admin/contato': typeof AuthenticatedAdminContatoRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
-  '/admin/rfq-tipos': typeof AuthenticatedAdminRfqTiposRoute
   '/admin/sla-chamados': typeof AuthenticatedAdminSlaChamadosRoute
   '/admin/suporte': typeof AuthenticatedAdminSuporteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -1034,15 +949,12 @@ export interface FileRoutesByTo {
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
-  '/comercial/formularios-rfq': typeof AuthenticatedComercialFormulariosRfqRoute
   '/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
   '/comercial/pipeline': typeof AuthenticatedComercialPipelineRoute
   '/compras/solicitacao': typeof AuthenticatedComprasSolicitacaoRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
-  '/engenharia/eletrico': typeof AuthenticatedEngenhariaEletricoRoute
   '/engenharia/etapas': typeof AuthenticatedEngenhariaEtapasRoute
   '/engenharia/hh': typeof AuthenticatedEngenhariaHhRoute
-  '/engenharia/mecanico': typeof AuthenticatedEngenhariaMecanicoRoute
   '/engenharia/projetos': typeof AuthenticatedEngenhariaProjetosRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
@@ -1112,12 +1024,9 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trocar-senha': typeof TrocarSenhaRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/central-documentos': typeof AuthenticatedCentralDocumentosRoute
   '/_authenticated/changelog': typeof AuthenticatedChangelogRoute
@@ -1138,17 +1047,13 @@ export interface FileRoutesById {
   '/suporte/$token': typeof SuporteTokenRoute
   '/equipamentos/': typeof EquipamentosIndexRoute
   '/suporte/': typeof SuporteIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
-  '/_authenticated/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/_authenticated/admin/checklist-tipos': typeof AuthenticatedAdminChecklistTiposRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
-  '/_authenticated/admin/contato': typeof AuthenticatedAdminContatoRoute
   '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   '/_authenticated/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/_authenticated/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
-  '/_authenticated/admin/rfq-tipos': typeof AuthenticatedAdminRfqTiposRoute
   '/_authenticated/admin/sla-chamados': typeof AuthenticatedAdminSlaChamadosRoute
   '/_authenticated/admin/suporte': typeof AuthenticatedAdminSuporteRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -1161,16 +1066,13 @@ export interface FileRoutesById {
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/_authenticated/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/_authenticated/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
-  '/_authenticated/comercial/formularios-rfq': typeof AuthenticatedComercialFormulariosRfqRoute
   '/_authenticated/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
   '/_authenticated/comercial/pipeline': typeof AuthenticatedComercialPipelineRoute
   '/_authenticated/compras/solicitacao': typeof AuthenticatedComprasSolicitacaoRoute
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
-  '/_authenticated/engenharia/eletrico': typeof AuthenticatedEngenhariaEletricoRoute
   '/_authenticated/engenharia/etapas': typeof AuthenticatedEngenhariaEtapasRoute
   '/_authenticated/engenharia/etp': typeof AuthenticatedEngenhariaEtpRouteWithChildren
   '/_authenticated/engenharia/hh': typeof AuthenticatedEngenhariaHhRoute
-  '/_authenticated/engenharia/mecanico': typeof AuthenticatedEngenhariaMecanicoRoute
   '/_authenticated/engenharia/projetos': typeof AuthenticatedEngenhariaProjetosRoute
   '/_authenticated/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/_authenticated/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
@@ -1241,12 +1143,9 @@ export interface FileRouteTypes {
     | '/contato'
     | '/forgot-password'
     | '/login'
-    | '/mcp'
     | '/reset-password'
     | '/sitemap.xml'
     | '/trocar-senha'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/central-documentos'
     | '/changelog'
@@ -1267,17 +1166,13 @@ export interface FileRouteTypes {
     | '/suporte/$token'
     | '/equipamentos/'
     | '/suporte/'
-    | '/.mcp/invoke-tool/$tool'
     | '/admin/auditoria'
-    | '/admin/banco'
     | '/admin/checklist-tipos'
     | '/admin/configuracoes'
-    | '/admin/contato'
     | '/admin/emails'
     | '/admin/etapas-equipamentos'
     | '/admin/formularios-recebidos'
     | '/admin/paginas-equipamentos'
-    | '/admin/rfq-tipos'
     | '/admin/sla-chamados'
     | '/admin/suporte'
     | '/admin/usuarios'
@@ -1290,16 +1185,13 @@ export interface FileRouteTypes {
     | '/clientes/novo'
     | '/comercial/checklists'
     | '/comercial/entrevistas'
-    | '/comercial/formularios-rfq'
     | '/comercial/mineracao'
     | '/comercial/pipeline'
     | '/compras/solicitacao'
     | '/documentos/$id'
-    | '/engenharia/eletrico'
     | '/engenharia/etapas'
     | '/engenharia/etp'
     | '/engenharia/hh'
-    | '/engenharia/mecanico'
     | '/engenharia/projetos'
     | '/fornecedores/$id'
     | '/fornecedores/novo'
@@ -1368,12 +1260,9 @@ export interface FileRouteTypes {
     | '/contato'
     | '/forgot-password'
     | '/login'
-    | '/mcp'
     | '/reset-password'
     | '/sitemap.xml'
     | '/trocar-senha'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/central-documentos'
     | '/changelog'
@@ -1393,16 +1282,12 @@ export interface FileRouteTypes {
     | '/suporte/$token'
     | '/equipamentos'
     | '/suporte'
-    | '/.mcp/invoke-tool/$tool'
     | '/admin/auditoria'
-    | '/admin/banco'
     | '/admin/checklist-tipos'
     | '/admin/configuracoes'
-    | '/admin/contato'
     | '/admin/emails'
     | '/admin/formularios-recebidos'
     | '/admin/paginas-equipamentos'
-    | '/admin/rfq-tipos'
     | '/admin/sla-chamados'
     | '/admin/suporte'
     | '/admin/usuarios'
@@ -1414,15 +1299,12 @@ export interface FileRouteTypes {
     | '/clientes/novo'
     | '/comercial/checklists'
     | '/comercial/entrevistas'
-    | '/comercial/formularios-rfq'
     | '/comercial/mineracao'
     | '/comercial/pipeline'
     | '/compras/solicitacao'
     | '/documentos/$id'
-    | '/engenharia/eletrico'
     | '/engenharia/etapas'
     | '/engenharia/hh'
-    | '/engenharia/mecanico'
     | '/engenharia/projetos'
     | '/fornecedores/$id'
     | '/fornecedores/novo'
@@ -1491,12 +1373,9 @@ export interface FileRouteTypes {
     | '/contato'
     | '/forgot-password'
     | '/login'
-    | '/mcp'
     | '/reset-password'
     | '/sitemap.xml'
     | '/trocar-senha'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/central-documentos'
     | '/_authenticated/changelog'
@@ -1517,17 +1396,13 @@ export interface FileRouteTypes {
     | '/suporte/$token'
     | '/equipamentos/'
     | '/suporte/'
-    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/auditoria'
-    | '/_authenticated/admin/banco'
     | '/_authenticated/admin/checklist-tipos'
     | '/_authenticated/admin/configuracoes'
-    | '/_authenticated/admin/contato'
     | '/_authenticated/admin/emails'
     | '/_authenticated/admin/etapas-equipamentos'
     | '/_authenticated/admin/formularios-recebidos'
     | '/_authenticated/admin/paginas-equipamentos'
-    | '/_authenticated/admin/rfq-tipos'
     | '/_authenticated/admin/sla-chamados'
     | '/_authenticated/admin/suporte'
     | '/_authenticated/admin/usuarios'
@@ -1540,16 +1415,13 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes/novo'
     | '/_authenticated/comercial/checklists'
     | '/_authenticated/comercial/entrevistas'
-    | '/_authenticated/comercial/formularios-rfq'
     | '/_authenticated/comercial/mineracao'
     | '/_authenticated/comercial/pipeline'
     | '/_authenticated/compras/solicitacao'
     | '/_authenticated/documentos/$id'
-    | '/_authenticated/engenharia/eletrico'
     | '/_authenticated/engenharia/etapas'
     | '/_authenticated/engenharia/etp'
     | '/_authenticated/engenharia/hh'
-    | '/_authenticated/engenharia/mecanico'
     | '/_authenticated/engenharia/projetos'
     | '/_authenticated/fornecedores/$id'
     | '/_authenticated/fornecedores/novo'
@@ -1620,12 +1492,9 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
-  McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrocarSenhaRoute: typeof TrocarSenhaRoute
-  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ChecklistSlugRoute: typeof ChecklistSlugRoute
   EntrevistaCodigoRoute: typeof EntrevistaCodigoRoute
   EquipamentosSlugRoute: typeof EquipamentosSlugRoute
@@ -1637,7 +1506,6 @@ export interface RootRouteChildren {
   SuporteTokenRoute: typeof SuporteTokenRoute
   EquipamentosIndexRoute: typeof EquipamentosIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
-  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicReadinessRoute: typeof ApiPublicReadinessRoute
   PCotacaoTokenRoute: typeof PCotacaoTokenRoute
@@ -1671,13 +1539,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1855,20 +1716,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/.mcp/list-tools': {
-      id: '/.mcp/list-tools'
-      path: '/.mcp/list-tools'
-      fullPath: '/.mcp/list-tools'
-      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/pos-vendas/': {
       id: '/_authenticated/pos-vendas/'
       path: '/'
@@ -2002,13 +1849,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEngenhariaProjetosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/engenharia/mecanico': {
-      id: '/_authenticated/engenharia/mecanico'
-      path: '/engenharia/mecanico'
-      fullPath: '/engenharia/mecanico'
-      preLoaderRoute: typeof AuthenticatedEngenhariaMecanicoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/engenharia/hh': {
       id: '/_authenticated/engenharia/hh'
       path: '/engenharia/hh'
@@ -2028,13 +1868,6 @@ declare module '@tanstack/react-router' {
       path: '/engenharia/etapas'
       fullPath: '/engenharia/etapas'
       preLoaderRoute: typeof AuthenticatedEngenhariaEtapasRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/engenharia/eletrico': {
-      id: '/_authenticated/engenharia/eletrico'
-      path: '/engenharia/eletrico'
-      fullPath: '/engenharia/eletrico'
-      preLoaderRoute: typeof AuthenticatedEngenhariaEletricoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/documentos/$id': {
@@ -2063,13 +1896,6 @@ declare module '@tanstack/react-router' {
       path: '/comercial/mineracao'
       fullPath: '/comercial/mineracao'
       preLoaderRoute: typeof AuthenticatedComercialMineracaoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/comercial/formularios-rfq': {
-      id: '/_authenticated/comercial/formularios-rfq'
-      path: '/comercial/formularios-rfq'
-      fullPath: '/comercial/formularios-rfq'
-      preLoaderRoute: typeof AuthenticatedComercialFormulariosRfqRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/comercial/entrevistas': {
@@ -2156,13 +1982,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSlaChamadosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/rfq-tipos': {
-      id: '/_authenticated/admin/rfq-tipos'
-      path: '/rfq-tipos'
-      fullPath: '/admin/rfq-tipos'
-      preLoaderRoute: typeof AuthenticatedAdminRfqTiposRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/paginas-equipamentos': {
       id: '/_authenticated/admin/paginas-equipamentos'
       path: '/paginas-equipamentos'
@@ -2191,13 +2010,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmailsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/contato': {
-      id: '/_authenticated/admin/contato'
-      path: '/contato'
-      fullPath: '/admin/contato'
-      preLoaderRoute: typeof AuthenticatedAdminContatoRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/configuracoes': {
       id: '/_authenticated/admin/configuracoes'
       path: '/configuracoes'
@@ -2212,26 +2024,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminChecklistTiposRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/banco': {
-      id: '/_authenticated/admin/banco'
-      path: '/banco'
-      fullPath: '/admin/banco'
-      preLoaderRoute: typeof AuthenticatedAdminBancoRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/auditoria': {
       id: '/_authenticated/admin/auditoria'
       path: '/auditoria'
       fullPath: '/admin/auditoria'
       preLoaderRoute: typeof AuthenticatedAdminAuditoriaRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/qualidade/fat/': {
       id: '/_authenticated/qualidade/fat/'
@@ -2557,15 +2355,12 @@ const AuthenticatedAdminEtapasEquipamentosRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
-  AuthenticatedAdminBancoRoute: typeof AuthenticatedAdminBancoRoute
   AuthenticatedAdminChecklistTiposRoute: typeof AuthenticatedAdminChecklistTiposRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
-  AuthenticatedAdminContatoRoute: typeof AuthenticatedAdminContatoRoute
   AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminEtapasEquipamentosRoute: typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   AuthenticatedAdminFormulariosRecebidosRoute: typeof AuthenticatedAdminFormulariosRecebidosRoute
   AuthenticatedAdminPaginasEquipamentosRoute: typeof AuthenticatedAdminPaginasEquipamentosRoute
-  AuthenticatedAdminRfqTiposRoute: typeof AuthenticatedAdminRfqTiposRoute
   AuthenticatedAdminSlaChamadosRoute: typeof AuthenticatedAdminSlaChamadosRoute
   AuthenticatedAdminSuporteRoute: typeof AuthenticatedAdminSuporteRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
@@ -2575,10 +2370,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
-  AuthenticatedAdminBancoRoute: AuthenticatedAdminBancoRoute,
   AuthenticatedAdminChecklistTiposRoute: AuthenticatedAdminChecklistTiposRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
-  AuthenticatedAdminContatoRoute: AuthenticatedAdminContatoRoute,
   AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminEtapasEquipamentosRoute:
     AuthenticatedAdminEtapasEquipamentosRouteWithChildren,
@@ -2586,7 +2379,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminFormulariosRecebidosRoute,
   AuthenticatedAdminPaginasEquipamentosRoute:
     AuthenticatedAdminPaginasEquipamentosRoute,
-  AuthenticatedAdminRfqTiposRoute: AuthenticatedAdminRfqTiposRoute,
   AuthenticatedAdminSlaChamadosRoute: AuthenticatedAdminSlaChamadosRoute,
   AuthenticatedAdminSuporteRoute: AuthenticatedAdminSuporteRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
@@ -2766,16 +2558,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
   AuthenticatedComercialChecklistsRoute: typeof AuthenticatedComercialChecklistsRoute
   AuthenticatedComercialEntrevistasRoute: typeof AuthenticatedComercialEntrevistasRouteWithChildren
-  AuthenticatedComercialFormulariosRfqRoute: typeof AuthenticatedComercialFormulariosRfqRoute
   AuthenticatedComercialMineracaoRoute: typeof AuthenticatedComercialMineracaoRoute
   AuthenticatedComercialPipelineRoute: typeof AuthenticatedComercialPipelineRoute
   AuthenticatedComprasSolicitacaoRoute: typeof AuthenticatedComprasSolicitacaoRoute
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
-  AuthenticatedEngenhariaEletricoRoute: typeof AuthenticatedEngenhariaEletricoRoute
   AuthenticatedEngenhariaEtapasRoute: typeof AuthenticatedEngenhariaEtapasRoute
   AuthenticatedEngenhariaEtpRoute: typeof AuthenticatedEngenhariaEtpRouteWithChildren
   AuthenticatedEngenhariaHhRoute: typeof AuthenticatedEngenhariaHhRoute
-  AuthenticatedEngenhariaMecanicoRoute: typeof AuthenticatedEngenhariaMecanicoRoute
   AuthenticatedEngenhariaProjetosRoute: typeof AuthenticatedEngenhariaProjetosRoute
   AuthenticatedFornecedoresIdRoute: typeof AuthenticatedFornecedoresIdRoute
   AuthenticatedFornecedoresNovoRoute: typeof AuthenticatedFornecedoresNovoRoute
@@ -2832,17 +2621,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComercialChecklistsRoute: AuthenticatedComercialChecklistsRoute,
   AuthenticatedComercialEntrevistasRoute:
     AuthenticatedComercialEntrevistasRouteWithChildren,
-  AuthenticatedComercialFormulariosRfqRoute:
-    AuthenticatedComercialFormulariosRfqRoute,
   AuthenticatedComercialMineracaoRoute: AuthenticatedComercialMineracaoRoute,
   AuthenticatedComercialPipelineRoute: AuthenticatedComercialPipelineRoute,
   AuthenticatedComprasSolicitacaoRoute: AuthenticatedComprasSolicitacaoRoute,
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
-  AuthenticatedEngenhariaEletricoRoute: AuthenticatedEngenhariaEletricoRoute,
   AuthenticatedEngenhariaEtapasRoute: AuthenticatedEngenhariaEtapasRoute,
   AuthenticatedEngenhariaEtpRoute: AuthenticatedEngenhariaEtpRouteWithChildren,
   AuthenticatedEngenhariaHhRoute: AuthenticatedEngenhariaHhRoute,
-  AuthenticatedEngenhariaMecanicoRoute: AuthenticatedEngenhariaMecanicoRoute,
   AuthenticatedEngenhariaProjetosRoute: AuthenticatedEngenhariaProjetosRoute,
   AuthenticatedFornecedoresIdRoute: AuthenticatedFornecedoresIdRoute,
   AuthenticatedFornecedoresNovoRoute: AuthenticatedFornecedoresNovoRoute,
@@ -2900,13 +2685,9 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
-  McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrocarSenhaRoute: TrocarSenhaRoute,
-  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
-  Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ChecklistSlugRoute: ChecklistSlugRoute,
   EntrevistaCodigoRoute: EntrevistaCodigoRoute,
   EquipamentosSlugRoute: EquipamentosSlugRoute,
@@ -2919,7 +2700,6 @@ const rootRouteChildren: RootRouteChildren = {
   SuporteTokenRoute: SuporteTokenRoute,
   EquipamentosIndexRoute: EquipamentosIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,
-  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicReadinessRoute: ApiPublicReadinessRoute,
   PCotacaoTokenRoute: PCotacaoTokenRoute,

@@ -96,15 +96,18 @@ function ConfiguracoesPage() {
         }
         className="w-full"
       >
-        <TabsList>
+        <TabsList className="flex-wrap gap-x-1 gap-y-1.5">
           <TabsTrigger value="administracao">Administração</TabsTrigger>
+          <span className="mx-1 h-5 w-px self-center bg-[var(--bg-border)]" aria-hidden />
+          <TabsTrigger value="diagnostico">Chaves & Diagnóstico</TabsTrigger>
+          <TabsTrigger value="banco">Banco de dados</TabsTrigger>
+          <TabsTrigger value="mineracao">Mineração</TabsTrigger>
+          <span className="mx-1 h-5 w-px self-center bg-[var(--bg-border)]" aria-hidden />
           <TabsTrigger value="geral">Geral</TabsTrigger>
           <TabsTrigger value="contato">Contato</TabsTrigger>
-          <TabsTrigger value="comercial">Comercial</TabsTrigger>
-          <TabsTrigger value="diagnostico">Chaves & Diagnóstico</TabsTrigger>
-          <TabsTrigger value="mineracao">Mineração</TabsTrigger>
-          <TabsTrigger value="banco">Banco de dados</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
+          <span className="mx-1 h-5 w-px self-center bg-[var(--bg-border)]" aria-hidden />
+          <TabsTrigger value="comercial">Comercial</TabsTrigger>
           <TabsTrigger value="enrich-logs">Logs de busca fiscal</TabsTrigger>
           <TabsTrigger value="migrations">Migrations</TabsTrigger>
         </TabsList>

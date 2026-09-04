@@ -40,9 +40,9 @@ import {
   updateEmailRecipients,
   listEmailLogs,
   sendTestEmail,
-  emailProviderStatus,
   previewEmailTemplate,
 } from "@/lib/email/admin.functions";
+import { runDiagnosticoLimitado } from "@/lib/system-diagnostics.functions";
 import { Eye } from "lucide-react";
 
 const APP_ROLES = ["admin","manager","engineer","production","purchasing","assembly","field","sales"] as const;
@@ -125,16 +125,25 @@ function EmailsAdminPage() {
   );
 }
 
+const SENDER_EMAIL = "system@sltkamericas.com";
+
 function ProviderStatusBanner() {
-  const fn = useServerFn(emailProviderStatus);
-  const { data } = useQuery({ queryKey: ["email-provider-status"], queryFn: () => fn() });
-  if (!data) return null;
-  if (data.configured) {
+  const fn = useServerFn(runDiagnosticoLimitado);
+  const { data: res } = useQuery({
+    queryKey: ["email-provider-status"],
+    queryFn: () => fn({ data: { ids: ["resend", "google_service_account"] } }),
+  });
+  if (!res) return null;
+  const resend = res.itens.find((i) => i.id === "resend");
+  const calendar = res.itens.find((i) => i.id === "google_service_account");
+  const configured = resend?.status === "ok";
+  const calendarConfigured = calendar?.status === "nao_testado";
+  if (configured) {
     return (
       <div className="mt-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
         <CheckCircle2 className="h-4 w-4" />
-        Provedor <strong>Resend</strong> conectado — envios reais por <strong>{data.sender}</strong>.
-        {data.calendarConfigured
+        Provedor <strong>Resend</strong> conectado — envios reais por <strong>{SENDER_EMAIL}</strong>.
+        {calendarConfigured
           ? <span className="ml-2 text-xs">+ Google Calendar disponível para eventos com agenda.</span>
           : <span className="ml-2 text-xs text-emerald-700/80">(Google Calendar opcional — não configurado.)</span>}
       </div>

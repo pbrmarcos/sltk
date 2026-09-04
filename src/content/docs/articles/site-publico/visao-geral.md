@@ -42,7 +42,7 @@ Em `/` o visitante encontra o posicionamento, CTAs para orçamento e catálogo, 
 
 ## Como se conecta ao Hub
 
-- **Contato** (`/contato`) → triagem em `/admin/contato` (Chamados unificados, origem "Contato do site").
+- **Contato** (`/contato`) → triagem em `/pos-vendas/chamados?origem=contato_site` (Chamados unificados, origem "Contato do site").
 - **Checklist** (`/checklist/$slug`) → gera oportunidade no pipeline com anexos indexados.
 - **Catálogo** → páginas geridas em `/admin/paginas-equipamentos`.
 

@@ -28,6 +28,8 @@ import {
   Truck,
   Mail,
   Inbox,
+  Receipt,
+  KeyRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -152,6 +154,13 @@ const SECTIONS: Section[] = [
         module: "compras",
       },
       {
+        label: "Cotações",
+        to: "/compras/cotacoes",
+        icon: Receipt,
+        roles: ["purchasing", "manager"],
+        module: "compras",
+      },
+      {
         label: "Ordens de Compra",
         to: "/compras/ordens",
         icon: ClipboardList,
@@ -271,7 +280,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    title: "Administração",
+    title: "Administração — Sistema",
     adminOnly: true,
     module: "admin",
     items: [
@@ -293,6 +302,19 @@ const SECTIONS: Section[] = [
         icon: FileSpreadsheet,
         module: "admin",
       },
+      {
+        label: "Balcão de Suporte",
+        to: "/admin/suporte",
+        icon: KeyRound,
+        module: "admin",
+      },
+    ],
+  },
+  {
+    title: "Administração — Atendimento & Conteúdo",
+    adminOnly: true,
+    module: "admin",
+    items: [
       {
         label: "E-mails automáticos",
         to: "/admin/emails",
@@ -323,6 +345,13 @@ const SECTIONS: Section[] = [
         icon: Cog,
         module: "admin",
       },
+    ],
+  },
+  {
+    title: "Administração — Equipamentos",
+    adminOnly: true,
+    module: "admin",
+    items: [
       {
         label: "Páginas dos Equipamentos",
         to: "/admin/paginas-equipamentos",

@@ -20,7 +20,7 @@ export function PurchasingDashboard({ userName }: { userName: string }) {
       actions={[
         { label: "Ordens", to: "/compras/ordens", icon: ShoppingCart },
         { label: "Cotações", to: "/compras/cotacoes", icon: FileSearch },
-        { label: "Solicitações", to: "/compras/solicitacoes", icon: PackageCheck },
+        { label: "Solicitações", to: "/compras/solicitacao", icon: PackageCheck },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

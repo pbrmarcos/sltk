@@ -41,8 +41,6 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/engenharia/etp", category: "engenharia", slug: "criar-etp" },
   { route: "/engenharia/etp/$id", category: "engenharia", slug: "criar-etp" },
   { route: "/engenharia/etapas", category: "engenharia", slug: "etapas-e-kanban" },
-  { route: "/engenharia/mecanico", category: "engenharia", slug: "visao-geral" },
-  { route: "/engenharia/eletrico", category: "engenharia", slug: "visao-geral" },
   { route: "/engenharia/hh", category: "engenharia", slug: "etapas-e-kanban" },
 
   // Compras
@@ -103,8 +101,6 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/admin/etapas-equipamentos", category: "admin", slug: "paginas-e-etapas-equipamentos" },
   { route: "/admin/etapas-equipamentos/$id", category: "admin", slug: "paginas-e-etapas-equipamentos" },
   { route: "/admin/paginas-equipamentos", category: "admin", slug: "paginas-e-etapas-equipamentos" },
-  { route: "/admin/banco", category: "admin", slug: "visao-geral" },
-  { route: "/admin/contato", category: "admin", slug: "visao-geral" },
   { route: "/admin/suporte", category: "admin", slug: "visao-geral" },
 
   // Conta
@@ -113,10 +109,8 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   // Telas adicionadas na 0.99.4
   { route: "/comercial/mineracao", category: "comercial", slug: "mineracao-de-leads" },
   { route: "/comercial/entrevistas/$id", category: "comercial", slug: "entrevistas" },
-  { route: "/comercial/formularios-rfq", category: "comercial", slug: "checklist-publico-e-formularios" },
   { route: "/admin/emails", category: "admin", slug: "emails-automaticos" },
   { route: "/admin/formularios-recebidos", category: "admin", slug: "formularios-recebidos" },
-  { route: "/admin/rfq-tipos", category: "admin", slug: "tipos-de-checklist" },
   { route: "/know-how/imprimir/$slug", category: "know-how", slug: "publicar-conteudo" },
 ];
 

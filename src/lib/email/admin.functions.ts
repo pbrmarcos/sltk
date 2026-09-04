@@ -300,23 +300,6 @@ export const sendTestEmail = createServerFn({ method: "POST" })
     return { ok: true, recipient };
   });
 
-
-export const emailProviderStatus = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    await requireAdminOrManager(context.userId);
-    const emailConfigured = !!process.env.RESEND_API_KEY;
-    const calendarConfigured =
-      !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
-      !!process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-    return {
-      configured: emailConfigured,
-      calendarConfigured,
-      sender: "system@sltkamericas.com",
-      provider: "resend" as const,
-    };
-  });
-
 const previewInput = z.object({
   subject_template: z.string().min(1).max(300),
   body_template: z.string().min(1).max(10_000),

@@ -10,7 +10,7 @@ import {
   History,
 } from "lucide-react";
 import { toast } from "sonner";
-import { checkGroqOnly } from "@/lib/conectores.functions";
+import { runDiagnostico } from "@/lib/system-diagnostics.functions";
 import { listGeminiScanLogs } from "@/lib/fornecedores.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,12 +18,24 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 
+type GroqStatus = { conectado: boolean; detalhe: string; latencia_ms?: number; chave_mascarada: string | null };
+
 export function GroqConfigCard() {
   const qc = useQueryClient();
-  const fn = useServerFn(checkGroqOnly);
+  const fn = useServerFn(runDiagnostico);
+  const testGroq = async (): Promise<GroqStatus> => {
+    const res = await fn({ data: { ids: ["groq"] } });
+    const cap = res.itens[0];
+    return {
+      conectado: cap?.status === "ok",
+      detalhe: cap?.detalhe ?? "Sem resposta.",
+      latencia_ms: cap?.latencia_ms,
+      chave_mascarada: cap?.envs.find((e) => e.nome === "GROQ_API_KEY")?.mascara ?? null,
+    };
+  };
   const qo = queryOptions({
     queryKey: ["admin", "groq-config"],
-    queryFn: () => fn({}),
+    queryFn: testGroq,
     staleTime: 30_000,
   });
   const q = useQuery(qo);
@@ -36,7 +48,7 @@ export function GroqConfigCard() {
 
 
   const test = useMutation({
-    mutationFn: () => fn({}),
+    mutationFn: testGroq,
     onSuccess: (d) => {
       qc.setQueryData(qo.queryKey, d);
       if (d.conectado) toast.success(`Groq OK — ${d.latencia_ms ?? 0}ms`);
