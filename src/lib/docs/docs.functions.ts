@@ -14,6 +14,7 @@ import type {
   OrcamentoPayload,
 } from "./types";
 import { bumpVersion } from "./formatters";
+import { translatePtTo as translateText } from "@/lib/ai-gateway.server";
 
 /** Moeda do documento: sempre o código ISO do cadastro do cliente (fallback BRL). */
 async function moedaDoCliente(db: any, clienteId: string | null | undefined): Promise<MoedaISO> {
@@ -324,43 +325,10 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
 
 
 // ============================================================
-// Tradução automática PT → ES / EN via Lovable AI Gateway
+// Tradução automática PT → ES / EN — ver src/lib/ai-gateway.server.ts
+// (prefere GEMINI_API_KEY direto; cai para o AI Gateway da Lovable
+// só se a chave direta não estiver configurada)
 // ============================================================
-async function translateText(
-  texto: string,
-  alvo: "es" | "en",
-): Promise<string> {
-  if (!texto || !texto.trim()) return "";
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) throw new Error("Recurso de IA indisponível — a integração não está configurada.");
-  const idiomaNome = alvo === "es" ? "espanhol neutro (LATAM)" : "inglês técnico (US)";
-  const sys = `Você é um tradutor técnico industrial. Traduza do português brasileiro para ${idiomaNome}.
-Regras estritas:
-- Preserve quebras de linha, marcadores (•, -, *) e formatação markdown.
-- Preserve placeholders no formato {{var.path}} EXATAMENTE como estão (não traduza).
-- Mantenha números, moedas, unidades e nomes próprios.
-- Use terminologia técnica de equipamentos industriais e processos.
-- Responda APENAS com a tradução, sem comentários, sem aspas extras.`;
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: sys },
-        { role: "user", content: texto },
-      ],
-    }),
-  });
-  if (r.status === 429) throw new Error("Limite de requisições da IA atingido. Tente em alguns segundos.");
-  if (r.status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos no workspace Lovable.");
-  if (!r.ok) throw new Error(`Falha na tradução (${r.status}).`);
-  const j = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  return (j.choices?.[0]?.message?.content ?? "").trim();
-}
 
 export const translateBloco = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

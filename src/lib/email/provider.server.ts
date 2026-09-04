@@ -1,7 +1,7 @@
 /**
- * Provider de envio via Resend (através do connector gateway do Lovable).
- * Remetente padrão: system@sltkamericas.com — o domínio precisa estar
- * verificado no Resend.
+ * Provider de envio via Resend, direto na API oficial (sem depender do
+ * connector gateway da Lovable). Remetente padrão: system@sltkamericas.com
+ * — o domínio precisa estar verificado no Resend.
  *
  * Calendar continua opcional via Google Service Account (Domain-Wide
  * Delegation). Se as env vars do Google não estiverem configuradas,
@@ -11,13 +11,12 @@
 
 const SENDER_EMAIL = "system@sltkamericas.com";
 const SENDER_NAME = "Solutek";
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const RESEND_API_URL = "https://api.resend.com/emails";
 
 function readResendCreds() {
-  const lovable = process.env.LOVABLE_API_KEY;
   const resend = process.env.RESEND_API_KEY;
-  if (!lovable || !resend) return null;
-  return { lovable, resend };
+  if (!resend) return null;
+  return { resend };
 }
 
 function readGoogleCreds() {
@@ -50,12 +49,11 @@ export async function sendMail(input: SendMailInput): Promise<SendResult> {
   const creds = readResendCreds();
   if (!creds) return { ok: false, reason: "provider_not_configured" };
 
-  const res = await fetch(`${GATEWAY_URL}/emails`, {
+  const res = await fetch(RESEND_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${creds.lovable}`,
-      "X-Connection-Api-Key": creds.resend,
+      Authorization: `Bearer ${creds.resend}`,
     },
     body: JSON.stringify({
       from: `${SENDER_NAME} <${SENDER_EMAIL}>`,

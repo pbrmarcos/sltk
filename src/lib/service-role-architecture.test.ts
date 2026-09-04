@@ -21,7 +21,7 @@ describe("service role architecture", () => {
   it("permite o client administrativo de baixo nível somente nos helpers centrais", () => {
     const violations = sourceFiles(SOURCE_ROOT)
       .filter((path) => LOW_LEVEL_IMPORT.test(readFileSync(path, "utf8")))
-      .map((path) => path.slice(process.cwd().length + 1))
+      .map((path) => path.slice(process.cwd().length + 1).replace(/\\/g, "/"))
       .filter((path) => path !== "src/integrations/supabase/client.server.ts")
       .filter((path) => !ALLOWED.has(path));
 

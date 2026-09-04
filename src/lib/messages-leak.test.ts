@@ -50,7 +50,7 @@ describe("mensagens exibidas ao usuário", () => {
     const violacoes: string[] = [];
 
     for (const absolute of sourceFiles(SOURCE_ROOT)) {
-      const relative = absolute.slice(process.cwd().length + 1);
+      const relative = absolute.slice(process.cwd().length + 1).replace(/\\/g, "/");
       if (ALLOWED.has(relative)) continue;
       const lines = readFileSync(absolute, "utf8").split("\n");
 

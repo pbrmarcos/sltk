@@ -305,8 +305,7 @@ export const emailProviderStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await requireAdminOrManager(context.userId);
-    const emailConfigured =
-      !!process.env.LOVABLE_API_KEY && !!process.env.RESEND_API_KEY;
+    const emailConfigured = !!process.env.RESEND_API_KEY;
     const calendarConfigured =
       !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
       !!process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;

@@ -214,8 +214,8 @@ export const translateBloco = createServerFn({ method: "POST" })
     ]);
     if (!isAdmin && !isMgr) throw new Error("Acesso restrito.");
 
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Recurso de IA indisponível — a integração não está configurada.");
+    const { aiConfigured } = await import("@/lib/ai-gateway.server");
+    if (!aiConfigured()) throw new Error("Recurso de IA indisponível — a integração não está configurada.");
 
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
@@ -240,8 +240,8 @@ export const translateBloco = createServerFn({ method: "POST" })
       const temConteudo = !!(atual.titulo || atual.texto);
       if (temConteudo && !data.sobrescrever) continue;
       const [tTitulo, tTexto] = await Promise.all([
-        ptTitulo ? translateText(ptTitulo, alvo, apiKey) : Promise.resolve(""),
-        ptTexto ? translateText(ptTexto, alvo, apiKey) : Promise.resolve(""),
+        ptTitulo ? translateText(ptTitulo, alvo) : Promise.resolve(""),
+        ptTexto ? translateText(ptTexto, alvo) : Promise.resolve(""),
       ]);
       patch[`conteudo_${alvo}`] = { ...atual, titulo: tTitulo || atual.titulo || "", texto: tTexto };
       alterou = true;

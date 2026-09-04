@@ -1,12 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { aiChatComplete, aiConfigured } from "@/lib/ai-gateway.server";
 
 /**
  * Server fns para anexos no Google Drive.
  * - Salvos em: {DRIVE_ROOT}/{cliente.codigo} - {cliente.razao_social}/{processo.codigo}/{AAAAMM}/
  * - Limites: ZIP <=50MB, PDF/JPG/PNG <=25MB
- * - Sugestões de nome via Gemini multimodal (LOVABLE_AI)
+ * - Sugestões de nome via Gemini multimodal (direto se GEMINI_API_KEY estiver setada, senão via Lovable AI Gateway)
  */
 
 const MIME_LIMITS: Record<string, number> = {
@@ -112,12 +113,10 @@ async function sugerirNomes(opts: {
   contexto: string;
   bytesBase64?: string;
 }): Promise<string[]> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) return [];
-  const ext = opts.filename.includes(".") ? opts.filename.split(".").pop() : "";
+  if (!aiConfigured()) return [];
   const baseName = opts.filename.replace(/\.[^.]+$/, "");
 
-  const userParts: Array<Record<string, unknown>> = [
+  const userContent: Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }> = [
     {
       type: "text",
       text: `Sugira 4 nomes de arquivo profissionais para este documento.
@@ -137,31 +136,18 @@ Responda apenas JSON: {"sugestoes": ["nome1", "nome2", "nome3", "nome4"]}`,
   ];
 
   if (opts.bytesBase64 && (opts.mimeType.startsWith("image/") || opts.mimeType === "application/pdf")) {
-    userParts.push({
+    userContent.push({
       type: "image_url",
       image_url: { url: `data:${opts.mimeType};base64,${opts.bytesBase64}` },
     });
   }
 
   try {
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: "Você é um assistente que sugere nomes de arquivo claros e padronizados." },
-          { role: "user", content: userParts },
-        ],
-        response_format: { type: "json_object" },
-      }),
+    const content = await aiChatComplete({
+      system: "Você é um assistente que sugere nomes de arquivo claros e padronizados.",
+      userContent,
+      jsonMode: true,
     });
-    if (!r.ok) return [];
-    const j = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = j.choices?.[0]?.message?.content ?? "{}";
     const parsed = JSON.parse(content) as { sugestoes?: unknown };
     const arr = Array.isArray(parsed.sugestoes) ? parsed.sugestoes : [];
     return arr
@@ -171,8 +157,6 @@ Responda apenas JSON: {"sugestoes": ["nome1", "nome2", "nome3", "nome4"]}`,
   } catch {
     return [];
   }
-
-  void ext;
 }
 
 /* ===================== Server functions ===================== */

@@ -59,38 +59,4 @@ export function extractPlaceholders(s: string): string[] {
   return out;
 }
 
-export async function translateText(
-  texto: string,
-  alvo: "es" | "en",
-  apiKey: string,
-): Promise<string> {
-  if (!texto || !texto.trim()) return "";
-  const idiomaNome = alvo === "es" ? "espanhol neutro (LATAM)" : "inglês técnico (US)";
-  const sys = `Você é um tradutor técnico industrial. Traduza do português brasileiro para ${idiomaNome}.
-Regras estritas:
-- Preserve quebras de linha, marcadores (•, -, *) e formatação markdown.
-- Preserve placeholders no formato {{var.path}} EXATAMENTE como estão (não traduza).
-- Mantenha números, moedas, unidades e nomes próprios.
-- Use terminologia técnica de equipamentos industriais e processos.
-- Responda APENAS com a tradução, sem comentários, sem aspas extras.`;
-
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: sys },
-        { role: "user", content: texto },
-      ],
-    }),
-  });
-  if (r.status === 429) throw new Error("Limite de requisições da IA atingido. Tente em alguns segundos.");
-  if (r.status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos no workspace Lovable.");
-  if (!r.ok) throw new Error(`Falha na tradução (${r.status}).`);
-  const j = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  return (j.choices?.[0]?.message?.content ?? "").trim();
-}
+export { translatePtTo as translateText } from "@/lib/ai-gateway.server";

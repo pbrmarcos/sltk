@@ -146,8 +146,8 @@ function ProviderStatusBanner() {
       <div>
         <div className="font-medium">Provedor Resend ainda não configurado</div>
         <p className="mt-1">
-          Enquanto <code>RESEND_API_KEY</code> (conector Resend) e o <code>LOVABLE_API_KEY</code>
-          não estiverem ativos, os disparos são registrados no log com status
+          Enquanto <code>RESEND_API_KEY</code> não estiver ativa, os disparos são
+          registrados no log com status
           <code> provider_not_configured</code> e nenhum e-mail sai de fato. Toda a
           configuração de templates, matriz e toggles pode ser feita normalmente.
         </p>

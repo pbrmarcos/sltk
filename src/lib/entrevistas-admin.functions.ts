@@ -2,6 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { aiChatComplete, aiConfigured } from "@/lib/ai-gateway.server";
 
 const FORMATOS = ["text", "textarea", "single_choice", "multi_choice", "number", "country"] as const;
 
@@ -394,32 +395,10 @@ export const traduzirTexto = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     await requireAdminOrManager(sb, context.userId);
-    const key = process.env.GEMINI_API_KEY || process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Recurso de IA indisponível — a integração não está configurada. Verifique em Configurações › Chaves & Diagnóstico.");
+    if (!aiConfigured()) throw new Error("Recurso de IA indisponível — a integração não está configurada. Verifique em Configurações › Chaves & Diagnóstico.");
     const alvo = data.para === "es" ? "Spanish (neutral Latin American)" : "American English";
     const prompt = `Translate the following Brazilian Portuguese sentence to ${alvo}. Return ONLY the translated text, no quotes, no preface.\n\n${data.texto}`;
 
-    const useGemini = !!process.env.GEMINI_API_KEY;
-    if (useGemini) {
-      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${key}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-      });
-      if (!resp.ok) throw new Error(`Gemini ${resp.status}`);
-      const j: any = await resp.json();
-      const out = j?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-      if (!out) throw new Error("Sem resposta da IA.");
-      return { texto: out };
-    }
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model: "google/gemini-flash-lite-latest", messages: [{ role: "user", content: prompt }] }),
-    });
-    if (!resp.ok) throw new Error(`Lovable AI ${resp.status}`);
-    const j: any = await resp.json();
-    const out = j?.choices?.[0]?.message?.content?.trim();
-    if (!out) throw new Error("Sem resposta da IA.");
+    const out = await aiChatComplete({ userContent: prompt, lovableModel: "google/gemini-flash-lite-latest" });
     return { texto: out };
   });
