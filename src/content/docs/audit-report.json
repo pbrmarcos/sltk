@@ -1,0 +1,1392 @@
+{
+  "generatedAt": "2026-08-20T01:20:51.270Z",
+  "appVersion": "0.99.4",
+  "totals": {
+    "activeRoutes": 90,
+    "routeMapEntries": 72,
+    "articles": 76,
+    "categories": 13
+  },
+  "sections": [
+    {
+      "id": "rotas-sem-doc",
+      "title": "Rotas ativas sem doc mapeado",
+      "severity": "warn",
+      "items": []
+    },
+    {
+      "id": "map-rota-inexistente",
+      "title": "Entradas do mapa apontando para rota inexistente",
+      "severity": "error",
+      "items": []
+    },
+    {
+      "id": "map-artigo-inexistente",
+      "title": "Entradas do mapa apontando para artigo inexistente",
+      "severity": "error",
+      "items": []
+    },
+    {
+      "id": "artigos-legados",
+      "title": "Artigos referenciando rotas legadas",
+      "severity": "warn",
+      "items": []
+    },
+    {
+      "id": "artigos-curtos",
+      "title": "Artigos curtos (< 1200 chars)",
+      "severity": "info",
+      "items": []
+    },
+    {
+      "id": "categorias-vazias",
+      "title": "Categorias sem artigos",
+      "severity": "info",
+      "items": []
+    },
+    {
+      "id": "artigos-sem-mapa",
+      "title": "Artigos sem entrada no ROUTE_DOC_MAP",
+      "severity": "info",
+      "items": [
+        {
+          "article": "admin/permissoes-por-papel",
+          "title": "Permissões por papel × módulo",
+          "category": "admin"
+        },
+        {
+          "article": "comercial/converter-oportunidade-em-orcamento",
+          "title": "Converter oportunidade em orçamento",
+          "category": "comercial"
+        },
+        {
+          "article": "comercial/fechar-oportunidade",
+          "title": "Fechar oportunidade — Ganho ou Perdido",
+          "category": "comercial"
+        },
+        {
+          "article": "comercial/previsao-e-saude",
+          "title": "Previsão e saúde do pipeline",
+          "category": "comercial"
+        },
+        {
+          "article": "comercial/visao-geral",
+          "title": "Visão geral do Comercial",
+          "category": "comercial"
+        },
+        {
+          "article": "compras/auditoria-de-compras",
+          "title": "Auditoria de compras",
+          "category": "compras"
+        },
+        {
+          "article": "compras/visao-geral",
+          "title": "Visão geral de Compras",
+          "category": "compras"
+        },
+        {
+          "article": "conta/login-e-recuperacao-de-senha",
+          "title": "Login e recuperação de senha",
+          "category": "conta"
+        },
+        {
+          "article": "conta/navegacao-e-atalhos",
+          "title": "Navegação e atalhos do sidebar",
+          "category": "conta"
+        },
+        {
+          "article": "conta/papeis-e-permissoes",
+          "title": "Entendendo papéis e permissões",
+          "category": "conta"
+        },
+        {
+          "article": "conta/trocar-senha-e-sessoes",
+          "title": "Trocar senha e encerrar sessões",
+          "category": "conta"
+        },
+        {
+          "article": "documentos/anexar-evidencias-por-etapa",
+          "title": "Anexar evidências por etapa (produção e qualidade)",
+          "category": "documentos"
+        },
+        {
+          "article": "documentos/indexacao-por-cliente-e-projeto",
+          "title": "Indexação por cliente e projeto",
+          "category": "documentos"
+        },
+        {
+          "article": "documentos/permissoes-e-compartilhamento",
+          "title": "Permissões, links públicos e compartilhamento",
+          "category": "documentos"
+        },
+        {
+          "article": "engenharia/liberacao-para-producao",
+          "title": "Liberação para produção",
+          "category": "engenharia"
+        },
+        {
+          "article": "know-how/certificacoes",
+          "title": "Certificações e validade",
+          "category": "know-how"
+        },
+        {
+          "article": "know-how/trilhas",
+          "title": "Trilhas de aprendizado",
+          "category": "know-how"
+        },
+        {
+          "article": "pos-vendas/abrir-chamado",
+          "title": "Abrir um chamado",
+          "category": "pos-vendas"
+        },
+        {
+          "article": "pos-vendas/encerrar-e-reabrir",
+          "title": "Encerrar e reabrir chamado",
+          "category": "pos-vendas"
+        },
+        {
+          "article": "pos-vendas/sla-e-alertas",
+          "title": "SLA e alertas de chamados",
+          "category": "pos-vendas"
+        },
+        {
+          "article": "producao/executar-etapa",
+          "title": "Executar etapa de montagem",
+          "category": "producao"
+        },
+        {
+          "article": "producao/liberar-para-fat",
+          "title": "Liberar para FAT",
+          "category": "producao"
+        },
+        {
+          "article": "producao/retrabalho-e-nc-interna",
+          "title": "Retrabalho e não conformidade interna",
+          "category": "producao"
+        },
+        {
+          "article": "producao/visao-geral",
+          "title": "Visão geral da Produção",
+          "category": "producao"
+        },
+        {
+          "article": "qualidade/encerrar-fat",
+          "title": "Encerrar FAT",
+          "category": "qualidade"
+        },
+        {
+          "article": "qualidade/rnc-e-reprovacao",
+          "title": "RNC e reprovação em FAT",
+          "category": "qualidade"
+        },
+        {
+          "article": "qualidade/templates-fat",
+          "title": "Templates de FAT",
+          "category": "qualidade"
+        },
+        {
+          "article": "site-publico/catalogo-equipamentos",
+          "title": "Catálogo público de equipamentos",
+          "category": "site-publico"
+        },
+        {
+          "article": "site-publico/checklists-publicos",
+          "title": "Formulários públicos de Checklist",
+          "category": "site-publico"
+        },
+        {
+          "article": "site-publico/contato-e-captacao",
+          "title": "Contato público e captação comercial",
+          "category": "site-publico"
+        },
+        {
+          "article": "site-publico/home-e-seo",
+          "title": "Home pública e SEO",
+          "category": "site-publico"
+        },
+        {
+          "article": "site-publico/links-publicos-e-seguranca",
+          "title": "Links públicos e segurança",
+          "category": "site-publico"
+        },
+        {
+          "article": "site-publico/visao-geral",
+          "title": "Visão geral do site público",
+          "category": "site-publico"
+        }
+      ]
+    },
+    {
+      "id": "cross-links-quebrados",
+      "title": "Cross-links quebrados entre artigos",
+      "severity": "error",
+      "items": []
+    },
+    {
+      "id": "rotas-fantasma",
+      "title": "Menções a rotas inexistentes no app",
+      "severity": "warn",
+      "items": []
+    },
+    {
+      "id": "frontmatter-incompleto",
+      "title": "Frontmatter incompleto",
+      "severity": "error",
+      "items": []
+    },
+    {
+      "id": "versao-defasada",
+      "title": "app_version defasada (≥ 2 minors atrás)",
+      "severity": "warn",
+      "items": []
+    },
+    {
+      "id": "screenshots-quebrados",
+      "title": "Screenshots referenciados que não existem",
+      "severity": "warn",
+      "items": [
+        {
+          "article": "documentos/anexar-evidencias-por-etapa",
+          "img": "01-montagem-kanban.png"
+        },
+        {
+          "article": "site-publico/contato-e-captacao",
+          "img": "admin-chamados.png"
+        }
+      ]
+    },
+    {
+      "id": "headings-duplicados",
+      "title": "Headings duplicados no mesmo artigo",
+      "severity": "info",
+      "items": []
+    },
+    {
+      "id": "rotas-sem-page-header",
+      "title": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+      "severity": "info",
+      "items": [
+        {
+          "route": "/admin"
+        },
+        {
+          "route": "/admin/banco"
+        },
+        {
+          "route": "/admin/contato"
+        },
+        {
+          "route": "/admin/etapas-equipamentos"
+        },
+        {
+          "route": "/admin/rfq-tipos"
+        },
+        {
+          "route": "/clientes/$codigo"
+        },
+        {
+          "route": "/comercial/formularios-rfq"
+        },
+        {
+          "route": "/comercial/orcamento/$id"
+        },
+        {
+          "route": "/engenharia/eletrico"
+        },
+        {
+          "route": "/engenharia/etp"
+        },
+        {
+          "route": "/engenharia/mecanico"
+        },
+        {
+          "route": "/engenharia/projetos"
+        },
+        {
+          "route": "/know-how/imprimir/$slug"
+        },
+        {
+          "route": "/pos-vendas"
+        },
+        {
+          "route": "/pos-vendas"
+        },
+        {
+          "route": "/producao/montagem"
+        },
+        {
+          "route": "/qualidade/revisao-eletrica"
+        },
+        {
+          "route": "/qualidade/revisao-mecanica"
+        }
+      ]
+    },
+    {
+      "id": "papeis-inconsistentes",
+      "title": "Papéis fora do enum DocPapel",
+      "severity": "info",
+      "items": [
+        {
+          "article": "know-how/busca-e-organizacao",
+          "invalidRoles": "assembly, field"
+        },
+        {
+          "article": "know-how/certificacoes",
+          "invalidRoles": "assembly, field"
+        },
+        {
+          "article": "know-how/trilhas",
+          "invalidRoles": "assembly, field"
+        },
+        {
+          "article": "know-how/visao-geral",
+          "invalidRoles": "assembly, field"
+        },
+        {
+          "article": "logistica/acompanhar-status",
+          "invalidRoles": "field"
+        },
+        {
+          "article": "logistica/visao-geral",
+          "invalidRoles": "field, logistics"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "errors": 0,
+    "warnings": 2,
+    "info": 57
+  },
+  "byModule": {
+    "admin": {
+      "category": "admin",
+      "articles": 11,
+      "routes": 17,
+      "errors": 0,
+      "warnings": 0,
+      "info": 6,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "admin/permissoes-por-papel",
+            "title": "Permissões por papel × módulo",
+            "category": "admin"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/admin"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/admin/banco"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/admin/contato"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/admin/etapas-equipamentos"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/admin/rfq-tipos"
+          }
+        }
+      ]
+    },
+    "clientes-fornecedores": {
+      "category": "clientes-fornecedores",
+      "articles": 4,
+      "routes": 7,
+      "errors": 0,
+      "warnings": 0,
+      "info": 1,
+      "findings": [
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/clientes/$codigo"
+          }
+        }
+      ]
+    },
+    "comercial": {
+      "category": "comercial",
+      "articles": 10,
+      "routes": 10,
+      "errors": 0,
+      "warnings": 0,
+      "info": 6,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "comercial/converter-oportunidade-em-orcamento",
+            "title": "Converter oportunidade em orçamento",
+            "category": "comercial"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "comercial/fechar-oportunidade",
+            "title": "Fechar oportunidade — Ganho ou Perdido",
+            "category": "comercial"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "comercial/previsao-e-saude",
+            "title": "Previsão e saúde do pipeline",
+            "category": "comercial"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "comercial/visao-geral",
+            "title": "Visão geral do Comercial",
+            "category": "comercial"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/comercial/formularios-rfq"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/comercial/orcamento/$id"
+          }
+        }
+      ]
+    },
+    "compras": {
+      "category": "compras",
+      "articles": 5,
+      "routes": 7,
+      "errors": 0,
+      "warnings": 0,
+      "info": 2,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "compras/auditoria-de-compras",
+            "title": "Auditoria de compras",
+            "category": "compras"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "compras/visao-geral",
+            "title": "Visão geral de Compras",
+            "category": "compras"
+          }
+        }
+      ]
+    },
+    "conta": {
+      "category": "conta",
+      "articles": 5,
+      "routes": 1,
+      "errors": 0,
+      "warnings": 0,
+      "info": 4,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "conta/login-e-recuperacao-de-senha",
+            "title": "Login e recuperação de senha",
+            "category": "conta"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "conta/navegacao-e-atalhos",
+            "title": "Navegação e atalhos do sidebar",
+            "category": "conta"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "conta/papeis-e-permissoes",
+            "title": "Entendendo papéis e permissões",
+            "category": "conta"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "conta/trocar-senha-e-sessoes",
+            "title": "Trocar senha e encerrar sessões",
+            "category": "conta"
+          }
+        }
+      ]
+    },
+    "documentos": {
+      "category": "documentos",
+      "articles": 6,
+      "routes": 4,
+      "errors": 0,
+      "warnings": 1,
+      "info": 3,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "documentos/anexar-evidencias-por-etapa",
+            "title": "Anexar evidências por etapa (produção e qualidade)",
+            "category": "documentos"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "documentos/indexacao-por-cliente-e-projeto",
+            "title": "Indexação por cliente e projeto",
+            "category": "documentos"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "documentos/permissoes-e-compartilhamento",
+            "title": "Permissões, links públicos e compartilhamento",
+            "category": "documentos"
+          }
+        },
+        {
+          "sectionId": "screenshots-quebrados",
+          "sectionTitle": "Screenshots referenciados que não existem",
+          "severity": "warn",
+          "item": {
+            "article": "documentos/anexar-evidencias-por-etapa",
+            "img": "01-montagem-kanban.png"
+          }
+        }
+      ]
+    },
+    "engenharia": {
+      "category": "engenharia",
+      "articles": 4,
+      "routes": 7,
+      "errors": 0,
+      "warnings": 0,
+      "info": 5,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "engenharia/liberacao-para-producao",
+            "title": "Liberação para produção",
+            "category": "engenharia"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/engenharia/eletrico"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/engenharia/etp"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/engenharia/mecanico"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/engenharia/projetos"
+          }
+        }
+      ]
+    },
+    "know-how": {
+      "category": "know-how",
+      "articles": 5,
+      "routes": 5,
+      "errors": 0,
+      "warnings": 0,
+      "info": 7,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "know-how/certificacoes",
+            "title": "Certificações e validade",
+            "category": "know-how"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "know-how/trilhas",
+            "title": "Trilhas de aprendizado",
+            "category": "know-how"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/know-how/imprimir/$slug"
+          }
+        },
+        {
+          "sectionId": "papeis-inconsistentes",
+          "sectionTitle": "Papéis fora do enum DocPapel",
+          "severity": "info",
+          "item": {
+            "article": "know-how/busca-e-organizacao",
+            "invalidRoles": "assembly, field"
+          }
+        },
+        {
+          "sectionId": "papeis-inconsistentes",
+          "sectionTitle": "Papéis fora do enum DocPapel",
+          "severity": "info",
+          "item": {
+            "article": "know-how/certificacoes",
+            "invalidRoles": "assembly, field"
+          }
+        },
+        {
+          "sectionId": "papeis-inconsistentes",
+          "sectionTitle": "Papéis fora do enum DocPapel",
+          "severity": "info",
+          "item": {
+            "article": "know-how/trilhas",
+            "invalidRoles": "assembly, field"
+          }
+        },
+        {
+          "sectionId": "papeis-inconsistentes",
+          "sectionTitle": "Papéis fora do enum DocPapel",
+          "severity": "info",
+          "item": {
+            "article": "know-how/visao-geral",
+            "invalidRoles": "assembly, field"
+          }
+        }
+      ]
+    },
+    "logistica": {
+      "category": "logistica",
+      "articles": 3,
+      "routes": 3,
+      "errors": 0,
+      "warnings": 0,
+      "info": 2,
+      "findings": [
+        {
+          "sectionId": "papeis-inconsistentes",
+          "sectionTitle": "Papéis fora do enum DocPapel",
+          "severity": "info",
+          "item": {
+            "article": "logistica/acompanhar-status",
+            "invalidRoles": "field"
+          }
+        },
+        {
+          "sectionId": "papeis-inconsistentes",
+          "sectionTitle": "Papéis fora do enum DocPapel",
+          "severity": "info",
+          "item": {
+            "article": "logistica/visao-geral",
+            "invalidRoles": "field, logistics"
+          }
+        }
+      ]
+    },
+    "pos-vendas": {
+      "category": "pos-vendas",
+      "articles": 6,
+      "routes": 5,
+      "errors": 0,
+      "warnings": 0,
+      "info": 5,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "pos-vendas/abrir-chamado",
+            "title": "Abrir um chamado",
+            "category": "pos-vendas"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "pos-vendas/encerrar-e-reabrir",
+            "title": "Encerrar e reabrir chamado",
+            "category": "pos-vendas"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "pos-vendas/sla-e-alertas",
+            "title": "SLA e alertas de chamados",
+            "category": "pos-vendas"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/pos-vendas"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/pos-vendas"
+          }
+        }
+      ]
+    },
+    "producao": {
+      "category": "producao",
+      "articles": 5,
+      "routes": 1,
+      "errors": 0,
+      "warnings": 0,
+      "info": 5,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "producao/executar-etapa",
+            "title": "Executar etapa de montagem",
+            "category": "producao"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "producao/liberar-para-fat",
+            "title": "Liberar para FAT",
+            "category": "producao"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "producao/retrabalho-e-nc-interna",
+            "title": "Retrabalho e não conformidade interna",
+            "category": "producao"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "producao/visao-geral",
+            "title": "Visão geral da Produção",
+            "category": "producao"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/producao/montagem"
+          }
+        }
+      ]
+    },
+    "qualidade": {
+      "category": "qualidade",
+      "articles": 6,
+      "routes": 5,
+      "errors": 0,
+      "warnings": 0,
+      "info": 5,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "qualidade/encerrar-fat",
+            "title": "Encerrar FAT",
+            "category": "qualidade"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "qualidade/rnc-e-reprovacao",
+            "title": "RNC e reprovação em FAT",
+            "category": "qualidade"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "qualidade/templates-fat",
+            "title": "Templates de FAT",
+            "category": "qualidade"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/qualidade/revisao-eletrica"
+          }
+        },
+        {
+          "sectionId": "rotas-sem-page-header",
+          "sectionTitle": "Rotas sem <PageHeader /> (sem botão de ajuda)",
+          "severity": "info",
+          "item": {
+            "route": "/qualidade/revisao-mecanica"
+          }
+        }
+      ]
+    },
+    "site-publico": {
+      "category": "site-publico",
+      "articles": 6,
+      "routes": 0,
+      "errors": 0,
+      "warnings": 1,
+      "info": 6,
+      "findings": [
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "site-publico/catalogo-equipamentos",
+            "title": "Catálogo público de equipamentos",
+            "category": "site-publico"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "site-publico/checklists-publicos",
+            "title": "Formulários públicos de Checklist",
+            "category": "site-publico"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "site-publico/contato-e-captacao",
+            "title": "Contato público e captação comercial",
+            "category": "site-publico"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "site-publico/home-e-seo",
+            "title": "Home pública e SEO",
+            "category": "site-publico"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "site-publico/links-publicos-e-seguranca",
+            "title": "Links públicos e segurança",
+            "category": "site-publico"
+          }
+        },
+        {
+          "sectionId": "artigos-sem-mapa",
+          "sectionTitle": "Artigos sem entrada no ROUTE_DOC_MAP",
+          "severity": "info",
+          "item": {
+            "article": "site-publico/visao-geral",
+            "title": "Visão geral do site público",
+            "category": "site-publico"
+          }
+        },
+        {
+          "sectionId": "screenshots-quebrados",
+          "sectionTitle": "Screenshots referenciados que não existem",
+          "severity": "warn",
+          "item": {
+            "article": "site-publico/contato-e-captacao",
+            "img": "admin-chamados.png"
+          }
+        }
+      ]
+    }
+  },
+  "byStage": [
+    {
+      "id": "comercial",
+      "label": "1. Comercial",
+      "categories": [
+        "comercial"
+      ],
+      "routePrefixes": [
+        "/comercial"
+      ],
+      "articles": 10,
+      "articlesByTipo": {
+        "guia": 7,
+        "conceito": 2,
+        "referencia": 0,
+        "troubleshooting": 0,
+        "indefinido": 1
+      },
+      "routes": 10,
+      "routesMapped": 10,
+      "routesMissing": [],
+      "routeMapEntries": 10,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "comercial",
+          "slug": "checklist-publico-e-formularios",
+          "title": "Checklist público e formulários por equipamento"
+        },
+        {
+          "category": "comercial",
+          "slug": "converter-oportunidade-em-orcamento",
+          "title": "Converter oportunidade em orçamento"
+        },
+        {
+          "category": "comercial",
+          "slug": "corrigir-orcamento",
+          "title": "Corrigir orçamento (nova revisão)"
+        }
+      ]
+    },
+    {
+      "id": "engenharia",
+      "label": "2. Engenharia",
+      "categories": [
+        "engenharia"
+      ],
+      "routePrefixes": [
+        "/engenharia"
+      ],
+      "articles": 4,
+      "articlesByTipo": {
+        "guia": 3,
+        "conceito": 1,
+        "referencia": 0,
+        "troubleshooting": 0,
+        "indefinido": 0
+      },
+      "routes": 8,
+      "routesMapped": 8,
+      "routesMissing": [],
+      "routeMapEntries": 7,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "engenharia",
+          "slug": "criar-etp",
+          "title": "Criar ETP a partir do orçamento"
+        },
+        {
+          "category": "engenharia",
+          "slug": "etapas-e-kanban",
+          "title": "Etapas do projeto e kanban"
+        },
+        {
+          "category": "engenharia",
+          "slug": "liberacao-para-producao",
+          "title": "Liberação para produção"
+        }
+      ]
+    },
+    {
+      "id": "compras",
+      "label": "3. Compras",
+      "categories": [
+        "compras"
+      ],
+      "routePrefixes": [
+        "/compras"
+      ],
+      "articles": 5,
+      "articlesByTipo": {
+        "guia": 3,
+        "conceito": 1,
+        "referencia": 1,
+        "troubleshooting": 0,
+        "indefinido": 0
+      },
+      "routes": 7,
+      "routesMapped": 7,
+      "routesMissing": [],
+      "routeMapEntries": 7,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "compras",
+          "slug": "cotacao-multiplos-fornecedores",
+          "title": "Cotação com múltiplos fornecedores"
+        },
+        {
+          "category": "compras",
+          "slug": "criar-solicitacao",
+          "title": "Criar solicitação de compra"
+        },
+        {
+          "category": "compras",
+          "slug": "emitir-e-aprovar-oc",
+          "title": "Emitir e aprovar ordem de compra"
+        }
+      ]
+    },
+    {
+      "id": "producao",
+      "label": "4. Produção",
+      "categories": [
+        "producao"
+      ],
+      "routePrefixes": [
+        "/producao"
+      ],
+      "articles": 5,
+      "articlesByTipo": {
+        "guia": 4,
+        "conceito": 1,
+        "referencia": 0,
+        "troubleshooting": 0,
+        "indefinido": 0
+      },
+      "routes": 1,
+      "routesMapped": 1,
+      "routesMissing": [],
+      "routeMapEntries": 1,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "producao",
+          "slug": "executar-etapa",
+          "title": "Executar etapa de montagem"
+        },
+        {
+          "category": "producao",
+          "slug": "kanban-montagem",
+          "title": "Kanban de montagem"
+        },
+        {
+          "category": "producao",
+          "slug": "liberar-para-fat",
+          "title": "Liberar para FAT"
+        }
+      ]
+    },
+    {
+      "id": "qualidade",
+      "label": "5. Qualidade",
+      "categories": [
+        "qualidade"
+      ],
+      "routePrefixes": [
+        "/qualidade"
+      ],
+      "articles": 6,
+      "articlesByTipo": {
+        "guia": 5,
+        "conceito": 1,
+        "referencia": 0,
+        "troubleshooting": 0,
+        "indefinido": 0
+      },
+      "routes": 5,
+      "routesMapped": 5,
+      "routesMissing": [],
+      "routeMapEntries": 5,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "qualidade",
+          "slug": "agendar-e-preparar-fat",
+          "title": "Agendar e preparar FAT"
+        },
+        {
+          "category": "qualidade",
+          "slug": "encerrar-fat",
+          "title": "Encerrar FAT"
+        },
+        {
+          "category": "qualidade",
+          "slug": "executar-fat",
+          "title": "Executar FAT"
+        }
+      ]
+    },
+    {
+      "id": "logistica",
+      "label": "6. Logística",
+      "categories": [
+        "logistica"
+      ],
+      "routePrefixes": [
+        "/logistica"
+      ],
+      "articles": 3,
+      "articlesByTipo": {
+        "guia": 2,
+        "conceito": 1,
+        "referencia": 0,
+        "troubleshooting": 0,
+        "indefinido": 0
+      },
+      "routes": 3,
+      "routesMapped": 3,
+      "routesMissing": [],
+      "routeMapEntries": 3,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "logistica",
+          "slug": "acompanhar-status",
+          "title": "Acompanhar status do embarque"
+        },
+        {
+          "category": "logistica",
+          "slug": "criar-embarque",
+          "title": "Criar um embarque"
+        },
+        {
+          "category": "logistica",
+          "slug": "visao-geral",
+          "title": "Logística — visão geral"
+        }
+      ]
+    },
+    {
+      "id": "pos-vendas",
+      "label": "7. Pós-vendas",
+      "categories": [
+        "pos-vendas"
+      ],
+      "routePrefixes": [
+        "/pos-vendas"
+      ],
+      "articles": 6,
+      "articlesByTipo": {
+        "guia": 4,
+        "conceito": 2,
+        "referencia": 0,
+        "troubleshooting": 0,
+        "indefinido": 0
+      },
+      "routes": 6,
+      "routesMapped": 6,
+      "routesMissing": [],
+      "routeMapEntries": 5,
+      "errors": 0,
+      "warnings": 0,
+      "coverage": 100,
+      "anchorArticles": [
+        {
+          "category": "pos-vendas",
+          "slug": "abrir-chamado",
+          "title": "Abrir um chamado"
+        },
+        {
+          "category": "pos-vendas",
+          "slug": "atender-chamado",
+          "title": "Atender e acompanhar chamado"
+        },
+        {
+          "category": "pos-vendas",
+          "slug": "encerrar-e-reabrir",
+          "title": "Encerrar e reabrir chamado"
+        }
+      ]
+    }
+  ],
+  "supportStage": {
+    "id": "suporte",
+    "label": "Suporte transversal",
+    "categories": [
+      "clientes-fornecedores",
+      "documentos",
+      "know-how",
+      "admin",
+      "conta",
+      "site-publico",
+      "importacao"
+    ],
+    "routePrefixes": [
+      "/clientes",
+      "/fornecedores",
+      "/importar",
+      "/documentos",
+      "/central-documentos",
+      "/template-documentos",
+      "/know-how",
+      "/admin",
+      "/conta"
+    ],
+    "articles": 37,
+    "articlesByTipo": {
+      "guia": 15,
+      "conceito": 11,
+      "referencia": 1,
+      "troubleshooting": 0,
+      "indefinido": 10
+    },
+    "routes": 34,
+    "routesMapped": 34,
+    "routesMissing": [],
+    "routeMapEntries": 34,
+    "errors": 0,
+    "warnings": 2,
+    "coverage": 100,
+    "anchorArticles": [
+      {
+        "category": "admin",
+        "slug": "auditoria",
+        "title": "Trilha de auditoria"
+      },
+      {
+        "category": "admin",
+        "slug": "paginas-e-etapas-equipamentos",
+        "title": "Páginas e etapas dos equipamentos"
+      },
+      {
+        "category": "admin",
+        "slug": "sla-chamados",
+        "title": "Configurar SLA de chamados"
+      }
+    ]
+  }
+}

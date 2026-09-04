@@ -1,0 +1,31 @@
+
+UPDATE public.segmentos SET nome = CASE lower(nome)
+  WHEN 'azeites, gorduras e vinagres' THEN 'Azeites, Gorduras e Vinagres'
+  WHEN 'biomassa, carvões e chip lenha' THEN 'Biomassa, Carvões e Chip Lenha'
+  WHEN 'cereais matinais e granolas' THEN 'Cereais Matinais e Granolas'
+  WHEN 'chocolates, balas e guloseimas' THEN 'Chocolates, Balas e Guloseimas'
+  WHEN 'comida balanceada' THEN 'Comida Balanceada'
+  WHEN 'condimentos e especiarias' THEN 'Condimentos e Especiarias'
+  WHEN 'domossanitantes, detergentes e limpeza' THEN 'Domossanitantes, Detergentes e Limpeza'
+  WHEN 'ervas e chás' THEN 'Ervas e Chás'
+  WHEN 'farma e cosméticos' THEN 'Farma e Cosméticos'
+  WHEN 'feijão e legumes' THEN 'Feijão e Legumes'
+  WHEN 'fertilizantes e adubo' THEN 'Fertilizantes e Adubo'
+  WHEN 'frigoríficos e embutidos' THEN 'Frigoríficos e Embutidos'
+  WHEN 'frutas e vegetais' THEN 'Frutas e Vegetais'
+  WHEN 'gelatinas e sobremesas' THEN 'Gelatinas e Sobremesas'
+  WHEN 'indústria de lácteos' THEN 'Indústria de Lácteos'
+  WHEN 'lodo e subprodutos industriais' THEN 'Lodo e Subprodutos Industriais'
+  WHEN 'marmeladas e geleias' THEN 'Marmeladas e Geleias'
+  WHEN 'minerais e indústria de construção' THEN 'Minerais e Indústria de Construção'
+  WHEN 'molhos e cremes' THEN 'Molhos e Cremes'
+  WHEN 'panificação e confeitaria' THEN 'Panificação e Confeitaria'
+  WHEN 'plástico, polímeros e recicláveis' THEN 'Plástico, Polímeros e Recicláveis'
+  WHEN 'químicos, aditivos e defensivos' THEN 'Químicos, Aditivos e Defensivos'
+  WHEN 'quinoa, chia, sésamo e amaranto' THEN 'Quinoa, Chia, Sésamo e Amaranto'
+  WHEN 'sucos e polpas' THEN 'Sucos e Polpas'
+  WHEN 'tintas, pinturas, resinas, pigmentos e vernizes' THEN 'Tintas, Pinturas, Resinas, Pigmentos e Vernizes'
+  WHEN 'vinho, destilados, cervejas e bebidas' THEN 'Vinho, Destilados, Cervejas e Bebidas'
+  ELSE nome
+END
+WHERE deleted_at IS NULL;

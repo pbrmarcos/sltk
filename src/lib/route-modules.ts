@@ -1,0 +1,42 @@
+import type { AppModule } from "@/lib/permissoes.functions";
+
+/**
+ * Mapa rota → módulo. Usado pelo guard de módulo do shell autenticado para
+ * fechar o acesso por URL direta a telas que o papel não possui (o menu já
+ * esconde, mas esconder não é proteger).
+ *
+ * Ordem importa: o primeiro prefixo que casar vence, por isso os prefixos
+ * mais específicos vêm antes.
+ */
+const ROUTE_MODULE_PREFIXES: Array<[string, AppModule]> = [
+  ["/dashboard", "dashboard"],
+  ["/comercial", "comercial"],
+  ["/clientes", "clientes"],
+  ["/engenharia", "engenharia"],
+  ["/producao", "producao"],
+  ["/compras", "compras"],
+  ["/fornecedores", "fornecedores"],
+  ["/qualidade", "qualidade"],
+  ["/pos-vendas", "pos_vendas"],
+  ["/logistica", "logistica"],
+  ["/know-how", "know_how"],
+  ["/changelog", "changelog"],
+  ["/design-system", "admin"],
+  // Superfícies de configuração global (editor de blocos, templates, importador)
+  // são administrativas: o menu já esconde, aqui fechamos o acesso por URL.
+  ["/central-documentos", "admin"],
+  ["/template-documentos", "admin"],
+  ["/importar", "admin"],
+  ["/admin", "admin"],
+];
+
+/**
+ * Rotas transversais que todo usuário autenticado pode abrir
+ * (conta, ajuda, documentos emitidos e editores de documento).
+ */
+export function moduleForPath(pathname: string): AppModule | null {
+  for (const [prefix, mod] of ROUTE_MODULE_PREFIXES) {
+    if (pathname === prefix || pathname.startsWith(prefix + "/")) return mod;
+  }
+  return null;
+}

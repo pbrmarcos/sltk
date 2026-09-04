@@ -1,0 +1,15 @@
+import { Badge } from "@/components/ui/badge";
+
+const MAP: Record<string, { label: string; className: string }> = {
+  baixa:   { label: "Baixa",    className: "bg-slate-100 text-slate-700 border-slate-200" },
+  media:   { label: "Média",    className: "bg-sky-100 text-sky-800 border-sky-200" },
+  alta:    { label: "Alta",     className: "bg-amber-100 text-amber-800 border-amber-200" },
+  critica: { label: "Crítica",  className: "bg-rose-100 text-rose-800 border-rose-200" },
+};
+
+export function ChamadoPrioridadeBadge({ prioridade }: { prioridade: string | null | undefined }) {
+  const s = MAP[prioridade ?? "media"] ?? MAP.media;
+  return (
+    <Badge variant="outline" className={s.className}>{s.label}</Badge>
+  );
+}

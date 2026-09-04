@@ -1,0 +1,202 @@
+{
+  "common": [
+    "/dashboard",
+    "/conta",
+    "/ajuda",
+    "/changelog"
+  ],
+  "users": [
+    {
+      "email": "comercial@sltkamericas.com",
+      "role": "sales"
+    },
+    {
+      "email": "engenharia@sltkamericas.com",
+      "role": "engineer"
+    },
+    {
+      "email": "producao@sltkamericas.com",
+      "role": "production"
+    },
+    {
+      "email": "montagem@sltkamericas.com",
+      "role": "assembly"
+    },
+    {
+      "email": "compras@sltkamericas.com",
+      "role": "purchasing"
+    },
+    {
+      "email": "campo@sltkamericas.com",
+      "role": "field"
+    },
+    {
+      "email": "gestor@sltkamericas.com",
+      "role": "manager"
+    }
+  ],
+  "roles": {
+    "sales": {
+      "allowed": [
+        "/comercial/pipeline",
+        "/comercial/checklists",
+        "/comercial/entrevistas",
+        "/comercial/orcamento",
+        "/comercial/orcamento/novo",
+        "/clientes",
+        "/clientes/novo",
+        "/fornecedores",
+        "/pos-vendas",
+        "/pos-vendas/chamados",
+        "/pos-vendas/sat",
+        "/know-how"
+      ],
+      "denied": [
+        "/admin/usuarios",
+        "/compras/ordens",
+        "/engenharia/projetos"
+      ],
+      "sidebar": [
+        "Comercial",
+        "Clientes",
+        "Pós-venda"
+      ]
+    },
+    "engineer": {
+      "allowed": [
+        "/engenharia/projetos",
+        "/engenharia/etapas",
+        "/engenharia/etp",
+        "/engenharia/eletrico",
+        "/engenharia/mecanico",
+        "/qualidade/revisao-mecanica",
+        "/qualidade/revisao-eletrica",
+        "/fornecedores",
+        "/pos-vendas/sat",
+        "/know-how"
+      ],
+      "denied": [
+        "/admin/usuarios",
+        "/compras/ordens"
+      ],
+      "sidebar": [
+        "Engenharia",
+        "Qualidade"
+      ]
+    },
+    "production": {
+      "allowed": [
+        "/engenharia/etapas",
+        "/producao/montagem",
+        "/qualidade/revisao-mecanica",
+        "/qualidade/revisao-eletrica",
+        "/qualidade/fat",
+        "/qualidade/fat/novo",
+        "/logistica/embarques",
+        "/logistica/embarques/novo",
+        "/know-how"
+      ],
+      "denied": [
+        "/admin/usuarios",
+        "/compras/ordens"
+      ],
+      "sidebar": [
+        "Produção",
+        "Qualidade",
+        "Logística"
+      ]
+    },
+    "assembly": {
+      "allowed": [
+        "/producao/montagem",
+        "/qualidade/revisao-mecanica",
+        "/qualidade/revisao-eletrica",
+        "/pos-vendas/sat",
+        "/logistica/embarques",
+        "/know-how"
+      ],
+      "denied": [
+        "/admin/usuarios",
+        "/compras/ordens"
+      ],
+      "sidebar": [
+        "Produção",
+        "Qualidade"
+      ]
+    },
+    "purchasing": {
+      "allowed": [
+        "/compras/solicitacao",
+        "/compras/ordens",
+        "/compras/ordens/nova",
+        "/compras/cotacoes",
+        "/compras/cotacoes/nova",
+        "/fornecedores",
+        "/fornecedores/novo",
+        "/clientes",
+        "/logistica/embarques",
+        "/know-how"
+      ],
+      "denied": [
+        "/admin/usuarios",
+        "/engenharia/projetos"
+      ],
+      "sidebar": [
+        "Compras",
+        "Fornecedores"
+      ]
+    },
+    "field": {
+      "allowed": [
+        "/pos-vendas",
+        "/pos-vendas/chamados",
+        "/pos-vendas/sat",
+        "/clientes",
+        "/qualidade/revisao-mecanica",
+        "/logistica/embarques",
+        "/know-how"
+      ],
+      "denied": [
+        "/admin/usuarios",
+        "/compras/ordens",
+        "/engenharia/projetos"
+      ],
+      "sidebar": [
+        "Pós-venda",
+        "Clientes",
+        "Logística"
+      ]
+    },
+    "manager": {
+      "allowed": [
+        "/comercial/pipeline",
+        "/comercial/orcamento",
+        "/comercial/entrevistas",
+        "/clientes",
+        "/fornecedores",
+        "/engenharia/projetos",
+        "/engenharia/etapas",
+        "/engenharia/etp",
+        "/producao/montagem",
+        "/qualidade/fat",
+        "/qualidade/revisao-mecanica",
+        "/compras/solicitacao",
+        "/compras/ordens",
+        "/logistica/embarques",
+        "/pos-vendas",
+        "/pos-vendas/chamados",
+        "/know-how",
+        "/documentos"
+      ],
+      "denied": [],
+      "sidebar": [
+        "Comercial",
+        "Operações",
+        "Produção",
+        "Qualidade",
+        "Compras",
+        "Logística"
+      ]
+    }
+  }
+}

@@ -1,0 +1,227 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist/index.css";
+@import "@fontsource-variable/geist-mono/index.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-full: 9999px;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-gray: var(--brand-gray);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-neutral: var(--neutral);
+
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-border: var(--bg-border);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted-color);
+
+  --color-prob-a: var(--prob-a);
+  --color-prob-b: var(--prob-b);
+  --color-prob-c: var(--prob-c);
+  --color-prob-frio: var(--prob-frio);
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --shadow-sm: 0 1px 2px 0 rgba(15, 17, 23, 0.06), 0 1px 3px 0 rgba(15, 17, 23, 0.04);
+  --shadow: 0 4px 12px rgba(15, 17, 23, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 17, 23, 0.12);
+}
+
+:root {
+  --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ===== SLTK Design System — Light (default) ===== */
+  /* Surfaces */
+  --bg-base:        #F8F9FA;
+  --bg-surface:     #FFFFFF;
+  --bg-elevated:    #F1F3F5;
+  --bg-border:      #E2E5E9;
+
+  /* Text */
+  --text-primary:   #0F1117;
+  --text-secondary: #4B5563;
+  --text-muted:     #9CA3AF;
+
+  /* Accent */
+  --accent-hover:        #2563EB;
+  --accent-muted-color:  #1E3A5F;
+
+  /* Status */
+  --success:  #22C55E;
+  --warning:  #F59E0B;
+  --danger:   #EF4444;
+  --info:     #3B82F6;
+  --neutral:  #6B7280;
+
+  /* Probabilidade comercial */
+  --prob-a:    #22C55E;
+  --prob-b:    #F59E0B;
+  --prob-c:    #EF4444;
+  --prob-frio: #6B7280;
+
+  /* Badge tokens (tinted bg + dark fg, WCAG AA on light surfaces) */
+  --badge-success-bg: #ECFDF5;
+  --badge-success-fg: #047857;
+  --badge-success-border: #A7F3D0;
+  --badge-danger-bg:  #FFF1F2;
+  --badge-danger-fg:  #BE123C;
+  --badge-danger-border: #FECDD3;
+  --badge-warning-bg: #FFFBEB;
+  --badge-warning-fg: #92400E;
+  --badge-warning-border: #FDE68A;
+  --badge-info-bg:    #EFF6FF;
+  --badge-info-fg:    #1D4ED8;
+  --badge-info-border: #BFDBFE;
+  --badge-neutral-bg: #F3F4F6;
+  --badge-neutral-fg: #374151;
+  --badge-neutral-border: #E5E7EB;
+
+  /* Solutek brand (legacy) */
+  --brand-deep: #343160;
+  --brand-blue: #3F4A97;
+  --brand-gray: #C9CACC;
+
+  /* shadcn tokens mapped to SLTK palette */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-elevated);
+  --popover-foreground: var(--text-primary);
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--bg-elevated);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-elevated);
+  --muted-foreground: var(--text-secondary);
+  --accent: #E8F0FE;
+  --accent-foreground: #0F1117;
+  --destructive: var(--danger);
+  --destructive-foreground: #FFFFFF;
+  --border: var(--bg-border);
+  --input: var(--bg-border);
+  --ring: #3B82F6;
+  --chart-1: #3B82F6;
+  --chart-2: #22C55E;
+  --chart-3: #F59E0B;
+  --chart-4: #EF4444;
+  --chart-5: #6B7280;
+
+  --sidebar: oklch(24% 0.08 285);
+  --sidebar-foreground: oklch(88% 0.02 270);
+  --sidebar-primary: oklch(55% 0.18 270);
+  --sidebar-primary-foreground: oklch(99% 0 0);
+  --sidebar-accent: oklch(32% 0.09 285);
+  --sidebar-accent-foreground: oklch(99% 0 0);
+  --sidebar-border: oklch(30% 0.08 285);
+  --sidebar-ring: oklch(55% 0.18 270);
+
+  /* ===== Gantt (ABB-inspired) ===== */
+  --gantt-today:        #FF000F;
+  --gantt-grid:         #E5E5E5;
+  --gantt-grid-strong:  #BDBDBD;
+  --gantt-row-alt:      #FAFAFA;
+  --gantt-row-hover:    #F1F4F8;
+  --gantt-header-bg:    #F5F5F5;
+  --gantt-track:        #EEF0F2;
+  --gantt-text:         #1F1F1F;
+  --gantt-text-muted:   #696969;
+  --gantt-fase-engenharia:    #1F77D0;
+  --gantt-fase-compras:       #E08600;
+  --gantt-fase-fabricacao:    #3756A8;
+  --gantt-fase-montagem:      #7B3FBF;
+  --gantt-fase-qualidade:     #1F9D55;
+  --gantt-fase-expedicao:     #2E4A87;
+}
+
+.dark {
+  /* Dark industrial B2B — ativado via class .dark no <html>. */
+  --bg-base:        #0F1117;
+  --bg-surface:     #16191F;
+  --bg-elevated:    #1E2229;
+  --bg-border:      #2A2D35;
+
+  --text-primary:   #F0F2F5;
+  --text-secondary: #8B8F98;
+  --text-muted:     #555A63;
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body { margin: 0; padding: 0; }
+  html, body, #root { min-height: 100vh; }
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@utility field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+#lovable-badge { display: none !important; }

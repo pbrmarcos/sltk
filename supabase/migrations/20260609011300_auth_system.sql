@@ -1,0 +1,98 @@
+-- Auth foundation: profiles + user_roles + has_role + signup trigger
+
+-- 1. Enum app_role (8 perfis SLTK)
+do $$ begin
+  create type public.app_role as enum (
+    'admin','manager','engineer','production',
+    'purchasing','assembly','field','sales'
+  );
+exception when duplicate_object then null; end $$;
+
+-- 2. profiles
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  email text,
+  language text not null default 'pt',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+grant select, update on public.profiles to authenticated;
+grant all on public.profiles to service_role;
+
+alter table public.profiles enable row level security;
+
+-- 3. user_roles (separada por segurança)
+create table if not exists public.user_roles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role public.app_role not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, role)
+);
+
+grant select on public.user_roles to authenticated;
+grant all on public.user_roles to service_role;
+
+alter table public.user_roles enable row level security;
+
+-- 4. has_role (SECURITY DEFINER)
+create or replace function public.has_role(_user_id uuid, _role public.app_role)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.user_roles
+    where user_id = _user_id and role = _role
+  )
+$$;
+
+-- 5. Políticas
+drop policy if exists "profiles_self_select" on public.profiles;
+create policy "profiles_self_select" on public.profiles
+  for select to authenticated
+  using (auth.uid() = id or public.has_role(auth.uid(), 'admin'));
+
+drop policy if exists "profiles_self_update" on public.profiles;
+create policy "profiles_self_update" on public.profiles
+  for update to authenticated
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+drop policy if exists "user_roles_self_select" on public.user_roles;
+create policy "user_roles_self_select" on public.user_roles
+  for select to authenticated
+  using (auth.uid() = user_id or public.has_role(auth.uid(), 'admin'));
+
+-- 6. updated_at trigger
+create or replace function public.tg_set_updated_at()
+returns trigger language plpgsql as $$
+begin new.updated_at = now(); return new; end;
+$$;
+
+drop trigger if exists profiles_set_updated_at on public.profiles;
+create trigger profiles_set_updated_at
+  before update on public.profiles
+  for each row execute function public.tg_set_updated_at();
+
+-- 7. Auto-criar profile no signup
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, full_name)
+  values (
+    new.id, new.email,
+    coalesce(new.raw_user_meta_data->>'full_name', new.email)
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
