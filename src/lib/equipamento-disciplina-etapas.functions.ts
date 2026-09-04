@@ -251,14 +251,3 @@ export const listUsuariosParaEtapa = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
-
-// ============ SEED (manual) ============
-export const seedEquipamentoDisciplinas = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as AnySb;
-    const { error } = await sb.rpc("seed_equipamento_disciplinas", { _eq_id: data.equipamento_id });
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });

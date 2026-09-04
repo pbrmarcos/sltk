@@ -691,60 +691,6 @@ export const runSlaAutomations = createServerFn({ method: "POST" })
     return { tratados };
   });
 
-/* ===================== seedProcessosDemo (dev only) ===================== */
-
-export const seedProcessosDemo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    // Apenas admin/manager
-    const { data: roles } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId);
-    const ok = (roles ?? []).some((r) => r.role === "admin" || r.role === "manager");
-    if (!ok) throw new Error("Acesso restrito.");
-
-    // Já existe? não duplica
-    const { count } = await context.supabase
-      .from("processos")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null);
-    if ((count ?? 0) > 0) return { inseridos: 0, motivo: "ja_existe" as const };
-
-    // Pega o primeiro cliente real
-    const { data: cli } = await context.supabase
-      .from("clientes")
-      .select("id")
-      .is("deleted_at", null)
-      .limit(1);
-    if (!cli || cli.length === 0)
-      throw new Error("Crie ao menos um cliente antes de popular o demo.");
-
-    const samples: Array<{ titulo: string; stage: PipelineStage; risco: Risco; valor: number; previsao: string }> = [
-      { titulo: "Linha de envase 24 bicos — expansão", stage: "Orçamento", risco: "Baixo", valor: 1480000, previsao: "2026-12-01" },
-      { titulo: "Empacotadora secundária — sucos", stage: "ETP", risco: "Médio", valor: 2100000, previsao: "2027-01-15" },
-      { titulo: "Retrofit linha de cereais", stage: "Eng. Mecânica", risco: "Baixo", valor: 870000, previsao: "2026-10-01" },
-      { titulo: "Diagnóstico de capacidade — granola", stage: "Lead", risco: "Médio", valor: 0, previsao: "2026-09-01" },
-      { titulo: "Linha UHT — envase asséptico", stage: "FAT", risco: "Baixo", valor: 2750000, previsao: "2026-07-30" },
-    ];
-
-    let inseridos = 0;
-    for (const s of samples) {
-      const { error } = await context.supabase.from("processos").insert({
-        titulo: s.titulo,
-        cliente_id: cli[0].id,
-        pilar_id: context.userId,
-        stage: s.stage,
-        risco: s.risco,
-        valor: s.valor,
-        previsao: s.previsao,
-        codigo: "",
-      } as never);
-      if (!error) inseridos++;
-    }
-    return { inseridos, motivo: "ok" as const };
-  });
-
 /* ===================== Lost / Restore ===================== */
 
 async function assertCanArchive(

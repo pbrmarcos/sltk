@@ -385,27 +385,3 @@ export const listRfqDocumentosGerados = createServerFn({ method: "GET" })
       (a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime(),
     );
   });
-
-
-/** Catálogo de condições de pagamento pré-configuradas. */
-export const listCondicoesPagamento = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const sb = context.supabase as any;
-    const { data, error } = await sb
-      .from("compras_condicoes_pagamento")
-      .select("id, codigo, descricao_pt, descricao_es, descricao_en, dias_liquidos, ordem, ativo")
-      .eq("ativo", true)
-      .order("ordem", { ascending: true });
-    if (error) throw new Error(error.message);
-    return (data ?? []) as Array<{
-      id: string;
-      codigo: string;
-      descricao_pt: string;
-      descricao_es: string | null;
-      descricao_en: string | null;
-      dias_liquidos: number | null;
-      ordem: number;
-      ativo: boolean;
-    }>;
-  });
