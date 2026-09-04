@@ -841,7 +841,7 @@ function NovoFornecedorPage() {
                         <span className="inline-flex items-center gap-2">
                           <Flag code={p.codigo} size={18} />
                           <span>{p.nome}</span>
-                          <span className="text-[11px] text-[var(--text-tertiary)]">{p.codigo}</span>
+                          <span className="text-[11px] text-[var(--text-muted)]">{p.codigo}</span>
                         </span>
                       </SelectItem>
                     ))}
@@ -862,7 +862,7 @@ function NovoFornecedorPage() {
                   onChange={(e) => setForm({ ...form, endereco: e.target.value })}
                 />
                 {enderecoOriginal && (
-                  <p className="mt-1 text-[11px] text-[var(--text-tertiary)]">
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
                     Original: <span className="font-mono">{enderecoOriginal}</span> (traduzido automaticamente)
                   </p>
                 )}
@@ -984,16 +984,16 @@ function NovoFornecedorPage() {
                 )}
                 <div className="mt-3 grid gap-2 text-[12px] sm:grid-cols-2 md:grid-cols-3">
                   {enrichment.site_oficial && (
-                    <div><span className="text-[var(--text-tertiary)]">Site:</span> <a className="text-blue-700 hover:underline" href={enrichment.site_oficial.startsWith("http") ? enrichment.site_oficial : `https://${enrichment.site_oficial}`} target="_blank" rel="noreferrer">{enrichment.site_oficial}</a></div>
+                    <div><span className="text-[var(--text-muted)]">Site:</span> <a className="text-blue-700 hover:underline" href={enrichment.site_oficial.startsWith("http") ? enrichment.site_oficial : `https://${enrichment.site_oficial}`} target="_blank" rel="noreferrer">{enrichment.site_oficial}</a></div>
                   )}
                   {enrichment.ano_fundacao && (
-                    <div><span className="text-[var(--text-tertiary)]">Fundada em:</span> {enrichment.ano_fundacao}</div>
+                    <div><span className="text-[var(--text-muted)]">Fundada em:</span> {enrichment.ano_fundacao}</div>
                   )}
                   {enrichment.porte && (
-                    <div><span className="text-[var(--text-tertiary)]">Porte:</span> {enrichment.porte}</div>
+                    <div><span className="text-[var(--text-muted)]">Porte:</span> {enrichment.porte}</div>
                   )}
                   {enrichment.funcionarios && (
-                    <div><span className="text-[var(--text-tertiary)]">Funcionários:</span> {enrichment.funcionarios}</div>
+                    <div><span className="text-[var(--text-muted)]">Funcionários:</span> {enrichment.funcionarios}</div>
                   )}
                 </div>
                 {enrichment.certificacoes && enrichment.certificacoes.length > 0 && (
@@ -1005,7 +1005,7 @@ function NovoFornecedorPage() {
                 )}
                 {enrichment.mercados_atendidos && enrichment.mercados_atendidos.length > 0 && (
                   <div className="mt-2 text-[12px]">
-                    <span className="text-[var(--text-tertiary)]">Mercados:</span> {enrichment.mercados_atendidos.join(", ")}
+                    <span className="text-[var(--text-muted)]">Mercados:</span> {enrichment.mercados_atendidos.join(", ")}
                   </div>
                 )}
                 {enrichment.fontes && enrichment.fontes.length > 0 && (
@@ -1643,7 +1643,7 @@ function ScanProgress({
                 : st === "running"
                   ? "text-blue-600"
                   : st === "skipped"
-                    ? "text-[var(--text-tertiary)]"
+                    ? "text-[var(--text-muted)]"
                     : "text-[var(--text-muted)]";
           return (
             <li

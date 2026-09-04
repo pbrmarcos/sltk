@@ -60,7 +60,7 @@ function FatListPage() {
                 <Link
                   to="/qualidade/fat/$id"
                   params={{ id: r.id }}
-                  className="grid grid-cols-1 gap-2 p-4 hover:bg-[var(--bg-muted)] sm:grid-cols-[120px_1fr_auto] sm:items-center"
+                  className="grid grid-cols-1 gap-2 p-4 hover:bg-[var(--bg-elevated)] sm:grid-cols-[120px_1fr_auto] sm:items-center"
                 >
                   <span className="font-mono text-sm font-semibold">{r.codigo ?? "—"}</span>
                   <div className="min-w-0">

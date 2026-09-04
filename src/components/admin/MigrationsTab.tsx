@@ -58,7 +58,7 @@ export function MigrationsTab() {
         Arquivos em <code>supabase/pending-migrations/</code>. Ao aplicar, o SQL é
         executado via Management API do Supabase e registrado em{" "}
         <code>public._migrations_applied</code>.{" "}
-        <span className="text-[var(--text)]">{pendentes.length} pendente(s)</span>.
+        <span className="text-[var(--text-primary)]">{pendentes.length} pendente(s)</span>.
       </div>
 
       <div className="space-y-2">
@@ -74,7 +74,7 @@ export function MigrationsTab() {
                 <div className="flex min-w-0 flex-1 items-center gap-2">
                   <button
                     onClick={() => setOpenSql((s) => ({ ...s, [m.name]: !open }))}
-                    className="text-[var(--text-muted)] hover:text-[var(--text)]"
+                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     aria-label="Ver SQL"
                   >
                     {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -106,7 +106,7 @@ export function MigrationsTab() {
                 </div>
               </div>
               {open && (
-                <pre className="max-h-80 overflow-auto border-t border-[var(--bg-border)] bg-[var(--bg-canvas)] p-3 text-xs">
+                <pre className="max-h-80 overflow-auto border-t border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 text-xs">
 {m.sql}
                 </pre>
               )}

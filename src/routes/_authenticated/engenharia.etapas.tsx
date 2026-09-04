@@ -304,7 +304,7 @@ function EtapasEditor({
 
       <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         <table className="w-full text-xs">
-          <thead className="bg-[var(--bg-muted)] text-[var(--text-muted)]">
+          <thead className="bg-[var(--bg-elevated)] text-[var(--text-muted)]">
             <tr>
               <th className="p-2 text-left">#</th>
               <th className="p-2 text-left">Etapa</th>
@@ -427,7 +427,7 @@ function EtapasEditor({
                 <td className="p-1">
                   <button
                     onClick={() => remove(i)}
-                    className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-rose-700"
+                    className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-rose-700"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>

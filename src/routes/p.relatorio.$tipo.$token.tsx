@@ -161,7 +161,7 @@ function PublicLinkErrorState({ error }: { error: Error | null }) {
           </div>
         </div>
         <p className="text-sm leading-relaxed text-[var(--text-primary)]">{copy.hint}</p>
-        <p className="mt-3 rounded-md border border-[var(--bg-border)] bg-[var(--bg-card)] p-3 text-xs text-[var(--text-muted)]">
+        <p className="mt-3 rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 text-xs text-[var(--text-muted)]">
           <span className="font-mono">{message}</span>
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-2">

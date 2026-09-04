@@ -29,7 +29,7 @@ export function ModuleGuard({ children }: { children: React.ReactNode }) {
   // nenhum dado de permissão para o usuário atual.
   if ((roleLoading || loading) && !renderedOnce.current) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-[var(--text-subtle)]">
+      <div className="flex flex-1 items-center justify-center p-8 text-sm text-[var(--text-muted)]">
         Verificando permissões…
       </div>
     );
@@ -44,9 +44,9 @@ export function ModuleGuard({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 items-center justify-center p-8">
       <div className="max-w-md rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 text-center">
-        <ShieldAlert className="mx-auto mb-4 h-10 w-10 text-[var(--text-subtle)]" />
+        <ShieldAlert className="mx-auto mb-4 h-10 w-10 text-[var(--text-muted)]" />
         <h1 className="text-lg font-semibold">Acesso restrito</h1>
-        <p className="mt-2 text-sm text-[var(--text-subtle)]">
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Seu perfil não tem permissão para o módulo{" "}
           <strong>{MODULE_LABEL[required]}</strong>. Solicite liberação a um
           administrador em Administração › Usuários &amp; Permissões.

@@ -368,19 +368,19 @@ export function TemplateEditorDialog({ templateId, open, onOpenChange }: Props) 
             <TabsList className="mb-3">
               <TabsTrigger value="checklist" className="gap-1.5">
                 <CheckSquare className="h-3.5 w-3.5" /> Checklist
-                <span className="ml-1 rounded-full bg-[var(--bg-muted)] px-1.5 text-[10.5px]">{d.itens.length}</span>
+                <span className="ml-1 rounded-full bg-[var(--bg-elevated)] px-1.5 text-[10.5px]">{d.itens.length}</span>
               </TabsTrigger>
               <TabsTrigger value="tarefas" className="gap-1.5">
                 <ListTodo className="h-3.5 w-3.5" /> Tarefas
-                <span className="ml-1 rounded-full bg-[var(--bg-muted)] px-1.5 text-[10.5px]">{d.tarefas.length}</span>
+                <span className="ml-1 rounded-full bg-[var(--bg-elevated)] px-1.5 text-[10.5px]">{d.tarefas.length}</span>
               </TabsTrigger>
               <TabsTrigger value="eventos" className="gap-1.5">
                 <CalendarClock className="h-3.5 w-3.5" /> Eventos
-                <span className="ml-1 rounded-full bg-[var(--bg-muted)] px-1.5 text-[10.5px]">{d.eventos.length}</span>
+                <span className="ml-1 rounded-full bg-[var(--bg-elevated)] px-1.5 text-[10.5px]">{d.eventos.length}</span>
               </TabsTrigger>
               <TabsTrigger value="historico" className="gap-1.5">
                 <History className="h-3.5 w-3.5" /> Histórico
-                <span className="ml-1 rounded-full bg-[var(--bg-muted)] px-1.5 text-[10.5px]">{versoesQ.data?.length ?? 0}</span>
+                <span className="ml-1 rounded-full bg-[var(--bg-elevated)] px-1.5 text-[10.5px]">{versoesQ.data?.length ?? 0}</span>
               </TabsTrigger>
             </TabsList>
 

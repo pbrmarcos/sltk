@@ -461,7 +461,7 @@ function FornecedoresListPage() {
           <button
             type="button"
             onClick={clearAllFilters}
-            className="text-[11px] font-medium text-[var(--brand-primary)] hover:underline"
+            className="text-[11px] font-medium text-[var(--primary)] hover:underline"
           >
             Limpar filtros
           </button>
@@ -495,7 +495,7 @@ function FornecedoresListPage() {
                   onClick={() =>
                     navigate({ search: (s: SearchParams) => ({ ...s, categoria: "todos", categorias: [], page: 1 }) })
                   }
-                  className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[var(--brand-primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                  className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[var(--primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                 >
                   <X aria-hidden="true" className="h-3 w-3" /> Limpar categorias
                 </button>
@@ -577,7 +577,7 @@ function FornecedoresListPage() {
                 <Link
                   to="/fornecedores/$id"
                   params={{ id: row.id }}
-                  className="block rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 hover:border-[var(--brand-primary)]"
+                  className="block rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 hover:border-[var(--primary)]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -757,7 +757,7 @@ function ChipRow({
     >
       <span
         id={groupId}
-        className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-tertiary)]"
+        className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]"
       >
         {label}
       </span>
@@ -773,8 +773,8 @@ function ChipRow({
             className={cn(
               "rounded-full border px-2 py-0.5 text-[11px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
               active
-                ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
-                : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]",
+                ? "border-[var(--primary)] bg-[var(--primary)] text-white"
+                : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:border-[var(--primary)]",
             )}
           >
             {it.value}

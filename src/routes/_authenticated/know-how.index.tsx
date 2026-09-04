@@ -142,7 +142,7 @@ function KnowHowIndex() {
     const fav = favSet.has(it.id);
     const visto = histMap.get(it.id);
     return (
-      <div className="group relative flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]">
+      <div className="group relative flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow)]">
         <div className="absolute right-2 top-2 flex gap-1">
           <Link
             to="/know-how/imprimir/$slug"

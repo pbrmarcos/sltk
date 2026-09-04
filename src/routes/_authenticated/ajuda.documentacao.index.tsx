@@ -44,7 +44,7 @@ function DocumentacaoPage() {
                 key={c.id}
                 to="/ajuda/documentacao/$categoria"
                 params={{ categoria: c.id }}
-                className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]"
+                className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow)]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm font-semibold text-[var(--text-primary)]">{c.label}</span>

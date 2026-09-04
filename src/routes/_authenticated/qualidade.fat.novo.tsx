@@ -72,7 +72,7 @@ function NovoFatPage() {
           <ul className="divide-y divide-[var(--bg-border)]">
             {filtered.map((p: any) => (
               <li key={p.id}>
-                <label className="flex cursor-pointer items-center gap-3 p-4 hover:bg-[var(--bg-muted)]">
+                <label className="flex cursor-pointer items-center gap-3 p-4 hover:bg-[var(--bg-elevated)]">
                   <input
                     type="radio"
                     name="processo"

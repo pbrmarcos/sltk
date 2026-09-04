@@ -168,7 +168,7 @@ export function EtpAnexosPanel({
       {isLoading ? (
         <p className="text-xs text-[var(--text-muted)]">Carregando…</p>
       ) : anexos.length === 0 ? (
-        <p className="rounded-[var(--radius-md)] border border-dashed border-[var(--bg-border)] bg-[var(--bg-muted)]/30 p-3 text-xs text-[var(--text-muted)]">
+        <p className="rounded-[var(--radius-md)] border border-dashed border-[var(--bg-border)] bg-[var(--bg-elevated)]/30 p-3 text-xs text-[var(--text-muted)]">
           Nenhum anexo. Arquivos enviados ficam organizados no Google Drive
           (cliente → AAAAMM → etps → este ETP).
         </p>
@@ -255,7 +255,7 @@ export function EtpAnexosPanel({
                   </div>
                 </div>
                 {canPreview && isOpen ? (
-                  <div className="mt-3 overflow-hidden rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-muted)]/30">
+                  <div className="mt-3 overflow-hidden rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-elevated)]/30">
                     <iframe
                       title={a.nome_final}
                       src={`https://drive.google.com/file/d/${a.drive_file_id}/preview`}
@@ -387,7 +387,7 @@ function UploadDialog({
 
         {file && (
           <div className="space-y-4 text-sm">
-            <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-muted)]/40 p-3">
+            <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-elevated)]/40 p-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="truncate text-xs font-medium" title={file.name}>
@@ -424,7 +424,7 @@ function UploadDialog({
                   disabled={busy}
                 />
                 {ext && (
-                  <span className="flex items-center bg-[var(--bg-muted)] px-3 text-xs text-[var(--text-muted)]">
+                  <span className="flex items-center bg-[var(--bg-elevated)] px-3 text-xs text-[var(--text-muted)]">
                     {ext}
                   </span>
                 )}

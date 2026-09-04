@@ -331,7 +331,7 @@ export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact"
         />
       </div>
       {results.length > 0 && (
-        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] shadow-[var(--shadow-md)]">
+        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] shadow-[var(--shadow)]">
           <ul className="max-h-96 overflow-auto">
             {results.map((r) => {
               return (

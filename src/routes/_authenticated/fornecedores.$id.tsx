@@ -438,7 +438,7 @@ function FornecedorDetailPage() {
                       href={f.site.startsWith("http") ? f.site : `https://${f.site}`}
                       target="_blank"
                       rel="noopener"
-                      className="text-[var(--brand-primary)] underline"
+                      className="text-[var(--primary)] underline"
                     >
                       {f.site}
                     </a>
@@ -462,7 +462,7 @@ function FornecedorDetailPage() {
                   {f.email_corporativo ? (
                     <a
                       href={`mailto:${f.email_corporativo}`}
-                      className="text-[var(--brand-primary)] underline"
+                      className="text-[var(--primary)] underline"
                     >
                       {f.email_corporativo}
                     </a>
@@ -832,7 +832,7 @@ function FornecedorDetailPage() {
                       className={cn(
                         "rounded-full border px-2.5 py-1 text-[11.5px] transition",
                         active
-                          ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
+                          ? "border-[var(--primary)] bg-[var(--primary)] text-white"
                           : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]",
                       )}
                     >
@@ -1234,14 +1234,14 @@ function SubmissoesPanel({ rows, loading }: { rows: ScanSubmissaoRow[]; loading:
             <div className="mt-2 grid gap-3 lg:grid-cols-2">
               {ext && (
                 <div className="rounded border border-[var(--bg-border)] bg-[var(--bg-base)] p-2">
-                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                     OCR / Traduzido
                   </div>
                   <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-[11.5px] text-[var(--text-secondary)]">
                     {JSON.stringify(ext, null, 2)}
                   </pre>
                   {r.endereco_original && (
-                    <p className="mt-1 text-[11px] text-[var(--text-tertiary)]">
+                    <p className="mt-1 text-[11px] text-[var(--text-muted)]">
                       Endereço original: <span className="font-mono">{r.endereco_original}</span>
                     </p>
                   )}
@@ -1249,7 +1249,7 @@ function SubmissoesPanel({ rows, loading }: { rows: ScanSubmissaoRow[]; loading:
               )}
               {enr && (
                 <div className="rounded border border-[var(--bg-border)] bg-[var(--bg-base)] p-2">
-                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                     Enriquecimento web
                   </div>
                   <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-[11.5px] text-[var(--text-secondary)]">

@@ -154,7 +154,7 @@ function SATListPage() {
               <tr
                 key={r.id}
                 onClick={() => nav({ to: "/pos-vendas/sat/$id", params: { id: r.id } })}
-                className="cursor-pointer border-t border-[var(--bg-border)] transition-colors hover:bg-[var(--bg-muted)]"
+                className="cursor-pointer border-t border-[var(--bg-border)] transition-colors hover:bg-[var(--bg-elevated)]"
               >
                 <td className="px-4 py-2.5 font-medium">{r.codigo}</td>
                 <td className="px-4 py-2.5">{r.cliente_nome ?? "—"}</td>
@@ -175,7 +175,7 @@ function SATListPage() {
                       href={r.pdf_drive_view_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[var(--brand-primary)] hover:underline"
+                      className="inline-flex items-center gap-1 text-[var(--primary)] hover:underline"
                     >
                       <FileText className="h-3.5 w-3.5" /> PDF
                     </a>

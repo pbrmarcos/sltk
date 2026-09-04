@@ -83,7 +83,7 @@ function HHPage() {
 
       <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--bg-muted)] text-xs text-[var(--text-muted)]">
+          <thead className="bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)]">
             <tr>
               <th className="p-3 text-left">Equipamento</th>
               <th className="p-3 text-left">Cliente</th>
@@ -108,7 +108,7 @@ function HHPage() {
                 const isOpen = expanded === r.id;
                 return (
                   <Fragment key={r.id}>
-                  <tr className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-muted)]/30">
+                  <tr className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]/30">
                     <td className="p-3">
                       <button
                         type="button"
@@ -140,7 +140,7 @@ function HHPage() {
                     </td>
                   </tr>
                   {isOpen && (
-                    <tr className="bg-[var(--bg-muted)]/20">
+                    <tr className="bg-[var(--bg-elevated)]/20">
                       <td colSpan={8} className="p-3">
                         <EtapasInline equipamentoId={r.id} />
                       </td>

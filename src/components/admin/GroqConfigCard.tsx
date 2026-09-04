@@ -63,8 +63,8 @@ export function GroqConfigCard() {
     <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-sm)]">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="rounded-md bg-[var(--brand-primary)]/10 p-2">
-            <Sparkles className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div className="rounded-md bg-[var(--primary)]/10 p-2">
+            <Sparkles className="h-5 w-5 text-[var(--primary)]" />
           </div>
           <div>
             <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
@@ -135,7 +135,7 @@ export function GroqConfigCard() {
             href="https://console.groq.com/keys"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-0.5 text-[var(--brand-primary)] hover:underline"
+            className="inline-flex items-center gap-0.5 text-[var(--primary)] hover:underline"
           >
             Obter chave no console Groq <ExternalLink className="h-3 w-3" />
           </a>

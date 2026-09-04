@@ -33,7 +33,7 @@ function AjudaIndex() {
       <div className="mb-8 grid gap-3 sm:grid-cols-2">
         <Link
           to="/ajuda/documentacao"
-          className="group flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]"
+          className="group flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow)]"
         >
           <div className="grid h-10 w-10 place-items-center rounded-md bg-[var(--bg-elevated)] text-[var(--info)]">
             <BookOpen className="h-5 w-5" />
@@ -48,7 +48,7 @@ function AjudaIndex() {
         </Link>
         <Link
           to="/ajuda/faq"
-          className="group flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]"
+          className="group flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow)]"
         >
           <div className="grid h-10 w-10 place-items-center rounded-md bg-[var(--bg-elevated)] text-[var(--info)]">
             <HelpCircle className="h-5 w-5" />
@@ -74,7 +74,7 @@ function AjudaIndex() {
               key={c.id}
               to="/ajuda/documentacao/$categoria"
               params={{ categoria: c.id }}
-              className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]"
+              className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow)]"
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-[var(--text-primary)]">{c.label}</span>

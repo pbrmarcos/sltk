@@ -411,7 +411,7 @@ export function OrcamentoWizard({
         <div className="flex items-center gap-3">
           {STEPS.map((label, i) => (
             <div key={label} className="flex items-center gap-2">
-              <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${i === step ? "bg-[var(--accent)] text-white" : i < step ? "bg-[var(--accent-muted,#cbd5ff)] text-[var(--text-primary)]" : "bg-[var(--bg-border)] text-[var(--text-muted)]"}`}>{i + 1}</div>
+              <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${i === step ? "bg-[var(--accent)] text-white" : i < step ? "bg-[var(--accent-muted-color)] text-white" : "bg-[var(--bg-border)] text-[var(--text-muted)]"}`}>{i + 1}</div>
               <div className={`text-sm ${i === step ? "font-medium" : "text-[var(--text-muted)]"}`}>{label}</div>
               {i < STEPS.length - 1 ? <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" /> : null}
             </div>
@@ -993,7 +993,7 @@ function EquipImageUploader(props: {
                 <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPick(f); e.currentTarget.value = ""; }} />
               </label>
-              <button type="button" onClick={() => onChange(null)} className="inline-flex items-center gap-1 text-xs text-[var(--state-danger)] hover:underline">
+              <button type="button" onClick={() => onChange(null)} className="inline-flex items-center gap-1 text-xs text-[var(--danger)] hover:underline">
                 <X className="h-3 w-3" /> Remover
               </button>
             </div>
@@ -1007,7 +1007,7 @@ function EquipImageUploader(props: {
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPick(f); e.currentTarget.value = ""; }} />
         </label>
       )}
-      {err ? <p className="mt-1 text-[11px] text-[var(--state-danger)]">{err}</p> : null}
+      {err ? <p className="mt-1 text-[11px] text-[var(--danger)]">{err}</p> : null}
     </div>
   );
 }

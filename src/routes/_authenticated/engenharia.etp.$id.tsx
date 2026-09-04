@@ -760,7 +760,7 @@ function HistoricoPanel({ etpId }: { etpId: string }) {
       </div>
 
       {canWrite ? (
-        <div className="mb-4 space-y-2 rounded-[var(--radius-md)] border border-dashed border-[var(--bg-border)] bg-[var(--bg-muted)]/40 p-3">
+        <div className="mb-4 space-y-2 rounded-[var(--radius-md)] border border-dashed border-[var(--bg-border)] bg-[var(--bg-elevated)]/40 p-3">
           <label className="block space-y-1">
             <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
               <MessageSquarePlus className="h-3.5 w-3.5" /> Adicionar nota
@@ -785,7 +785,7 @@ function HistoricoPanel({ etpId }: { etpId: string }) {
           </div>
         </div>
       ) : (
-        <p className="mb-3 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-muted)]/40 p-2 text-[11px] text-[var(--text-muted)]">
+        <p className="mb-3 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-elevated)]/40 p-2 text-[11px] text-[var(--text-muted)]">
           Apenas administradores, gestores e engenheiros podem registrar notas.
         </p>
       )}

@@ -146,8 +146,8 @@ function TipoTabs({
             className={
               "inline-flex items-center gap-2 whitespace-nowrap rounded-md border px-3 py-1.5 text-sm transition-colors " +
               (active
-                ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
-                : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:bg-[var(--bg-muted)]")
+                ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]"
+                : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]")
             }
           >
             <span className="font-medium">{t.nome}</span>
@@ -321,7 +321,7 @@ function BlocosList({ tipo, autoTr }: { tipo: string; autoTr: boolean }) {
                     <button
                       type="button"
                       aria-pressed={(b.largura ?? 100) === 100}
-                      className={`flex items-center gap-1 px-2 py-1 text-xs transition-colors ${(b.largura ?? 100) === 100 ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-[var(--bg-muted)]"}`}
+                      className={`flex items-center gap-1 px-2 py-1 text-xs transition-colors ${(b.largura ?? 100) === 100 ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-[var(--bg-elevated)]"}`}
                       onClick={() => handleSetLargura(b, 100)}
                       title="Ocupa a linha inteira"
                     >
@@ -330,7 +330,7 @@ function BlocosList({ tipo, autoTr }: { tipo: string; autoTr: boolean }) {
                     <button
                       type="button"
                       aria-pressed={(b.largura ?? 100) === 50}
-                      className={`flex items-center gap-1 border-l border-[var(--bg-border)] px-2 py-1 text-xs transition-colors ${(b.largura ?? 100) === 50 ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-[var(--bg-muted)]"}`}
+                      className={`flex items-center gap-1 border-l border-[var(--bg-border)] px-2 py-1 text-xs transition-colors ${(b.largura ?? 100) === 50 ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-[var(--bg-elevated)]"}`}
                       onClick={() => handleSetLargura(b, 50)}
                       title="Metade da linha (permite 2 blocos lado a lado)"
                     >
@@ -339,10 +339,10 @@ function BlocosList({ tipo, autoTr }: { tipo: string; autoTr: boolean }) {
                   </div>
 
                   <div className="inline-flex overflow-hidden rounded-md border border-[var(--bg-border)]">
-                    <button type="button" className="px-2 py-1 text-xs hover:bg-[var(--bg-muted)]" onClick={() => handleMove(b, -1)} title="Mover para cima">
+                    <button type="button" className="px-2 py-1 text-xs hover:bg-[var(--bg-elevated)]" onClick={() => handleMove(b, -1)} title="Mover para cima">
                       <ArrowUp className="h-3.5 w-3.5" />
                     </button>
-                    <button type="button" className="border-l border-[var(--bg-border)] px-2 py-1 text-xs hover:bg-[var(--bg-muted)]" onClick={() => handleMove(b, 1)} title="Mover para baixo">
+                    <button type="button" className="border-l border-[var(--bg-border)] px-2 py-1 text-xs hover:bg-[var(--bg-elevated)]" onClick={() => handleMove(b, 1)} title="Mover para baixo">
                       <ArrowDown className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -381,7 +381,7 @@ function BlocosList({ tipo, autoTr }: { tipo: string; autoTr: boolean }) {
                     <div>
                       <div className="mb-1 flex items-center justify-between">
                         <Label className="text-xs">Texto</Label>
-                        <span className="text-[10px] text-[var(--text-muted)]">Use <code className="rounded bg-[var(--bg-muted)] px-1 py-0.5">**texto**</code> para negrito</span>
+                        <span className="text-[10px] text-[var(--text-muted)]">Use <code className="rounded bg-[var(--bg-elevated)] px-1 py-0.5">**texto**</code> para negrito</span>
                       </div>
                       <Textarea
                         rows={6}
@@ -547,7 +547,7 @@ function HistoricoSheet({
           ? "bg-[color-mix(in_oklab,var(--success)_22%,transparent)] text-[var(--success)]"
           : st === "altered"
           ? "bg-[color-mix(in_oklab,var(--warning,#d97706)_22%,transparent)] text-[var(--warning,#d97706)] underline decoration-dotted"
-          : "bg-[var(--bg-emphasis)] text-[var(--text-primary)]";
+          : "bg-[var(--bg-elevated)] text-[var(--text-primary)]";
       const title =
         st === "removed"
           ? "Será removido após restaurar"
@@ -588,8 +588,8 @@ function HistoricoSheet({
                 onClick={() => setSelectedId(v.id)}
                 className={`w-full rounded-md border px-3 py-2 text-left text-xs transition ${
                   selectedId === v.id
-                    ? "border-[var(--accent)] bg-[var(--bg-emphasis)]"
-                    : "border-[var(--bg-border)] hover:bg-[var(--bg-emphasis)]"
+                    ? "border-[var(--accent)] bg-[var(--bg-elevated)]"
+                    : "border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -621,14 +621,14 @@ function HistoricoSheet({
                       <button
                         type="button"
                         onClick={() => setViewMode("diff")}
-                        className={`rounded px-2 py-1 ${viewMode === "diff" ? "bg-[var(--bg-emphasis)] font-medium" : "text-[var(--text-muted)]"}`}
+                        className={`rounded px-2 py-1 ${viewMode === "diff" ? "bg-[var(--bg-elevated)] font-medium" : "text-[var(--text-muted)]"}`}
                       >
                         <GitCompare className="mr-1 inline h-3 w-3" /> Diff
                       </button>
                       <button
                         type="button"
                         onClick={() => setViewMode("preview")}
-                        className={`rounded px-2 py-1 ${viewMode === "preview" ? "bg-[var(--bg-emphasis)] font-medium" : "text-[var(--text-muted)]"}`}
+                        className={`rounded px-2 py-1 ${viewMode === "preview" ? "bg-[var(--bg-elevated)] font-medium" : "text-[var(--text-muted)]"}`}
                       >
                         Versão
                       </button>
@@ -762,7 +762,7 @@ function HistoricoSheet({
                                             <span className="inline-block h-2 w-2 rounded-sm bg-[color-mix(in_oklab,var(--success)_60%,transparent)]" /> reintroduzido
                                           </span>
                                           <span className="flex items-center gap-1 text-[var(--text-muted)]">
-                                            <span className="inline-block h-2 w-2 rounded-sm bg-[var(--bg-emphasis)]" /> mantido
+                                            <span className="inline-block h-2 w-2 rounded-sm bg-[var(--bg-elevated)]" /> mantido
                                           </span>
                                           <span className="ml-auto text-[var(--text-muted)]">
                                             {info.removed.length} removidos · {info.altered.length} alterados · {info.added.length} reintroduzidos · {info.preserved.length} mantidos

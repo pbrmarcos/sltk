@@ -151,7 +151,7 @@ export function SATFormPage({ id }: { id: string }) {
   return (
     <div className="space-y-4">
       {/* Actions topo */}
-      <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-[var(--bg-page)] py-2 border-b border-[var(--bg-border)]">
+      <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-[var(--bg-base)] py-2 border-b border-[var(--bg-border)]">
         <div className="flex items-center gap-2 text-[13px]">
           <span className="font-medium">{rel?.codigo}</span>
           <Badge variant="outline">{rel?.status}</Badge>

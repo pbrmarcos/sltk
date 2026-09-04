@@ -59,7 +59,7 @@ function KnowHowPrint() {
   const it = item.data;
 
   return (
-    <div className="kh-print-root min-h-screen bg-[var(--bg-canvas)] py-8 print:bg-white print:py-0">
+    <div className="kh-print-root min-h-screen bg-[var(--bg-elevated)] py-8 print:bg-white print:py-0">
       <style dangerouslySetInnerHTML={{ __html: PRINT_CSS }} />
 
       <div className="mx-auto mb-4 flex max-w-[820px] items-center justify-between px-4" data-print-hide>

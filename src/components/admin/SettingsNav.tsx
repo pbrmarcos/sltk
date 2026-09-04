@@ -94,7 +94,7 @@ export function SettingsNav() {
       </div>
 
       {/* Desktop: menu de categorias fixo */}
-      <nav className="hidden w-60 shrink-0 space-y-5 overflow-y-auto pr-2 lg:block">
+      <nav className="hidden w-60 shrink-0 space-y-5 overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 lg:block">
         {GROUPS.map((g) => (
           <div key={g.title}>
             <div className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
@@ -110,7 +110,7 @@ export function SettingsNav() {
                     className={cn(
                       "block rounded-md px-2 py-1.5 text-[13px] transition-colors",
                       active
-                        ? "bg-[var(--brand-primary)]/10 font-medium text-[var(--brand-primary)]"
+                        ? "bg-[var(--primary)]/10 font-medium text-[var(--primary)]"
                         : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]",
                     )}
                   >

@@ -535,7 +535,7 @@ function EmbarqueDetalhe() {
                             key={a.id}
                             type="button"
                             onClick={() => openLogAnexo(a.storage_path)}
-                            className="inline-flex items-center gap-1 rounded border border-[var(--bg-border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] hover:bg-[var(--bg-hover)]"
+                            className="inline-flex items-center gap-1 rounded border border-[var(--bg-border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] hover:bg-[var(--bg-elevated)]"
                             title={a.nome_arquivo}
                           >
                             <Paperclip className="h-3 w-3" />

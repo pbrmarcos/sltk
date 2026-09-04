@@ -126,7 +126,7 @@ export function OrigensLeadTab() {
                   <button
                     type="button"
                     aria-label="Mover para cima"
-                    className="text-[var(--text-muted)] hover:text-[var(--text)] disabled:opacity-30"
+                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30"
                     disabled={i === 0 || reordenar.isPending}
                     onClick={() => mover(i, -1)}
                   >
@@ -135,7 +135,7 @@ export function OrigensLeadTab() {
                   <button
                     type="button"
                     aria-label="Mover para baixo"
-                    className="text-[var(--text-muted)] hover:text-[var(--text)] disabled:opacity-30"
+                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30"
                     disabled={i === rows.length - 1 || reordenar.isPending}
                     onClick={() => mover(i, 1)}
                   >

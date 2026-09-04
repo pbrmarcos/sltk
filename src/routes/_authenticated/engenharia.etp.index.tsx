@@ -118,7 +118,7 @@ function EtpListPage() {
                 <Link
                   to="/engenharia/etp/$id"
                   params={{ id: r.id }}
-                  className="grid grid-cols-[120px_1fr_auto_auto] items-center gap-3 p-4 hover:bg-[var(--bg-muted)]"
+                  className="grid grid-cols-[120px_1fr_auto_auto] items-center gap-3 p-4 hover:bg-[var(--bg-elevated)]"
                 >
                   <span className="font-mono text-xs">
                     {r.cliente_equipamentos?.codigo ?? "—"}

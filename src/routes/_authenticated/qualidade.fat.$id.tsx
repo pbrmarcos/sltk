@@ -578,7 +578,7 @@ function MedicoesCard({ data, disabled, onSaved }: { data: FatData; disabled: bo
               </tr>
             ))}
             {!disabled && (
-              <tr className="border-t border-[var(--bg-border)] bg-[var(--bg-muted)]">
+              <tr className="border-t border-[var(--bg-border)] bg-[var(--bg-elevated)]">
                 <td className="p-2"><Input value={novo.parametro} onChange={(e) => setNovo({ ...novo, parametro: e.target.value })} placeholder="Ex: Velocidade" /></td>
                 <td className="p-2"><Input value={novo.unidade} onChange={(e) => setNovo({ ...novo, unidade: e.target.value })} placeholder="ppm" /></td>
                 <td className="p-2"><Input type="number" value={novo.nominal} onChange={(e) => setNovo({ ...novo, nominal: e.target.value })} /></td>
