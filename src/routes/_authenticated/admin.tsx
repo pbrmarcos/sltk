@@ -4,6 +4,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { logAdminLogin, logAdminAccessDenied } from "@/lib/admin-events.functions";
+import { SettingsNav } from "@/components/admin/SettingsNav";
 
 const ALLOWED = new Set(["admin", "manager", "engineer"]);
 const LOGIN_FLAG_KEY = "sltk_admin_logged";
@@ -96,5 +97,14 @@ function AdminLayout() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <div className="flex min-h-full w-full flex-col md:flex-row">
+      <div className="shrink-0 px-4 pt-4 md:px-8 md:pt-8">
+        <SettingsNav />
+      </div>
+      <div className="min-w-0 flex-1">
+        <Outlet />
+      </div>
+    </div>
+  );
 }

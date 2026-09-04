@@ -13,7 +13,6 @@ import {
   Plus,
   LogOut,
   ChevronDown,
-  Shield,
   HelpCircle,
   PanelLeftClose,
   PanelLeftOpen,
@@ -24,12 +23,8 @@ import {
   CalendarRange,
   Wrench,
   MessageSquare,
-  MessageSquareText,
   Truck,
-  Mail,
-  Inbox,
   Receipt,
-  KeyRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -280,7 +275,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    title: "Administração — Sistema",
+    title: "Administração",
     adminOnly: true,
     module: "admin",
     items: [
@@ -288,80 +283,6 @@ const SECTIONS: Section[] = [
         label: "Configurações",
         to: "/admin/configuracoes",
         icon: Cog,
-        module: "admin",
-      },
-      {
-        label: "Usuários & Permissões",
-        to: "/admin/usuarios",
-        icon: Shield,
-        module: "admin",
-      },
-      {
-        label: "Auditoria",
-        to: "/admin/auditoria",
-        icon: FileSpreadsheet,
-        module: "admin",
-      },
-      {
-        label: "Balcão de Suporte",
-        to: "/admin/suporte",
-        icon: KeyRound,
-        module: "admin",
-      },
-    ],
-  },
-  {
-    title: "Administração — Atendimento & Conteúdo",
-    adminOnly: true,
-    module: "admin",
-    items: [
-      {
-        label: "E-mails automáticos",
-        to: "/admin/emails",
-        icon: Mail,
-        module: "admin",
-      },
-      {
-        label: "Formulários recebidos",
-        to: "/admin/formularios-recebidos",
-        icon: Inbox,
-        module: "admin",
-      },
-      {
-        label: "Tipos de Checklist",
-        to: "/admin/checklist-tipos",
-        icon: ClipboardList,
-        module: "admin",
-      },
-      {
-        label: "Formulários de Entrevista",
-        to: "/admin/entrevistas",
-        icon: MessageSquareText,
-        module: "admin",
-      },
-      {
-        label: "SLA de Chamados",
-        to: "/admin/sla-chamados",
-        icon: Cog,
-        module: "admin",
-      },
-    ],
-  },
-  {
-    title: "Administração — Equipamentos",
-    adminOnly: true,
-    module: "admin",
-    items: [
-      {
-        label: "Páginas dos Equipamentos",
-        to: "/admin/paginas-equipamentos",
-        icon: ClipboardList,
-        module: "admin",
-      },
-      {
-        label: "Etapas dos Equipamentos",
-        to: "/admin/etapas-equipamentos",
-        icon: ClipboardList,
         module: "admin",
       },
       {
