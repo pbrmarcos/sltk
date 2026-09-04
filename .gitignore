@@ -28,6 +28,11 @@ dist-ssr
 # Supabase CLI local cache
 supabase/.temp/
 
+# One-off local artifacts from bootstrapping the staging database
+prod-schema-dump.sql
+restore-log.txt
+.env.production.bak
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

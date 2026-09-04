@@ -43,10 +43,14 @@ CREATE INDEX IF NOT EXISTS idx_doc_bloco_versoes_bloco
   ON public.documento_bloco_versoes (bloco_id, versao_seq DESC);
 
 -- 2) Unique (tipo_codigo, codigo) em documento_blocos
+-- Postgres levanta duplicate_table (42P07) para o índice implícito da
+-- constraint, não duplicate_object (42710) — captura ambos para ser
+-- realmente idempotente (a constraint já pode existir vinda da criação
+-- base da tabela em 20260623115900_documento_tipos_blocos_base.sql).
 DO $$ BEGIN
   ALTER TABLE public.documento_blocos
     ADD CONSTRAINT documento_blocos_tipo_codigo_unq UNIQUE (tipo_codigo, codigo);
-EXCEPTION WHEN duplicate_object THEN NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 
 -- 3) Tipos FAT/SAT
