@@ -25,6 +25,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Local Claude Code session state (not project content)
+.claude/
+
 # Supabase CLI local cache
 supabase/.temp/
 
