@@ -200,6 +200,22 @@
   --text-primary:   #F0F2F5;
   --text-secondary: #8B8F98;
   --text-muted:     #555A63;
+
+  --badge-success-bg: #0F2D22;
+  --badge-success-fg: #6EE7B7;
+  --badge-success-border: #14532D;
+  --badge-danger-bg:  #2D1216;
+  --badge-danger-fg:  #FDA4AF;
+  --badge-danger-border: #7F1D2E;
+  --badge-warning-bg: #2A2110;
+  --badge-warning-fg: #FCD34D;
+  --badge-warning-border: #78350F;
+  --badge-info-bg:    #10203D;
+  --badge-info-fg:    #93C5FD;
+  --badge-info-border: #1E3A8A;
+  --badge-neutral-bg: #1E2229;
+  --badge-neutral-fg: #C7CBD1;
+  --badge-neutral-border: #2A2D35;
 }
 
 @layer base {

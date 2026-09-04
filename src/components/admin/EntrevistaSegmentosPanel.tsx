@@ -105,7 +105,14 @@ export function EntrevistaSegmentosPanel({ isAdmin }: { isAdmin: boolean }) {
                 <div className="flex items-center flex-wrap gap-2 text-xs">
                   <Badge variant="outline"><ListChecks className="h-3 w-3 mr-1" /> {s.total_perguntas} pergunta{s.total_perguntas === 1 ? "" : "s"}</Badge>
                   <Badge variant="outline"><Users className="h-3 w-3 mr-1" /> {s.total_entrevistas} entrevista{s.total_entrevistas === 1 ? "" : "s"}</Badge>
-                  {!s.ativo && <Badge variant="outline" className="bg-slate-200 text-slate-700">Inativo</Badge>}
+                  {!s.ativo && (
+                    <Badge
+                      variant="outline"
+                      className="bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]"
+                    >
+                      Inativo
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t">
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
