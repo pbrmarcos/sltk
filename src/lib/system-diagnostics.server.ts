@@ -1,5 +1,6 @@
 // Diagnóstico das chaves/capacidades externas — SOMENTE servidor.
 import { CAPABILITIES, type CapabilityDef } from "./system-keys";
+import { driveAuth, driveConfigured } from "./docs/drive-auth.server";
 
 export type EnvStatus = { nome: string; presente: boolean; mascara: string | null; opcional: boolean };
 
@@ -111,12 +112,11 @@ async function probe(cap: CapabilityDef): Promise<{
         : { status: "erro", detalhe: r.erro ?? `Provedor respondeu ${r.status}.`, latencia_ms: r.ms };
     }
     case "google_drive": {
-      const lov = process.env.LOVABLE_API_KEY;
-      const drv = process.env.GOOGLE_DRIVE_API_KEY;
-      if (!lov || !drv) return { status: "ausente", detalhe: "Conta do Drive não vinculada." };
+      if (!driveConfigured()) return { status: "ausente", detalhe: "Conta do Drive não vinculada." };
+      const { baseUrl, headers } = await driveAuth();
       const r = await timedFetch(
-        "https://connector-gateway.lovable.dev/google_drive/drive/v3/about?fields=user(emailAddress,displayName)",
-        { headers: { Authorization: `Bearer ${lov}`, "X-Connection-Api-Key": drv } },
+        `${baseUrl}/drive/v3/about?fields=user(emailAddress,displayName)`,
+        { headers },
       );
       if (!r.ok) {
         return { status: "erro", detalhe: r.erro ?? `Conector respondeu ${r.status}.`, latencia_ms: r.ms };

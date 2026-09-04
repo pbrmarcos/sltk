@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { driveAuth } from "@/lib/docs/drive-auth.server";
 
 /**
  * Anexos por insumo (arquivos técnicos, orçamentos recebidos) + trilha de atividades.
@@ -22,35 +23,6 @@ const MIME_LIMITS: Record<string, number> = {
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": 25 * 1024 * 1024,
 };
 
-const GW = "https://connector-gateway.lovable.dev/google_drive";
-
-function driveHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.LOVABLE_API_KEY ?? ""}`,
-    "X-Connection-Api-Key": process.env.GOOGLE_DRIVE_API_KEY ?? "",
-  };
-}
-
-async function driveFindFolder(name: string, parentId: string): Promise<string | null> {
-  const q = `mimeType='application/vnd.google-apps.folder' and name='${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed=false`;
-  const url = `${GW}/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=1`;
-  const r = await fetch(url, { headers: driveHeaders() });
-  if (!r.ok) throw new Error(`Drive list ${r.status}`);
-  const j = (await r.json()) as { files?: Array<{ id: string }> };
-  return j.files?.[0]?.id ?? null;
-}
-async function driveCreateFolder(name: string, parentId: string): Promise<string> {
-  const r = await fetch(`${GW}/drive/v3/files?fields=id`, {
-    method: "POST",
-    headers: { ...driveHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", parents: [parentId] }),
-  });
-  if (!r.ok) throw new Error(`Drive create folder ${r.status}`);
-  return (await r.json() as { id: string }).id;
-}
-async function ensureFolder(name: string, parentId: string) {
-  return (await driveFindFolder(name, parentId)) ?? driveCreateFolder(name, parentId);
-}
 async function ensureInsumoFolder(opts: {
   cliente_codigo: string; projeto_codigo: string; tag: string;
 }): Promise<{ id: string; url: string }> {
@@ -77,9 +49,10 @@ async function driveUploadMultipart(opts: {
   body.set(head, 0);
   body.set(new Uint8Array(opts.bytes), head.byteLength);
   body.set(tail, head.byteLength + opts.bytes.byteLength);
-  const r = await fetch(`${GW}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`, {
+  const { baseUrl, headers } = await driveAuth();
+  const r = await fetch(`${baseUrl}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`, {
     method: "POST",
-    headers: { ...driveHeaders(), "Content-Type": `multipart/related; boundary=${boundary}` },
+    headers: { ...headers, "Content-Type": `multipart/related; boundary=${boundary}` },
     body,
   });
   if (!r.ok) throw new Error(`Drive upload ${r.status}: ${await r.text()}`);
@@ -145,7 +118,8 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
     let driveFileId: string | null = null;
     let driveViewUrl: string | null = null;
 
-    const canDrive = !!process.env.LOVABLE_API_KEY && !!process.env.GOOGLE_DRIVE_API_KEY;
+    const { driveConfigured } = await import("@/lib/docs/drive-auth.server");
+    const canDrive = driveConfigured();
     if (canDrive) {
       try {
         const folder = await ensureInsumoFolder({ cliente_codigo, projeto_codigo, tag });

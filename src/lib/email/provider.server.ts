@@ -9,9 +9,12 @@
  * apenas registra no log sem quebrar o envio de e-mail.
  */
 
+import { getGoogleAccessToken, serviceAccountConfigured } from "@/lib/google-service-account.server";
+
 const SENDER_EMAIL = "system@sltkamericas.com";
 const SENDER_NAME = "Solutek";
 const RESEND_API_URL = "https://api.resend.com/emails";
+const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 
 function readResendCreds() {
   const resend = process.env.RESEND_API_KEY;
@@ -19,19 +22,12 @@ function readResendCreds() {
   return { resend };
 }
 
-function readGoogleCreds() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const keyRaw = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-  if (!email || !keyRaw) return null;
-  return { email, key: keyRaw.replace(/\\n/g, "\n") };
-}
-
 export function providerConfigured(): boolean {
   return readResendCreds() != null;
 }
 
 export function calendarConfigured(): boolean {
-  return readGoogleCreds() != null;
+  return serviceAccountConfigured();
 }
 
 export interface SendMailInput {
@@ -92,41 +88,13 @@ export interface CalendarEventInput {
 export async function insertCalendarEvent(
   input: CalendarEventInput,
 ): Promise<{ ok: true; eventId: string } | { ok: false; reason: string }> {
-  const creds = readGoogleCreds();
-  if (!creds) return { ok: false, reason: "provider_not_configured" };
-
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: "RS256", typ: "JWT" };
-  const claim = {
-    iss: creds.email,
-    sub: input.attendee,
-    scope: "https://www.googleapis.com/auth/calendar.events",
-    aud: "https://oauth2.googleapis.com/token",
-    iat: now,
-    exp: now + 3600,
-  };
-  const b64url = (buf: Buffer | string) =>
-    (typeof buf === "string" ? Buffer.from(buf) : buf)
-      .toString("base64")
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  const enc = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(claim))}`;
-  const { createSign } = await import("node:crypto");
-  const sig = createSign("RSA-SHA256").update(enc).sign(creds.key);
-  const jwt = `${enc}.${b64url(sig)}`;
-
-  const tokRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwt,
-    }),
-  });
-  if (!tokRes.ok) {
-    return { ok: false, reason: `token_exchange_failed: ${await tokRes.text()}` };
+  let access_token: string | null;
+  try {
+    access_token = await getGoogleAccessToken(CALENDAR_SCOPE, input.attendee);
+  } catch (e) {
+    return { ok: false, reason: e instanceof Error ? e.message : "token_exchange_failed" };
   }
-  const { access_token } = (await tokRes.json()) as { access_token?: string };
-  if (!access_token) return { ok: false, reason: "no_access_token" };
+  if (!access_token) return { ok: false, reason: "provider_not_configured" };
 
   const end = new Date(new Date(input.startISO).getTime() + input.durationMin * 60_000).toISOString();
   const res = await fetch(

@@ -1,30 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Server-only helpers for Google Drive uploads via Lovable Connector Gateway.
-// Used by docs.functions.ts handlers — never imported from client.
-
-const GATEWAY = "https://connector-gateway.lovable.dev/google_drive";
-
-function authHeaders() {
-  const lov = process.env.LOVABLE_API_KEY;
-  const drv = process.env.GOOGLE_DRIVE_API_KEY;
-  if (!lov || !drv) {
-    const err = new Error(
-      "Google Drive indisponível — a integração não está configurada. Os documentos continuam sendo gerados e podem ser baixados normalmente.",
-    );
-    err.name = "CapabilityUnavailableError";
-    throw err;
-  }
-  return {
-    Authorization: `Bearer ${lov}`,
-    "X-Connection-Api-Key": drv,
-  };
-}
-
+// Server-only helpers for Google Drive uploads. Prefere conta de serviço
+// direta e cai para o Lovable Connector Gateway via drive-auth.server.ts.
+// Usado por docs.functions.ts handlers — never imported from client.
+import { driveAuth } from "./drive-auth.server";
 
 async function gw(path: string, init: RequestInit = {}): Promise<any> {
-  const r = await fetch(`${GATEWAY}${path}`, {
+  const { baseUrl, headers } = await driveAuth();
+  const r = await fetch(`${baseUrl}${path}`, {
     ...init,
-    headers: { ...authHeaders(), ...(init.headers || {}) },
+    headers: { ...headers, ...(init.headers || {}) },
   });
   if (!r.ok) {
     const body = await r.text().catch(() => "");
@@ -101,11 +85,12 @@ export async function uploadFile(opts: {
   body.set(opts.bytes, head.byteLength);
   body.set(tail, head.byteLength + opts.bytes.byteLength);
 
+  const { baseUrl, headers } = await driveAuth();
   const url = `/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`;
-  const r = await fetch(`${GATEWAY}${url}`, {
+  const r = await fetch(`${baseUrl}${url}`, {
     method: "POST",
     headers: {
-      ...authHeaders(),
+      ...headers,
       "Content-Type": `multipart/related; boundary=${boundary}`,
     },
     body,

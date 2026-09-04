@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { driveAuth } from "@/lib/docs/drive-auth.server";
 
 /**
  * Anexos de oportunidades no SLTK Drive.
@@ -25,28 +26,21 @@ const MIME_LIMITS: Record<string, number> = {
   "image/png": 25 * 1024 * 1024,
 };
 
-const GW = "https://connector-gateway.lovable.dev/google_drive";
-
-function driveHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.LOVABLE_API_KEY ?? ""}`,
-    "X-Connection-Api-Key": process.env.GOOGLE_DRIVE_API_KEY ?? "",
-  };
-}
-
 async function driveFindFolder(name: string, parentId: string): Promise<string | null> {
+  const { baseUrl, headers } = await driveAuth();
   const q = `mimeType='application/vnd.google-apps.folder' and name='${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed=false`;
-  const url = `${GW}/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=1`;
-  const r = await fetch(url, { headers: driveHeaders() });
+  const url = `${baseUrl}/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=1`;
+  const r = await fetch(url, { headers });
   if (!r.ok) throw new Error(`Drive list ${r.status}: ${await r.text()}`);
   const j = (await r.json()) as { files?: Array<{ id: string }> };
   return j.files?.[0]?.id ?? null;
 }
 
 async function driveCreateFolder(name: string, parentId: string): Promise<string> {
-  const r = await fetch(`${GW}/drive/v3/files?fields=id`, {
+  const { baseUrl, headers } = await driveAuth();
+  const r = await fetch(`${baseUrl}/drive/v3/files?fields=id`, {
     method: "POST",
-    headers: { ...driveHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({
       name,
       mimeType: "application/vnd.google-apps.folder",
@@ -114,11 +108,12 @@ async function driveUploadMultipart(opts: {
   body.set(new Uint8Array(opts.bytes), head.byteLength);
   body.set(tail, head.byteLength + opts.bytes.byteLength);
 
+  const { baseUrl, headers } = await driveAuth();
   const r = await fetch(
-    `${GW}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
+    `${baseUrl}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
     {
       method: "POST",
-      headers: { ...driveHeaders(), "Content-Type": `multipart/related; boundary=${boundary}` },
+      headers: { ...headers, "Content-Type": `multipart/related; boundary=${boundary}` },
       body,
     },
   );

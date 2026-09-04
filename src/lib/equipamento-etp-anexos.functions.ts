@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { driveAuth } from "@/lib/docs/drive-auth.server";
 
 /**
  * Anexos de ETPs no Google Drive.
@@ -24,28 +25,21 @@ const MIME_LIMITS: Record<string, number> = {
   "text/csv": 10 * 1024 * 1024,
 };
 
-const GW = "https://connector-gateway.lovable.dev/google_drive";
-
-function driveHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.LOVABLE_API_KEY ?? ""}`,
-    "X-Connection-Api-Key": process.env.GOOGLE_DRIVE_API_KEY ?? "",
-  };
-}
-
 async function driveFindFolder(name: string, parentId: string): Promise<string | null> {
+  const { baseUrl, headers } = await driveAuth();
   const q = `mimeType='application/vnd.google-apps.folder' and name='${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed=false`;
-  const url = `${GW}/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=1`;
-  const r = await fetch(url, { headers: driveHeaders() });
+  const url = `${baseUrl}/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=1`;
+  const r = await fetch(url, { headers });
   if (!r.ok) throw new Error(`Drive list ${r.status}: ${await r.text()}`);
   const j = (await r.json()) as { files?: Array<{ id: string }> };
   return j.files?.[0]?.id ?? null;
 }
 
 async function driveCreateFolder(name: string, parentId: string): Promise<string> {
-  const r = await fetch(`${GW}/drive/v3/files?fields=id`, {
+  const { baseUrl, headers } = await driveAuth();
+  const r = await fetch(`${baseUrl}/drive/v3/files?fields=id`, {
     method: "POST",
-    headers: { ...driveHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({
       name,
       mimeType: "application/vnd.google-apps.folder",
@@ -81,12 +75,13 @@ async function driveUploadMultipart(opts: {
   body.set(new Uint8Array(opts.bytes), head.byteLength);
   body.set(tail, head.byteLength + opts.bytes.byteLength);
 
+  const { baseUrl, headers } = await driveAuth();
   const r = await fetch(
-    `${GW}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
+    `${baseUrl}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
     {
       method: "POST",
       headers: {
-        ...driveHeaders(),
+        ...headers,
         "Content-Type": `multipart/related; boundary=${boundary}`,
       },
       body,
@@ -97,9 +92,10 @@ async function driveUploadMultipart(opts: {
 }
 
 async function driveTrash(fileId: string): Promise<void> {
-  const r = await fetch(`${GW}/drive/v3/files/${fileId}`, {
+  const { baseUrl, headers } = await driveAuth();
+  const r = await fetch(`${baseUrl}/drive/v3/files/${fileId}`, {
     method: "PATCH",
-    headers: { ...driveHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ trashed: true }),
   });
   if (!r.ok && r.status !== 404) {
@@ -285,8 +281,9 @@ export const removerEtpAnexo = createServerFn({ method: "POST" })
 /* ============= REINDEXAR ANEXOS ============= */
 /** Move arquivos no Drive para a pasta correta {cliente}/{AAAAMM}/etps/{eqp - v{n}}. */
 async function driveGetParents(fileId: string): Promise<string[]> {
-  const r = await fetch(`${GW}/drive/v3/files/${fileId}?fields=parents`, {
-    headers: driveHeaders(),
+  const { baseUrl, headers } = await driveAuth();
+  const r = await fetch(`${baseUrl}/drive/v3/files/${fileId}?fields=parents`, {
+    headers,
   });
   if (!r.ok) throw new Error(`Drive get ${r.status}: ${await r.text()}`);
   const j = (await r.json()) as { parents?: string[] };
@@ -294,12 +291,13 @@ async function driveGetParents(fileId: string): Promise<string[]> {
 }
 
 async function driveMove(fileId: string, addParent: string, removeParents: string[]) {
-  const url = `${GW}/drive/v3/files/${fileId}?addParents=${encodeURIComponent(addParent)}${
+  const { baseUrl, headers } = await driveAuth();
+  const url = `${baseUrl}/drive/v3/files/${fileId}?addParents=${encodeURIComponent(addParent)}${
     removeParents.length ? `&removeParents=${encodeURIComponent(removeParents.join(","))}` : ""
   }&fields=id,parents`;
   const r = await fetch(url, {
     method: "PATCH",
-    headers: { ...driveHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
   if (!r.ok) throw new Error(`Drive move ${r.status}: ${await r.text()}`);

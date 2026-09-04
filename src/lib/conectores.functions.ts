@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { driveAuth, driveConfigured } from "@/lib/docs/drive-auth.server";
 
 async function assertAdmin(supabase: SupabaseClient<Database>, userId: string) {
   const { data, error } = await supabase
@@ -48,21 +49,15 @@ async function testGoogleDrive(): Promise<ConectorStatus> {
     nome: "Google Drive",
     descricao: "Anexar e listar arquivos do Drive vinculado.",
   };
-  const lovableKey = process.env.LOVABLE_API_KEY;
-  const connKey = process.env.GOOGLE_DRIVE_API_KEY;
-  if (!lovableKey || !connKey) {
+  if (!driveConfigured()) {
     return { ...base, conectado: false, detalhe: "Conexão não vinculada." };
   }
   const t0 = Date.now();
   try {
+    const { baseUrl, headers } = await driveAuth();
     const r = await fetch(
-      "https://connector-gateway.lovable.dev/google_drive/drive/v3/about?fields=user(emailAddress,displayName)",
-      {
-        headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          "X-Connection-Api-Key": connKey,
-        },
-      },
+      `${baseUrl}/drive/v3/about?fields=user(emailAddress,displayName)`,
+      { headers },
     );
     const latencia_ms = Date.now() - t0;
     if (!r.ok) {

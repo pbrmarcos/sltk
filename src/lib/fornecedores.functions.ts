@@ -1243,7 +1243,8 @@ export const uploadScanToDrive = createServerFn({ method: "POST" })
     if (fErr) throw new Error(fErr.message);
     if (!f) throw new Error("Fornecedor não encontrado");
 
-    if (!process.env.LOVABLE_API_KEY || !process.env.GOOGLE_DRIVE_API_KEY) {
+    const { driveConfigured } = await import("@/lib/docs/drive-auth.server");
+    if (!driveConfigured()) {
       return {
         ok: false as const,
         error: "Google Drive indisponível — a integração não está configurada. Você pode seguir sem o arquivamento automático.",
