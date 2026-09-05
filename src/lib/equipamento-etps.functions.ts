@@ -98,6 +98,21 @@ export const createEtp = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
+
+    try {
+      const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
+      const vars = await etpEmailVars(context.supabase, row.id, context.userId);
+      await safeDispatch({
+        eventKey: "etp.criado",
+        triggeredBy: context.userId,
+        entityTable: "equipamento_etps",
+        entityId: row.id,
+        vars,
+      });
+    } catch (e) {
+      console.error("[etps/createEtp] email dispatch failed", e);
+    }
+
     return row;
   });
 
@@ -142,6 +157,31 @@ const updateInput = z.object({
   observacoes: z.string().max(5000).nullable().optional(),
   status: z.enum(["rascunho", "em_revisao"]).optional(),
 });
+
+/** Contexto comum pros e-mails de ETP: código de exibição + nome de quem disparou. */
+async function etpEmailVars(
+  sb: any,
+  etpId: string,
+  userId: string,
+): Promise<{ codigo: string; usuario: string; link: string }> {
+  const { data: etp } = await sb
+    .from("equipamento_etps")
+    .select("versao, cliente_equipamentos(modelo)")
+    .eq("id", etpId)
+    .maybeSingle();
+  const { data: perfil } = await sb
+    .from("profiles")
+    .select("full_name")
+    .eq("id", userId)
+    .maybeSingle();
+  const { appUrl } = await import("@/lib/email/safe-dispatch.server");
+  const modelo = (etp as any)?.cliente_equipamentos?.modelo ?? "Equipamento";
+  return {
+    codigo: `${modelo} · ETP v${etp?.versao ?? "?"}`,
+    usuario: perfil?.full_name ?? "",
+    link: appUrl(`/engenharia/etp/${etpId}`),
+  };
+}
 
 async function assertCanEditEtp(context: {
   supabase: any;
@@ -211,6 +251,21 @@ export const aprovarEtp = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
     await logStatus(context as EtpCtx, data.id, anterior, "aprovado", "ETP aprovado.", "aprovacao");
+
+    try {
+      const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
+      const vars = await etpEmailVars(context.supabase, data.id, context.userId);
+      await safeDispatch({
+        eventKey: "etp.aprovado",
+        triggeredBy: context.userId,
+        entityTable: "equipamento_etps",
+        entityId: data.id,
+        vars,
+      });
+    } catch (e) {
+      console.error("[etps/aprovarEtp] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
@@ -526,6 +581,21 @@ export const enviarEtpParaRevisao = createServerFn({ method: "POST" })
       "em_revisao",
       data.observacao || "ETP enviado para revisão.",
     );
+
+    try {
+      const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
+      const vars = await etpEmailVars(context.supabase, data.id, context.userId);
+      await safeDispatch({
+        eventKey: "etp.enviado_aprovacao",
+        triggeredBy: context.userId,
+        entityTable: "equipamento_etps",
+        entityId: data.id,
+        vars,
+      });
+    } catch (e) {
+      console.error("[etps/enviarEtpParaRevisao] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
@@ -598,6 +668,21 @@ export const rejeitarEtp = createServerFn({ method: "POST" })
       data.motivo,
       "aprovacao",
     );
+
+    try {
+      const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
+      const vars = await etpEmailVars(context.supabase, data.id, context.userId);
+      await safeDispatch({
+        eventKey: "etp.reprovado",
+        triggeredBy: context.userId,
+        entityTable: "equipamento_etps",
+        entityId: data.id,
+        vars: { ...vars, motivo: data.motivo },
+      });
+    } catch (e) {
+      console.error("[etps/rejeitarEtp] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
