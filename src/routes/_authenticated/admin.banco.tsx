@@ -1,11 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminSettingsPage } from "@/components/admin/AdminSettingsPage";
-import { BancoTab } from "@/components/admin/BancoTab";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Banco de Dados virou a aba "Banco de Dados" dentro de Chaves & Diagnóstico.
 export const Route = createFileRoute("/_authenticated/admin/banco")({
-  component: () => (
-    <AdminSettingsPage title="Banco de Dados" subtitle="Projeto Supabase ativo e status de conexão.">
-      <BancoTab />
-    </AdminSettingsPage>
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/diagnostico" });
+  },
 });

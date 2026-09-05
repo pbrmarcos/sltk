@@ -111,7 +111,9 @@ function UsuariosPanel({
     if (!isAdmin) return "senha";
     if (typeof window === "undefined") return "usuarios";
     const p = new URLSearchParams(window.location.search).get("tab");
-    return p === "permissoes" || p === "senha" ? p : "usuarios";
+    // Admin já tem a ação de reset por linha na aba "Usuários" — a aba
+    // "Redefinir senha" só existe pra manager/engineer, que não veem essa ação.
+    return p === "permissoes" ? p : "usuarios";
   });
 
   useEffect(() => {
@@ -244,7 +246,7 @@ function UsuariosPanel({
         <TabsList>
           {isAdmin && <TabsTrigger value="usuarios">Usuários</TabsTrigger>}
           {isAdmin && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
-          <TabsTrigger value="senha">Redefinir senha</TabsTrigger>
+          {!isAdmin && <TabsTrigger value="senha">Redefinir senha</TabsTrigger>}
         </TabsList>
         {isAdmin && (
         <TabsContent value="usuarios" className="mt-4 flex flex-col gap-4">
@@ -457,9 +459,11 @@ function UsuariosPanel({
           <PermissoesMatrixTab />
         </TabsContent>
         )}
+        {!isAdmin && (
         <TabsContent value="senha" className="mt-4">
           <SupportPasswordResetPanel />
         </TabsContent>
+        )}
       </Tabs>
 
       {/* Create / Edit / Post-create reveal */}

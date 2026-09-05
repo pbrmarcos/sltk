@@ -23,7 +23,6 @@ const GROUPS: NavGroup[] = [
     title: "Sistema",
     items: [
       { label: "Chaves & Diagnóstico", to: "/admin/diagnostico", roles: ADMIN_ONLY },
-      { label: "Banco de Dados", to: "/admin/banco", roles: ADMIN_ONLY },
       { label: "Mineração", to: "/admin/mineracao", roles: ADMIN_ONLY },
       { label: "Migrations", to: "/admin/migrations", roles: ADMIN_ONLY },
     ],
@@ -51,9 +50,9 @@ const GROUPS: NavGroup[] = [
       { label: "Formulários recebidos", to: "/admin/formularios-recebidos", roles: ["admin", "manager"] },
       { label: "Modelos de Formulário", to: "/admin/modelos-formulario", roles: ["admin", "manager"] },
       { label: "SLA de Chamados", to: "/admin/sla-chamados" },
+      { label: "Origens de Lead", to: "/admin/origens-lead", roles: ADMIN_ONLY },
     ],
   },
-  { title: "Comercial", items: [{ label: "Origens de Lead", to: "/admin/origens-lead", roles: ADMIN_ONLY }] },
   { title: "Equipamentos", items: [{ label: "Etapas dos Equipamentos", to: "/admin/etapas-equipamentos" }] },
 ];
 
