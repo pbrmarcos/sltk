@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { driveAuth } from "@/lib/docs/drive-auth.server";
@@ -178,7 +179,7 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (aErr) throw new Error(aErr.message);
+    if (aErr) throw friendlyDbError(aErr);
 
     await logAtividade(
       sb,
@@ -208,7 +209,7 @@ export const listInsumoAnexos = createServerFn({ method: "GET" })
       .eq("insumo_id", data.insumo_id)
       .is("deleted_at", null)
       .order("criado_em", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -257,7 +258,7 @@ export const removeInsumoAnexo = createServerFn({ method: "POST" })
       .from("insumo_anexos")
       .update({ deleted_at: new Date().toISOString() } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const nome = await actorNome(sb, context.userId);
     await logAtividade(sb, (cur as any).insumo_id, context.userId, nome, "anexo_removido", `Removeu ${(cur as any).file_name}`, { anexo_id: data.id, kind: (cur as any).kind });
     return { ok: true };
@@ -276,7 +277,7 @@ export const listInsumoAtividades = createServerFn({ method: "GET" })
       .eq("insumo_id", data.insumo_id)
       .order("criado_em", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -319,7 +320,7 @@ export const listAtividadesSolicitacoes = createServerFn({ method: "GET" })
     if (data.tipo && data.tipo !== "todos") query = query.eq("tipo", data.tipo);
     if (data.actor_q) query = query.ilike("actor_nome", `%${data.actor_q}%`);
     const { data: rows, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []).map((r: any) => ({
       ...r,
       revertable:
@@ -358,7 +359,7 @@ export const reverterAtividade = createServerFn({ method: "POST" })
       }
       if (Object.keys(patch).length === 0) throw new Error("Nenhum campo revertível.");
       const { error } = await sb.from("projeto_insumos").update({ ...patch, updated_by: context.userId }).eq("id", at.insumo_id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await logAtividade(sb, at.insumo_id, context.userId, nome, "editado",
         `Reversão de alteração anterior. Motivo: ${data.justificativa}`,
         { reverted_from: at.id, patch });
@@ -369,7 +370,7 @@ export const reverterAtividade = createServerFn({ method: "POST" })
       const anexoId = (at.meta as any)?.anexo_id;
       if (!anexoId) throw new Error("Anexo não localizado no evento.");
       const { error } = await sb.from("insumo_anexos").update({ deleted_at: null } as never).eq("id", anexoId);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await logAtividade(sb, at.insumo_id, context.userId, nome, "anexo_adicionado",
         `Anexo restaurado. Motivo: ${data.justificativa}`, { reverted_from: at.id, anexo_id: anexoId });
       return { ok: true, kind: "anexo_restaurado" };
@@ -383,7 +384,7 @@ export const reverterAtividade = createServerFn({ method: "POST" })
         (Array.isArray(meta.status) ? (meta.status as unknown[])[0] : null);
       if (!prev || typeof prev !== "string") throw new Error("Status anterior indisponível.");
       const { error } = await sb.from("projeto_insumos").update({ status: prev, updated_by: context.userId }).eq("id", at.insumo_id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await logAtividade(sb, at.insumo_id, context.userId, nome, "status_alterado",
         `Reversão de status. Motivo: ${data.justificativa}`, { reverted_from: at.id, de: (meta.para as string) ?? null, para: prev });
       return { ok: true, kind: "status" };
@@ -394,7 +395,7 @@ export const reverterAtividade = createServerFn({ method: "POST" })
         .from("projeto_insumos")
         .update({ deleted_at: null, updated_by: context.userId })
         .eq("id", at.insumo_id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await logAtividade(sb, at.insumo_id, context.userId, nome, "insumo_restaurado",
         `Insumo restaurado. Motivo: ${data.justificativa}`,
         { reverted_from: at.id, justificativa: data.justificativa });

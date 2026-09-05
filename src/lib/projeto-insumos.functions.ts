@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -115,7 +116,7 @@ export const listInsumos = createServerFn({ method: "POST" })
       .order("necessidade_em", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: (rows as InsumoRow[]) ?? [], total: count ?? 0 };
   });
 
@@ -161,7 +162,7 @@ export const upsertInsumo = createServerFn({ method: "POST" })
         .from("projeto_insumos")
         .update({ ...rest, updated_by: context.userId })
         .eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id, updated: true as const };
     }
 
@@ -176,7 +177,7 @@ export const upsertInsumo = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: (row as { id: string }).id, created: true as const };
   });
 
@@ -200,7 +201,7 @@ export const setInsumoStatus = createServerFn({ method: "POST" })
       patch.aprovado_em = new Date().toISOString();
     }
     const { error } = await sb.from("projeto_insumos").update(patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -227,7 +228,7 @@ export const removerInsumo = createServerFn({ method: "POST" })
       .from("projeto_insumos")
       .update({ deleted_at: now, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: prof } = await sb
       .from("profiles")
@@ -299,7 +300,7 @@ export const restaurarInsumo = createServerFn({ method: "POST" })
       .from("projeto_insumos")
       .update({ deleted_at: null, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const { data: prof } = await sb
       .from("profiles")
       .select("full_name, email")
@@ -330,7 +331,7 @@ export const necessidadesPorCategoria = createServerFn({ method: "GET" })
       .select("categoria_slug, status, criticidade, fornecedor_categorias_catalog(nome_pt)")
       .is("deleted_at", null)
       .in("status", ["aprovado", "em_cotacao", "cotado"]);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const agg = new Map<
       string,
       { categoria_slug: string | null; label: string; total: number; criticos: number }
@@ -368,7 +369,7 @@ export const listProjetosAtivos = createServerFn({ method: "GET" })
       .neq("status", "obsoleto")
       .order("updated_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{
       id: string;
       disciplina: string;
@@ -388,7 +389,7 @@ export const listCategorias = createServerFn({ method: "GET" })
       .from("fornecedor_categorias_catalog")
       .select("slug, nome_pt")
       .order("nome_pt", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{ slug: string; nome_pt: string }>;
   });
 
@@ -431,7 +432,7 @@ export const listInsumosRfq = createServerFn({ method: "POST" })
     }
 
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const list = (rows ?? []) as Array<{
       id: string;
@@ -506,7 +507,7 @@ export const listInsumosAguardandoOC = createServerFn({ method: "GET" })
       .select("id, insumo_id, decisao, decidido_em, decidido_por, fornecedor_id_sugerido, created_at")
       .order("created_at", { ascending: false })
       .limit(500);
-    if (eA) throw new Error(eA.message);
+    if (eA) throw friendlyDbError(eA);
 
     const latest = new Map<string, any>();
     for (const a of (aprovs ?? []) as any[]) {
@@ -537,7 +538,7 @@ export const listInsumosAguardandoOC = createServerFn({ method: "GET" })
         pendentes.map((p) => p.insumo_id),
       )
       .is("deleted_at", null);
-    if (eI) throw new Error(eI.message);
+    if (eI) throw friendlyDbError(eI);
 
     const byId = new Map<string, any>((insumos ?? []).map((r: any) => [r.id, r]));
 
@@ -634,7 +635,7 @@ export const aprovarInsumosEmLote = createServerFn({ method: "POST" })
       .eq("status", "rascunho")
       .is("deleted_at", null)
       .select("id");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { aprovados: ((rows as { id: string }[]) ?? []).length };
   });
 
@@ -687,7 +688,7 @@ export const listHistoricoInsumos = createServerFn({ method: "POST" })
       .limit(data.limit);
     if (data.tipo) q = q.eq("tipo", data.tipo);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -716,7 +717,7 @@ export const atualizarEstoqueInsumo = createServerFn({ method: "POST" })
       .from("projeto_insumos")
       .update({ qtd_estoque: depois, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await _logInsumoHist(sb, context.userId, {
       projeto_id: c.projeto_id,
       tipo: "estoque_alterado",
@@ -1075,7 +1076,7 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
 
     for (const u of updated) {
       const { error } = await sb.from("projeto_insumos").update({ ...u.payload, updated_by: context.userId }).eq("id", u.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     for (const a of added) {
       const { error } = await sb.from("projeto_insumos").insert({
@@ -1087,14 +1088,14 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
         solicitado_por: context.userId,
         created_by: context.userId,
       });
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     for (const r of removed) {
       const { error } = await sb
         .from("projeto_insumos")
         .update({ deleted_at: new Date().toISOString(), updated_by: context.userId })
         .eq("id", (r as any).id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
 
     await _logInsumoHist(sb, context.userId, {

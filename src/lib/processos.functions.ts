@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
@@ -209,7 +210,7 @@ export const listProcessos = createServerFn({ method: "POST" })
       );
     }
     const { data: rows, error } = await q.order("codigo", { ascending: false }).limit(500);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return enrichRows(context.supabase as unknown as Sb, (rows ?? []) as ProcessoRow[]);
   });
 
@@ -227,7 +228,7 @@ export const getProcessoDetalhe = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!row) throw new Error("Processo não encontrado");
 
     const [enriched] = await enrichRows(
@@ -296,7 +297,7 @@ export const createProcesso = createServerFn({ method: "POST" })
       } as never)
       .select("id, codigo")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await context.supabase.from("processo_eventos").insert({
       processo_id: inserted.id,
@@ -336,7 +337,7 @@ export const criarProcessoDeModelo = createServerFn({ method: "POST" })
       } as never)
       .select("id, codigo")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const novoId = inserted.id as string;
 
     // 2) Clona tarefas (mantém títulos/prazos relativos, reseta status)
@@ -393,7 +394,7 @@ export const listarModelosProcesso = createServerFn({ method: "GET" })
       .is("lost_at", null)
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []).map((r: {
       id: string;
       codigo: string;
@@ -456,7 +457,7 @@ export const moveProcesso = createServerFn({ method: "POST" })
       .from("processos")
       .update({ stage: data.toStage } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await context.supabase.from("processo_eventos").insert({
       processo_id: data.id,
@@ -494,7 +495,7 @@ export const listChecklist = createServerFn({ method: "POST" })
       .select("tipo")
       .eq("id", data.id)
       .maybeSingle();
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw friendlyDbError(pErr);
     if (!proc) return [];
     const tipo = ((proc as { tipo?: ProcessoTipo }).tipo ?? "projeto") as ProcessoTipo;
     const stages = PIPELINE_BY_TIPO[tipo] as readonly string[];
@@ -506,7 +507,7 @@ export const listChecklist = createServerFn({ method: "POST" })
       .eq("ativo", true)
       .order("stage")
       .order("ordem");
-    if (tErr) throw new Error(tErr.message);
+    if (tErr) throw friendlyDbError(tErr);
 
     const { data: sts } = await context.supabase
       .from("processo_checklist_status")
@@ -575,7 +576,7 @@ export const toggleChecklistItem = createServerFn({ method: "POST" })
         } as never,
         { onConflict: "processo_id,template_id" },
       );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -589,7 +590,7 @@ export const concluirTarefa = createServerFn({ method: "POST" })
       .from("processo_tarefas")
       .update({ status: "concluida" } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -603,7 +604,7 @@ export const listPilares = createServerFn({ method: "GET" })
       .from("user_roles")
       .select("user_id, role")
       .in("role", ["sales", "manager", "admin"]);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const ids = Array.from(new Set((roles ?? []).map((r) => r.user_id)));
     if (ids.length === 0) return [];
     const { data: profs } = await context.supabase
@@ -735,7 +736,7 @@ export const marcarComoPerdido = createServerFn({ method: "POST" })
       .select("lost_at, lost_count, pilar_id, codigo, stage")
       .eq("id", data.id)
       .maybeSingle();
-    if (bErr) throw new Error(bErr.message);
+    if (bErr) throw friendlyDbError(bErr);
     if (!before) throw new Error("Processo não encontrado.");
     if (before.lost_at) throw new Error("Processo já está arquivado.");
 
@@ -751,7 +752,7 @@ export const marcarComoPerdido = createServerFn({ method: "POST" })
         restored_by: null,
       } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await sb.from("processo_eventos").insert({
       processo_id: data.id,
@@ -808,7 +809,7 @@ export const restaurarProcesso = createServerFn({ method: "POST" })
         restored_by: context.userId,
       } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const txt = data.comentario
       ? `Processo restaurado. Comentário: ${data.comentario}`

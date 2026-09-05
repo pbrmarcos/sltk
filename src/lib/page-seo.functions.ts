@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdmin } from "@/lib/admin-guard";
@@ -58,7 +59,7 @@ export const listPageSeo = createServerFn({ method: "GET" })
       .from("page_seo")
       .select("*")
       .order("route_path", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as PageSeoRow[];
   });
 
@@ -73,7 +74,7 @@ export const scanPageSeo = createServerFn({ method: "POST" })
     const { data: existing, error: exErr } = await sb
       .from("page_seo")
       .select("route_path");
-    if (exErr) throw new Error(exErr.message);
+    if (exErr) throw friendlyDbError(exErr);
     const have = new Set(((existing ?? []) as { route_path: string }[]).map((r) => r.route_path));
     const toInsert = PUBLIC_ROUTES.filter((r) => !have.has(r.path)).map((r) => ({
       route_path: r.path,
@@ -88,14 +89,14 @@ export const scanPageSeo = createServerFn({ method: "POST" })
     }));
     if (toInsert.length) {
       const { error } = await sb.from("page_seo").insert(toInsert);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     if (have.size) {
       const { error } = await sb
         .from("page_seo")
         .update({ last_scanned_at: now })
         .in("route_path", Array.from(have));
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     return { inserted: toInsert.length, refreshed: have.size, total: PUBLIC_ROUTES.length };
   });
@@ -127,7 +128,7 @@ export const upsertPageSeo = createServerFn({ method: "POST" })
       },
       { onConflict: "route_path" },
     );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -142,6 +143,6 @@ export const deletePageSeo = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = admin as any;
     const { error } = await sb.from("page_seo").delete().eq("route_path", data.route_path);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

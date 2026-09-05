@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MOEDA_PADRAO, toMoedaISO, type MoedaISO } from "@/lib/moedas";
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
@@ -41,7 +42,7 @@ export const listDocumentos = createServerFn({ method: "GET" })
     if (data.cliente_id) q = q.eq("cliente_id", data.cliente_id);
     if (data.q) q = q.ilike("codigo", `%${data.q}%`);
     const { data: docs, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Hydrate cliente codes / razao
     const clienteIds = Array.from(new Set((docs || []).map((d: any) => d.cliente_id).filter(Boolean)));
@@ -74,7 +75,7 @@ export const listOrcamentosDaOportunidade = createServerFn({ method: "GET" })
       .eq("oportunidade_id", data.oportunidade_id)
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (docs || []) as Array<{
       id: string;
       codigo: string;
@@ -101,7 +102,7 @@ export const listBlocos = createServerFn({ method: "GET" })
       .eq("tipo_codigo", data.tipo)
       .eq("ativo", true)
       .order("ordem_padrao", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (blocos || []) as unknown as Bloco[];
   });
 
@@ -117,7 +118,7 @@ export const getLayoutConfig = createServerFn({ method: "GET" })
       .select("*")
       .eq("tipo_codigo", data.tipo)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (layout ?? null) as unknown as DocumentoLayoutConfig | null;
   });
 
@@ -135,7 +136,7 @@ export const updateLayoutConfig = createServerFn({ method: "POST" })
     const { error } = await (supabaseAdmin as any)
       .from("documento_layout_config")
       .upsert({ ...data, updated_at: new Date().toISOString() }, { onConflict: "tipo_codigo" });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -150,7 +151,7 @@ export const listDocumentoTipos = createServerFn({ method: "GET" })
       .select("codigo, nome, prefixo_codigo, ativo")
       .eq("ativo", true)
       .order("nome");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data || []) as Array<{ codigo: string; nome: string; prefixo_codigo: string; ativo: boolean }>;
   });
 
@@ -222,7 +223,7 @@ export const updateBloco = createServerFn({ method: "POST" })
       .from("documento_blocos")
       .update({ ...patch, updated_at: new Date().toISOString() })
       .eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -238,7 +239,7 @@ export const listBlocoHistorico = createServerFn({ method: "GET" })
       .select("*")
       .eq("bloco_id", data.bloco_id)
       .order("versao_seq", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows || []) as Array<any>;
   });
 
@@ -261,7 +262,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
     const { data: ver, error: vErr } = await (supabaseAdmin as any)
       .from("documento_bloco_versoes").select("*").eq("id", data.versao_id).maybeSingle();
-    if (vErr) throw new Error(vErr.message);
+    if (vErr) throw friendlyDbError(vErr);
     if (!ver) throw new Error("Versão não encontrada.");
     // Buscar conteúdo atual para calcular impacto
     const { data: atual } = await (supabaseAdmin as any)
@@ -299,7 +300,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
         updated_at: new Date().toISOString(),
       })
       .eq("id", ver.bloco_id);
-    if (uErr) throw new Error(uErr.message);
+    if (uErr) throw friendlyDbError(uErr);
     // Audit log: registra a tentativa/execução de restauração com impacto detalhado
     await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "documento_blocos",
@@ -345,7 +346,7 @@ export const translateBloco = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
     const { data: bloco, error } = await (supabaseAdmin as any)
       .from("documento_blocos").select("*").eq("id", data.bloco_id).maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!bloco) throw new Error("Bloco não encontrado.");
 
     const pt = (bloco.conteudo_pt as any) || {};
@@ -376,7 +377,7 @@ export const translateBloco = createServerFn({ method: "POST" })
       .from("documento_blocos")
       .update({ ...patch, updated_at: new Date().toISOString() })
       .eq("id", data.bloco_id);
-    if (uErr) throw new Error(uErr.message);
+    if (uErr) throw friendlyDbError(uErr);
     return { ok: true, alvos };
   });
 
@@ -392,7 +393,7 @@ async function nextCodigo(supabase: any, tipo: string, prefixo: string): Promise
     .ilike("codigo", `${prefixo}-${year}-%`)
     .order("codigo", { ascending: false })
     .limit(1);
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   let next = 1;
   const last = data?.[0]?.codigo as string | undefined;
   if (last) {
@@ -457,9 +458,9 @@ export async function generateOrcamentoImpl(
         supabase.from("documento_layout_config").select("*").eq("tipo_codigo", tipo).maybeSingle(),
         supabase.from("documento_tipos").select("*").eq("codigo", tipo).maybeSingle(),
       ]);
-    if (bErr) throw new Error(bErr.message);
-    if (lErr) throw new Error(lErr.message);
-    if (tErr) throw new Error(tErr.message);
+    if (bErr) throw friendlyDbError(bErr);
+    if (lErr) throw friendlyDbError(lErr);
+    if (tErr) throw friendlyDbError(tErr);
     if (!layout) throw new Error("Layout do tipo 'orcamento' não configurado.");
 
     const blocosList = (blocos || []) as Bloco[];
@@ -485,7 +486,7 @@ export async function generateOrcamentoImpl(
         .select("id, codigo, versao")
         .eq("id", docId)
         .maybeSingle();
-      if (eErr) throw new Error(eErr.message);
+      if (eErr) throw friendlyDbError(eErr);
       if (!existing) throw new Error("Documento não encontrado.");
       codigo = existing.codigo;
       versao = bumpVersion(existing.versao || "1.0.0", data.bump || "minor");
@@ -569,7 +570,7 @@ export async function generateOrcamentoImpl(
           updated_at: new Date().toISOString(),
         })
         .eq("id", docId);
-      if (upErr) throw new Error(upErr.message);
+      if (upErr) throw friendlyDbError(upErr);
     } else {
       const { data: ins, error: iErr } = await supabase
         .from("documentos")
@@ -591,7 +592,7 @@ export async function generateOrcamentoImpl(
         })
         .select("id")
         .single();
-      if (iErr) throw new Error(iErr.message);
+      if (iErr) throw friendlyDbError(iErr);
       docId = ins.id;
     }
 
@@ -613,7 +614,7 @@ export async function generateOrcamentoImpl(
       payload: versionPayload,
       gerado_por: context.userId,
     });
-    if (vErr) throw new Error(vErr.message);
+    if (vErr) throw friendlyDbError(vErr);
 
     // Auto-sync para Google Drive (não falha a geração se Drive estiver indisponível)
     let drive_synced = false;
@@ -683,7 +684,7 @@ export const getSignedUrl = createServerFn({ method: "POST" })
     const { data: signed, error } = await context.supabase.storage
       .from("documentos")
       .createSignedUrl(data.path, data.expiresIn ?? 600);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Auditoria de acesso a documento restrito — só metadados, nunca o conteúdo do arquivo.
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
@@ -710,7 +711,7 @@ export const getDocumento = createServerFn({ method: "GET" })
       .select("*")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!doc) return { documento: null, versoes: [], aprovacoes: [], notFound: true as const };
     const [{ data: versoes }, { data: aprovacoes }] = await Promise.all([
       (context.supabase as any)
@@ -785,7 +786,7 @@ async function executeApprovalAction(
     .select("id, status, versao, created_by, responsavel_id")
     .eq("id", documento_id)
     .maybeSingle();
-  if (dErr) throw new Error(dErr.message);
+  if (dErr) throw friendlyDbError(dErr);
   if (!doc) throw new Error("Documento não encontrado.");
 
   await assertCanAct(context.supabase, context.userId, acao, doc);
@@ -809,13 +810,13 @@ async function executeApprovalAction(
     actor_user_id: context.userId,
     actor_nome: actorNome,
   });
-  if (insErr) throw new Error(insErr.message);
+  if (insErr) throw friendlyDbError(insErr);
 
   const { error: updErr } = await (supabaseAdmin as any)
     .from("documentos")
     .update({ status: rule.to, updated_at: new Date().toISOString() })
     .eq("id", documento_id);
-  if (updErr) throw new Error(updErr.message);
+  if (updErr) throw friendlyDbError(updErr);
 
   // Auto-trigger Drive upload + HMAC signature on publish
   if (rule.to === "publicado") {
@@ -1025,7 +1026,7 @@ async function uploadAndSignImpl(supabase: any, documento_id: string, userId: st
     .select("id, codigo, tipo_codigo, versao, cliente_id, titulo")
     .eq("id", documento_id)
     .maybeSingle();
-  if (dErr) throw new Error(dErr.message);
+  if (dErr) throw friendlyDbError(dErr);
   if (!doc) throw new Error("Documento não encontrado.");
 
   const { data: ver } = await supabase
@@ -1113,7 +1114,7 @@ export const listAssinaturas = createServerFn({ method: "GET" })
       .select("*")
       .eq("documento_id", data.documento_id)
       .order("signed_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows || [];
   });
 
@@ -1124,7 +1125,7 @@ export const verifyAssinatura = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: a, error } = await (context.supabase as any)
       .from("documento_assinaturas").select("*").eq("id", data.assinatura_id).maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!a) throw new Error("Assinatura não encontrada.");
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
@@ -1208,7 +1209,7 @@ export async function generateFatDocumentInternal(args: {
   // Fetch FAT + dependências
   const { data: fat, error: fErr } = await (supabaseAdmin as any)
     .from("fat_relatorios").select("*").eq("id", data.fat_id).maybeSingle();
-  if (fErr) throw new Error(fErr.message);
+  if (fErr) throw friendlyDbError(fErr);
   if (!fat) throw new Error("FAT não encontrado.");
 
   const [{ data: cli }, { data: proc }, { data: insp }, { data: hom }, { data: meds }, { data: rncs }] = await Promise.all([
@@ -1309,7 +1310,7 @@ export async function generateFatDocumentInternal(args: {
       idiomas_gerados: idiomas, titulo,
       updated_at: new Date().toISOString(),
     }).eq("id", docId);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
   } else {
     const { data: ins, error: iErr } = await (supabaseAdmin as any).from("documentos").insert({
       codigo, tipo_codigo: "fat_report",
@@ -1320,14 +1321,14 @@ export async function generateFatDocumentInternal(args: {
       payload: payloadSnapshot, blocos: [],
       idiomas_gerados: idiomas, created_by: actorId,
     }).select("id").single();
-    if (iErr) throw new Error(iErr.message);
+    if (iErr) throw friendlyDbError(iErr);
     docId = ins.id;
   }
 
   const { error: vErr } = await (supabaseAdmin as any).from("documento_versoes").insert({
     documento_id: docId, versao, arquivos, payload: payloadSnapshot, gerado_por: actorId,
   });
-  if (vErr) throw new Error(vErr.message);
+  if (vErr) throw friendlyDbError(vErr);
 
   return { ok: true, documento_id: docId as string, codigo, versao, arquivos };
 }
@@ -1390,7 +1391,7 @@ export async function generateSatDocumentInternal(args: {
 
   const { data: sat, error: sErr } = await (supabaseAdmin as any)
     .from("sat_relatorio").select("*").eq("id", data.sat_id).maybeSingle();
-  if (sErr) throw new Error(sErr.message);
+  if (sErr) throw friendlyDbError(sErr);
   if (!sat) throw new Error("SAT não encontrado.");
 
   const [{ data: cli }, { data: proc }, { data: secoes }, { data: anexos }] = await Promise.all([
@@ -1528,7 +1529,7 @@ export async function generateSatDocumentInternal(args: {
       idiomas_gerados: idiomas, titulo,
       updated_at: new Date().toISOString(),
     }).eq("id", docId);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
   } else {
     const { data: ins, error: iErr } = await (supabaseAdmin as any).from("documentos").insert({
       codigo, tipo_codigo: "sat_report",
@@ -1539,14 +1540,14 @@ export async function generateSatDocumentInternal(args: {
       payload: payloadSnapshot, blocos: [],
       idiomas_gerados: idiomas, created_by: actorId,
     }).select("id").single();
-    if (iErr) throw new Error(iErr.message);
+    if (iErr) throw friendlyDbError(iErr);
     docId = ins.id;
   }
 
   const { error: vErr } = await (supabaseAdmin as any).from("documento_versoes").insert({
     documento_id: docId, versao, arquivos, payload: payloadSnapshot, gerado_por: actorId,
   });
-  if (vErr) throw new Error(vErr.message);
+  if (vErr) throw friendlyDbError(vErr);
 
   return { ok: true, documento_id: docId as string, codigo, versao, arquivos };
 }
@@ -1570,7 +1571,7 @@ export const getOrcamentoForEdit = createServerFn({ method: "GET" })
       .select("id, codigo, tipo_codigo, titulo, status, versao, cliente_id, payload")
       .eq("id", data.documento_id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!doc) throw new Error("Documento não encontrado.");
     if (doc.tipo_codigo !== "orcamento") throw new Error("Documento não é um orçamento.");
 

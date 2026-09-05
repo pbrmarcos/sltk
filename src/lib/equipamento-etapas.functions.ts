@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ETAPA_FASES, ETAPA_STATUS } from "@/lib/engenharia.shared";
@@ -17,7 +18,7 @@ export const listEquipamentoEtapas = createServerFn({ method: "POST" })
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null)
       .order("ordem", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -65,7 +66,7 @@ export const upsertEtapas = createServerFn({ method: "POST" })
         .from("equipamento_etapas")
         .update({ deleted_at: new Date().toISOString() })
         .in("id", data.remove_ids);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
 
     // Upsert (insert ou update)
@@ -95,12 +96,12 @@ export const upsertEtapas = createServerFn({ method: "POST" })
           .from("equipamento_etapas")
           .update(payload)
           .eq("id", e.id);
-        if (error) throw new Error(error.message);
+        if (error) throw friendlyDbError(error);
       } else {
         const { error } = await context.supabase
           .from("equipamento_etapas")
           .insert({ ...payload, created_by: context.userId });
-        if (error) throw new Error(error.message);
+        if (error) throw friendlyDbError(error);
       }
     }
     return { ok: true };
@@ -140,7 +141,7 @@ export const listHHConsolidado = createServerFn({ method: "POST" })
     }
 
     const { data: eqps, count, error } = await q.order("created_at", { ascending: false }).range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (eqps ?? []).map((e) => e.id);
     let etapasAgg: Record<string, { mec: number; elet: number }> = {};

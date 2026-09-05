@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
@@ -70,7 +71,7 @@ export const listarMigrations = createServerFn({ method: "GET" })
       .from("_migrations_applied")
       .select("filename, applied_at");
     if (error && error.code !== "42P01") {
-      throw new Error(error.message);
+      throw friendlyDbError(error);
     }
     const appliedMap = new Map<string, string>();
     for (const row of data ?? []) appliedMap.set(row.filename, row.applied_at);

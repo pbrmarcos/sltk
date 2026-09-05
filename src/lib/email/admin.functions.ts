@@ -5,6 +5,7 @@
  * Toda mutação registra auditoria em `audit_log`.
  */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
@@ -18,7 +19,7 @@ async function requireAdmin(userId: string) {
     .eq("user_id", userId)
     .eq("role", "admin")
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   if (!data) throw new Error("Acesso restrito a administradores.");
   return supabaseAdmin;
 }
@@ -31,7 +32,7 @@ async function requireAdminOrManager(userId: string) {
     .select("role")
     .eq("user_id", userId)
     .in("role", ["admin", "manager"]);
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   if (!data || data.length === 0) throw new Error("Acesso restrito.");
   return supabaseAdmin;
 }
@@ -65,11 +66,11 @@ export const listEmailEvents = createServerFn({ method: "POST" })
       .select("*")
       .order("module")
       .order("event_key");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const { data: recs, error: rErr } = await admin
       .from("email_event_recipients")
       .select("event_key, role, mode");
-    if (rErr) throw new Error(rErr.message);
+    if (rErr) throw friendlyDbError(rErr);
 
     // Último envio por event_key. Pega os 500 mais recentes (janela grande
     // o suficiente para cobrir todos os eventos ativos) e reduz no JS.
@@ -118,7 +119,7 @@ export const toggleEmailEvent = createServerFn({ method: "POST" })
       .from("email_event_config")
       .update({ enabled: data.enabled })
       .eq("event_key", data.event_key);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logAuditServer(admin, context.userId, {
       table_name: "email_event_config",
       record_id: data.event_key,
@@ -160,7 +161,7 @@ export const updateEmailTemplate = createServerFn({ method: "POST" })
         required_vars: data.required_vars,
       })
       .eq("event_key", data.event_key);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logAuditServer(admin, context.userId, {
       table_name: "email_event_config",
       record_id: data.event_key,
@@ -194,7 +195,7 @@ export const updateEmailRecipients = createServerFn({ method: "POST" })
       .from("email_event_recipients")
       .delete()
       .eq("event_key", data.event_key);
-    if (delErr) throw new Error(delErr.message);
+    if (delErr) throw friendlyDbError(delErr);
     if (data.recipients.length > 0) {
       const { error: insErr } = await admin.from("email_event_recipients").insert(
         data.recipients.map((r) => ({
@@ -203,7 +204,7 @@ export const updateEmailRecipients = createServerFn({ method: "POST" })
           mode: r.mode,
         })),
       );
-      if (insErr) throw new Error(insErr.message);
+      if (insErr) throw friendlyDbError(insErr);
     }
     await logAuditServer(admin, context.userId, {
       table_name: "email_event_recipients",
@@ -258,7 +259,7 @@ export const listEmailLogs = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("created_at", { ascending: false })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: (rows ?? []) as unknown as EmailLogRow[], total: count ?? 0 };
   });
 

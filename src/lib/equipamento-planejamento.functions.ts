@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -14,7 +15,7 @@ export const listPlanejamentoTemplates = createServerFn({ method: "GET" })
       .select("id, slug, nome, familia, descricao, publicado")
       .eq("publicado", true)
       .order("nome", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{
       id: string;
       slug: string;
@@ -37,14 +38,14 @@ export const getPlanejamentoTemplate = createServerFn({ method: "POST" })
       .select("id, slug, nome, familia, descricao")
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!tpl) return null;
     const { data: secoes, error: e2 } = await sb
       .from("equipamento_planejamento_secoes")
       .select("id, ordem, titulo, area")
       .eq("template_id", tpl.id)
       .order("ordem", { ascending: true });
-    if (e2) throw new Error(e2.message);
+    if (e2) throw friendlyDbError(e2);
     const secIds = (secoes ?? []).map((s: any) => s.id);
     const { data: itens, error: e3 } = secIds.length
       ? await sb
@@ -53,7 +54,7 @@ export const getPlanejamentoTemplate = createServerFn({ method: "POST" })
           .in("secao_id", secIds)
           .order("ordem", { ascending: true })
       : { data: [], error: null };
-    if (e3) throw new Error(e3.message);
+    if (e3) throw friendlyDbError(e3);
     return { ...tpl, secoes: secoes ?? [], itens: itens ?? [] };
   });
 
@@ -70,7 +71,7 @@ export const getEquipamentoPlanejamento = createServerFn({ method: "POST" })
       .select("id, planejamento_template_slug")
       .eq("id", data.equipamentoId)
       .maybeSingle();
-    if (eqErr) throw new Error(eqErr.message);
+    if (eqErr) throw friendlyDbError(eqErr);
     const slug = eq?.planejamento_template_slug;
     if (!slug) return null;
     const { data: tpl } = await sb
@@ -132,7 +133,7 @@ export const togglePlanejamentoItem = createServerFn({ method: "POST" })
         },
         { onConflict: "equipamento_id,item_id" },
       );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -152,7 +153,7 @@ export const listCandidatosClone = createServerFn({ method: "POST" })
     if (data.modelo) q = q.ilike("modelo", `%${data.modelo}%`);
     if (data.categoria) q = q.eq("categoria", data.categoria);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -210,7 +211,7 @@ export const criarEquipamentoDeOrcamento = createServerFn({ method: "POST" })
       .insert(insertPayload)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Marca oportunidade com processo/equipamento vinculado (audit-friendly via observação)
     if (data.oportunidadeId) {
@@ -333,6 +334,6 @@ export const listUsuariosParaDelegar = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("full_name", { ascending: true })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>;
   });

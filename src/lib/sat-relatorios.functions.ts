@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { driveAuth } from "@/lib/docs/drive-auth.server";
@@ -186,7 +187,7 @@ export const listSATRelatorios = createServerFn({ method: "POST" })
     if (data.q) q = q.ilike("codigo", `%${data.q}%`);
 
     const { data: rows, error, count } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return {
       items: (rows ?? []).map((r) => {
         const cli = (r as { clientes?: { razao_social?: string } }).clientes;
@@ -267,7 +268,7 @@ export const createSATRelatorio = createServerFn({ method: "POST" })
       } as never)
       .select("id, codigo")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row as { id: string; codigo: string };
   });
 
@@ -286,7 +287,7 @@ export const getSATRelatorio = createServerFn({ method: "POST" })
       )
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!row) throw new Error("Relatório não encontrado ou sem acesso.");
     return row;
   });
@@ -327,7 +328,7 @@ export const saveSATRelatorio = createServerFn({ method: "POST" })
       .from("sat_relatorio")
       .update(patch as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -364,7 +365,7 @@ export const uploadSATAnexo = createServerFn({ method: "POST" })
       .select("id, codigo, cliente_id, processo_id, drive_folder_id, clientes(codigo, razao_social), processos(codigo)")
       .eq("id", data.relatorio_id)
       .maybeSingle();
-    if (rErr) throw new Error(rErr.message);
+    if (rErr) throw friendlyDbError(rErr);
     if (!rel) throw new Error("Relatório não encontrado ou sem acesso.");
 
     const cli = (rel as { clientes?: { codigo?: string; razao_social?: string } }).clientes ?? null;
@@ -429,7 +430,7 @@ export const uploadSATAnexo = createServerFn({ method: "POST" })
       } as never)
       .select("id, drive_view_url, nome_final, mime_type")
       .single();
-    if (aErr) throw new Error(aErr.message);
+    if (aErr) throw friendlyDbError(aErr);
     return anexo as { id: string; drive_view_url: string; nome_final: string; mime_type: string };
   });
 
@@ -447,7 +448,7 @@ export const listSATAnexos = createServerFn({ method: "POST" })
       .eq("relatorio_id", data.relatorio_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as unknown as SATAnexo[];
   });
 
@@ -461,6 +462,6 @@ export const deleteSATAnexo = createServerFn({ method: "POST" })
       .from("sat_relatorio_anexo")
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

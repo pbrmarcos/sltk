@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -92,7 +93,7 @@ export const listEmbarques = createServerFn({ method: "GET" })
     }
 
     const { data: rows, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -104,7 +105,7 @@ export const listClientesComEmbarques = createServerFn({ method: "GET" })
       .from("logistica_embarques")
       .select("projeto:equipamento_projetos!inner(cliente:clientes!inner(id, nome_fantasia, razao_social))")
       .limit(1000);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const seen = new Map<string, { id: string; nome: string }>();
     for (const row of (data ?? []) as any[]) {
       const c = row?.projeto?.cliente;
@@ -129,7 +130,7 @@ export const getEmbarque = createServerFn({ method: "GET" })
       )
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!emb) throw new Error("Embarque não encontrado.");
 
     const [{ data: itens }, { data: anexos }] = await Promise.all([
@@ -164,7 +165,7 @@ export const listProjetosDisponiveis = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("updated_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });
 
@@ -177,7 +178,7 @@ export const listTransportadoras = createServerFn({ method: "GET" })
       .select("id, nome")
       .eq("ativo", true)
       .order("nome", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });
 
@@ -208,7 +209,7 @@ export const createEmbarque = createServerFn({ method: "POST" })
       })
       .select("id, numero")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row as { id: string; numero: string };
   });
 
@@ -234,7 +235,7 @@ export const updateEmbarque = createServerFn({ method: "POST" })
       .from("logistica_embarques")
       .update(patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -281,7 +282,7 @@ export const setStatus = createServerFn({ method: "POST" })
       .from("logistica_embarques")
       .update(patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Registrar na trilha (idempotente: só se realmente mudou)
     if (fromStatus !== data.status) {
@@ -295,7 +296,7 @@ export const setStatus = createServerFn({ method: "POST" })
           changed_by: context.userId,
           anexo_ids: data.anexo_ids ?? [],
         });
-      if (logErr) throw new Error(logErr.message);
+      if (logErr) throw friendlyDbError(logErr);
     }
     return { ok: true };
   });
@@ -330,7 +331,7 @@ export const listStatusLog = createServerFn({ method: "GET" })
       .select("id, embarque_id, from_status, to_status, notas, changed_by, changed_at, anexo_ids")
       .eq("embarque_id", data.embarque_id)
       .order("changed_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const rowsArr = (rows ?? []) as any[];
     const ids = Array.from(new Set(rowsArr.map((r) => r.changed_by).filter(Boolean)));
@@ -418,7 +419,7 @@ export const addItem = createServerFn({ method: "POST" })
       })
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row as EmbarqueItem;
   });
 
@@ -430,7 +431,7 @@ export const removeItem = createServerFn({ method: "POST" })
       .from("logistica_embarque_itens")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -461,7 +462,7 @@ export const registrarAnexo = createServerFn({ method: "POST" })
       })
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row as EmbarqueAnexo;
   });
 
@@ -474,7 +475,7 @@ export const removerAnexo = createServerFn({ method: "POST" })
       .from("logistica_embarque_anexos")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -487,7 +488,7 @@ export const getAnexoSignedUrl = createServerFn({ method: "POST" })
     const { data: res, error } = await (context.supabase as any).storage
       .from(LOGISTICA_ANEXOS_BUCKET)
       .createSignedUrl(data.path, data.expiresIn ?? 60 * 60);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { url: (res as { signedUrl: string }).signedUrl };
   });
 
@@ -516,7 +517,7 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
       )
       .eq("id", data.embarque_id)
       .maybeSingle();
-    if (eErr) throw new Error(eErr.message);
+    if (eErr) throw friendlyDbError(eErr);
     if (!emb) throw new Error("Embarque não encontrado.");
 
     const [{ data: itens }, { data: logs }] = await Promise.all([
@@ -687,7 +688,7 @@ export const exportStatusLog = createServerFn({ method: "POST" })
       .select("id, from_status, to_status, notas, changed_by, changed_at, anexo_ids")
       .eq("embarque_id", data.embarque_id)
       .order("changed_at", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const rowsArr = (rows ?? []) as any[];
 
     // Autores

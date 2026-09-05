@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher as assertCanManage } from "@/lib/admin-guard";
@@ -192,7 +193,7 @@ export const listTemplates = createServerFn({ method: "GET" })
     if (data.tipo) q = q.eq("tipo", data.tipo);
     if (data.q && data.q.trim()) q = q.ilike("nome", `%${data.q.trim()}%`);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (rows ?? []).map((r) => r.id);
     if (ids.length === 0) return [];
@@ -249,7 +250,7 @@ export const getTemplate = createServerFn({ method: "GET" })
       .select("*")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!t) throw new Error("Template não encontrado.");
     const [{ data: itens }, { data: tarefas }, { data: eventos }, names] = await Promise.all([
       context.supabase
@@ -347,7 +348,7 @@ export const upsertTemplate = createServerFn({ method: "POST" })
         .from("processo_templates")
         .update(patch as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const insertRow: Record<string, unknown> = {
@@ -364,7 +365,7 @@ export const upsertTemplate = createServerFn({ method: "POST" })
       .insert(insertRow as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: ins.id };
   });
 
@@ -380,7 +381,7 @@ export const deleteTemplate = createServerFn({ method: "POST" })
       .from("processo_templates")
       .update({ deleted_at: new Date().toISOString(), updated_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -395,7 +396,7 @@ export const restoreTemplate = createServerFn({ method: "POST" })
       .from("processo_templates")
       .update({ deleted_at: null, updated_by: context.userId, updated_at: new Date().toISOString() } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await snapshotTemplate(context.supabase, data.id, context.userId, "Restaurado do arquivo");
     return { ok: true };
   });
@@ -410,7 +411,7 @@ export const duplicateTemplate = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!t) throw new Error("Template não encontrado.");
     const { data: ins, error: insErr } = await context.supabase
       .from("processo_templates")
@@ -424,7 +425,7 @@ export const duplicateTemplate = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (insErr) throw new Error(insErr.message);
+    if (insErr) throw friendlyDbError(insErr);
     const newId = ins.id as string;
 
     const [{ data: itens }, { data: tarefas }, { data: eventos }] = await Promise.all([
@@ -494,7 +495,7 @@ export const listTemplateVersoes = createServerFn({ method: "GET" })
       .select("id, versao, motivo, created_at, created_by, created_by_nome")
       .eq("template_id", data.template_id)
       .order("versao", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as TemplateVersaoLite[];
   });
 
@@ -519,7 +520,7 @@ export const restaurarVersaoTemplate = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.versao_id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!v) throw new Error("Versão não encontrada.");
     const templateId = v.template_id as string;
     const snap = v.snapshot as any;
@@ -626,7 +627,7 @@ export const upsertTemplateItem = createServerFn({ method: "POST" })
         .from("processo_template_checklist_itens")
         .update(payload as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await touchTemplate(context.supabase, data.template_id, context.userId);
       return { id: data.id };
     }
@@ -635,7 +636,7 @@ export const upsertTemplateItem = createServerFn({ method: "POST" })
       .insert(payload as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await touchTemplate(context.supabase, data.template_id, context.userId);
     return { id: ins.id };
   });
@@ -654,7 +655,7 @@ export const deleteTemplateItem = createServerFn({ method: "POST" })
       .from("processo_template_checklist_itens")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (row?.template_id) await touchTemplate(context.supabase, row.template_id, context.userId);
     return { ok: true };
   });
@@ -687,7 +688,7 @@ export const upsertTemplateTarefa = createServerFn({ method: "POST" })
         .from("processo_template_tarefas")
         .update(payload as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await touchTemplate(context.supabase, data.template_id, context.userId);
       return { id: data.id };
     }
@@ -696,7 +697,7 @@ export const upsertTemplateTarefa = createServerFn({ method: "POST" })
       .insert(payload as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await touchTemplate(context.supabase, data.template_id, context.userId);
     return { id: ins.id };
   });
@@ -715,7 +716,7 @@ export const deleteTemplateTarefa = createServerFn({ method: "POST" })
       .from("processo_template_tarefas")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (row?.template_id) await touchTemplate(context.supabase, row.template_id, context.userId);
     return { ok: true };
   });
@@ -746,7 +747,7 @@ export const upsertTemplateEvento = createServerFn({ method: "POST" })
         .from("processo_template_eventos")
         .update(payload as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await touchTemplate(context.supabase, data.template_id, context.userId);
       return { id: data.id };
     }
@@ -755,7 +756,7 @@ export const upsertTemplateEvento = createServerFn({ method: "POST" })
       .insert(payload as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await touchTemplate(context.supabase, data.template_id, context.userId);
     return { id: ins.id };
   });
@@ -774,7 +775,7 @@ export const deleteTemplateEvento = createServerFn({ method: "POST" })
       .from("processo_template_eventos")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (row?.template_id) await touchTemplate(context.supabase, row.template_id, context.userId);
     return { ok: true };
   });
@@ -800,7 +801,7 @@ async function reorderTable(
       .update({ ordem: i })
       .eq("id", orderedIds[i])
       .eq("template_id", templateId);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
   }
   await touchTemplate(supabase, templateId, userId);
   return { ok: true };
@@ -843,7 +844,7 @@ export const aplicarTemplate = createServerFn({ method: "POST" })
       .select("id, tipo, pilar_id, codigo")
       .eq("id", data.processo_id)
       .maybeSingle();
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw friendlyDbError(pErr);
     if (!p) throw new Error("Processo não encontrado.");
 
     const { data: t, error: tErr } = await context.supabase
@@ -852,7 +853,7 @@ export const aplicarTemplate = createServerFn({ method: "POST" })
       .eq("id", data.template_id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (tErr) throw new Error(tErr.message);
+    if (tErr) throw friendlyDbError(tErr);
     if (!t) throw new Error("Template não encontrado.");
     if (t.tipo !== p.tipo) {
       throw new Error("Tipo do template não corresponde ao tipo do processo.");
@@ -890,7 +891,7 @@ export const aplicarTemplate = createServerFn({ method: "POST" })
       const { error } = await context.supabase
         .from("processo_tarefas")
         .insert(rows as never);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       tarefasCriadas = rows.length;
     }
 
@@ -904,7 +905,7 @@ export const aplicarTemplate = createServerFn({ method: "POST" })
       const { error } = await context.supabase
         .from("processo_eventos")
         .insert(rows as never);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       eventosCriados = rows.length;
     }
 

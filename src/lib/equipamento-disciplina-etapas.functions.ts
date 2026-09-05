@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -38,7 +39,7 @@ export const listDisciplinaEtapas = createServerFn({ method: "POST" })
       .eq("disciplina", data.disciplina)
       .is("deleted_at", null)
       .order("ordem", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (rows ?? []).map((r: any) => r.id);
     let commentCounts: Record<string, number> = {};
@@ -70,7 +71,7 @@ export const listAllEquipamentoEtapas = createServerFn({ method: "POST" })
       .eq("equipamento_id", data.equipamentoId)
       .is("deleted_at", null)
       .order("data_vencimento", { ascending: true, nullsFirst: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string;
       disciplina: string;
@@ -126,7 +127,7 @@ export const createEtapa = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: row.id as string };
   });
 
@@ -152,7 +153,7 @@ export const updateEtapa = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     const payload: Record<string, unknown> = { ...rest, updated_by: context.userId };
     const { error } = await sb.from("equipamento_disciplina_etapas").update(payload).eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -187,7 +188,7 @@ export const deleteEtapa = createServerFn({ method: "POST" })
       .from("equipamento_disciplina_etapas")
       .update({ deleted_at: new Date().toISOString(), updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -202,7 +203,7 @@ export const listEtapaComentarios = createServerFn({ method: "POST" })
       .select("id, autor_id, autor_nome, texto, created_at")
       .eq("etapa_id", data.etapa_id)
       .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -229,7 +230,7 @@ export const addEtapaComentario = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await sb
       .from("equipamento_disciplina_etapas")
       .update({ updated_at: new Date().toISOString() })
@@ -248,6 +249,6 @@ export const listUsuariosParaEtapa = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("full_name", { ascending: true })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });

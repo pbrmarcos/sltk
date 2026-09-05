@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -63,7 +64,7 @@ export const listOportunidadesByEmpresa = createServerFn({ method: "POST" })
     }
 
     const { data: rows, error } = await q.order("stage_entered_at", { ascending: false }).limit(100);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []).map((r) => ({
       id: r.id,
       codigo: r.codigo ?? "",
@@ -143,7 +144,7 @@ async function applyTemplateInline(
       status: "aberta" as const,
     }));
     const { error } = await supabase.from("processo_tarefas").insert(rows);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     tCount = rows.length;
   }
 
@@ -155,7 +156,7 @@ async function applyTemplateInline(
       text: `[${e.tipo}] ${e.titulo} (D+${e.dias_apos_inicio})`,
     }));
     const { error } = await supabase.from("processo_eventos").insert(rows);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     eCount = rows.length;
   }
 
@@ -179,7 +180,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
       .eq("id", data.cliente_id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (cliErr) throw new Error(cliErr.message);
+    if (cliErr) throw friendlyDbError(cliErr);
     if (!cli) throw new Error("Cliente não encontrado.");
 
     // Promove para ativo, se ainda não estiver
@@ -188,7 +189,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
         .from("clientes")
         .update({ status: "ativo", updated_by: context.userId })
         .eq("id", data.cliente_id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
 
     const created: Array<{
@@ -205,7 +206,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
         .eq("id", item.id)
         .is("deleted_at", null)
         .maybeSingle();
-      if (oppErr) throw new Error(oppErr.message);
+      if (oppErr) throw friendlyDbError(oppErr);
       if (!opp) continue;
 
       if (item.action === "win") {
@@ -256,7 +257,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
             processo_id: proc.id,
           })
           .eq("id", opp.id);
-        if (updErr) throw new Error(updErr.message);
+        if (updErr) throw friendlyDbError(updErr);
 
         created.push({
           oportunidade_id: opp.id,
@@ -273,7 +274,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
             lost_reason: item.lost_reason ?? "Convertida em outra oportunidade da mesma empresa.",
           })
           .eq("id", opp.id);
-        if (error) throw new Error(error.message);
+        if (error) throw friendlyDbError(error);
       } else {
         // keep: apenas vincula o cliente
         if (opp.cliente_id !== data.cliente_id) {
@@ -281,7 +282,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
             .from("oportunidades")
             .update({ cliente_id: data.cliente_id })
             .eq("id", opp.id);
-          if (error) throw new Error(error.message);
+          if (error) throw friendlyDbError(error);
         }
       }
     }

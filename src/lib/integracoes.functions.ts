@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdmin } from "@/lib/admin-guard";
@@ -11,7 +12,7 @@ export const listIntegracoes = createServerFn({ method: "GET" })
       .select("*")
       .order("ordem", { ascending: true })
       .order("pais", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const providers = data ?? [];
 
     // Sincroniza com paises_config: países sem provedor recebem placeholder "Futuro"
@@ -19,7 +20,7 @@ export const listIntegracoes = createServerFn({ method: "GET" })
       .from("paises_config")
       .select("codigo, nome")
       .order("nome", { ascending: true });
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw friendlyDbError(pErr);
 
     const comProvider = new Set(providers.map((p) => p.pais));
     const placeholders = (paises ?? [])
@@ -62,7 +63,7 @@ export const listProvedoresAtivosPorPais = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("integracoes_config")
       .select("pais, ativo, disponivel");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const map: Record<string, { hasActive: boolean; hasAvailable: boolean }> = {};
     for (const r of data ?? []) {
       const cur = map[r.pais] ?? { hasActive: false, hasAvailable: false };
@@ -89,6 +90,6 @@ export const toggleIntegracao = createServerFn({ method: "POST" })
       .update({ ativo: data.ativo, updated_by: context.userId })
       .eq("provider", data.provider)
       .eq("disponivel", true);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

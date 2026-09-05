@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { EQUIPAMENTO_DOC_CATEGORIAS } from "@/lib/equipamentos.shared";
@@ -113,7 +114,7 @@ export const listEquipamentoDocumentos = createServerFn({ method: "POST" })
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string;
       categoria: string;
@@ -159,7 +160,7 @@ export const uploadEquipamentoDocumento = createServerFn({ method: "POST" })
       .select("id, codigo, cliente_id, processo_id, clientes(codigo, razao_social)")
       .eq("id", data.equipamento_id)
       .maybeSingle();
-    if (eErr) throw new Error(eErr.message);
+    if (eErr) throw friendlyDbError(eErr);
     if (!eqp) throw new Error("Equipamento não encontrado ou sem acesso.");
 
     const cliente = (eqp as unknown as {
@@ -217,7 +218,7 @@ export const uploadEquipamentoDocumento = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (iErr) throw new Error(iErr.message);
+    if (iErr) throw friendlyDbError(iErr);
     return { id: (row as { id: string }).id, url: up.webViewLink, name: finalName };
   });
 
@@ -229,6 +230,6 @@ export const removerEquipamentoDocumento = createServerFn({ method: "POST" })
       .from("cliente_equipamento_documentos" as never)
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

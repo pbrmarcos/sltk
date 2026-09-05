@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -20,7 +21,7 @@ export const getMediaSignedUrl = createServerFn({ method: "POST" })
     const { data: res, error } = await (context.supabase as any).storage
       .from(KH_MEDIA_BUCKET)
       .createSignedUrl(data.path, data.expiresIn ?? 60 * 60);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { url: (res as { signedUrl: string }).signedUrl };
   });
 
@@ -73,7 +74,7 @@ export const listColecoes = createServerFn({ method: "GET" })
       .select("id, slug, nome, descricao, cor, ordem, ativo")
       .eq("ativo", true)
       .order("ordem", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as KhColecao[];
   });
 
@@ -111,7 +112,7 @@ export const listItens = createServerFn({ method: "GET" })
     }
 
     const { data: rows, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<Omit<KhItem, "revisor_id" | "aprovado_em" | "aprovado_por">>;
   });
 
@@ -122,7 +123,7 @@ export const listFavoritos = createServerFn({ method: "GET" })
     const { data, error } = await (context.supabase as any).from("kh_favoritos")
       .select("item_id")
       .eq("user_id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return ((data ?? []) as Array<{ item_id: string }>).map((r) => r.item_id);
   });
 
@@ -140,13 +141,13 @@ export const toggleFavorito = createServerFn({ method: "POST" })
       const { error } = await (context.supabase as any).from("kh_favoritos")
         .delete()
         .eq("id", (existing as { id: string }).id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { favorito: false };
     }
 
     const { error } = await (context.supabase as any).from("kh_favoritos")
       .insert({ item_id: data.itemId, user_id: context.userId });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { favorito: true };
   });
 
@@ -159,7 +160,7 @@ export const listHistorico = createServerFn({ method: "GET" })
       .eq("user_id", context.userId)
       .order("viewed_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const seen = new Map<string, string>();
     for (const r of (data ?? []) as Array<{ item_id: string; viewed_at: string }>) {
       if (!seen.has(r.item_id)) seen.set(r.item_id, r.viewed_at);
@@ -177,7 +178,7 @@ export const getItemBySlug = createServerFn({ method: "GET" })
       .select("*")
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!item) throw new Error("Item não encontrado.");
 
     // Registrar visualização (não bloqueia)
@@ -226,7 +227,7 @@ export const createItem = createServerFn({ method: "POST" })
       .select("id, slug")
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row as { id: string; slug: string };
   });
 
@@ -250,7 +251,7 @@ export const updateItem = createServerFn({ method: "POST" })
       if (data[k] !== undefined) patch[k] = data[k];
     }
     const { error } = await (context.supabase as any).from("kh_itens").update(patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -262,7 +263,7 @@ export const enviarParaRevisao = createServerFn({ method: "POST" })
     const { error } = await (context.supabase as any).from("kh_itens")
       .update({ status: "em_revisao" })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -276,7 +277,7 @@ export const listRevisao = createServerFn({ method: "GET" })
       )
       .eq("status", "em_revisao")
       .order("atualizado_em", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });
 
@@ -310,7 +311,7 @@ export const aprovarItem = createServerFn({ method: "POST" })
         revisor_id: context.userId,
       })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -322,6 +323,6 @@ export const solicitarAjuste = createServerFn({ method: "POST" })
     const { error } = await (context.supabase as any).from("kh_itens")
       .update({ status: "rascunho", revisor_id: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

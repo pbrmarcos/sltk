@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -19,7 +20,7 @@ export const listMinhasNotificacoes = createServerFn({ method: "POST" })
       .limit(data.limit);
     if (data.apenas_nao_lidas) q = q.is("lida_em", null);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const { count } = await sb
       .from("notificacoes_usuario")
       .select("*", { count: "exact", head: true })
@@ -38,7 +39,7 @@ export const marcarComoLida = createServerFn({ method: "POST" })
       .update({ lida_em: new Date().toISOString() })
       .eq("id", data.id)
       .eq("user_id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -51,6 +52,6 @@ export const marcarTodasLidas = createServerFn({ method: "POST" })
       .update({ lida_em: new Date().toISOString() })
       .eq("user_id", context.userId)
       .is("lida_em", null);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

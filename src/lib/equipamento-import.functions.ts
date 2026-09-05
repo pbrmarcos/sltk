@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import ExcelJS from "exceljs";
@@ -19,7 +20,7 @@ async function assertEmPlanejamento(sb: AnySb, equipamentoId: string): Promise<{
     .select("status, codigo, modelo")
     .eq("id", equipamentoId)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   if (!data) throw new Error("Equipamento não encontrado");
   if (data.status !== "planejamento") {
     throw new Error("Import/edição em bloco disponível somente durante a fase de planejamento.");
@@ -73,7 +74,7 @@ export const exportEquipamentoDisciplinaXlsx = createServerFn({ method: "POST" }
       .eq("disciplina", data.disciplina)
       .is("deleted_at", null)
       .order("ordem", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Etapas");
@@ -169,7 +170,7 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
       .eq("equipamento_id", data.equipamentoId)
       .eq("disciplina", data.disciplina)
       .is("deleted_at", null);
-    if (exErr) throw new Error(exErr.message);
+    if (exErr) throw friendlyDbError(exErr);
 
     const byCode = new Map<string, any>();
     for (const r of existing ?? []) if (r.codigo) byCode.set(r.codigo, r);
@@ -223,7 +224,7 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
         .from("equipamento_disciplina_etapas")
         .update({ ...u.payload, updated_by: context.userId })
         .eq("id", u.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     for (const a of added) {
       const { error } = await sb
@@ -241,14 +242,14 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
           created_by: context.userId,
           updated_by: context.userId,
         });
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     for (const r of removed) {
       const { error } = await sb
         .from("equipamento_disciplina_etapas")
         .update({ deleted_at: new Date().toISOString(), updated_by: context.userId })
         .eq("id", (r as any).id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
 
     const descricao = `Importou Excel de ${data.disciplina}: ${added.length} novas, ${updated.length} atualizadas, ${removed.length} removidas`;
@@ -309,7 +310,7 @@ export const listHistoricoEquipamento = createServerFn({ method: "POST" })
     if (data.disciplina) q = q.eq("disciplina", data.disciplina);
     if (data.tipo) q = q.eq("tipo", data.tipo);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 

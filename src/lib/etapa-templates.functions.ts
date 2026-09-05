@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher } from "@/lib/admin-guard";
@@ -65,7 +66,7 @@ export const listEtapaTemplates = createServerFn({ method: "POST" })
     if (data.publicado === "sim") q = q.eq("publicado", true);
     if (data.publicado === "nao") q = q.eq("publicado", false);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (rows ?? []).map((r: any) => r.id);
     let counts: Record<string, number> = {};
@@ -83,7 +84,7 @@ export const getEtapaTemplate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
     const { data: tpl, error } = await sb.from("etapa_template").select("*").eq("id", data.id).is("deleted_at", null).maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!tpl) throw new Error("Template não encontrado.");
 
     const [{ data: itens }, { data: bom }, { data: versoes }] = await Promise.all([
@@ -122,7 +123,7 @@ export const createEtapaTemplate = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await writeAudit(sb, context.userId!, "create", "etapa_template", row.id, null, data);
     return { id: row.id };
   });
@@ -149,7 +150,7 @@ export const duplicateEtapaTemplate = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: itens } = await sb.from("etapa_template_item").select("*").eq("template_id", data.id).is("deleted_at", null);
     if (itens?.length) {
@@ -205,7 +206,7 @@ export const updateEtapaTemplate = createServerFn({ method: "POST" })
     if (tipoId !== undefined) upd.tipo_id = tipoId;
     const { data: before } = await sb.from("etapa_template").select("*").eq("id", id).maybeSingle();
     const { error } = await sb.from("etapa_template").update(upd).eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await writeAudit(sb, context.userId!, "update", "etapa_template", id, before, upd);
     return { ok: true };
   });
@@ -218,7 +219,7 @@ export const deleteEtapaTemplate = createServerFn({ method: "POST" })
     const sb = context.supabase as AnySb;
     await requireManagerRole(sb, context.userId!);
     const { error } = await sb.from("etapa_template").update({ deleted_at: new Date().toISOString() }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await writeAudit(sb, context.userId!, "delete", "etapa_template", data.id, null, null);
     return { ok: true };
   });
@@ -264,12 +265,12 @@ export const upsertEtapaTemplateItem = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { error } = await sb.from("etapa_template_item").update(row).eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await writeAudit(sb, context.userId!, "update", "etapa_template_item", data.id, null, row);
       return { id: data.id };
     }
     const { data: ins, error } = await sb.from("etapa_template_item").insert(row).select("id").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await writeAudit(sb, context.userId!, "create", "etapa_template_item", ins.id, null, row);
     return { id: ins.id };
   });
@@ -281,7 +282,7 @@ export const deleteEtapaTemplateItem = createServerFn({ method: "POST" })
     const sb = context.supabase as AnySb;
     await requireManagerRole(sb, context.userId!);
     const { error } = await sb.from("etapa_template_item").update({ deleted_at: new Date().toISOString() }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await writeAudit(sb, context.userId!, "delete", "etapa_template_item", data.id, null, null);
     return { ok: true };
   });
@@ -343,11 +344,11 @@ export const upsertEtapaTemplateBomItem = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { error } = await sb.from("etapa_template_bom_item").update(row).eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: ins, error } = await sb.from("etapa_template_bom_item").insert(row).select("id").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: ins.id };
   });
 
@@ -478,7 +479,7 @@ export const deleteEtapaTemplateBomItem = createServerFn({ method: "POST" })
     const sb = context.supabase as AnySb;
     await requireManagerRole(sb, context.userId!);
     const { error } = await sb.from("etapa_template_bom_item").update({ deleted_at: new Date().toISOString() }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 

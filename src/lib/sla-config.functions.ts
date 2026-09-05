@@ -3,6 +3,7 @@
 // Leitura permitida a admin/manager/engineer; escrita a admin/manager.
 
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -23,7 +24,7 @@ export const listSlaConfig = createServerFn({ method: "GET" })
       .select("origem, prioridade, resposta_horas, resolucao_horas, estagnado_horas, updated_at")
       .order("origem", { ascending: true })
       .order("prioridade", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: data ?? [] };
   });
 
@@ -49,6 +50,6 @@ export const upsertSlaConfig = createServerFn({ method: "POST" })
       },
       { onConflict: "origem,prioridade" },
     );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

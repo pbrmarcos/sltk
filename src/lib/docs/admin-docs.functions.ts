@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Bloco, DocumentoLayoutConfig } from "./types";
 import {
@@ -19,7 +20,7 @@ export const listBlocos = createServerFn({ method: "GET" })
       .select("*")
       .eq("tipo_codigo", data.tipo)
       .order("ordem_padrao", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (blocos || []) as unknown as Bloco[];
   });
 
@@ -32,7 +33,7 @@ export const getLayoutConfig = createServerFn({ method: "GET" })
       .select("*")
       .eq("tipo_codigo", data.tipo)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (layout ?? null) as unknown as DocumentoLayoutConfig | null;
   });
 
@@ -45,7 +46,7 @@ export const updateLayoutConfig = createServerFn({ method: "POST" })
     const { error } = await (supabaseAdmin as any)
       .from("documento_layout_config")
       .upsert({ ...data, updated_at: new Date().toISOString() }, { onConflict: "tipo_codigo" });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -57,7 +58,7 @@ export const listDocumentoTipos = createServerFn({ method: "GET" })
       .select("codigo, nome, prefixo_codigo, ativo")
       .eq("ativo", true)
       .order("nome");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data || []) as Array<{ codigo: string; nome: string; prefixo_codigo: string; ativo: boolean }>;
   });
 
@@ -92,7 +93,7 @@ export const updateBloco = createServerFn({ method: "POST" })
       .from("documento_blocos")
       .update({ ...patch, updated_at: new Date().toISOString() })
       .eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -105,7 +106,7 @@ export const listBlocoHistorico = createServerFn({ method: "GET" })
       .select("*")
       .eq("bloco_id", data.bloco_id)
       .order("versao_seq", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows || []) as Array<any>;
   });
 
@@ -127,7 +128,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.versao_id)
       .maybeSingle();
-    if (vErr) throw new Error(vErr.message);
+    if (vErr) throw friendlyDbError(vErr);
     if (!ver) throw new Error("Versão não encontrada.");
 
     const { data: atual } = await (supabaseAdmin as any)
@@ -175,7 +176,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
         updated_at: new Date().toISOString(),
       })
       .eq("id", ver.bloco_id);
-    if (uErr) throw new Error(uErr.message);
+    if (uErr) throw friendlyDbError(uErr);
 
     await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "documento_blocos",
@@ -224,7 +225,7 @@ export const translateBloco = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.bloco_id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!bloco) throw new Error("Bloco não encontrado.");
 
     const pt = (bloco.conteudo_pt as any) || {};
@@ -255,6 +256,6 @@ export const translateBloco = createServerFn({ method: "POST" })
       .from("documento_blocos")
       .update({ ...patch, updated_at: new Date().toISOString() })
       .eq("id", data.bloco_id);
-    if (uErr) throw new Error(uErr.message);
+    if (uErr) throw friendlyDbError(uErr);
     return { ok: true, alvos };
   });

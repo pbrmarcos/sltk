@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdminOrManager } from "@/lib/admin-guard";
@@ -63,7 +64,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("created_at", { ascending: false })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const userIds = Array.from(
       new Set((rows ?? []).map((r) => r.user_id).filter((v): v is string => !!v)),
@@ -74,7 +75,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
         .from("profiles")
         .select("id, email, full_name")
         .in("id", userIds);
-      if (pErr) throw new Error(pErr.message);
+      if (pErr) throw friendlyDbError(pErr);
       for (const p of profs ?? []) {
         userMap.set(p.id, { email: p.email ?? null, full_name: p.full_name ?? null });
       }
@@ -116,7 +117,7 @@ export const searchAuditUsers = createServerFn({ method: "POST" })
       q = q.order("full_name", { ascending: true });
     }
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []).map((r) => ({
       id: r.id,
       email: r.email ?? null,
@@ -169,7 +170,7 @@ export const exportAuditLog = createServerFn({ method: "POST" })
     const { data: rows, error } = await q
       .order("created_at", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const userIds = Array.from(
       new Set((rows ?? []).map((r) => r.user_id).filter((v): v is string => !!v)),

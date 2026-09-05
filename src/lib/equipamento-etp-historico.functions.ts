@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -33,7 +34,7 @@ export const listEtpHistorico = createServerFn({ method: "POST" })
       .eq("etp_id", data.etp_id)
       .order("created_at", { ascending: false })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as EtpHistoricoRow[];
   });
 
@@ -82,6 +83,6 @@ export const addEtpHistoricoNota = createServerFn({ method: "POST" })
       created_by: context.userId,
       created_by_nome: nome,
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

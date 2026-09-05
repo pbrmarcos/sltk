@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -53,7 +54,7 @@ export const listAlmoxEstoque = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("codigo", { ascending: true })
       .range(from, from + data.per_page - 1);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: kpi } = await sb.from("almox_saldo_item").select("total, valor_total, abaixo_minimo, ativo");
     const ativos = ((kpi ?? []) as any[]).filter((r) => r.ativo);
@@ -156,7 +157,7 @@ export const getAlmoxItem = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: item, error } = await sb.from("almox_itens").select("*").eq("id", data.id).maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!item) throw new Error("Item não encontrado.");
 
     const [saldo, porLocal, movs, reservas, locais] = await Promise.all([
@@ -324,7 +325,7 @@ export const listOcsParaReceber = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("emissao_em", { ascending: false })
       .limit(100);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const ids = ((ocs ?? []) as any[]).map((o) => o.id);
     let pend = new Map<string, number>();
     if (ids.length) {
@@ -640,7 +641,7 @@ export const buscarItensCatalogo = createServerFn({ method: "POST" })
       q = q.or(`codigo.ilike.${t},descricao.ilike.${t}`);
     }
     const { data: rows, error } = await q.order("codigo").limit(30);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -672,7 +673,7 @@ export const listOcsPainel = createServerFn({ method: "POST" })
       q = q.or(`numero.ilike.${t},fornecedor_razao_social.ilike.${t}`);
     }
     const { data: ocs, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = ((ocs ?? []) as any[]).map((o) => o.id);
     let tot = new Map<string, any>();

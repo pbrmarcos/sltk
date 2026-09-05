@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -83,7 +84,7 @@ export const listFATTemplates = createServerFn({ method: "POST" })
       .from(TBL)
       .select("id, nome, versao, ativo, descricao, created_at, updated_at, deleted_at")
       .order("versao", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = ((tpls ?? []) as Array<{ id: string }>).map((t) => t.id);
     const secCounts = new Map<string, number>();
@@ -134,7 +135,7 @@ export const getFATTemplate = createServerFn({ method: "POST" })
     else if (data.ativo) q = q.eq("ativo", true);
     else throw new Error("Informe id ou ativo");
     const { data: tpl, error } = await q.maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!tpl) return null;
 
     const tplRow = tpl as unknown as { id: string; nome: string; versao: number; ativo: boolean; descricao: string | null };
@@ -144,7 +145,7 @@ export const getFATTemplate = createServerFn({ method: "POST" })
       .select("id, template_id, ordem, titulo, descricao")
       .eq("template_id", tplRow.id)
       .order("ordem");
-    if (sErr) throw new Error(sErr.message);
+    if (sErr) throw friendlyDbError(sErr);
 
     const secIds = ((secs ?? []) as Array<{ id: string }>).map((s) => s.id);
     const { data: items } = secIds.length
@@ -208,7 +209,7 @@ export const novaVersaoFATTemplate = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const novoId = (novo as { id: string }).id;
 
     if (data.base_id) {
@@ -254,7 +255,7 @@ export const setFATTemplateAtivo = createServerFn({ method: "POST" })
       .from(TBL)
       .update({ ativo: true, updated_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -275,7 +276,7 @@ export const updateFATTemplate = createServerFn({ method: "POST" })
       .from(TBL)
       .update(patch as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -293,7 +294,7 @@ export const archiveFATTemplate = createServerFn({ method: "POST" })
         ativo: false,
       } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -320,7 +321,7 @@ export const upsertFATSecao = createServerFn({ method: "POST" })
           descricao: data.descricao ?? null,
         } as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: row, error } = await context.supabase
@@ -333,7 +334,7 @@ export const upsertFATSecao = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: (row as { id: string }).id };
   });
 
@@ -343,7 +344,7 @@ export const deleteFATSecao = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteSecaoInput.parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from(TBL_SEC).delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -382,7 +383,7 @@ export const upsertFATItem = createServerFn({ method: "POST" })
         .from(TBL_ITEM)
         .update(payload as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: row, error } = await context.supabase
@@ -390,7 +391,7 @@ export const upsertFATItem = createServerFn({ method: "POST" })
       .insert(payload as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: (row as { id: string }).id };
   });
 
@@ -400,6 +401,6 @@ export const deleteFATItem = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteItemInput.parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from(TBL_ITEM).delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

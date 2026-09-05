@@ -5,6 +5,7 @@
 // upload no Google Drive e histórico em `insumo_documentos_gerados`.
 
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -53,7 +54,7 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
       )
       .eq("id", data.insumo_id)
       .maybeSingle();
-    if (eIns) throw new Error(eIns.message);
+    if (eIns) throw friendlyDbError(eIns);
     if (!ins) throw new Error("Insumo não encontrado.");
 
     // Blocos configurados na Central de Documentos
@@ -269,7 +270,7 @@ export const listInsumoDocumentos = createServerFn({ method: "GET" })
       .eq("insumo_id", data.insumo_id)
       .order("criado_em", { ascending: false })
       .limit(60);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string;
       idioma: Idioma;
@@ -301,7 +302,7 @@ export const listRfqDocumentosGerados = createServerFn({ method: "GET" })
       )
       .order("criado_em", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     type Row = {
       id: string;

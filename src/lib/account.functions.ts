@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
@@ -20,7 +21,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       .select("full_name, avatar_url")
       .eq("id", context.userId)
       .maybeSingle();
-    if (befErr) throw new Error(befErr.message);
+    if (befErr) throw friendlyDbError(befErr);
 
     const update: { full_name: string; avatar_url?: string | null } = {
       full_name: data.full_name,
@@ -31,7 +32,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       .from("profiles")
       .update(update)
       .eq("id", context.userId);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
 
     const entries: Array<Record<string, unknown>> = [];
     if (before?.full_name !== data.full_name) {
@@ -71,7 +72,7 @@ export const removeMyAvatar = createServerFn({ method: "POST" })
       .select("avatar_url")
       .eq("id", context.userId)
       .maybeSingle();
-    if (befErr) throw new Error(befErr.message);
+    if (befErr) throw friendlyDbError(befErr);
 
     if (before?.avatar_url) {
       try {
@@ -89,7 +90,7 @@ export const removeMyAvatar = createServerFn({ method: "POST" })
       .from("profiles")
       .update({ avatar_url: null })
       .eq("id", context.userId);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
 
     if (before?.avatar_url !== null) {
       await logAuditServer(db, context.userId, {
@@ -126,7 +127,7 @@ export const changeMyPassword = createServerFn({ method: "POST" })
       .select("email")
       .eq("id", context.userId)
       .maybeSingle();
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw friendlyDbError(pErr);
     if (!profile?.email) throw new Error("Email do usuário não encontrado.");
 
     // Verify current password by attempting sign-in on a throwaway client.
@@ -146,12 +147,12 @@ export const changeMyPassword = createServerFn({ method: "POST" })
       const { error: upErr } = await admin.auth.admin.updateUserById(context.userId, {
         password: data.new_password,
       });
-      if (upErr) throw new Error(upErr.message);
+      if (upErr) throw friendlyDbError(upErr);
     } else {
       // No service role available: update through the freshly signed-in session.
       if (!signed?.session) throw new Error("Não foi possível validar a sessão para trocar a senha.");
       const { error: upErr } = await verify.auth.updateUser({ password: data.new_password });
-      if (upErr) throw new Error(upErr.message);
+      if (upErr) throw friendlyDbError(upErr);
     }
 
     await logAuditServer(db, context.userId, {
@@ -191,7 +192,7 @@ export const getMyAgendaPrefs = createServerFn({ method: "GET" })
       .select(AGENDA_FIELDS)
       .eq("id", context.userId)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const row = (data ?? {}) as Partial<AgendaPrefs>;
     return {
       agenda_provider: (row.agenda_provider ?? "google") as AgendaPrefs["agenda_provider"],
@@ -239,6 +240,6 @@ export const updateMyAgendaPrefs = createServerFn({ method: "POST" })
       .from("profiles")
       .update(data as never)
       .eq("id", context.userId);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

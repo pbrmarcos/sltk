@@ -3,6 +3,7 @@
  * "pendente" | "lido" e listar o mapa de status.
  */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -17,7 +18,7 @@ async function requireAdminOrManager(userId: string) {
     .select("role")
     .eq("user_id", userId)
     .in("role", ["admin", "manager"]);
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   if (!data || data.length === 0) throw new Error("Acesso restrito.");
   return supabaseAdmin;
 }
@@ -45,7 +46,7 @@ export const listFormInboxStatus = createServerFn({ method: "POST" })
       .from("form_inbox_status")
       .select("entity_type, entity_id, status, updated_at")
       .eq("entity_type", data.entity_type);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -76,6 +77,6 @@ export const setFormInboxStatus = createServerFn({ method: "POST" })
       },
       { onConflict: "entity_type,entity_id" },
     );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });

@@ -6,6 +6,7 @@
 // Central de Documentos (aba Entrevistas).
 
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -66,7 +67,7 @@ export const gerarDocumentoEntrevista = createServerFn({ method: "POST" })
       )
       .eq("id", data.entrevista_id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Entrevista não encontrada.");
 
     const [{ data: seg }, { data: criador }, { data: me }] = await Promise.all([
@@ -201,7 +202,7 @@ export const listEntrevistaDocumentosGerados = createServerFn({ method: "GET" })
       )
       .order("criado_em", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const segIds = Array.from(new Set((rows ?? []).map((r: any) => r.entrevistas?.segmento_id).filter(Boolean)));
     let segMap = new Map<string, string>();

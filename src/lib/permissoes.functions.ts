@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -63,7 +64,7 @@ export const listRoleModulePermissions = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("role_module_permissions")
       .select("role, module, enabled");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as RoleModulePermissionRow[];
   });
 
@@ -75,7 +76,7 @@ export const getMyModules = createServerFn({ method: "GET" })
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
-    if (rErr) throw new Error(rErr.message);
+    if (rErr) throw friendlyDbError(rErr);
     const roles = (roleRows ?? []).map((r) => r.role as AppRoleName);
     if (roles.includes("admin")) return APP_MODULES as readonly AppModule[];
     if (roles.length === 0) return [] as AppModule[];
@@ -84,7 +85,7 @@ export const getMyModules = createServerFn({ method: "GET" })
       .select("module, enabled, role")
       .in("role", roles)
       .eq("enabled", true);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const set = new Set<AppModule>();
     for (const r of data ?? []) set.add(r.module as AppModule);
     return Array.from(set);
@@ -241,7 +242,7 @@ export async function assertAdmin(supabase: any, userId: string) {
     .eq("user_id", userId)
     .eq("role", "admin")
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   if (!data) throw new Error("Acesso restrito a administradores.");
 }
 
@@ -273,7 +274,7 @@ export async function applyBulkSetRolePermissions(
   const { error } = await supabase
     .from("role_module_permissions")
     .upsert(rows, { onConflict: "role,module" });
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   return { ok: true, count: rows.length };
 }
 
@@ -307,7 +308,7 @@ export const listPermissoesAuditLog = createServerFn({ method: "GET" })
       .eq("table_name", "role_module_permissions")
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const rows = (data ?? []) as Array<{
       id: string;
       created_at: string;

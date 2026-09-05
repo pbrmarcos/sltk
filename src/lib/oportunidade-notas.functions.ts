@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -22,7 +23,7 @@ export const listOportunidadeNotas = createServerFn({ method: "POST" })
       .eq("oportunidade_id", data.oportunidade_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as never;
   });
 
@@ -51,7 +52,7 @@ export const addOportunidadeNota = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: (ins as { id: string }).id };
   });
 
@@ -63,6 +64,6 @@ export const removerOportunidadeNota = createServerFn({ method: "POST" })
       .from("oportunidade_notas" as never)
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

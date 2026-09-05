@@ -5,6 +5,7 @@
 // toda validação/rate-limit fica aqui.
 
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
@@ -158,7 +159,7 @@ export const publicAbrirChamado = createServerFn({ method: "POST" })
         break;
       }
       // 23505 = unique violation → colisão codigo/token: retry.
-      if (error.code !== "23505") throw new Error(error.message);
+      if (error.code !== "23505") throw friendlyDbError(error);
     }
     if (!inserted) throw new Error("Não foi possível gerar o código. Tente novamente.");
 
@@ -199,7 +200,7 @@ export const publicGetChamado = createServerFn({ method: "POST" })
       .select("*")
       .eq("token_hash", hash)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!chamado) throw new Error("Chamado não encontrado. Verifique o link.");
 
     const { data: msgs } = await sb
@@ -246,7 +247,7 @@ export const publicEnviarMensagem = createServerFn({ method: "POST" })
       autor_nome: chamado.visitante_nome,
       conteudo: data.conteudo.trim(),
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -270,13 +271,13 @@ export const publicAcaoChamado = createServerFn({ method: "POST" })
         .from("chamados")
         .update({ status: "resolvido", resolvido_em: new Date().toISOString() })
         .eq("id", chamado.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     } else {
       const { error } = await sb
         .from("chamados")
         .update({ status: "reaberto", reaberto_em: new Date().toISOString(), resolvido_em: null })
         .eq("id", chamado.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     return { ok: true };
   });

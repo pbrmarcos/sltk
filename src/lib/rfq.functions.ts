@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { getSupabasePublicConfig } from "@/integrations/supabase/config";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -52,7 +53,7 @@ export const listRfqTipos = createServerFn({ method: "GET" })
       .select("id, codigo, nome_pt, nome_es, nome_en, familia, descricao")
       .eq("ativo", true)
       .order("nome_pt", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{
       id: string;
       codigo: string;
@@ -74,7 +75,7 @@ export const getRfqTipoSchema = createServerFn({ method: "GET" })
       .select("id, codigo, nome_pt, nome_es, nome_en, campos_schema")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!row) throw new Error("Tipo não encontrado.");
     return row as {
       id: string;
@@ -100,7 +101,7 @@ export const adminListRfqTipos = createServerFn({ method: "GET" })
       .from("rfq_formulario_tipo")
       .select("id, codigo, nome_pt, nome_es, nome_en, familia, descricao, campos_schema, ativo, updated_at")
       .order("nome_pt", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{
       id: string;
       codigo: string;
@@ -174,7 +175,7 @@ export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
         .from("rfq_formulario_tipo")
         .update(payload)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { ok: true as const, id: data.id };
     }
     const { data: inserted, error } = await sb
@@ -182,7 +183,7 @@ export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
       .insert(payload)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const, id: inserted.id as string };
   });
 
@@ -200,7 +201,7 @@ export const adminToggleRfqTipoAtivo = createServerFn({ method: "POST" })
       .from("rfq_formulario_tipo")
       .update({ ativo: data.ativo, updated_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -257,7 +258,7 @@ export const emitirRfqLink = createServerFn({ method: "POST" })
       })
       .select("id, slug")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return inserted as { id: string; slug: string };
   });
 
@@ -276,7 +277,7 @@ export const listRfqLinksCliente = createServerFn({ method: "GET" })
       )
       .eq("cliente_id", data.cliente_id)
       .order("criado_em", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -290,7 +291,7 @@ export const arquivarRfqLink = createServerFn({ method: "POST" })
       .from("rfq_formulario_link")
       .update({ status: "arquivado" })
       .eq("id", data.link_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -320,7 +321,7 @@ export const listRfqSubmissoes = createServerFn({ method: "GET" })
     if (data.cliente_id) q = q.eq("cliente_id", data.cliente_id);
     if (data.apenas_nao_lidas) q = q.is("lida_em", null);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -337,7 +338,7 @@ export const getRfqSubmissao = createServerFn({ method: "GET" })
       )
       .eq("id", data.id)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const { data: anexos } = await sb
       .from("rfq_submissao_anexo")
       .select("id, campo_id, nome, mime, drive_view_url, criado_em")
@@ -369,14 +370,14 @@ export const listSalesUsers = createServerFn({ method: "GET" })
       .from("user_roles")
       .select("user_id")
       .eq("role", "sales");
-    if (e1) throw new Error(e1.message);
+    if (e1) throw friendlyDbError(e1);
     const ids = Array.from(new Set((roles ?? []).map((r: any) => r.user_id as string)));
     if (ids.length === 0) return [];
     const { data: profs, error: e2 } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, email")
       .in("id", ids);
-    if (e2) throw new Error(e2.message);
+    if (e2) throw friendlyDbError(e2);
     return (profs ?? []).map((p: any) => ({
       id: p.id as string,
       nome: (p.full_name || p.email || "—") as string,
@@ -394,7 +395,7 @@ export const listClienteLiberacoes = createServerFn({ method: "GET" })
       .select("id, sales_id, liberado_por, liberado_em, revogado_em, revogado_por, observacoes")
       .eq("cliente_id", data.cliente_id)
       .order("liberado_em", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if ((rows ?? []).length === 0) return [];
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
@@ -445,7 +446,7 @@ export const liberarClienteParaSales = createServerFn({ method: "POST" })
           observacoes: data.observacoes ?? null,
         })
         .eq("id", existente.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { ok: true as const, id: existente.id };
     }
     const { data: inserted, error } = await sb
@@ -458,7 +459,7 @@ export const liberarClienteParaSales = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const, id: inserted.id };
   });
 
@@ -474,7 +475,7 @@ export const revogarLiberacaoSales = createServerFn({ method: "POST" })
       .from("cliente_sales_liberacao")
       .update({ revogado_em: new Date().toISOString(), revogado_por: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -499,7 +500,7 @@ export const getRfqPublicoPorSlug = createServerFn({ method: "GET" })
       )
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!link) return { ok: false as const, motivo: "nao_encontrado" as const };
     if (link.status !== "aberto") return { ok: false as const, motivo: "fechado" as const };
     if (link.expira_em && new Date(link.expira_em).getTime() < Date.now()) {
@@ -614,7 +615,7 @@ export const vincularSubmissaoOportunidade = createServerFn({ method: "POST" })
         updated_by: context.userId,
       })
       .eq("id", data.oportunidade_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -635,7 +636,7 @@ export const listOportunidadesDoCliente = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string;
       codigo: string | null;

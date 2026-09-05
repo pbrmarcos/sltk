@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const BUCKET = "orcamento-imagens";
@@ -43,7 +44,7 @@ export const uploadOrcamentoImagem = createServerFn({ method: "POST" })
 
     const { data: cli, error: cErr } = await context.supabase
       .from("clientes").select("id, codigo").eq("id", data.cliente_id).maybeSingle();
-    if (cErr) throw new Error(cErr.message);
+    if (cErr) throw friendlyDbError(cErr);
     if (!cli) throw new Error("Cliente não encontrado.");
 
     const cliFolder = cli.codigo || cli.id;
@@ -55,7 +56,7 @@ export const uploadOrcamentoImagem = createServerFn({ method: "POST" })
     const { error: uErr } = await context.supabase.storage
       .from(BUCKET)
       .upload(path, bytes, { contentType: data.content_type, upsert: false });
-    if (uErr) throw new Error(uErr.message);
+    if (uErr) throw friendlyDbError(uErr);
 
     return { path, bucket: BUCKET };
   });
@@ -68,6 +69,6 @@ export const signOrcamentoImagem = createServerFn({ method: "POST" })
     const { data: r, error } = await context.supabase.storage
       .from(BUCKET)
       .createSignedUrl(data.path, 3600);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { url: r.signedUrl as string };
   });

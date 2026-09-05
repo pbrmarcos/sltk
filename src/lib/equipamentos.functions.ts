@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -21,7 +22,7 @@ export const listClienteEquipamentos = createServerFn({ method: "POST" })
       .eq("cliente_id", data.clienteId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as any[];
   });
 
@@ -64,7 +65,7 @@ export const createEquipamento = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row;
   });
 
@@ -78,6 +79,6 @@ export const softDeleteEquipamento = createServerFn({ method: "POST" })
       .from("cliente_equipamentos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

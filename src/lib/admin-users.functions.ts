@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanActOn, assertAdmin as assertAdminRole } from "@/lib/admin-guard";
@@ -54,7 +55,7 @@ export const listAdminUsers = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .eq("role", "admin")
       .maybeSingle();
-    if (adminRoleError) throw new Error(adminRoleError.message);
+    if (adminRoleError) throw friendlyDbError(adminRoleError);
     if (!adminRole) throw new Error("Acesso restrito a administradores.");
     const admin = context.supabase;
 
@@ -76,7 +77,7 @@ export const listAdminUsers = createServerFn({ method: "POST" })
         .from("user_roles")
         .select("user_id")
         .eq("role", data.role);
-      if (rErr) throw new Error(rErr.message);
+      if (rErr) throw friendlyDbError(rErr);
       const list = (ids ?? []).map((r) => r.user_id);
       if (list.length === 0) {
         return { rows: [] as AdminUserRow[], total: 0 };
@@ -89,7 +90,7 @@ export const listAdminUsers = createServerFn({ method: "POST" })
     const { data: profiles, count, error } = await q
       .order("created_at", { ascending: false })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (profiles ?? []).map((p) => p.id);
     let rolesByUser = new Map<string, typeof ROLES[number][]>();
@@ -98,7 +99,7 @@ export const listAdminUsers = createServerFn({ method: "POST" })
         .from("user_roles")
         .select("user_id, role")
         .in("user_id", ids);
-      if (rrErr) throw new Error(rrErr.message);
+      if (rrErr) throw friendlyDbError(rrErr);
       for (const r of roleRows ?? []) {
         const arr = rolesByUser.get(r.user_id) ?? [];
         arr.push(r.role as typeof ROLES[number]);
@@ -137,7 +138,7 @@ export const createAdminUser = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .eq("role", "admin")
       .maybeSingle();
-    if (adminRoleError) throw new Error(adminRoleError.message);
+    if (adminRoleError) throw friendlyDbError(adminRoleError);
     if (!adminRole) throw new Error("Acesso restrito a administradores.");
 
     let newId: string;
@@ -206,12 +207,12 @@ export const createAdminUser = createServerFn({ method: "POST" })
           { id: newId, email: data.email, full_name: data.full_name },
           { onConflict: "id" },
         );
-      if (profileError) throw new Error(profileError.message);
+      if (profileError) throw friendlyDbError(profileError);
 
       const { error: rolesError } = await privilegedClient
         .from("user_roles")
         .insert(uniqueRoles.map((role) => ({ user_id: newId, role })));
-      if (rolesError) throw new Error(rolesError.message);
+      if (rolesError) throw friendlyDbError(rolesError);
     } else {
       // O RPC revalida auth.uid() como admin e executa perfil + roles
       // atomicamente, sem expor privilégios de escrita no cliente.
@@ -224,7 +225,7 @@ export const createAdminUser = createServerFn({ method: "POST" })
         _full_name: data.full_name,
         _roles: uniqueRoles,
       });
-      if (finalizeError) throw new Error(finalizeError.message);
+      if (finalizeError) throw friendlyDbError(finalizeError);
     }
 
     // audit_log é append-only para usuários autenticados; no fallback, os
@@ -261,14 +262,14 @@ export const updateAdminUser = createServerFn({ method: "POST" })
       .select("full_name")
       .eq("id", data.id)
       .maybeSingle();
-    if (befErr) throw new Error(befErr.message);
+    if (befErr) throw friendlyDbError(befErr);
     if (!before) throw new Error("Usuário não encontrado");
 
     const { data: existingRoles, error: erErr } = await admin
       .from("user_roles")
       .select("role")
       .eq("user_id", data.id);
-    if (erErr) throw new Error(erErr.message);
+    if (erErr) throw friendlyDbError(erErr);
     const oldRoles = (existingRoles ?? []).map((r) => r.role as typeof ROLES[number]);
     const newRoles = Array.from(new Set(data.roles));
 
@@ -288,7 +289,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
         .from("profiles")
         .update({ full_name: data.full_name })
         .eq("id", data.id);
-      if (upErr) throw new Error(upErr.message);
+      if (upErr) throw friendlyDbError(upErr);
       entries.push({
         table_name: "profiles",
         record_id: data.id,
@@ -303,7 +304,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
       const { error: addErr } = await admin
         .from("user_roles")
         .insert(toAdd.map((role) => ({ user_id: data.id, role })));
-      if (addErr) throw new Error(addErr.message);
+      if (addErr) throw friendlyDbError(addErr);
     }
     if (toRemove.length > 0) {
       const { error: rmErr } = await admin
@@ -311,7 +312,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
         .delete()
         .eq("user_id", data.id)
         .in("role", toRemove);
-      if (rmErr) throw new Error(rmErr.message);
+      if (rmErr) throw friendlyDbError(rmErr);
     }
     if (toAdd.length > 0 || toRemove.length > 0) {
       entries.push({
@@ -359,19 +360,19 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
         disabled_by: context.userId,
       } as never)
       .eq("id", data.id);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
 
     const { error: delErr } = await admin
       .from("user_roles")
       .delete()
       .eq("user_id", data.id);
-    if (delErr) throw new Error(delErr.message);
+    if (delErr) throw friendlyDbError(delErr);
 
     // Bane a conta no Auth (revoga refresh tokens).
     const { error: banErr } = await admin.auth.admin.updateUserById(data.id, {
       ban_duration: "876000h",
     });
-    if (banErr) throw new Error(banErr.message);
+    if (banErr) throw friendlyDbError(banErr);
 
     // Derruba sessões ativas — não podemos esperar o JWT expirar (~1h).
     try {
@@ -408,12 +409,12 @@ export const reactivateAdminUser = createServerFn({ method: "POST" })
         disabled_reason: null,
       } as never)
       .eq("id", data.id);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
 
     const { error: banErr } = await admin.auth.admin.updateUserById(data.id, {
       ban_duration: "none",
     });
-    if (banErr) throw new Error(banErr.message);
+    if (banErr) throw friendlyDbError(banErr);
 
     await logAuditServer(admin, context.userId, [
       {
@@ -448,7 +449,7 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .eq("role", "admin")
       .maybeSingle();
-    if (adminErr) throw new Error(adminErr.message);
+    if (adminErr) throw friendlyDbError(adminErr);
     if (!isAdminRow) throw new Error("Acesso restrito a administradores.");
 
     // Vetor de escalação: um ator só pode resetar alvos com rank inferior.
@@ -461,7 +462,7 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, {
         password: data.password,
       });
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       try {
         await logAuditServer(supabaseAdmin, context.userId, [
           {
@@ -491,7 +492,7 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       _user_id: data.id,
       _password: data.password,
     });
-    if (rpcErr) throw new Error(rpcErr.message);
+    if (rpcErr) throw friendlyDbError(rpcErr);
     return { ok: true, mode: "password" as const, email: null as string | null };
 
 

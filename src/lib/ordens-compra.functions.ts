@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { OC_REQUIRED_FIELDS, OC_STATUS, type OcStatus } from "@/lib/ordens-compra.shared";
@@ -71,7 +72,7 @@ export const listOrdensCompra = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("created_at", { ascending: false })
       .range(from, from + data.per_page - 1);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -125,7 +126,7 @@ export const getOrdemCompra = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: itens } = await sb
       .from("ordem_compra_itens")
@@ -211,7 +212,7 @@ export const createOrdemCompra = createServerFn({ method: "POST" })
     };
 
     const { data: oc, error } = await sb.from("ordens_compra").insert(insert).select("id, numero").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await logHistorico(sb, oc.id, uid, "OC criada", { status_novo: "rascunho" });
     return oc;
@@ -521,7 +522,7 @@ export const updateOrdemCompra = createServerFn({ method: "POST" })
     }
 
     const { error } = await sb.from("ordens_compra").update(data.patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     if (data.patch.valor_frete !== undefined) {
       await sb.rpc("oc_recalc_totais", { oc_id: data.id });
@@ -561,10 +562,10 @@ export const upsertItemOc = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     if (id) {
       const { error } = await sb.from("ordem_compra_itens").update(rest).eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     } else {
       const { error } = await sb.from("ordem_compra_itens").insert(rest);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     return { ok: true };
   });
@@ -577,7 +578,7 @@ export const removeItemOc = createServerFn({ method: "POST" })
     const uid = context.userId;
     if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
     const { error } = await sb.from("ordem_compra_itens").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -619,7 +620,7 @@ export const setOcStatus = createServerFn({ method: "POST" })
     if (data.status === "enviada") patch.enviado_em = new Date().toISOString();
 
     const { error } = await sb.from("ordens_compra").update(patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await logHistorico(sb, data.id, uid, `Status alterado para ${data.status}`, {
       status_anterior: cur.status as OcStatus,

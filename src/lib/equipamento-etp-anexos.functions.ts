@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { driveAuth } from "@/lib/docs/drive-auth.server";
@@ -151,7 +152,7 @@ export const uploadEtpAnexo = createServerFn({ method: "POST" })
       )
       .eq("id", data.etp_id)
       .maybeSingle();
-    if (etpErr) throw new Error(etpErr.message);
+    if (etpErr) throw friendlyDbError(etpErr);
     if (!etp) throw new Error("ETP não encontrado ou sem acesso.");
 
     const cli = (etp as unknown as { clientes: { codigo: string; razao_social: string } }).clientes;
@@ -208,7 +209,7 @@ export const uploadEtpAnexo = createServerFn({ method: "POST" })
       } as never)
       .select("id, nome_final, drive_view_url")
       .single();
-    if (insErr) throw new Error(insErr.message);
+    if (insErr) throw friendlyDbError(insErr);
 
     return row as { id: string; nome_final: string; drive_view_url: string };
   });
@@ -225,7 +226,7 @@ export const listEtpAnexos = createServerFn({ method: "POST" })
       .eq("etp_id", data.etp_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string;
       nome_final: string;
@@ -258,7 +259,7 @@ export const removerEtpAnexo = createServerFn({ method: "POST" })
       .select("id, drive_file_id")
       .eq("id", data.id)
       .maybeSingle();
-    if (getErr) throw new Error(getErr.message);
+    if (getErr) throw friendlyDbError(getErr);
     if (!row) throw new Error("Anexo não encontrado.");
 
     const driveId = (row as unknown as { drive_file_id: string }).drive_file_id;
@@ -274,7 +275,7 @@ export const removerEtpAnexo = createServerFn({ method: "POST" })
       .from("equipamento_etp_anexos" as never)
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -329,7 +330,7 @@ export const reindexEtpAnexos = createServerFn({ method: "POST" })
       .is("deleted_at", null);
     if (data.etp_id) q = q.eq("etp_id", data.etp_id);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const root = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || "root";
     const folderCache = new Map<string, string>();

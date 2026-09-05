@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher } from "@/lib/admin-guard";
@@ -18,7 +19,7 @@ export const listEtapaAnexos = createServerFn({ method: "POST" })
       .eq("etapa_id", data.etapa_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -76,7 +77,7 @@ export const uploadEtapaAnexo = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: row.id as string };
   });
 
@@ -94,7 +95,7 @@ export const getEtapaAnexoUrl = createServerFn({ method: "POST" })
     const { data: signed, error: se } = await sb.storage
       .from("etapa-anexos")
       .createSignedUrl(row.storage_path, 600);
-    if (se) throw new Error(se.message);
+    if (se) throw friendlyDbError(se);
     return { url: signed.signedUrl as string };
   });
 
@@ -116,6 +117,6 @@ export const deleteEtapaAnexo = createServerFn({ method: "POST" })
       .from("equipamento_etapa_anexos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.anexo_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

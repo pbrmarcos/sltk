@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { driveAuth } from "@/lib/docs/drive-auth.server";
@@ -135,7 +136,7 @@ export const uploadClienteDocumento = createServerFn({ method: "POST" })
       .eq("id", data.cliente_id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (cErr) throw new Error(cErr.message);
+    if (cErr) throw friendlyDbError(cErr);
     if (!cliente) throw new Error("Cliente não encontrado ou sem acesso.");
 
     const now = new Date();
@@ -184,7 +185,7 @@ export const uploadClienteDocumento = createServerFn({ method: "POST" })
       } as never)
       .select("id, drive_view_url, nome_final")
       .single();
-    if (dErr) throw new Error(dErr.message);
+    if (dErr) throw friendlyDbError(dErr);
 
     // Registra interação na timeline
     await context.supabase.from("cliente_interacoes").insert({
@@ -215,7 +216,7 @@ export const removerClienteDocumento = createServerFn({ method: "POST" })
       .from("cliente_documentos")
       .update({ deleted_at: new Date().toISOString() } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     if (doc) {
       const { data: profile } = await context.supabase

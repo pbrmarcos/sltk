@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { driveAuth } from "@/lib/docs/drive-auth.server";
@@ -150,7 +151,7 @@ export const uploadOportunidadeAnexo = createServerFn({ method: "POST" })
       .select("id, codigo, titulo, empresa_lead, cliente_id, clientes(codigo, razao_social)")
       .eq("id", data.oportunidade_id)
       .maybeSingle();
-    if (oErr) throw new Error(oErr.message);
+    if (oErr) throw friendlyDbError(oErr);
     if (!opp) throw new Error("Oportunidade não encontrada ou sem acesso.");
 
     const cliente = (opp as unknown as {
@@ -206,7 +207,7 @@ export const uploadOportunidadeAnexo = createServerFn({ method: "POST" })
       } as never)
       .select("id, drive_view_url, nome_final")
       .single();
-    if (aErr) throw new Error(aErr.message);
+    if (aErr) throw friendlyDbError(aErr);
 
     return {
       id: (anexo as { id: string }).id,
@@ -225,7 +226,7 @@ export const listOportunidadeAnexos = createServerFn({ method: "POST" })
       .eq("oportunidade_id", data.oportunidade_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string;
       nome_final: string;
@@ -245,6 +246,6 @@ export const removerOportunidadeAnexo = createServerFn({ method: "POST" })
       .from("oportunidade_anexos" as never)
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

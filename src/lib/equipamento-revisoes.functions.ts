@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { REVISAO_DISCIPLINAS, REVISAO_STATUS } from "@/lib/engenharia.shared";
@@ -35,7 +36,7 @@ export const listAllRevisoes = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("updated_at", { ascending: false })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -72,7 +73,7 @@ export const createRevisao = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row;
   });
 
@@ -96,7 +97,7 @@ export const updateRevisao = createServerFn({ method: "POST" })
       .from("equipamento_revisoes")
       .update({ ...rest, updated_by: context.userId })
       .eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -108,6 +109,6 @@ export const removerRevisao = createServerFn({ method: "POST" })
       .from("equipamento_revisoes")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

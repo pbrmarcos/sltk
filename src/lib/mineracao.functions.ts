@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdminOrManager as assertAdmin, hasAnyRole } from "@/lib/admin-guard";
@@ -45,7 +46,7 @@ async function assertComercial(supabase: AnyDb, userId: string) {
 
 async function loadCreds(supabase: AnyDb) {
   const { data, error } = await supabase.rpc("mineracao_creds");
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   const row = (Array.isArray(data) ? data[0] : data) as
     | { api_base_url: string; usuario: string | null; senha: string | null; delay_ms: number }
     | null;
@@ -72,7 +73,7 @@ export const getMineracaoConfig = createServerFn({ method: "GET" })
     const db = anyDb(context.supabase);
     await assertAdmin(db, context.userId);
     const { data, error } = await db.rpc("mineracao_config_admin");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const row = (data ?? {}) as Record<string, any>;
     return {
       api_base_url: row["api_base_url"] ?? "",
@@ -128,7 +129,7 @@ export const saveMineracaoConfig = createServerFn({ method: "POST" })
       .from("mineracao_config")
       .update(patch)
       .eq("singleton", true);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -222,7 +223,7 @@ export const atualizarRestricoes = createServerFn({ method: "POST" })
       const { data, error } = await db.rpc("mineracao_restricoes_set", {
         _snapshot: dados as unknown as Record<string, unknown>,
       });
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { dados, atualizado_em: (data as string) ?? new Date().toISOString() };
     } catch (err) {
       return { dados: null, atualizado_em: null, erro: (err as Error).message };
@@ -307,7 +308,7 @@ export const listarBases = createServerFn({ method: "POST" })
       .limit(2000);
     if (data.pais) q = q.or(`key_country.eq.${data.pais},pais.ilike.%${data.pais}%`);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return ((rows ?? []) as Array<Record<string, any>>).map(mapBaseRow);
   });
 
@@ -322,7 +323,7 @@ export const statusSincronizacaoBases = createServerFn({ method: "GET" })
       .select("synced_at")
       .order("synced_at", { ascending: false })
       .limit(1);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const { count } = await db
       .from("penta_bases")
       .select("id", { count: "exact", head: true });
@@ -389,7 +390,7 @@ export const sincronizarBases = createServerFn({ method: "POST" })
       const { error } = await db
         .from("penta_bases")
         .upsert(registros, { onConflict: "key_country,key_operation,key_version" });
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
 
     return {
@@ -430,7 +431,7 @@ export const solicitarSincronizacaoBases = createServerFn({ method: "POST" })
       p_origem_id: null,
       p_link: "/comercial/mineracao",
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -537,7 +538,7 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
 
     // Cota diária de consultas — bloqueia antes de chamar o provedor.
     const { error: cotaErr } = await admin.rpc("mineracao_consumir_consultas", { _chamadas: 1 });
-    if (cotaErr) throw new Error(cotaErr.message);
+    if (cotaErr) throw friendlyDbError(cotaErr);
 
     const { pentaOperations } = await import("@/lib/mineracao/penta.server");
 
@@ -702,7 +703,7 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (campErr) throw new Error(campErr.message);
+    if (campErr) throw friendlyDbError(campErr);
     const campanhaId = (campanha as { id: string }).id;
 
     if (leads.length) {
@@ -720,7 +721,7 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
           ultima_operacao: l.ultima_operacao,
         })),
       );
-      if (resErr) throw new Error(resErr.message);
+      if (resErr) throw friendlyDbError(resErr);
     }
 
     return {
@@ -757,7 +758,7 @@ export const descobrirBaseImportacao = createServerFn({ method: "POST" })
       .eq("active", true)
       .ilike("pais", `%${data.pais}%`)
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const base = ((rows ?? []) as Array<Record<string, any>>).find((b) =>
       /import/i.test(String(b["key_operation"])),
     );
@@ -821,7 +822,7 @@ export const salvarAnotacaoLead = createServerFn({ method: "POST" })
       .from("mineracao_resultados")
       .update({ anotacao: data.anotacao || null })
       .eq("id", data.resultado_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -861,7 +862,7 @@ export const buscaAnterior = createServerFn({ method: "POST" })
       .limit(10);
     if (data.paisOrigem) q = q.eq("pais_origem", data.paisOrigem);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const alvo = [...data.rubros].sort().join(",");
     const match = ((rows ?? []) as Array<Record<string, any>>).find(
       (r) => [...((r["rubros"] ?? []) as string[])].sort().join(",") === alvo,
@@ -889,7 +890,7 @@ export const listarCampanhas = createServerFn({ method: "GET" })
       )
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const rows = (data ?? []) as Array<Record<string, any>>;
 
     // Quem executou cada busca (evita dois vendedores repetirem o mesmo trabalho).
@@ -934,7 +935,7 @@ export const listarResultados = createServerFn({ method: "POST" })
       .limit(1000);
     if (data.busca) q = q.or(`empresa.ilike.%${data.busca}%,contraparte.ilike.%${data.busca}%`);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<Record<string, any>>;
   });
 
@@ -961,7 +962,7 @@ export const converterLeadEmOportunidade = createServerFn({ method: "POST" })
         "id, empresa, contraparte, pais, operacoes, rubros, valor_total, anotacao, ultima_operacao, convertido_oportunidade_id, campanha_id",
       )
       .in("id", data.resultado_ids);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const papel = data.papel ?? "importador";
     const criadas: Array<{ resultado_id: string; oportunidade_id: string; codigo: string }> = [];
@@ -1016,7 +1017,7 @@ export const converterLeadEmOportunidade = createServerFn({ method: "POST" })
           })
           .select("id, codigo")
           .single();
-        if (opErr) throw new Error(opErr.message);
+        if (opErr) throw friendlyDbError(opErr);
         const oportunidade = op as { id: string; codigo: string };
         if (!primeira) primeira = oportunidade;
         criadas.push({

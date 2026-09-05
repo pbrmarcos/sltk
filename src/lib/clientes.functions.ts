@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
@@ -38,7 +39,7 @@ export const listPaises = createServerFn({ method: "GET" })
       .from("paises_config")
       .select("*")
       .order("nome", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });
 
@@ -87,7 +88,7 @@ export const listClientes = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("codigo", { ascending: true })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -110,7 +111,7 @@ export const getCliente = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!cliente) throw new Error("Cliente não encontrado");
 
     const { data: contatos, error: cErr } = await context.supabase
@@ -120,7 +121,7 @@ export const getCliente = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .order("principal", { ascending: false })
       .order("nome", { ascending: true });
-    if (cErr) throw new Error(cErr.message);
+    if (cErr) throw friendlyDbError(cErr);
 
     const { data: socios } = await context.supabase
       .from("cliente_socios")
@@ -142,7 +143,7 @@ export const getClienteByCodigo = createServerFn({ method: "POST" })
       .eq("codigo", data.codigo)
       .is("deleted_at", null)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!cliente) throw new Error("Cliente não encontrado");
 
     const { data: contatos } = await context.supabase
@@ -169,7 +170,7 @@ async function loadPais(admin: SupabaseClient<Database>, codigo: string) {
     .select("codigo, documento_nome, documento_regex")
     .eq("codigo", codigo)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   if (!data) {
     const err = new Error("País inválido.");
     (err as any).code = "pais_inexistente";
@@ -281,7 +282,7 @@ export const createCliente = createServerFn({ method: "POST" })
       .insert(insertPayload as never)
       .select("id, codigo")
       .single();
-    if (insErr) throw new Error(insErr.message);
+    if (insErr) throw friendlyDbError(insErr);
 
     const { error: cErr } = await admin.from("cliente_contatos").insert(
       contatos.map((c) => ({
@@ -294,7 +295,7 @@ export const createCliente = createServerFn({ method: "POST" })
         principal: c.principal,
       })),
     );
-    if (cErr) throw new Error(cErr.message);
+    if (cErr) throw friendlyDbError(cErr);
 
     if (data.socios && data.socios.length > 0) {
       const { error: sErr } = await admin.from("cliente_socios").insert(
@@ -307,7 +308,7 @@ export const createCliente = createServerFn({ method: "POST" })
           updated_by: context.userId,
         })),
       );
-      if (sErr) throw new Error(sErr.message);
+      if (sErr) throw friendlyDbError(sErr);
     }
 
     await logAuditServer(admin, context.userId, {
@@ -340,7 +341,7 @@ export const updateCliente = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (befErr) throw new Error(befErr.message);
+    if (befErr) throw friendlyDbError(befErr);
     if (!before) throw new Error("Cliente não encontrado");
 
     const patch: Record<string, unknown> = {};
@@ -383,7 +384,7 @@ export const updateCliente = createServerFn({ method: "POST" })
     patch.updated_by = context.userId;
 
     const { error: upErr } = await admin.from("clientes").update(patch as never).eq("id", data.id);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
 
     // Diff por campo
     const diff: Array<{
@@ -436,7 +437,7 @@ export const updateCliente = createServerFn({ method: "POST" })
           principal: c.principal,
         })),
       );
-      if (cErr) throw new Error(cErr.message);
+      if (cErr) throw friendlyDbError(cErr);
       diff.push({
         table_name: "cliente_contatos",
         record_id: data.id,
@@ -463,7 +464,7 @@ export const deleteCliente = createServerFn({ method: "POST" })
       .from("clientes")
       .update({ deleted_at: now, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logAuditServer(admin, context.userId, {
       table_name: "clientes",
       record_id: data.id,
@@ -490,7 +491,7 @@ export const listClienteOportunidades = createServerFn({ method: "POST" })
       .eq("cliente_id", data.clienteId)
       .is("deleted_at", null)
       .order("updated_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -506,7 +507,7 @@ export const listClienteProcessos = createServerFn({ method: "POST" })
       .eq("cliente_id", data.clienteId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -520,7 +521,7 @@ export const listClienteDocumentos = createServerFn({ method: "POST" })
       .eq("cliente_id", data.clienteId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -551,7 +552,7 @@ export const listClienteTimeline = createServerFn({ method: "POST" })
         .order("updated_at", { ascending: false })
         .limit(50),
     ]);
-    if (iErr) throw new Error(iErr.message);
+    if (iErr) throw friendlyDbError(iErr);
 
     type Item = {
       id: string;
@@ -622,7 +623,7 @@ export const addClienteInteracao = createServerFn({ method: "POST" })
       user_id: context.userId,
       user_nome: nome,
     } as never);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await admin
       .from("clientes")
       .update({ ultimo_contato_em: new Date().toISOString() } as never)
@@ -713,7 +714,7 @@ export const addClienteSocio = createServerFn({ method: "POST" })
       } as never)
       .select("id, nome, qualificacao, desde")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await recordClienteEvent(admin, {
       clienteId: data.clienteId,
       tipo: "socio_adicionado",
@@ -735,7 +736,7 @@ export const removerClienteSocio = createServerFn({ method: "POST" })
       .select("id, cliente_id, nome")
       .eq("id", data.id)
       .maybeSingle();
-    if (gErr) throw new Error(gErr.message);
+    if (gErr) throw friendlyDbError(gErr);
     if (!row) throw new Error("Sócio não encontrado.");
     const { error } = await admin
       .from("cliente_socios")
@@ -744,7 +745,7 @@ export const removerClienteSocio = createServerFn({ method: "POST" })
         updated_by: context.userId,
       } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await recordClienteEvent(admin, {
       clienteId: row.cliente_id,
       tipo: "socio_removido",
@@ -785,7 +786,7 @@ export const geocodeCliente = createServerFn({ method: "POST" })
       )
       .eq("id", data.clienteId)
       .maybeSingle();
-    if (cliErr) throw new Error(cliErr.message);
+    if (cliErr) throw friendlyDbError(cliErr);
     if (!cli) throw new Error("Cliente não encontrado.");
 
     const parts = [
@@ -879,7 +880,7 @@ export const geocodeCliente = createServerFn({ method: "POST" })
       .from("clientes")
       .update({ latitude: lat, longitude: lon, geocoded_at: geocodedAt } as never)
       .eq("id", data.clienteId);
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) throw friendlyDbError(upErr);
 
     await recordClienteEvent(admin, {
       clienteId: data.clienteId,

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PROJETO_DISCIPLINAS, PROJETO_STATUS } from "@/lib/engenharia.shared";
@@ -20,7 +21,7 @@ export const listProjetosByEquipamento = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .order("disciplina")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -59,7 +60,7 @@ export const listAllProjetos = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("updated_at", { ascending: false })
       .range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -102,7 +103,7 @@ export const createProjeto = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row;
   });
 
@@ -135,7 +136,7 @@ export const linkProjetoOrigem = createServerFn({ method: "POST" })
       .from("equipamento_projetos")
       .update(patch as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -180,7 +181,7 @@ export const updateProjeto = createServerFn({ method: "POST" })
         updated_by: context.userId,
       })
       .eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -192,6 +193,6 @@ export const removerProjeto = createServerFn({ method: "POST" })
       .from("equipamento_projetos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

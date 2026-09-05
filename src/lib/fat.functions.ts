@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -62,7 +63,7 @@ export const listFats = createServerFn({ method: "GET" })
     if (data.status && data.status !== "todos") q = q.eq("status", data.status as never);
     if (data.q) q = q.or(`codigo.ilike.%${data.q}%,tag_equipamento.ilike.%${data.q}%`);
     const { data: rows, error, count } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // enrich cliente/processo nomes
     const clienteIds = Array.from(new Set((rows ?? []).map((r) => r.cliente_id)));
@@ -115,7 +116,7 @@ export const createFat = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: fat!.id };
   });
 
@@ -200,7 +201,7 @@ export const updateFatIdentificacao = createServerFn({ method: "POST" })
       .from("fat_relatorios")
       .update({ ...data.patch, status: "em_execucao" as const })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -233,7 +234,7 @@ export const setChecklistResposta = createServerFn({ method: "POST" })
         },
         { onConflict: "fat_id,template_id" },
       );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Cria RNC automática se NOK e ainda não existe
     if (data.status === "nok") {
@@ -346,11 +347,11 @@ export const upsertMedicao = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { error } = await context.supabase.from("fat_medicoes").update(row).eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: ins, error } = await context.supabase.from("fat_medicoes").insert(row).select("id").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: ins!.id };
   });
 
@@ -359,7 +360,7 @@ export const deleteMedicao = createServerFn({ method: "POST" })
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("fat_medicoes").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -384,11 +385,11 @@ export const upsertRnc = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     if (id) {
       const { error } = await context.supabase.from("fat_rnc").update(rest).eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id };
     }
     const { data: ins, error } = await context.supabase.from("fat_rnc").insert(rest).select("id").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: ins!.id };
   });
 
@@ -430,7 +431,7 @@ export const submitAssinatura = createServerFn({ method: "POST" })
         },
         { onConflict: "fat_id,tipo" },
       );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { hash };
   });
 
@@ -445,7 +446,7 @@ export const removeAssinatura = createServerFn({ method: "POST" })
       .delete()
       .eq("fat_id", data.fat_id)
       .eq("tipo", data.tipo);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -485,7 +486,7 @@ export const homologarFat = createServerFn({ method: "POST" })
         homologado_por: context.userId,
       })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     try {
       const { getCriticalClient } = await import("@/lib/supabase-client.server");
@@ -529,6 +530,6 @@ export const getFatFotoSignedUrl = createServerFn({ method: "POST" })
     const { data: signed, error } = await context.supabase.storage
       .from("fat-evidencias")
       .createSignedUrl(data.path, 900);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { url: signed.signedUrl };
   });

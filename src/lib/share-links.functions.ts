@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -122,7 +123,7 @@ export const listShareLinks = createServerFn({ method: "POST" })
       .eq("tipo", data.tipo)
       .eq("relatorio_id", data.relatorio_id)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const userIds = Array.from(
       new Set(
@@ -158,7 +159,7 @@ export const revokeShareLink = createServerFn({ method: "POST" })
       .select("created_by")
       .eq("id", data.id)
       .maybeSingle();
-    if (lErr) throw new Error(lErr.message);
+    if (lErr) throw friendlyDbError(lErr);
     if (!link) throw new Error("Link não encontrado.");
     const [isAdmin, isManager] = await Promise.all([
       hasRole(context.supabase, context.userId, "admin"),
@@ -172,7 +173,7 @@ export const revokeShareLink = createServerFn({ method: "POST" })
       .update({ revoked_at: new Date().toISOString(), revoked_by: context.userId })
       .eq("id", data.id)
       .is("revoked_at", null);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -195,7 +196,7 @@ export const listShareSubmissoes = createServerFn({ method: "POST" })
       .eq("relatorio_id", data.relatorio_id)
       .order("created_at", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -459,7 +460,7 @@ export const publicSetChecklistResposta = createServerFn({ method: "POST" })
         },
         { onConflict: "fat_id,template_id" },
       );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // recalcula contadores
     const { count: totalCount } = await (supabaseAdmin as any)
@@ -518,7 +519,7 @@ export const publicSetSatResposta = createServerFn({ method: "POST" })
       .from("sat_relatorio")
       .update({ dados, status: "preenchendo" })
       .eq("id", payload.rid);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await touchLink(link.id);
     await logSubmissao({
@@ -570,7 +571,7 @@ export const publicSubmitAssinatura = createServerFn({ method: "POST" })
           },
           { onConflict: "fat_id,tipo" },
         );
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     } else {
       // SAT — anexa em sat_relatorio.assinatura_tecnico / assinatura_cliente e em tecnicos[]
       const field = data.tipo === "cliente" ? "assinatura_cliente" : "assinatura_tecnico";
@@ -588,7 +589,7 @@ export const publicSubmitAssinatura = createServerFn({ method: "POST" })
       filtered.push({ nome: data.nome, cargo: data.cargo ?? null, tipo: data.tipo, assinado_em: new Date().toISOString() });
       const patch: Record<string, unknown> = { [field]: sigObj, tecnicos: filtered, status: "assinado" };
       const { error } = await (supabaseAdmin as any).from("sat_relatorio").update(patch).eq("id", payload.rid);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
 
     await touchLink(link.id);

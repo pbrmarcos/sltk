@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -27,7 +28,7 @@ export const listPaginasPublicadas = createServerFn({ method: "GET" }).handler(a
     .select("id, tipo_id, slug, seo_title_pt, seo_description_pt, og_image_url, publicado, rfq_formulario_tipo!inner(nome_pt, familia)")
     .eq("publicado", true)
     .order("slug", { ascending: true });
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   return (data ?? []).map((r: any) => ({
     id: r.id as string,
     slug: r.slug as string,
@@ -52,7 +53,7 @@ export const getPaginaPorSlug = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .eq("publicado", true)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!pagina) return null;
     const { data: blocos, error: err2 } = await sb
       .from("equipamento_pagina_bloco")
@@ -60,7 +61,7 @@ export const getPaginaPorSlug = createServerFn({ method: "GET" })
       .eq("pagina_id", pagina.id)
       .eq("visivel", true)
       .order("ordem", { ascending: true });
-    if (err2) throw new Error(err2.message);
+    if (err2) throw friendlyDbError(err2);
     return {
       pagina: {
         id: pagina.id,
@@ -91,7 +92,7 @@ export const adminListPaginas = createServerFn({ method: "GET" })
       .from("equipamento_pagina")
       .select("id, tipo_id, slug, publicado, seo_title_pt, og_image_url, rfq_formulario_tipo!inner(nome_pt, familia, codigo)")
       .order("slug", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []).map((r: any) => ({
       id: r.id as string,
       tipo_id: r.tipo_id as string,
@@ -116,14 +117,14 @@ export const adminGetPagina = createServerFn({ method: "GET" })
       .select("*, rfq_formulario_tipo!inner(nome_pt, codigo, familia)")
       .eq("id", data.pagina_id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!pagina) throw new Error("Página não encontrada.");
     const { data: blocos, error: e2 } = await sb
       .from("equipamento_pagina_bloco")
       .select("*")
       .eq("pagina_id", data.pagina_id)
       .order("ordem", { ascending: true });
-    if (e2) throw new Error(e2.message);
+    if (e2) throw friendlyDbError(e2);
     return {
       pagina: {
         ...pagina,
@@ -159,7 +160,7 @@ export const adminUpdatePagina = createServerFn({ method: "POST" })
     const clean: Record<string, unknown> = { atualizado_em: new Date().toISOString() };
     for (const [k, v] of Object.entries(patch)) if (v !== undefined) clean[k] = v;
     const { error } = await sb.from("equipamento_pagina").update(clean).eq("id", pagina_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -207,7 +208,7 @@ export const adminAddBloco = createServerFn({ method: "POST" })
       .insert({ pagina_id: data.pagina_id, tipo_bloco: data.tipo_bloco, ordem, conteudo_json: conteudo })
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return novo as EquipamentoBloco;
   });
 
@@ -230,7 +231,7 @@ export const adminUpdateBloco = createServerFn({ method: "POST" })
     const clean: Record<string, unknown> = { atualizado_em: new Date().toISOString() };
     for (const [k, v] of Object.entries(patch)) if (v !== undefined) clean[k] = v;
     const { error } = await sb.from("equipamento_pagina_bloco").update(clean).eq("id", bloco_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -241,7 +242,7 @@ export const adminDeleteBloco = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     await ensureAdmin(sb, context.userId);
     const { error } = await sb.from("equipamento_pagina_bloco").delete().eq("id", data.bloco_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -259,7 +260,7 @@ export const adminReordenarBlocos = createServerFn({ method: "POST" })
     await ensureAdmin(sb, context.userId);
     for (const { bloco_id, ordem } of data.ordem) {
       const { error } = await sb.from("equipamento_pagina_bloco").update({ ordem }).eq("id", bloco_id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     return { ok: true };
   });

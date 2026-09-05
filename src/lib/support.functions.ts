@@ -8,6 +8,7 @@
  * na entrada; aqui a porta é `engineer`.
  */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -69,7 +70,7 @@ export const listSupportUsers = createServerFn({ method: "POST" })
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
     const { data: profiles, error, count } = await q.range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (profiles ?? []).map((p) => p.id);
     let rolesByUser = new Map<string, AppRoleName[]>();
@@ -78,7 +79,7 @@ export const listSupportUsers = createServerFn({ method: "POST" })
         .from("user_roles")
         .select("user_id, role")
         .in("user_id", ids);
-      if (rErr) throw new Error(rErr.message);
+      if (rErr) throw friendlyDbError(rErr);
       rolesByUser = (roles ?? []).reduce((acc, r) => {
         const arr = acc.get(r.user_id) ?? [];
         arr.push(r.role as AppRoleName);
@@ -139,7 +140,7 @@ export const supportResetPassword = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, {
       password: data.password,
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "auth.users",
@@ -182,7 +183,7 @@ export const supportSendPasswordRecovery = createServerFn({ method: "POST" })
       .select("email")
       .eq("id", data.id)
       .maybeSingle();
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw friendlyDbError(pErr);
     if (!prof?.email) {
       throw new Error("Usuário sem email cadastrado; use reset de senha.");
     }
@@ -191,7 +192,7 @@ export const supportSendPasswordRecovery = createServerFn({ method: "POST" })
       type: "recovery",
       email: prof.email,
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "auth.users",

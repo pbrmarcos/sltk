@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { titleCasePtBR } from "@/lib/text-case";
@@ -42,7 +43,7 @@ export const listLeadOrigens = createServerFn({ method: "GET" })
       .eq("ativo", true)
       .order("ordem", { ascending: true })
       .order("nome", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as unknown as LeadOrigemRow[];
   });
 
@@ -57,7 +58,7 @@ export const listLeadOrigensAdmin = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("ordem", { ascending: true })
       .order("nome", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as unknown as LeadOrigemRow[];
   });
 
@@ -76,7 +77,7 @@ export const createLeadOrigem = createServerFn({ method: "POST" })
       .from("lead_origens")
       .select("id, nome, ativo, ordem")
       .is("deleted_at", null);
-    if (listErr) throw new Error(listErr.message);
+    if (listErr) throw friendlyDbError(listErr);
     const existente = ((todas ?? []) as unknown as LeadOrigemRow[]).find(
       (o) => normalizeOrigem(o.nome) === alvo,
     );
@@ -102,7 +103,7 @@ export const createLeadOrigem = createServerFn({ method: "POST" })
       } as never)
       .select("id, nome")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return inserted as { id: string; nome: string };
   });
 
@@ -119,7 +120,7 @@ export const renameLeadOrigem = createServerFn({ method: "POST" })
       .from("lead_origens")
       .select("id, nome")
       .is("deleted_at", null);
-    if (listErr) throw new Error(listErr.message);
+    if (listErr) throw friendlyDbError(listErr);
     const conflito = ((todas ?? []) as { id: string; nome: string }[]).find(
       (o) => o.id !== data.id && normalizeOrigem(o.nome) === alvo,
     );
@@ -128,7 +129,7 @@ export const renameLeadOrigem = createServerFn({ method: "POST" })
       .from("lead_origens")
       .update({ nome, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: data.id, nome };
   });
 
@@ -144,7 +145,7 @@ export const toggleLeadOrigem = createServerFn({ method: "POST" })
       .from("lead_origens")
       .update({ ativo: data.ativo, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -162,7 +163,7 @@ export const reorderLeadOrigens = createServerFn({ method: "POST" })
         .from("lead_origens")
         .update({ ordem: i, updated_by: context.userId } as never)
         .eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     }
     return { ok: true };
   });

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { COTACAO_STATUS } from "@/lib/cotacoes.shared";
@@ -46,7 +47,7 @@ export const listCotacoes = createServerFn({ method: "POST" })
     const { data: rows, count, error } = await q
       .order("created_at", { ascending: false })
       .range(from, from + data.per_page - 1);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Para cada RFQ, conta convites/respostas
     const ids = (rows ?? []).map((r: { id: string }) => r.id);
@@ -191,7 +192,7 @@ export const createCotacao = createServerFn({ method: "POST" })
         part_number_snapshot: i.part_number,
       }));
       const { error: e2 } = await sb.from("cotacao_itens").insert(rows);
-      if (e2) throw new Error(e2.message);
+      if (e2) throw friendlyDbError(e2);
     }
 
     // Convites
@@ -201,7 +202,7 @@ export const createCotacao = createServerFn({ method: "POST" })
         fornecedor_id: fid,
       }));
       const { error: e3 } = await sb.from("cotacao_fornecedores").insert(rows);
-      if (e3) throw new Error(e3.message);
+      if (e3) throw friendlyDbError(e3);
     }
 
     await sb.from("cotacao_historico").insert({
@@ -244,7 +245,7 @@ export const inviteFornecedores = createServerFn({ method: "POST" })
     const { error } = await sb
       .from("cotacao_fornecedores")
       .upsert(rows, { onConflict: "cotacao_id,fornecedor_id", ignoreDuplicates: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await sb.from("cotacao_historico").insert({
       cotacao_id: data.cotacao_id,
       evento: "fornecedores_convidados",
@@ -264,7 +265,7 @@ export const setCotacaoStatus = createServerFn({ method: "POST" })
     const sb = context.supabase as unknown as SB;
     if (!(await isPurchasing(sb, context.userId))) throw new Error("Sem permissão");
     const { error } = await sb.from("cotacoes").update({ status: data.status }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await sb.from("cotacao_historico").insert({
       cotacao_id: data.id,
       evento: `status_${data.status}`,
@@ -300,7 +301,7 @@ export const escolherVencedor = createServerFn({ method: "POST" })
         },
         { onConflict: "cotacao_item_id" },
       );
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
 
@@ -318,7 +319,7 @@ export const listInsumosAprovados = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("necessidade_em", { ascending: true, nullsFirst: false })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (data ?? []) as any[];
   });
 
@@ -337,7 +338,7 @@ export const listInsumosParaRFQ = createServerFn({ method: "POST" })
       )
       .in("id", data.ids)
       .is("deleted_at", null);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as any[];
   });
 
@@ -356,7 +357,7 @@ export const listCotacoesDoProjeto = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const ids = (rows ?? []).map((r: { id: string }) => r.id);
     let counts: Record<string, number> = {};
     if (ids.length) {
@@ -401,7 +402,7 @@ export const listFornecedoresParaCotacao = createServerFn({ method: "POST" })
         .is("deleted_at", null)
         .order("nome_fantasia", { ascending: true })
         .limit(300);
-      if (e2) throw new Error(e2.message);
+      if (e2) throw friendlyDbError(e2);
       return (r2 ?? []) as any[];
     }
     return (rows ?? []) as any[];
@@ -538,7 +539,7 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
       observacao: it.observacao,
     }));
     const { error: e3 } = await sb.from("cotacao_proposta_itens").insert(rows);
-    if (e3) throw new Error(e3.message);
+    if (e3) throw friendlyDbError(e3);
 
     await sb
       .from("cotacao_fornecedores")

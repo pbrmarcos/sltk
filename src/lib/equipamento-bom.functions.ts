@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DISCIPLINAS, type Disciplina } from "@/lib/equipamento-disciplina-etapas.functions";
@@ -27,7 +28,7 @@ export const listEquipamentoBom = createServerFn({ method: "POST" })
       .order("created_at", { ascending: true });
     if (data.disciplina) q = q.eq("equipamento_disciplina", data.disciplina);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []).map((r: any) => {
       const ocItens: any[] = Array.isArray(r.ordem_compra_itens) ? r.ordem_compra_itens : [];
       const oc = ocItens
@@ -49,7 +50,7 @@ async function ensureProjetoForBom(sb: AnySb, equipamentoId: string, equipamento
     .select("cliente_id")
     .eq("id", equipamentoId)
     .maybeSingle();
-  if (eqError) throw new Error(eqError.message);
+  if (eqError) throw friendlyDbError(eqError);
   if (!eq) throw new Error("Equipamento não encontrado");
 
   const projetoDisciplina = equipamentoDisciplina === "producao" ? "eletrico" : "mecanico";
@@ -60,7 +61,7 @@ async function ensureProjetoForBom(sb: AnySb, equipamentoId: string, equipamento
     .eq("disciplina", projetoDisciplina)
     .eq("revisao", "R00")
     .maybeSingle();
-  if (selectError) throw new Error(selectError.message);
+  if (selectError) throw friendlyDbError(selectError);
   if (existing?.id) return { projeto_id: existing.id, cliente_id: eq.cliente_id };
 
   const { data: projeto, error: insertError } = await sb
@@ -75,7 +76,7 @@ async function ensureProjetoForBom(sb: AnySb, equipamentoId: string, equipamento
     })
     .select("id")
     .single();
-  if (insertError) throw new Error(insertError.message);
+  if (insertError) throw friendlyDbError(insertError);
   return { projeto_id: projeto.id, cliente_id: eq.cliente_id };
 }
 
@@ -115,7 +116,7 @@ export const createBomItem = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: row.id };
   });
 
@@ -141,7 +142,7 @@ export const updateBomItem = createServerFn({ method: "POST" })
       delete patch.custo_unitario_estimado;
     }
     const { error } = await sb.from("projeto_insumos").update(patch).eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -154,7 +155,7 @@ export const deleteBomItem = createServerFn({ method: "POST" })
       .from("projeto_insumos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -175,7 +176,7 @@ export const submitBomForApproval = createServerFn({ method: "POST" })
       .eq("equipamento_disciplina", data.equipamento_disciplina)
       .eq("status", "rascunho")
       .select("id");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { count: (rows ?? []).length };
   });
 
@@ -190,7 +191,7 @@ export const approveBomItem = createServerFn({ method: "POST" })
       throw new Error("Apenas manager/admin pode aprovar insumos.");
     });
     const { error } = await sb.from("projeto_insumos").update({ status: "aprovado" }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -208,7 +209,7 @@ export const rejectBomItem = createServerFn({ method: "POST" })
       .from("projeto_insumos")
       .update({ status: "rascunho", observacoes: data.motivo ?? null })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -223,7 +224,7 @@ export const getEquipamentoBomResumo = createServerFn({ method: "POST" })
       .select("equipamento_disciplina, status, quantidade, custo_estimado_unit")
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const buckets: Record<string, { total: number; aprovados: number; pendentes: number; custo: number }> = {};
     let totalItens = 0;
     let custoTotal = 0;
@@ -262,6 +263,6 @@ export const runSeedEquipamento = createServerFn({ method: "POST" })
       _eq_id: data.equipamento_id,
       _tipo_slug: eqRow?.planejamento_template_slug ?? null,
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

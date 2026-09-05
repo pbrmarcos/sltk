@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -48,7 +49,7 @@ export const listEnrichLogs = createServerFn({ method: "POST" })
     if (typeof data.success === "boolean") q = q.eq("success", data.success);
 
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Resolve e-mail dos usuários em lote.
     const ids = Array.from(

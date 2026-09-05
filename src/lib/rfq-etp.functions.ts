@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher } from "@/lib/admin-guard";
@@ -17,7 +18,7 @@ export const listEquipamentosDoCliente = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .order("codigo", { ascending: true })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -103,7 +104,7 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: prof } = await context.supabase
       .from("profiles")

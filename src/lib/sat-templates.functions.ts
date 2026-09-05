@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -72,7 +73,7 @@ export const listSATTemplates = createServerFn({ method: "POST" })
       .from("sat_template")
       .select("id, nome, versao, ativo, descricao, created_at, updated_at, deleted_at")
       .order("versao", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const ids = (tpls ?? []).map((t) => t.id);
     let secCounts = new Map<string, number>();
@@ -126,7 +127,7 @@ export const getSATTemplate = createServerFn({ method: "POST" })
     else if (data.ativo) q = q.eq("ativo", true);
     else throw new Error("Informe id ou ativo");
     const { data: tpl, error } = await q.maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!tpl) return null;
 
     const { data: secs, error: sErr } = await context.supabase
@@ -134,7 +135,7 @@ export const getSATTemplate = createServerFn({ method: "POST" })
       .select("id, template_id, ordem, titulo, descricao")
       .eq("template_id", tpl.id as string)
       .order("ordem");
-    if (sErr) throw new Error(sErr.message);
+    if (sErr) throw friendlyDbError(sErr);
 
     const secIds = (secs ?? []).map((s) => s.id as string);
     const { data: items } = secIds.length
@@ -199,7 +200,7 @@ export const novaVersaoSATTemplate = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const novoId = (novo as { id: string }).id;
 
     if (data.base_id) {
@@ -245,7 +246,7 @@ export const setSATTemplateAtivo = createServerFn({ method: "POST" })
       .from("sat_template")
       .update({ ativo: true, updated_by: context.userId } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -266,7 +267,7 @@ export const updateSATTemplate = createServerFn({ method: "POST" })
       .from("sat_template")
       .update(patch as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -284,7 +285,7 @@ export const archiveSATTemplate = createServerFn({ method: "POST" })
         ativo: false,
       } as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -311,7 +312,7 @@ export const upsertSATSecao = createServerFn({ method: "POST" })
           descricao: data.descricao ?? null,
         } as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: row, error } = await context.supabase
@@ -324,7 +325,7 @@ export const upsertSATSecao = createServerFn({ method: "POST" })
       } as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: (row as { id: string }).id };
   });
 
@@ -337,7 +338,7 @@ export const deleteSATSecao = createServerFn({ method: "POST" })
       .from("sat_template_secao")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -372,7 +373,7 @@ export const upsertSATItem = createServerFn({ method: "POST" })
         .from("sat_template_item")
         .update(payload as never)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: row, error } = await context.supabase
@@ -380,7 +381,7 @@ export const upsertSATItem = createServerFn({ method: "POST" })
       .insert(payload as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: (row as { id: string }).id };
   });
 
@@ -393,6 +394,6 @@ export const deleteSATItem = createServerFn({ method: "POST" })
       .from("sat_template_item")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

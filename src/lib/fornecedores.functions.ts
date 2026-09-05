@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -118,14 +119,14 @@ export const listFornecedores = createServerFn({ method: "GET" })
         .from("fornecedor_categoria_link")
         .select("fornecedor_id")
         .in("categoria_slug", slugs);
-      if (linkErr) throw new Error(linkErr.message);
+      if (linkErr) throw friendlyDbError(linkErr);
       const ids = Array.from(new Set((links ?? []).map((r) => r.fornecedor_id)));
       if (ids.length === 0) return { rows: [], total: 0 };
       query = query.in("id", ids);
     }
 
     const { data: rows, error, count } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -139,7 +140,7 @@ export const listFiltrosPopulares = createServerFn({ method: "GET" })
       )
       .is("deleted_at", null)
       .limit(5000);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const rows = (data ?? []) as unknown[];
 
     const tallyArr = (key: string) => {
@@ -208,7 +209,7 @@ export const listCategoriasFornecedor = createServerFn({ method: "GET" })
       .select("slug, nome_pt, nome_en, ordem")
       .eq("ativo", true)
       .order("ordem", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });
 
@@ -224,7 +225,7 @@ export const getFornecedor = createServerFn({ method: "GET" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!f) throw new Error("Fornecedor não encontrado");
 
     const [contatosRes, linksRes, anexosRes, notasRes] = await Promise.all([
@@ -333,14 +334,14 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
         .from("fornecedores")
         .update(normalized as never)
         .eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
     } else {
       const { data: created, error } = await supabase
         .from("fornecedores")
         .insert(normalized as never)
         .select("id")
         .single();
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       id = created.id;
     }
 
@@ -349,7 +350,7 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
       .from("fornecedor_categoria_link")
       .delete()
       .eq("fornecedor_id", id);
-    if (delErr) throw new Error(delErr.message);
+    if (delErr) throw friendlyDbError(delErr);
     if (categorias.length > 0) {
       const { error: insErr } = await supabase
         .from("fornecedor_categoria_link")
@@ -359,7 +360,7 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
             categoria_slug: slug,
           })),
         );
-      if (insErr) throw new Error(insErr.message);
+      if (insErr) throw friendlyDbError(insErr);
     }
 
     return { id };
@@ -374,7 +375,7 @@ export const archiveFornecedor = createServerFn({ method: "POST" })
       .from("fornecedores")
       .update({ deleted_at: new Date().toISOString(), status: "inativo" })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -405,7 +406,7 @@ export const upsertContatoFornecedor = createServerFn({ method: "POST" })
         .from("fornecedor_contatos")
         .update(payload)
         .eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
     const { data: created, error } = await supabase
@@ -413,7 +414,7 @@ export const upsertContatoFornecedor = createServerFn({ method: "POST" })
       .insert(payload as never)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: created.id };
   });
 
@@ -425,7 +426,7 @@ export const removeContatoFornecedor = createServerFn({ method: "POST" })
       .from("fornecedor_contatos")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -454,7 +455,7 @@ export const addNotaFornecedor = createServerFn({ method: "POST" })
       user_id: userId,
       user_nome: prof?.full_name || prof?.email || "Usuário",
     } as never);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -489,7 +490,7 @@ export const registerAnexoFornecedor = createServerFn({ method: "POST" })
       tipo: data.tipo ?? "documento",
       descricao: data.descricao ?? null,
     } as never);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -503,12 +504,12 @@ export const removeAnexoFornecedor = createServerFn({ method: "POST" })
       .select("storage_path")
       .eq("id", data.id)
       .maybeSingle();
-    if (getErr) throw new Error(getErr.message);
+    if (getErr) throw friendlyDbError(getErr);
     const { error } = await supabase
       .from("fornecedor_anexos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (row?.storage_path) {
       // best-effort: remove o arquivo no storage
       await supabase.storage.from("fornecedores").remove([row.storage_path]);
@@ -528,7 +529,7 @@ export const getAnexoSignedUrl = createServerFn({ method: "POST" })
       .select("storage_bucket, storage_path, nome_original, descricao")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!row) throw new Error("Anexo não encontrado");
     // Anexos no Google Drive: usa o webViewLink salvo em `descricao`
     if (row.storage_bucket === "google_drive") {
@@ -538,7 +539,7 @@ export const getAnexoSignedUrl = createServerFn({ method: "POST" })
     const { data: signed, error: signErr } = await supabase.storage
       .from(row.storage_bucket || "fornecedores")
       .createSignedUrl(row.storage_path, 60 * 10);
-    if (signErr) throw new Error(signErr.message);
+    if (signErr) throw friendlyDbError(signErr);
     return { url: signed.signedUrl, nome: row.nome_original };
   });
 
@@ -1238,7 +1239,7 @@ export const uploadScanToDrive = createServerFn({ method: "POST" })
       .select("id, codigo, nome")
       .eq("id", data.fornecedor_id)
       .maybeSingle();
-    if (fErr) throw new Error(fErr.message);
+    if (fErr) throw friendlyDbError(fErr);
     if (!f) throw new Error("Fornecedor não encontrado");
 
     const { driveConfigured } = await import("@/lib/docs/drive-auth.server");
@@ -1371,7 +1372,7 @@ export const linkScanSubmissao = createServerFn({ method: "POST" })
       .insert(payload)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { id: row?.id ?? null };
   });
 
@@ -1423,7 +1424,7 @@ export const reenriquecerFornecedor = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.fornecedor_id)
       .maybeSingle();
-    if (fErr) throw new Error(fErr.message);
+    if (fErr) throw friendlyDbError(fErr);
     if (!f) throw new Error("Fornecedor não encontrado");
 
     if (!apiKey || !firecrawlKey) {

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -88,7 +89,7 @@ export const listPipeline = createServerFn({ method: "POST" })
     if (data.responsavel) q = q.eq("responsavel_id", data.responsavel);
     if (data.q) q = q.or(`titulo.ilike.%${data.q}%,empresa_lead.ilike.%${data.q}%,nome_lead.ilike.%${data.q}%`);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!rows || rows.length === 0) return [];
 
     const clienteIds = Array.from(new Set(rows.map((r) => r.cliente_id).filter((v): v is string => !!v)));
@@ -174,7 +175,7 @@ export const updateStage = createServerFn({ method: "POST" })
       .from("oportunidades")
       .update(patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -206,7 +207,7 @@ export const restoreOportunidade = createServerFn({ method: "POST" })
       .update({ pipeline_stage: targetStage, lost_reason: null })
       .eq("id", data.id)
       .eq("pipeline_stage", "perdido");
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true, stage: targetStage };
   });
 
@@ -329,7 +330,7 @@ export const createOportunidade = createServerFn({ method: "POST" })
           .maybeSingle();
         if (existente) return { ...(existente as { id: string; codigo: string }), reused: true as const, needsConfirm: false as const, duplicatas: [] as OportunidadeDuplicada[] };
       }
-      throw new Error(error.message);
+      throw friendlyDbError(error);
     }
     return { ...(row as { id: string; codigo: string }), reused: false as const, needsConfirm: false as const, duplicatas: [] as OportunidadeDuplicada[] };
   });
@@ -376,7 +377,7 @@ export const updateOportunidade = createServerFn({ method: "POST" })
       .from("oportunidades")
       .update(patch as never)
       .eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -423,7 +424,7 @@ export const convertToProcesso = createServerFn({ method: "POST" })
         processo_id: proc.id,
       })
       .eq("id", data.id);
-    if (updErr) throw new Error(updErr.message);
+    if (updErr) throw friendlyDbError(updErr);
 
     return { processo_id: proc.id, processo_codigo: proc.codigo };
   });
@@ -505,6 +506,6 @@ export const vincularClienteOportunidade = createServerFn({ method: "POST" })
       .from("oportunidades")
       .update({ cliente_id: data.cliente_id })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

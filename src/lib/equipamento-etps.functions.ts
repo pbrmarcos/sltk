@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ETP_STATUS } from "@/lib/engenharia.shared";
@@ -20,7 +21,7 @@ export const listEquipamentoEtps = createServerFn({ method: "POST" })
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null)
       .order("versao", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 
@@ -54,7 +55,7 @@ export const listAllEtps = createServerFn({ method: "POST" })
       );
     }
     const { data: rows, count, error } = await q.order("updated_at", { ascending: false }).range(from, to);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -93,7 +94,7 @@ export const createEtp = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return row;
   });
 
@@ -111,7 +112,7 @@ export const getEtp = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     let aprovado_por_nome: string | null = null;
     if (row?.aprovado_por) {
       const { data: prof } = await context.supabase
@@ -170,7 +171,7 @@ export const updateEtp = createServerFn({ method: "POST" })
       .eq("id", id)
       .is("deleted_at", null)
       .single();
-    if (curErr) throw new Error(curErr.message);
+    if (curErr) throw friendlyDbError(curErr);
     if (
       cur?.status === "aprovado" ||
       cur?.status === "obsoleto" ||
@@ -185,7 +186,7 @@ export const updateEtp = createServerFn({ method: "POST" })
       .from("equipamento_etps")
       .update({ ...patch, updated_by: context.userId })
       .eq("id", id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -207,7 +208,7 @@ export const aprovarEtp = createServerFn({ method: "POST" })
       .from("equipamento_etps")
       .update({ status: "aprovado", updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logStatus(
       context as EtpCtx,
       data.id,
@@ -246,7 +247,7 @@ export const reabrirEtp = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .is("deleted_at", null)
       .single();
-    if (curErr) throw new Error(curErr.message);
+    if (curErr) throw friendlyDbError(curErr);
     if (cur?.status !== "aprovado") {
       throw new Error("Apenas ETPs aprovados podem ser reabertos.");
     }
@@ -260,7 +261,7 @@ export const reabrirEtp = createServerFn({ method: "POST" })
         updated_by: context.userId,
       })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: prof } = await context.supabase
       .from("profiles")
@@ -301,7 +302,7 @@ export const removerEtp = createServerFn({ method: "POST" })
       .from("equipamento_etps")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 /* ============= BUSCA DE ETP (para vincular a um equipamento) ============= */
@@ -329,7 +330,7 @@ export const buscarEtpsParaVincular = createServerFn({ method: "POST" })
       query = query.neq("equipamento_id", data.excluir_equipamento_id);
     }
     const { data: rows, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const term = data.q.toLowerCase();
     const list = (rows ?? []).filter((r) => {
@@ -400,7 +401,7 @@ export const vincularEtpAoEquipamento = createServerFn({ method: "POST" })
         updated_by: context.userId,
       })
       .eq("id", data.etp_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     const { data: prof } = await context.supabase
       .from("profiles")
@@ -492,7 +493,7 @@ async function statusAtual(context: EtpCtx, id: string): Promise<string> {
     .eq("id", id)
     .is("deleted_at", null)
     .single();
-  if (error) throw new Error(error.message);
+  if (error) throw friendlyDbError(error);
   return cur?.status as string;
 }
 
@@ -517,7 +518,7 @@ export const enviarEtpParaRevisao = createServerFn({ method: "POST" })
       .from("equipamento_etps")
       .update({ status: "em_revisao" as never, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logStatus(
       context as EtpCtx,
       data.id,
@@ -543,7 +544,7 @@ export const voltarEtpParaRascunho = createServerFn({ method: "POST" })
       .from("equipamento_etps")
       .update({ status: "rascunho" as never, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logStatus(context as EtpCtx, data.id, "em_revisao", "rascunho", "ETP devolvido para rascunho.");
     return { ok: true };
   });
@@ -581,7 +582,7 @@ export const rejeitarEtp = createServerFn({ method: "POST" })
         updated_by: context.userId,
       })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logStatus(context as EtpCtx, data.id, "em_revisao", "rejeitado", data.motivo, "aprovacao");
     return { ok: true };
   });
@@ -608,7 +609,7 @@ export const retomarEtpRejeitado = createServerFn({ method: "POST" })
       .from("equipamento_etps")
       .update({ status: "em_revisao" as never, updated_by: context.userId })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await logStatus(context as EtpCtx, data.id, "rejeitado", "em_revisao", data.observacao);
     return { ok: true };
   });

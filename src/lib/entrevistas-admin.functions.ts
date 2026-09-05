@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiChatComplete, aiConfigured } from "@/lib/ai-gateway.server";
@@ -62,7 +63,7 @@ export const listSegmentosAdmin = createServerFn({ method: "GET" })
       .from("entrevista_segmentos")
       .select("id, slug, nome_pt, nome_es, nome_en, ordem, ativo")
       .order("nome_pt", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const ids = (segs ?? []).map((s: any) => s.id);
     if (ids.length === 0) return [] as SegmentoAdminRow[];
     const [pergs, entrs] = await Promise.all([
@@ -104,7 +105,7 @@ export const upsertSegmento = createServerFn({ method: "POST" })
       const { data: after, error } = await sb.from("entrevista_segmentos").update({
         slug: data.slug, nome_pt: data.nome_pt, nome_es: data.nome_es ?? null, nome_en: data.nome_en ?? null,
       }).eq("id", data.id).select("*").maybeSingle();
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await audit(sb, context.userId, { entity_type: "segmento", entity_id: data.id, segmento_id: data.id, action: "update", before, after });
       return after;
     }
@@ -114,7 +115,7 @@ export const upsertSegmento = createServerFn({ method: "POST" })
     const { data: created, error } = await sb.from("entrevista_segmentos").insert({
       slug: data.slug, nome_pt: data.nome_pt, nome_es: data.nome_es ?? null, nome_en: data.nome_en ?? null, ordem, ativo: true,
     }).select("*").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await audit(sb, context.userId, { entity_type: "segmento", entity_id: created.id, segmento_id: created.id, action: "create", after: created });
     return created;
   });
@@ -127,7 +128,7 @@ export const toggleSegmento = createServerFn({ method: "POST" })
     const role = await requireAdminOrManager(sb, context.userId);
     if (role !== "admin") throw new Error("Apenas admin pode ativar/desativar segmentos.");
     const { error } = await sb.from("entrevista_segmentos").update({ ativo: data.ativo }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await audit(sb, context.userId, { entity_type: "segmento", entity_id: data.id, segmento_id: data.id, action: "toggle", meta: { ativo: data.ativo } });
     return { ok: true };
   });
@@ -169,7 +170,7 @@ export const getSegmentoAdmin = createServerFn({ method: "GET" })
       .from("entrevista_segmentos")
       .select("id, slug, nome_pt, nome_es, nome_en, ordem, ativo")
       .eq("id", data.segmento_id).maybeSingle();
-    if (sErr) throw new Error(sErr.message);
+    if (sErr) throw friendlyDbError(sErr);
     if (!seg) throw new Error("Segmento não encontrado.");
 
     const { data: perguntas, error: pErr } = await sb
@@ -177,7 +178,7 @@ export const getSegmentoAdmin = createServerFn({ method: "GET" })
       .select("id, segmento_id, numero, ordem, formato, enunciado_pt, enunciado_es, enunciado_en, obrigatoria")
       .eq("segmento_id", data.segmento_id)
       .order("ordem", { ascending: true });
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw friendlyDbError(pErr);
 
     const pIds = (perguntas ?? []).map((p: any) => p.id);
     let opcoes: OpcaoAdminRow[] = [];
@@ -230,7 +231,7 @@ export const upsertPergunta = createServerFn({ method: "POST" })
         enunciado_en: data.enunciado_en ?? null,
         obrigatoria: data.obrigatoria,
       }).eq("id", data.id).select("*").maybeSingle();
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await audit(sb, context.userId, { entity_type: "pergunta", entity_id: data.id, segmento_id: data.segmento_id, action: "update", before, after });
       return after;
     }
@@ -246,7 +247,7 @@ export const upsertPergunta = createServerFn({ method: "POST" })
       obrigatoria: data.obrigatoria,
       ordem, numero,
     }).select("*").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await audit(sb, context.userId, { entity_type: "pergunta", entity_id: created.id, segmento_id: data.segmento_id, action: "create", after: created });
     return created;
   });
@@ -265,7 +266,7 @@ export const excluirPergunta = createServerFn({ method: "POST" })
     // remove opções em cascata (não há FK cascade — apagamos manualmente)
     await sb.from("entrevista_opcoes").delete().eq("pergunta_id", data.id);
     const { error } = await sb.from("entrevista_perguntas").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (before) {
       await audit(sb, context.userId, { entity_type: "pergunta", entity_id: data.id, segmento_id: before.segmento_id, action: "delete", before, meta: { respostas: count ?? 0 } });
     }
@@ -317,7 +318,7 @@ export const upsertOpcao = createServerFn({ method: "POST" })
         label_en: data.label_en ?? null,
         tem_descricao: data.tem_descricao,
       }).eq("id", data.id).select("*").maybeSingle();
-      if (error) throw new Error(error.message);
+      if (error) throw friendlyDbError(error);
       await audit(sb, context.userId, { entity_type: "opcao", entity_id: data.id, segmento_id: perg.segmento_id, action: "update", before, after });
       return after;
     }
@@ -331,7 +332,7 @@ export const upsertOpcao = createServerFn({ method: "POST" })
       tem_descricao: data.tem_descricao,
       ordem,
     }).select("*").single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await audit(sb, context.userId, { entity_type: "opcao", entity_id: created.id, segmento_id: perg.segmento_id, action: "create", after: created });
     return created;
   });
@@ -344,7 +345,7 @@ export const excluirOpcao = createServerFn({ method: "POST" })
     await requireAdminOrManager(sb, context.userId);
     const { data: before } = await sb.from("entrevista_opcoes").select("*, entrevista_perguntas!inner(segmento_id)").eq("id", data.id).maybeSingle();
     const { error } = await sb.from("entrevista_opcoes").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (before) await audit(sb, context.userId, { entity_type: "opcao", entity_id: data.id, segmento_id: before.entrevista_perguntas?.segmento_id ?? null, action: "delete", before });
     return { ok: true };
   });
@@ -380,7 +381,7 @@ export const historicoSegmento = createServerFn({ method: "GET" })
       .eq("segmento_id", data.segmento_id)
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 30);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return rows ?? [];
   });
 

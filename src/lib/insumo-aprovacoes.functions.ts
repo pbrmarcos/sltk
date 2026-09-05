@@ -6,6 +6,7 @@
 //   quando existir uma aprovação vigente (aprovada e não usada) para o insumo.
 
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -55,7 +56,7 @@ export const solicitarAprovacaoOC = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Mover status do insumo para "pronto_aprovacao" se ainda estava em cotação/cotado
     await sb
@@ -122,7 +123,7 @@ export const decidirAprovacaoOC = createServerFn({ method: "POST" })
         ...(fornecedor_id_sugerido ? { fornecedor_id_sugerido } : {}),
       })
       .eq("id", data.aprovacao_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Se aprovado, insumo volta a "cotado" (pronto p/ emissão).
     if (data.decisao === "aprovado") {

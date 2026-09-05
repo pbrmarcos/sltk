@@ -4,6 +4,7 @@
 // políticas RLS acima + trigger de auditoria, então tudo cai em audit_log.
 
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher } from "@/lib/admin-guard";
@@ -99,7 +100,7 @@ export const listChamados = createServerFn({ method: "POST" })
     q = q.range(from, to);
 
     const { data: rows, error, count } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
@@ -120,7 +121,7 @@ export const setPrioridadeChamado = createServerFn({ method: "POST" })
     const anterior = atual?.prioridade ?? null;
     if (anterior === data.prioridade) return { ok: true };
     const { error } = await sb.from("chamados").update({ prioridade: data.prioridade }).eq("id", data.chamado_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await sb.from("chamado_eventos").insert({
       chamado_id: data.chamado_id,
       tipo: "prioridade_change",
@@ -160,7 +161,7 @@ export const reatribuirChamado = createServerFn({ method: "POST" })
       .from("chamados")
       .update({ atendente_id: data.atendente_id, atendente_nome })
       .eq("id", data.chamado_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await sb.from("chamado_eventos").insert({
       chamado_id: data.chamado_id,
       tipo: "atendente_change",
@@ -228,7 +229,7 @@ export const addComentarioInterno = createServerFn({ method: "POST" })
       conteudo: data.conteudo.trim(),
       interno: true,
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     await sb.from("chamado_eventos").insert({
       chamado_id: data.chamado_id,
       tipo: "comentario_interno",
@@ -273,7 +274,7 @@ export const getChamado = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!chamado) throw new Error("Chamado não encontrado.");
 
     const [{ data: msgs }, { data: eventos }, equip] = await Promise.all([
@@ -332,7 +333,7 @@ export const responderChamado = createServerFn({ method: "POST" })
       autor_nome: nome,
       conteudo: data.conteudo.trim(),
     });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -355,7 +356,7 @@ export const alterarStatusChamado = createServerFn({ method: "POST" })
       patch.resolvido_em = null;
     }
     const { error } = await sb.from("chamados").update(patch).eq("id", data.chamado_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // Dispara e-mail para transições relevantes
     const eventKey =
@@ -410,7 +411,7 @@ export const assumirChamado = createServerFn({ method: "POST" })
       .from("chamados")
       .update({ atendente_id: context.userId, atendente_nome: nome })
       .eq("id", data.chamado_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });
 
@@ -439,6 +440,6 @@ export const vincularEquipamentoChamado = createServerFn({ method: "POST" })
       .from("chamados")
       .update({ equipamento_id: data.equipamento_id, cliente_id })
       .eq("id", data.chamado_id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true };
   });

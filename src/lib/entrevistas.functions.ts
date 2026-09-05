@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -28,7 +29,7 @@ export const listSegmentos = createServerFn({ method: "GET" })
       .select("id, slug, nome_pt, nome_es, nome_en, ordem, ativo")
       .eq("ativo", true)
       .order("nome_pt", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data as Array<{ id: string; slug: string; nome_pt: string; nome_es: string | null; nome_en: string | null; ordem: number; ativo: boolean }>;
   });
 
@@ -70,7 +71,7 @@ export const listEntrevistas = createServerFn({ method: "GET" })
     if (escopo === "lixeira") q = q.not("deleted_at", "is", null);
     else q = q.is("deleted_at", null);
     const { data: rows0, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     const rows = (rows0 ?? []) as any[];
     if (rows.length === 0) return [] as EntrevistaRow[];
     const segIds = Array.from(new Set(rows.map((r) => r.segmento_id)));
@@ -130,7 +131,7 @@ export const criarEntrevista = createServerFn({ method: "POST" })
       })
       .select("id, codigo")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
 
     // e-mail para o criador
     try {
@@ -166,7 +167,7 @@ export const getEntrevista = createServerFn({ method: "GET" })
       .select("id, codigo, segmento_id, criado_por, lead_nome, lead_email, lead_empresa, idioma_default, status, respondida_em, expires_at, created_at, updated_at")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Entrevista não encontrada.");
     const [{ data: seg }, { data: prof }] = await Promise.all([
       sb.from("entrevista_segmentos").select("id, slug, nome_pt").eq("id", e.segmento_id).maybeSingle(),
@@ -252,7 +253,7 @@ export const expirarEntrevista = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .select("id, codigo, segmento_id, criado_por")
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Sem permissão ou entrevista inexistente.");
     try {
       const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
@@ -312,7 +313,7 @@ export const moverEntrevistaParaLixeira = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .select("id, codigo")
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Sem permissão ou entrevista já está na lixeira.");
     const { data: prof } = await sb.from("profiles").select("email").eq("id", context.userId).maybeSingle();
     await logAudit(sb, { entrevista_id: e.id, action: "trash", actor_id: context.userId, actor_email: prof?.email ?? null, reason: data.motivo ?? null, meta: { purge_at: purge.toISOString() } });
@@ -331,7 +332,7 @@ export const restaurarEntrevista = createServerFn({ method: "POST" })
       .not("deleted_at", "is", null)
       .select("id, codigo")
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Sem permissão ou entrevista não está na lixeira.");
     const { data: prof } = await sb.from("profiles").select("email").eq("id", context.userId).maybeSingle();
     await logAudit(sb, { entrevista_id: e.id, action: "restore", actor_id: context.userId, actor_email: prof?.email ?? null });
@@ -367,7 +368,7 @@ export const excluirEntrevistaDefinitivamente = createServerFn({ method: "POST" 
       meta: { codigo: e0.codigo, purged_at: new Date().toISOString() },
     });
     const { error } = await sb.from("entrevistas").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return { ok: true, codigo: e0.codigo };
   });
 
@@ -381,7 +382,7 @@ export const listEntrevistaAudit = createServerFn({ method: "GET" })
       .select("id, action, actor_id, actor_email, reason, meta, created_at")
       .eq("entrevista_id", data.entrevista_id)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
       id: string; action: "trash" | "restore" | "purge" | "create" | "update";
       actor_id: string | null; actor_email: string | null; reason: string | null; meta: any; created_at: string;

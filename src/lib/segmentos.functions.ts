@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { titleCasePtBR } from "@/lib/text-case";
@@ -23,7 +24,7 @@ export const listSegmentos = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .eq("ativo", true)
       .order("nome", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return data ?? [];
   });
 
@@ -49,6 +50,6 @@ export const createSegmento = createServerFn({ method: "POST" })
       .insert({ nome, created_by: context.userId, updated_by: context.userId })
       .select("id, nome")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw friendlyDbError(error);
     return inserted;
   });
