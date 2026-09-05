@@ -1,7 +1,17 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Fase 1 — Fundação do painel `/admin`.
+ * Admin — layout, guard de papel e redirect padrão de /admin.
+ *
+ * Reescrito para a estrutura atual (menu de categorias + módulos filtrados
+ * por papel via `firstAccessibleAdminRoute`, ver src/components/admin/
+ * SettingsNav.tsx e src/routes/_authenticated/admin.tsx). O spec anterior
+ * testava uma versão de /admin anterior a essa reorganização (headings
+ * "painel administrativo" e links "Permissões"/"Flags" que não existem
+ * mais) — as strings abaixo foram conferidas direto no código-fonte atual,
+ * não adivinhadas, mas ainda não foram rodadas de ponta a ponta contra uma
+ * instância real (sem browser interativo neste ambiente) — vale uma
+ * conferência manual antes de confiar 100% nelas.
  *
  * Requer storage states separados por role para rodar de verdade:
  *   E2E_BASE_URL, E2E_STORAGE_ADMIN, E2E_STORAGE_MANAGER,
@@ -16,47 +26,57 @@ const S_MANAGER = process.env.E2E_STORAGE_MANAGER;
 const S_ENGINEER = process.env.E2E_STORAGE_ENGINEER;
 const S_NOROLE = process.env.E2E_STORAGE_NOROLE;
 
-test.describe("Admin fase 1 — layout e guard", () => {
+test.describe("Admin — layout e guard", () => {
   test.skip(!BASE, "Defina E2E_BASE_URL e storage states por role.");
 
-  test("usuário sem role permitida em /admin → 403 (Forbidden)", async ({ browser }) => {
+  test("usuário sem role permitida em /admin → Acesso restrito", async ({ browser }) => {
     test.skip(!S_NOROLE, "Defina E2E_STORAGE_NOROLE.");
     const ctx = await browser.newContext({ storageState: S_NOROLE });
     const page = await ctx.newPage();
     await page.goto("/admin");
-    await expect(page.getByText(/você não tem permissão para acessar esta área/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Acesso restrito" })).toBeVisible();
+    await expect(
+      page.getByText(/reservado a administradores, gestores e engenharia/i),
+    ).toBeVisible();
     await ctx.close();
   });
 
-  test("engineer em /admin → redirect para /admin/suporte", async ({ browser }) => {
+  test("engineer em /admin → redireciona para /admin/usuarios (aba Redefinir senha)", async ({
+    browser,
+  }) => {
     test.skip(!S_ENGINEER, "Defina E2E_STORAGE_ENGINEER.");
     const ctx = await browser.newContext({ storageState: S_ENGINEER });
     const page = await ctx.newPage();
     await page.goto("/admin");
-    await page.waitForURL("**/admin/suporte");
+    await page.waitForURL("**/admin/usuarios**");
+    // Engineer não é admin: não vê as abas "Usuários"/"Permissões", só o reset de senha.
+    await expect(page.getByRole("tab", { name: "Usuários" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "Permissões" })).toHaveCount(0);
     await ctx.close();
   });
 
-  test("manager em /admin → Overview sem itens 'Permissões' e 'Flags'", async ({ browser }) => {
+  test("manager em /admin → redireciona para /admin/usuarios (aba Redefinir senha)", async ({
+    browser,
+  }) => {
     test.skip(!S_MANAGER, "Defina E2E_STORAGE_MANAGER.");
     const ctx = await browser.newContext({ storageState: S_MANAGER });
     const page = await ctx.newPage();
     await page.goto("/admin");
-    await expect(page.getByRole("heading", { name: /painel administrativo/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /^permissões$/i })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: /^flags$/i })).toHaveCount(0);
+    await page.waitForURL("**/admin/usuarios**");
+    await expect(page.getByRole("tab", { name: "Usuários" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "Permissões" })).toHaveCount(0);
     await ctx.close();
   });
 
-  test("admin em /admin → Overview com sidebar completa", async ({ browser }) => {
+  test("admin em /admin → redireciona para /admin/configuracoes (Painel)", async ({ browser }) => {
     test.skip(!S_ADMIN, "Defina E2E_STORAGE_ADMIN.");
     const ctx = await browser.newContext({ storageState: S_ADMIN });
     const page = await ctx.newPage();
     await page.goto("/admin");
-    await expect(page.getByRole("heading", { name: /painel administrativo/i })).toBeVisible();
-    // Itens em breve continuam visíveis mas desabilitados.
-    await expect(page.getByText(/^Permissões$/)).toBeVisible();
-    await expect(page.getByText(/^Flags$/)).toBeVisible();
+    await page.waitForURL("**/admin/configuracoes**");
+    await expect(page.getByRole("heading", { name: "Painel" })).toBeVisible();
+    // KPI real de AdministracaoTab.tsx — confirma que o painel carregou de verdade.
+    await expect(page.getByText("Chamados fora do SLA")).toBeVisible();
     await ctx.close();
   });
 
@@ -71,12 +91,14 @@ test.describe("Admin fase 1 — layout e guard", () => {
     await ctx.close();
   });
 
-  test("guard legado: sem role permitida em /admin/usuarios → 403", async ({ browser }) => {
+  test("guard legado: sem role permitida em /admin/usuarios → Acesso restrito", async ({
+    browser,
+  }) => {
     test.skip(!S_NOROLE, "Defina E2E_STORAGE_NOROLE.");
     const ctx = await browser.newContext({ storageState: S_NOROLE });
     const page = await ctx.newPage();
     await page.goto("/admin/usuarios");
-    await expect(page.getByText(/acesso restrito/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Acesso restrito" })).toBeVisible();
     await ctx.close();
   });
 });

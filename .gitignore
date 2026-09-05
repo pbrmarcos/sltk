@@ -51,3 +51,8 @@ restore-log.txt
 # Role sweep local artifacts
 scripts/role-sweep/reports/
 scripts/role-sweep/screenshots/
+
+# Playwright local run artifacts
+test-results/
+playwright-report/
+blob-report/
