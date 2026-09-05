@@ -15,6 +15,7 @@ import {
 } from "@/hooks/use-brand-settings";
 import { applyBrand } from "@/lib/brand-apply";
 import { logAudit, diffEntries } from "@/lib/audit";
+import { SeoFieldsCard } from "@/components/admin/SeoFieldsCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -551,19 +552,15 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
       </Section>
 
       <Section title="SEO & Indexação" description="Metadados padrão e controle de indexação por buscadores.">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="meta_title" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
-              Meta title <span className="ml-1 text-[10px] text-[var(--text-muted)]">{metaTitle.length}/60</span>
-            </Label>
-            <Input id="meta_title" maxLength={60} {...form.register("meta_title")} />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="meta_description" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
-              Meta description <span className="ml-1 text-[10px] text-[var(--text-muted)]">{metaDescription.length}/160</span>
-            </Label>
-            <Textarea id="meta_description" maxLength={160} rows={3} {...form.register("meta_description")} />
-          </div>
+        <SeoFieldsCard
+          titleId="meta_title"
+          title={metaTitle}
+          onTitleChange={(v) => form.setValue("meta_title", v, { shouldDirty: true })}
+          descriptionId="meta_description"
+          description={metaDescription}
+          onDescriptionChange={(v) => form.setValue("meta_description", v, { shouldDirty: true })}
+        />
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="canonical_base_url" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               URL canônica base
@@ -590,7 +587,7 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
             </div>
           </div>
         </div>
-        <p className="text-[11px] text-[var(--text-muted)]">
+        <p className="mt-3 text-[11px] text-[var(--text-muted)]">
           Preview do título: <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">{metaTitle || systemName}</code>
         </p>
       </Section>

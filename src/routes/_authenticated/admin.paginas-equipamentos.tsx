@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { SeoFieldsCard } from "@/components/admin/SeoFieldsCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -289,29 +290,16 @@ function SeoForm({ pagina, onSave }: { pagina: any; onSave: (patch: any) => void
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="grid gap-4">
-        <div>
-          <Label>Título SEO (PT)</Label>
-          <Input value={form.seo_title_pt} onChange={(e) => setForm({ ...form, seo_title_pt: e.target.value })} />
-        </div>
-        <div>
-          <Label>Descrição SEO (PT)</Label>
-          <Textarea
-            rows={3}
-            value={form.seo_description_pt}
-            onChange={(e) => setForm({ ...form, seo_description_pt: e.target.value })}
-          />
-        </div>
-        <div>
-          <Label>og:image (URL)</Label>
-          <Input
-            value={form.og_image_url}
-            onChange={(e) => setForm({ ...form, og_image_url: e.target.value })}
-            placeholder="https://…"
-          />
-          {form.og_image_url && (
-            <img src={form.og_image_url} alt="preview" className="mt-2 max-h-40 rounded-md border border-border" />
-          )}
-        </div>
+        <SeoFieldsCard
+          className="grid gap-4"
+          title={form.seo_title_pt}
+          onTitleChange={(v) => setForm({ ...form, seo_title_pt: v })}
+          description={form.seo_description_pt}
+          onDescriptionChange={(v) => setForm({ ...form, seo_description_pt: v })}
+          ogImage={form.og_image_url}
+          onOgImageChange={(v) => setForm({ ...form, og_image_url: v })}
+          showOgImagePreview
+        />
         <div className="flex justify-end">
           <Button onClick={() => onSave(form)}>
             <Save className="mr-1.5 h-4 w-4" />

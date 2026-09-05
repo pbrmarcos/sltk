@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { SeoFieldsCard } from "@/components/admin/SeoFieldsCard";
 
 const qo = queryOptions({
   queryKey: ["admin", "page_seo"],
@@ -171,17 +172,16 @@ function SeoCard({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label className="text-xs">Title</Label>
-          <Input
-            value={local.title ?? ""}
-            onChange={(e) => field("title", e.target.value)}
-            maxLength={60}
-            placeholder="Título da página (até 60 caracteres)"
-          />
-          <p className="mt-1 text-[10px] text-[var(--text-muted)]">{(local.title ?? "").length}/60</p>
-        </div>
+      <SeoFieldsCard
+        title={local.title ?? ""}
+        onTitleChange={(v) => field("title", v)}
+        description={local.description ?? ""}
+        onDescriptionChange={(v) => field("description", v)}
+        ogImage={local.og_image ?? ""}
+        onOgImageChange={(v) => field("og_image", v)}
+      />
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
           <Label className="text-xs">Canonical URL</Label>
           <Input
@@ -190,30 +190,11 @@ function SeoCard({
             placeholder="https://..."
           />
         </div>
-        <div className="sm:col-span-2">
-          <Label className="text-xs">Meta description</Label>
-          <Textarea
-            value={local.description ?? ""}
-            onChange={(e) => field("description", e.target.value)}
-            rows={2}
-            maxLength={160}
-            placeholder="Descrição (até 160 caracteres)"
-          />
-          <p className="mt-1 text-[10px] text-[var(--text-muted)]">{(local.description ?? "").length}/160</p>
-        </div>
         <div>
           <Label className="text-xs">og:title</Label>
           <Input
             value={local.og_title ?? ""}
             onChange={(e) => field("og_title", e.target.value)}
-          />
-        </div>
-        <div>
-          <Label className="text-xs">og:image (URL)</Label>
-          <Input
-            value={local.og_image ?? ""}
-            onChange={(e) => field("og_image", e.target.value)}
-            placeholder="https://.../imagem.png"
           />
         </div>
         <div className="sm:col-span-2">
