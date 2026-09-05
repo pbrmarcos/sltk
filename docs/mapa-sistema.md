@@ -163,14 +163,24 @@ Convenções:
 - **Fluxos**: convidar usuário · atribuir papéis · ajustar SLA · configurar SEO/indexação antes de publicar · aplicar migration com confirmação · auditar mudanças.
 - **FAQs candidatas**: "Como convido um novo usuário?", "Um usuário pode ter mais de um papel?", "Por que não vejo certos itens do menu de Configurações?", "Onde vejo quem alterou uma OC?", "Como aplico uma migration com segurança?".
 
+### Segurança e confiabilidade — resolvido nesta rodada (Tier 1)
+
+Auditoria encontrou módulos de negócio inteiros (Qualidade, Pós-vendas/SAT, Engenharia, Comercial, Almoxarifado/Compras, Know-how, Logística) onde mutações de escrita só exigiam login, sem checagem de papel nenhuma no servidor — incluindo `homologarFat` (aceite formal de qualidade) e `createEmbarque`, chamáveis por qualquer usuário autenticado de qualquer papel. Corrigido via `assertCanAccessModule()` (novo, em `src/lib/admin-guard.ts`), que espelha a RPC `can_access_module()` já usada pela RLS em vários módulos — consulta a matriz dinâmica `role_module_permissions` (configurável em Usuários & Permissões), não uma lista fixa de papéis.
+
+Junto: `throw new Error(error.message)` (vazando erro cru do Postgres pro usuário) convertido pra `friendlyDbError()` (`src/lib/db-errors.ts`) em 66 arquivos — admin incluído, não era algo já resolvido lá. E estados de loading/erro adicionados em 5 telas amostradas (cotações, embarques, FAT, orçamentos, clientes), reusando `src/components/data/TableStates.tsx`.
+
+**Nota de verificação**: para tabelas cujo RLS eu consegui conferir nas migrations (ex. `fat_relatorios`), a policy já bloqueava no banco — a checagem de aplicação é defesa em profundidade. Pra maioria das outras tabelas tocadas, o `CREATE TABLE` nem está em `supabase/migrations/` (mesmo gap de ~60 tabelas abaixo), então não dá pra confirmar estaticamente se havia RLS — ali a checagem de aplicação pode ter sido a única proteção real.
+
 ### Pendências técnicas conhecidas (não é FAQ de usuário — referência pra quem for continuar o desenvolvimento)
 
-- **Cores fixas fora do tema**: ~54 arquivos (182 ocorrências) ainda usam cinza/slate/zinc fixo do Tailwind em vez dos tokens de tema — só importa se/quando o tema escuro for ativado (hoje o app usa tema claro por padrão). Uma primeira fatia (9 arquivos de Compras/Engenharia) já foi convertida.
-- **SEO em 3 telas**: Geral, SEO e Páginas dos Equipamentos editam conceitos de SEO em tabelas diferentes (`brand_settings`, `page_seo`, `equipamento_pagina`) — não é duplicação de dado, mas usa um componente compartilhado (`SeoFieldsCard`) desde a última rodada; ainda não há decisão sobre consolidar as tabelas.
-- **Gap de migrations**: `supabase/migrations/` (87 arquivos) não cobre 100% do schema de produção — existem tabelas criadas via SQL Editor da Lovable nunca capturadas como migration. `prod-schema-dump.sql`/`restore-log.txt` na raiz documentam uma reconciliação parcial (via staging), ainda não fechada.
-- **Integrações reais não validadas**: Resend, Gemini, Google Service Account (Drive) e o token de Migrations (`SB_MANAGEMENT_ACCESS_TOKEN`) não têm chave configurada no ambiente local — o catálogo em `src/lib/system-keys.ts` + `/admin/diagnostico` já sabe testar cada uma assim que a chave existir.
-- **Lint desligado do CI**: `bun run lint` acusa ~26 mil problemas pré-existentes (quase todos formatação/prettier) — precisa de um `prettier --write .` dedicado antes de fazer sentido ligar no `.github/workflows/ci.yml`.
-- **`e2e/admin-fase1.spec.ts` desatualizado**: testa uma estrutura de `/admin` anterior a esta reorganização (headings/links que não existem mais); precisa de reescrita contra uma instância rodando.
+- **Cobertura de teste não toca a lógica que mais importa** (Tier 2): os 6 arquivos de teste cobrem estoque, validação de documento fiscal e RBAC de permissões — nada testa cálculo de preço de orçamento nem transição de status de embarque/chamado/OC.
+- **Tabelas sem rolagem horizontal em mobile** (Tier 3): só `compras.cotacoes.$id.tsx` usa `overflow-x-auto`; cotações/embarques/orçamentos em lista quebram em tela estreita.
+- **Cores fixas fora do tema** (Tier 3): ~54 arquivos (182 ocorrências) ainda usam cinza/slate/zinc fixo do Tailwind em vez dos tokens de tema — só importa se/quando o tema escuro for ativado. Uma primeira fatia (9 arquivos de Compras/Engenharia) já foi convertida.
+- **SEO em 3 telas**: Geral, SEO e Páginas dos Equipamentos editam conceitos de SEO em tabelas diferentes (`brand_settings`, `page_seo`, `equipamento_pagina`) — não é duplicação de dado, usa um componente compartilhado (`SeoFieldsCard`); ainda não há decisão sobre consolidar as tabelas.
+- **Gap de migrations** (Tier 4): `supabase/migrations/` (87 arquivos) não cobre 100% do schema de produção — existem tabelas criadas via SQL Editor da Lovable nunca capturadas como migration (`prod-schema-dump.sql`/`restore-log.txt` na raiz documentam uma reconciliação parcial via staging, ainda não fechada). É essa mesma lacuna que impediu confirmar RLS pra boa parte das correções de segurança acima.
+- **Integrações reais não validadas** (Tier 4): Resend, Gemini, Google Service Account (Drive) e o token de Migrations (`SB_MANAGEMENT_ACCESS_TOKEN`) não têm chave configurada no ambiente local.
+- **Lint desligado do CI** (Tier 2): `bun run lint` acusa ~26 mil problemas pré-existentes (quase todos formatação/prettier) — precisa de um `prettier --write .` dedicado antes de fazer sentido ligar no CI.
+- **`e2e/admin-fase1.spec.ts` desatualizado** (Tier 2): testa uma estrutura de `/admin` anterior a esta reorganização; precisa de reescrita contra uma instância rodando.
 
 ## 11. Site público (referência para admins)
 
