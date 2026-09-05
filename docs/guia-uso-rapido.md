@@ -110,12 +110,16 @@ Módulos cobertos: Conta · Comercial · Clientes/Fornecedores · Importação �
 
 ## 14. Administração
 
-- **Acesso**: `/admin`
-- **Convidar usuário**: `/admin/usuarios` → **Novo** → e-mail + papéis (pode ter mais de um).
+- **Acesso**: `/admin` (menu de categorias à esquerda, filtrado pelo seu papel).
+- **Convidar usuário**: `/admin/usuarios` → aba Usuários → **Novo** → e-mail + papéis (pode ter mais de um).
+- **Redefinir senha de outro usuário**: admin usa a ação por linha em `/admin/usuarios`; manager/engineer usam a aba "Redefinir senha" da mesma tela.
 - **Alterar SLA**: `/admin/sla-chamados` → por prioridade.
-- **Configurar empresa/domínio**: `/admin/configuracoes` (`canonical_base_url`, dados fiscais).
+- **Configurar empresa/tema/SEO padrão**: `/admin/geral`.
+- **Painel administrativo (KPIs)**: `/admin/configuracoes`.
 - **Auditoria**: `/admin/auditoria` — filtro por tabela, usuário, período.
-- **CMS do site**: `/admin/paginas-equipamentos`, `/admin/rfq-tipos`.
+- **CMS do site**: `/admin/paginas-equipamentos` (blocos + SEO por equipamento).
+- **Tipos de Checklist / segmentos de Entrevista**: `/admin/modelos-formulario`.
+- **Chaves e status das integrações externas**: `/admin/diagnostico`.
 - **Design system / changelog**: `/design-system`, `/changelog`.
 
 ---

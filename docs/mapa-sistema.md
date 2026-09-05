@@ -150,23 +150,27 @@ Convenções:
 
 ## 10. Administração
 
-- **Objetivo**: configurar sistema, gerenciar usuários e permissões, auditar.
-- **Papéis**: `admin` (algumas telas abertas a `manager`).
-- **Rotas**:
-  - `/admin` (índice)
-  - `/admin/usuarios` — CRUD de usuários e papéis (via `user_roles`)
-  - `/admin/auditoria` — logs
-  - `/admin/configuracoes` — dados da empresa, `canonical_base_url`, chaves públicas
-  - `/admin/banco` — dados bancários para OC
-  - `/admin/sla-chamados` — SLA por prioridade
-  - `/admin/etapas-equipamentos` e `/admin/etapas-equipamentos/$id`
-  - `/admin/paginas-equipamentos` — CMS do site público
-  - `/admin/rfq-tipos` — tipos de RFQ e campos
-  - `/admin/suporte`, `/admin/contato`
-  - `/design-system` — referência visual
-  - `/changelog`
-- **Fluxos**: convidar usuário · atribuir papéis · ajustar SLA · configurar canonical URL antes de publicar em domínio próprio · auditar mudanças.
-- **FAQs candidatas**: "Como convido um novo usuário?", "Um usuário pode ter mais de um papel?", "Como troco o domínio canônico?", "Onde vejo quem alterou uma OC?".
+- **Objetivo**: configurar sistema, gerenciar usuários e permissões, auditar. Reorganizado numa área única (`/admin/*`) com menu de categorias à esquerda (`SettingsNav.tsx`), filtrado pelo papel de quem está logado.
+- **Papéis**: acesso à área inteira exige `admin`, `manager` ou `engineer`; a maioria das telas é `admin`-only (ver abaixo quais abrem pra mais gente). `/admin` sem sufixo redireciona pra primeira seção que o papel do usuário pode abrir.
+- **Grupos e rotas** (nomes do menu):
+  - **Visão geral** — Painel (`/admin/configuracoes`): KPIs, pendências e atividade recente. *admin.*
+  - **Sistema** — Chaves & Diagnóstico (`/admin/diagnostico`, com sub-abas Chaves / Banco de Dados / Integrações fiscais / Logs), Mineração (`/admin/mineracao`), Migrations (`/admin/migrations` — aplica SQL de `supabase/pending-migrations/` direto em produção via Management API, com confirmação e registro em auditoria). *admin.*
+  - **Marca & Site** — Geral (`/admin/geral`: identidade visual, tema, SEO/indexação padrão), Contato (`/admin/contato`), SEO (`/admin/seo`: título/descrição/og:image por rota pública, tabela `page_seo`), Páginas dos Equipamentos (`/admin/paginas-equipamentos`: CMS de blocos de conteúdo + SEO por equipamento). *admin.*
+  - **Usuários & Segurança** — Usuários & Permissões (`/admin/usuarios`: CRUD de usuários/papéis, matriz de permissões por módulo, e uma aba "Redefinir senha" restrita a manager/engineer), Auditoria (`/admin/auditoria`). *admin/manager (Usuários abre pra engineer também, só a aba de reset).*
+  - **Atendimento & Conteúdo** — E-mails automáticos (`/admin/emails`), Formulários recebidos (`/admin/formularios-recebidos` — caixa de entrada de RFQ/entrevista/contato), Modelos de Formulário (`/admin/modelos-formulario`: tipos de Checklist RFQ + segmentos de Entrevista, duas abas), SLA de Chamados (`/admin/sla-chamados`), Origens de Lead (`/admin/origens-lead`). *admin/manager, salvo Origens de Lead (admin) e SLA (aberto a engineer também.)*
+  - **Equipamentos** — Etapas dos Equipamentos (`/admin/etapas-equipamentos`).
+  - Fora do menu: `/design-system`, `/changelog`.
+- **Fluxos**: convidar usuário · atribuir papéis · ajustar SLA · configurar SEO/indexação antes de publicar · aplicar migration com confirmação · auditar mudanças.
+- **FAQs candidatas**: "Como convido um novo usuário?", "Um usuário pode ter mais de um papel?", "Por que não vejo certos itens do menu de Configurações?", "Onde vejo quem alterou uma OC?", "Como aplico uma migration com segurança?".
+
+### Pendências técnicas conhecidas (não é FAQ de usuário — referência pra quem for continuar o desenvolvimento)
+
+- **Cores fixas fora do tema**: ~54 arquivos (182 ocorrências) ainda usam cinza/slate/zinc fixo do Tailwind em vez dos tokens de tema — só importa se/quando o tema escuro for ativado (hoje o app usa tema claro por padrão). Uma primeira fatia (9 arquivos de Compras/Engenharia) já foi convertida.
+- **SEO em 3 telas**: Geral, SEO e Páginas dos Equipamentos editam conceitos de SEO em tabelas diferentes (`brand_settings`, `page_seo`, `equipamento_pagina`) — não é duplicação de dado, mas usa um componente compartilhado (`SeoFieldsCard`) desde a última rodada; ainda não há decisão sobre consolidar as tabelas.
+- **Gap de migrations**: `supabase/migrations/` (87 arquivos) não cobre 100% do schema de produção — existem tabelas criadas via SQL Editor da Lovable nunca capturadas como migration. `prod-schema-dump.sql`/`restore-log.txt` na raiz documentam uma reconciliação parcial (via staging), ainda não fechada.
+- **Integrações reais não validadas**: Resend, Gemini, Google Service Account (Drive) e o token de Migrations (`SB_MANAGEMENT_ACCESS_TOKEN`) não têm chave configurada no ambiente local — o catálogo em `src/lib/system-keys.ts` + `/admin/diagnostico` já sabe testar cada uma assim que a chave existir.
+- **Lint desligado do CI**: `bun run lint` acusa ~26 mil problemas pré-existentes (quase todos formatação/prettier) — precisa de um `prettier --write .` dedicado antes de fazer sentido ligar no `.github/workflows/ci.yml`.
+- **`e2e/admin-fase1.spec.ts` desatualizado**: testa uma estrutura de `/admin` anterior a esta reorganização (headings/links que não existem mais); precisa de reescrita contra uma instância rodando.
 
 ## 11. Site público (referência para admins)
 
