@@ -128,7 +128,8 @@ export const updateMontagem = createServerFn({ method: "POST" })
       .eq("id", id);
     if (error) throw friendlyDbError(error);
 
-    const atribuiuAgora = !!data.responsavel_id && data.responsavel_id !== (antes as any)?.responsavel_id;
+    const atribuiuAgora =
+      !!data.responsavel_id && data.responsavel_id !== (antes as any)?.responsavel_id;
     const bloqueouAgora = data.status === "bloqueada" && (antes as any)?.status !== "bloqueada";
     if (atribuiuAgora || bloqueouAgora) {
       try {
