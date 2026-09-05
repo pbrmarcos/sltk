@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -195,6 +196,7 @@ export const createEmbarque = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     const { data: row, error } = await (context.supabase as any)
       .from("logistica_embarques")
       .insert({
@@ -227,6 +229,7 @@ export const updateEmbarque = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     const patch: Record<string, unknown> = { updated_by: context.userId };
     for (const k of ["transportadora_id", "previsao_saida", "nf_saida", "destino", "observacoes"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
@@ -256,6 +259,7 @@ export const setStatus = createServerFn({ method: "POST" })
       .parse(input)
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     // Motivo obrigatório para transições críticas
     if (CRITICAL_STATUS.includes(data.status)) {
       const trimmed = (data.notas ?? "").trim();
@@ -395,6 +399,7 @@ export const addItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => itemInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     const { data: max } = await (context.supabase as any)
       .from("logistica_embarque_itens")
       .select("ordem")
@@ -427,6 +432,7 @@ export const removeItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     const { error } = await (context.supabase as any)
       .from("logistica_embarque_itens")
       .delete()
@@ -449,6 +455,7 @@ export const registrarAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => anexoInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     const { data: row, error } = await (context.supabase as any)
       .from("logistica_embarque_anexos")
       .insert({
@@ -470,6 +477,7 @@ export const removerAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), storage_path: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "logistica");
     await (context.supabase as any).storage.from(LOGISTICA_ANEXOS_BUCKET).remove([data.storage_path]);
     const { error } = await (context.supabase as any)
       .from("logistica_embarque_anexos")
