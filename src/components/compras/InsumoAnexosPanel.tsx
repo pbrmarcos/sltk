@@ -53,7 +53,7 @@ const KIND_LABEL: Record<Kind, string> = {
 const KIND_COLOR: Record<Kind, string> = {
   orcamento: "bg-emerald-50 text-emerald-700 border-emerald-200",
   tecnico: "bg-blue-50 text-blue-700 border-blue-200",
-  outro: "bg-zinc-50 text-zinc-700 border-zinc-200",
+  outro: "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--bg-border)]",
 };
 
 const MOEDAS = ["BRL", "USD", "EUR", "CNY"] as const;
@@ -233,7 +233,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
   return (
     <div className="space-y-4">
       {/* Uploader */}
-      <div className="rounded-md border border-zinc-200 bg-zinc-50/60 p-3 space-y-3">
+      <div className="rounded-md border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-xs flex items-center gap-1.5">
             <Upload className="h-3.5 w-3.5" />
@@ -244,7 +244,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
               href={folderUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] text-zinc-600 hover:text-blue-600"
+              className="inline-flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-blue-600"
             >
               <FolderOpen className="h-3 w-3" />
               Abrir pasta do Drive
@@ -254,7 +254,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           <div>
-            <Label className="text-[11px] text-zinc-500">Tipo</Label>
+            <Label className="text-[11px] text-[var(--text-muted)]">Tipo</Label>
             <Select value={kind} onValueChange={(v) => setKind(v as Kind)}>
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
@@ -267,7 +267,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             </Select>
           </div>
           <div className="md:col-span-2">
-            <Label className="text-[11px] text-zinc-500">
+            <Label className="text-[11px] text-[var(--text-muted)]">
               Fornecedor {kind === "orcamento" && <span className="text-red-500">*</span>}
             </Label>
             <Select value={fornecedorId || "none"} onValueChange={(v) => setFornecedorId(v === "none" ? "" : v)}>
@@ -299,7 +299,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
         {kind === "orcamento" && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded border border-emerald-200 bg-emerald-50/40 p-2">
             <div>
-              <Label className="text-[11px] text-zinc-500">
+              <Label className="text-[11px] text-[var(--text-muted)]">
                 Valor <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -312,7 +312,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             </div>
 
             <div>
-              <Label className="text-[11px] text-zinc-500">Moeda</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Moeda</Label>
               <Select value={moeda} onValueChange={setMoeda}>
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
@@ -327,7 +327,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
               </Select>
             </div>
             <div>
-              <Label className="text-[11px] text-zinc-500">Lead time (dias)</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Lead time (dias)</Label>
               <Input
                 type="number"
                 min={0}
@@ -337,7 +337,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
               />
             </div>
             <div>
-              <Label className="text-[11px] text-zinc-500">Incoterm</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Incoterm</Label>
               <Select value={incoterm || "none"} onValueChange={(v) => setIncoterm(v === "none" ? "" : v)}>
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder="—" />
@@ -353,7 +353,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
               </Select>
             </div>
             <div className="col-span-2">
-              <Label className="text-[11px] text-zinc-500">
+              <Label className="text-[11px] text-[var(--text-muted)]">
                 Condição de pagamento <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -365,7 +365,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
               {errors.condicao && <FieldError msg={errors.condicao} />}
             </div>
             <div>
-              <Label className="text-[11px] text-zinc-500">Validade</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Validade</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -373,7 +373,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
                     variant="outline"
                     className={cn(
                       "h-8 w-full justify-start text-left text-xs font-normal",
-                      !validade && "text-zinc-400",
+                      !validade && "text-[var(--text-muted)]",
                       errors.validade && "border-red-400",
                     )}
                   >
@@ -395,7 +395,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             </div>
 
             <div className="col-span-4">
-              <Label className="text-[11px] text-zinc-500">Observações</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Observações</Label>
               <Textarea
                 rows={2}
                 className="text-xs"
@@ -430,7 +430,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             )}
             {uploading ? "Enviando…" : "Selecionar arquivo"}
           </Button>
-          <span className="text-[11px] text-zinc-500">
+          <span className="text-[11px] text-[var(--text-muted)]">
             PDF, imagens, DOC/XLS ou ZIP até 25MB. Salvo em Drive/Compras/Insumos/…
           </span>
         </div>
@@ -477,13 +477,13 @@ function Section({
 }) {
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-700">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
         {icon}
         {title}
-        <span className="text-zinc-400 font-normal">({rows.length})</span>
+        <span className="text-[var(--text-muted)] font-normal">({rows.length})</span>
       </div>
       {rows.length === 0 ? (
-        <div className="text-[11px] text-zinc-400 italic border border-dashed border-zinc-200 rounded p-3">
+        <div className="text-[11px] text-[var(--text-muted)] italic border border-dashed border-[var(--bg-border)] rounded p-3">
           Nada por aqui ainda.
         </div>
       ) : (
@@ -495,7 +495,7 @@ function Section({
             return (
               <div
                 key={r.id}
-                className="rounded border border-zinc-200 bg-white p-2.5 flex flex-col md:flex-row md:items-center gap-2 text-xs"
+                className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] p-2.5 flex flex-col md:flex-row md:items-center gap-2 text-xs"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Badge
@@ -505,10 +505,10 @@ function Section({
                     {KIND_LABEL[kind]}
                   </Badge>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-zinc-800">
+                    <div className="truncate font-medium text-[var(--text-primary)]">
                       {r.file_name}
                     </div>
-                    <div className="text-[10px] text-zinc-500 flex flex-wrap gap-x-2">
+                    <div className="text-[10px] text-[var(--text-muted)] flex flex-wrap gap-x-2">
                       <span>{formatSize(r.size_bytes)}</span>
                       {forn && (
                         <span>· {forn.nome_fantasia ?? forn.nome}</span>
@@ -528,7 +528,7 @@ function Section({
                       </div>
                     )}
                     {r.observacoes && (
-                      <div className="text-[10px] text-zinc-600 mt-0.5 italic truncate">
+                      <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 italic truncate">
                         {r.observacoes}
                       </div>
                     )}

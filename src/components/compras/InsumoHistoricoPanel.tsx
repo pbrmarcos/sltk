@@ -39,7 +39,7 @@ const TIPOS: Record<string, TipoMap> = {
   anexo_adicionado: { icon: FilePlus2, color: "text-purple-600 bg-purple-50 border-purple-200", label: "Anexo" },
   anexo_removido: { icon: FileMinus2, color: "text-red-600 bg-red-50 border-red-200", label: "Removido" },
   orcamento_recebido: { icon: DollarSign, color: "text-emerald-700 bg-emerald-50 border-emerald-200", label: "Orçamento" },
-  comentario: { icon: MessageCircle, color: "text-zinc-700 bg-zinc-50 border-zinc-200", label: "Comentário" },
+  comentario: { icon: MessageCircle, color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]", label: "Comentário" },
 };
 
 const FIELD_LABEL: Record<string, string> = {
@@ -131,8 +131,8 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-md border border-zinc-200 bg-zinc-50/60 p-3 space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-700">
+      <div className="rounded-md border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
           <MessageCircle className="h-3.5 w-3.5" />
           Novo comentário
         </div>
@@ -144,12 +144,12 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
             setComentario(e.target.value);
             if (erroComentario) setErroComentario(null);
           }}
-          className={cn("text-xs bg-white", erroComentario && "border-red-400 focus-visible:ring-red-300")}
+          className={cn("text-xs bg-[var(--bg-surface)]", erroComentario && "border-red-400 focus-visible:ring-red-300")}
           aria-invalid={!!erroComentario}
           maxLength={2000}
         />
         <div className="flex items-center justify-between">
-          <span className={cn("text-[11px]", erroComentario ? "text-red-600" : "text-zinc-400")}>
+          <span className={cn("text-[11px]", erroComentario ? "text-red-600" : "text-[var(--text-muted)]")}>
             {erroComentario ?? `${comentario.length}/2000`}
           </span>
           <Button size="sm" onClick={enviar} disabled={enviando}>
@@ -168,15 +168,15 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
             className={cn(
               "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
               filter === f.key
-                ? "bg-zinc-900 border-zinc-900 text-white"
-                : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50",
+                ? "bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-surface)]"
+                : "bg-[var(--bg-surface)] border-[var(--bg-border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]",
             )}
           >
             {f.label}
             <span
               className={cn(
                 "rounded-full px-1.5 text-[10px]",
-                filter === f.key ? "bg-white/20" : "bg-zinc-100 text-zinc-500",
+                filter === f.key ? "bg-[var(--bg-surface)]/20" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]",
               )}
             >
               {counts[f.key]}
@@ -186,7 +186,7 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
         <Button
           size="sm"
           variant="ghost"
-          className="ml-auto h-7 text-[11px] text-zinc-600"
+          className="ml-auto h-7 text-[11px] text-[var(--text-secondary)]"
           onClick={() => setAscending((v) => !v)}
         >
           <ArrowUpDown className="mr-1 h-3 w-3" />
@@ -195,21 +195,21 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-700">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
           <History className="h-3.5 w-3.5" />
           Linha do tempo
-          <span className="text-zinc-400 font-normal">({rows.length})</span>
+          <span className="text-[var(--text-muted)] font-normal">({rows.length})</span>
         </div>
         {rows.length === 0 ? (
-          <div className="text-[11px] text-zinc-400 italic border border-dashed border-zinc-200 rounded p-3">
+          <div className="text-[11px] text-[var(--text-muted)] italic border border-dashed border-[var(--bg-border)] rounded p-3">
             Nenhuma atividade nesse filtro.
           </div>
         ) : (
-          <ol className="relative border-l border-zinc-200 ml-2 space-y-2 py-1">
+          <ol className="relative border-l border-[var(--bg-border)] ml-2 space-y-2 py-1">
             {rows.map((r) => {
               const cfg = TIPOS[r.tipo] ?? {
                 icon: History,
-                color: "text-zinc-600 bg-zinc-50 border-zinc-200",
+                color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
                 label: r.tipo,
               };
               const Icon = cfg.icon;
@@ -217,24 +217,24 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
                 <li key={r.id} className="ml-4">
                   <span
                     className={cn(
-                      "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border bg-white",
+                      "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border bg-[var(--bg-surface)]",
                       cfg.color,
                     )}
                   >
                     <Icon className="h-2.5 w-2.5" />
                   </span>
-                  <div className="rounded border border-zinc-200 bg-white p-2 text-xs">
+                  <div className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] p-2 text-xs">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Badge variant="outline" className={cn("font-normal", cfg.color)}>
                         {cfg.label}
                       </Badge>
-                      <span className="text-zinc-500">{r.actor_nome ?? "Sistema"}</span>
-                      <span className="text-zinc-400">·</span>
-                      <span className="text-zinc-400">
+                      <span className="text-[var(--text-muted)]">{r.actor_nome ?? "Sistema"}</span>
+                      <span className="text-[var(--text-muted)]">·</span>
+                      <span className="text-[var(--text-muted)]">
                         {new Date(r.criado_em).toLocaleString("pt-BR")}
                       </span>
                     </div>
-                    <div className="text-zinc-800 mt-1 whitespace-pre-wrap">
+                    <div className="text-[var(--text-primary)] mt-1 whitespace-pre-wrap">
                       {r.descricao}
                     </div>
                     {r.tipo === "editado" && r.meta && typeof r.meta === "object" && (
@@ -245,15 +245,15 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
                           return (
                             <div
                               key={k}
-                              className="rounded bg-zinc-50 border border-zinc-100 px-1.5 py-1 text-[10px]"
+                              className="rounded bg-[var(--bg-elevated)] border border-[var(--bg-border)] px-1.5 py-1 text-[10px]"
                             >
-                              <span className="text-zinc-500">
+                              <span className="text-[var(--text-muted)]">
                                 {FIELD_LABEL[k] ?? k}:{" "}
                               </span>
                               <span className="line-through text-red-600/70">
                                 {String(a ?? "—")}
                               </span>
-                              <span className="mx-1 text-zinc-400">→</span>
+                              <span className="mx-1 text-[var(--text-muted)]">→</span>
                               <span className="text-emerald-700">
                                 {String(b ?? "—")}
                               </span>

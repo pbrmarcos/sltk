@@ -211,13 +211,13 @@ function NovaCotacaoPage() {
         subtitle={`Passo ${step} de 3`}
       />
 
-      <div className="mt-4 rounded-md border bg-white p-6">
+      <div className="mt-4 rounded-md border bg-[var(--bg-surface)] p-6">
         {step === 1 && (
           <div className="space-y-3">
             <h3 className="text-base font-semibold">
               {fromBom ? "1. Itens da B.O.M. pré-selecionados" : "1. Selecione os insumos aprovados"}
             </h3>
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-[var(--text-muted)]">
               {insumoSel.size} item(ns) selecionado(s) de {insumosQ.data?.length ?? 0}
               {fromBom ? " itens da B.O.M." : " aprovados"}.
               {categoriasSel.length > 1 && (
@@ -237,14 +237,14 @@ function NovaCotacaoPage() {
             </p>
             <div className="max-h-[500px] overflow-y-auto rounded border">
               {(insumosQ.data ?? []).length === 0 ? (
-                <div className="p-6 text-sm text-zinc-500">
+                <div className="p-6 text-sm text-[var(--text-muted)]">
                   Nenhum insumo aprovado disponível. Aprove insumos na aba de um projeto antes de
                   criar o checklist.
                 </div>
               ) : (
                 <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-zinc-50">
-                    <tr className="text-left text-xs text-zinc-600">
+                  <thead className="sticky top-0 bg-[var(--bg-elevated)]">
+                    <tr className="text-left text-xs text-[var(--text-secondary)]">
                       <th className="p-2 w-10" />
                       <th className="p-2">Descrição</th>
                       <th className="p-2">Projeto</th>
@@ -269,7 +269,7 @@ function NovaCotacaoPage() {
                       };
                       const checked = insumoSel.has(it.id);
                       return (
-                        <tr key={it.id} className="border-t hover:bg-zinc-50">
+                        <tr key={it.id} className="border-t hover:bg-[var(--bg-elevated)]">
                           <td className="p-2">
                             <Checkbox
                               checked={checked}
@@ -284,10 +284,10 @@ function NovaCotacaoPage() {
                           <td className="p-2">
                             <div className="font-medium">{it.descricao}</div>
                             {it.part_number && (
-                              <div className="text-xs text-zinc-500">PN: {it.part_number}</div>
+                              <div className="text-xs text-[var(--text-muted)]">PN: {it.part_number}</div>
                             )}
                           </td>
-                          <td className="p-2 text-xs text-zinc-600">
+                          <td className="p-2 text-xs text-[var(--text-secondary)]">
                             {it.equipamento_projetos?.cliente_equipamentos?.codigo ?? "—"}
                           </td>
                           <td className="p-2">
@@ -389,7 +389,7 @@ function NovaCotacaoPage() {
         {step === 3 && (
           <div className="space-y-3">
             <h3 className="text-base font-semibold">3. Fornecedores convidados</h3>
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-[var(--text-muted)]">
               {fornSel.size} fornecedor(es) selecionado(s).
               {categoriasSel.length > 0
                 ? ` Filtrando por ${categoriasSel.length} categoria(s) dos insumos selecionados.`
@@ -397,8 +397,8 @@ function NovaCotacaoPage() {
             </p>
             <div className="max-h-[400px] overflow-y-auto rounded border">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-zinc-50">
-                  <tr className="text-left text-xs text-zinc-600">
+                <thead className="sticky top-0 bg-[var(--bg-elevated)]">
+                  <tr className="text-left text-xs text-[var(--text-secondary)]">
                     <th className="p-2 w-10" />
                     <th className="p-2">Código</th>
                     <th className="p-2">Fornecedor</th>
@@ -418,7 +418,7 @@ function NovaCotacaoPage() {
                     };
                     const checked = fornSel.has(it.id);
                     return (
-                      <tr key={it.id} className="border-t hover:bg-zinc-50">
+                      <tr key={it.id} className="border-t hover:bg-[var(--bg-elevated)]">
                         <td className="p-2">
                           <Checkbox
                             checked={checked}

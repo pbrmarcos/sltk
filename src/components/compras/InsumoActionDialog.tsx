@@ -371,7 +371,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
       <DialogContent className="max-w-6xl max-h-[92vh] overflow-hidden p-0">
         {insumo ? (
           <div className="flex flex-col max-h-[92vh]">
-            <div className="px-6 pt-5 pb-3 border-b bg-white shrink-0">
+            <div className="px-6 pt-5 pb-3 border-b bg-[var(--bg-surface)] shrink-0">
               <DialogHeader>
                 <div className="flex flex-wrap items-center gap-2">
                   <DialogTitle className="text-xl">{descricao || "—"}</DialogTitle>
@@ -389,8 +389,8 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
             </div>
 
             {/* Barra de status / progressão do fluxo */}
-            <div className="px-6 py-2 border-b bg-zinc-50/60 shrink-0 flex flex-wrap items-center gap-2">
-              <span className="text-[11px] uppercase tracking-wide text-zinc-500 font-medium mr-1">
+            <div className="px-6 py-2 border-b bg-[var(--bg-elevated)] shrink-0 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] font-medium mr-1">
                 Fluxo
               </span>
               {(insumo.status === "rascunho" || insumo.status === "cancelado") && (
@@ -440,7 +440,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 text-xs text-zinc-500 hover:text-red-600 ml-auto"
+                  className="h-7 text-xs text-[var(--text-muted)] hover:text-red-600 ml-auto"
                   disabled={saving}
                   onClick={() => avancarStatus("cancelado", "Solicitação cancelada.")}
                 >
@@ -450,19 +450,19 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
             </div>
 
             <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col min-h-0">
-              <div className="border-b bg-zinc-50/60 px-6 shrink-0">
+              <div className="border-b bg-[var(--bg-elevated)] px-6 shrink-0">
 
                 <TabsList className="h-10 bg-transparent p-0 gap-1">
-                  <TabsTrigger value="detalhes" className="data-[state=active]:bg-white data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger value="detalhes" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
                     <FileText className="h-3.5 w-3.5" /> Detalhes
                   </TabsTrigger>
-                  <TabsTrigger value="acoes" className="data-[state=active]:bg-white data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger value="acoes" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
                     <Wrench className="h-3.5 w-3.5" /> Ações do Compras
                   </TabsTrigger>
-                  <TabsTrigger value="anexos" className="data-[state=active]:bg-white data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger value="anexos" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
                     <Paperclip className="h-3.5 w-3.5" /> Anexos & Orçamentos
                   </TabsTrigger>
-                  <TabsTrigger value="historico" className="data-[state=active]:bg-white data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger value="historico" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
                     <History className="h-3.5 w-3.5" /> Histórico
                   </TabsTrigger>
                 </TabsList>
@@ -476,14 +476,14 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                     onGoToAcoes={() => setTab("acoes")}
                   />
 
-                  <details className="rounded-lg border border-zinc-200 bg-white group" open={insumo.status === "rascunho"}>
-                    <summary className="cursor-pointer select-none px-3 py-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-600 font-medium hover:bg-zinc-50/60">
+                  <details className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] group" open={insumo.status === "rascunho"}>
+                    <summary className="cursor-pointer select-none px-3 py-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-[var(--text-secondary)] font-medium hover:bg-[var(--bg-elevated)]">
                       <span className="flex items-center gap-2">
-                        <FileText className="h-3 w-3 text-zinc-500" />
+                        <FileText className="h-3 w-3 text-[var(--text-muted)]" />
                         Dados do insumo
                       </span>
-                      <span className="text-[10px] text-zinc-400 group-open:hidden">clique para editar</span>
-                      <span className="text-[10px] text-zinc-400 hidden group-open:inline">clique para recolher</span>
+                      <span className="text-[10px] text-[var(--text-muted)] group-open:hidden">clique para editar</span>
+                      <span className="text-[10px] text-[var(--text-muted)] hidden group-open:inline">clique para recolher</span>
                     </summary>
                     <div className="px-3 pb-3 pt-1 space-y-2">
                       <div>
@@ -575,18 +575,18 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                 </TabsContent>
 
                 <TabsContent value="acoes" className="mt-0 space-y-3">
-                  <div className="rounded-md border border-zinc-200 bg-zinc-50/60 p-3 space-y-2">
+                  <div className="rounded-md border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs flex items-center gap-1.5">
                         <MessageSquare className="h-3.5 w-3.5" />
                         Mensagem para fornecedor
                       </Label>
-                      <button type="button" className="text-[11px] text-zinc-500 hover:text-zinc-800 underline underline-offset-2" onClick={() => setMensagens(mensagensPadrao)}>
+                      <button type="button" className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline underline-offset-2" onClick={() => setMensagens(mensagensPadrao)}>
                         Restaurar padrão
                       </button>
                     </div>
                     <Tabs value={mensagemLang} onValueChange={(v) => setMensagemLang(v as Idioma)}>
-                      <TabsList className="h-8 bg-white">
+                      <TabsList className="h-8 bg-[var(--bg-surface)]">
                         {IDIOMAS.map((l) => (
                           <TabsTrigger key={l} value={l} className="text-xs h-6 px-2">
                             <span className="mr-1">{IDIOMA_FLAG[l]}</span>
@@ -596,7 +596,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                       </TabsList>
                       {IDIOMAS.map((l) => (
                         <TabsContent key={l} value={l} className="mt-2">
-                          <Textarea rows={8} className="font-mono text-xs bg-white" value={mensagens[l]} onChange={(e) => setMensagens((prev) => ({ ...prev, [l]: e.target.value }))} />
+                          <Textarea rows={8} className="font-mono text-xs bg-[var(--bg-surface)]" value={mensagens[l]} onChange={(e) => setMensagens((prev) => ({ ...prev, [l]: e.target.value }))} />
                         </TabsContent>
                       ))}
                     </Tabs>
@@ -612,7 +612,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
 
                   <Separator />
 
-                  <div className="rounded-md border border-zinc-200 p-3 space-y-2 bg-white">
+                  <div className="rounded-md border border-[var(--bg-border)] p-3 space-y-2 bg-[var(--bg-surface)]">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <Label className="text-xs flex items-center gap-1.5">
                         <Printer className="h-3.5 w-3.5" />
@@ -624,12 +624,12 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="text-[11px] text-zinc-500 leading-snug">
+                    <p className="text-[11px] text-[var(--text-muted)] leading-snug">
                       PDF em modo paisagem. O documento é externo: <strong>não</strong> inclui dados do cliente ou do projeto — apenas a TAG interna do item.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {IDIOMAS.map((l) => (
-                        <label key={l} className={cn("flex items-center gap-1.5 text-xs px-2 py-1 rounded border cursor-pointer", idiomasGerar[l] ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-500")}>
+                        <label key={l} className={cn("flex items-center gap-1.5 text-xs px-2 py-1 rounded border cursor-pointer", idiomasGerar[l] ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)]")}>
                           <input type="checkbox" className="h-3 w-3" checked={idiomasGerar[l]} onChange={(e) => setIdiomasGerar((prev) => ({ ...prev, [l]: e.target.checked }))} />
                           <span>{IDIOMA_FLAG[l]}</span>
                           <span>{IDIOMA_LABEL[l]}</span>
@@ -637,11 +637,11 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                       ))}
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[11px] text-zinc-600 flex items-center gap-1">
+                      <Label className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1">
                         Nota do comprador (opcional)
                         <RfqTooltip>
-                          <span className="cursor-help rounded-full bg-zinc-100 p-0.5">
-                            <HelpCircle className="h-3 w-3 text-zinc-500" />
+                          <span className="cursor-help rounded-full bg-[var(--bg-elevated)] p-0.5">
+                            <HelpCircle className="h-3 w-3 text-[var(--text-muted)]" />
                           </span>
                         </RfqTooltip>
                       </Label>
@@ -679,7 +679,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                             <div key={i}>
                               {d.drive_view_url ? (
                                 <div className="flex items-center gap-1">
-                                  <Button asChild size="sm" variant="outline" className="flex-1 justify-start bg-white border-emerald-300 text-emerald-800 hover:bg-emerald-100">
+                                  <Button asChild size="sm" variant="outline" className="flex-1 justify-start bg-[var(--bg-surface)] border-emerald-300 text-emerald-800 hover:bg-emerald-100">
                                     <a href={d.drive_view_url} target="_blank" rel="noopener noreferrer" title={d.file_name ?? undefined}>
                                       <span className="mr-1.5">{IDIOMA_FLAG[d.idioma]}</span>
                                       <span className="truncate flex-1 text-left">Abrir PDF ({IDIOMA_LABEL[d.idioma]})</span>
@@ -711,15 +711,15 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
 
                     {docsHistory.data && docsHistory.data.length > 0 && (
                       <details className="pt-1">
-                        <summary className="text-[11px] text-zinc-500 cursor-pointer hover:text-zinc-800">
+                        <summary className="text-[11px] text-[var(--text-muted)] cursor-pointer hover:text-[var(--text-primary)]">
                           Histórico ({docsHistory.data.length})
                         </summary>
                         <div className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                           {docsHistory.data.map((d) => (
-                            <a key={d.id} href={d.drive_view_url ?? "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] text-zinc-600 hover:text-blue-600">
+                            <a key={d.id} href={d.drive_view_url ?? "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] hover:text-blue-600">
                               <span>{IDIOMA_FLAG[d.idioma as Idioma]}</span>
                               <span className="truncate flex-1">{d.file_name ?? "—"}</span>
-                              <span className="text-zinc-400">{new Date(d.criado_em).toLocaleDateString("pt-BR")}</span>
+                              <span className="text-[var(--text-muted)]">{new Date(d.criado_em).toLocaleDateString("pt-BR")}</span>
                             </a>
                           ))}
                         </div>
@@ -739,7 +739,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
               </div>
             </Tabs>
 
-            <DialogFooter className="flex-row justify-end items-center gap-2 border-t px-6 py-3 bg-white shrink-0">
+            <DialogFooter className="flex-row justify-end items-center gap-2 border-t px-6 py-3 bg-[var(--bg-surface)] shrink-0">
               <Button variant="outline" size="sm" onClick={requestClose}>
                 Fechar
               </Button>

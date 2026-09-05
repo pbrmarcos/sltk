@@ -158,10 +158,10 @@ function CotacaoDetailPage() {
         <Badge variant="outline" className={cn(COTACAO_STATUS_COLOR[cot.status])}>
           {COTACAO_STATUS_LABEL[cot.status]}
         </Badge>
-        <span className="text-zinc-500">Moeda: {cot.moeda}</span>
-        {cot.incoterm && <span className="text-zinc-500">• Incoterm: {cot.incoterm}</span>}
+        <span className="text-[var(--text-muted)]">Moeda: {cot.moeda}</span>
+        {cot.incoterm && <span className="text-[var(--text-muted)]">• Incoterm: {cot.incoterm}</span>}
         {cot.prazo_resposta && (
-          <span className="text-zinc-500">
+          <span className="text-[var(--text-muted)]">
             • Prazo: {new Date(cot.prazo_resposta).toLocaleDateString("pt-BR")}
           </span>
         )}
@@ -175,9 +175,9 @@ function CotacaoDetailPage() {
       {/* Convidados */}
       <section className="mt-6">
         <h3 className="mb-2 text-sm font-semibold">Fornecedores convidados ({convites.length})</h3>
-        <div className="overflow-x-auto rounded-md border bg-white">
+        <div className="overflow-x-auto rounded-md border bg-[var(--bg-surface)]">
           <table className="w-full text-sm">
-            <thead className="bg-zinc-50 text-left text-xs text-zinc-600">
+            <thead className="bg-[var(--bg-elevated)] text-left text-xs text-[var(--text-secondary)]">
               <tr>
                 <th className="p-2">Fornecedor</th>
                 <th className="p-2">Status</th>
@@ -196,7 +196,7 @@ function CotacaoDetailPage() {
                       <div className="font-medium">
                         {c.fornecedores?.nome_fantasia || c.fornecedores?.razao_social}
                       </div>
-                      <div className="text-xs text-zinc-500">
+                      <div className="text-xs text-[var(--text-muted)]">
                         {c.fornecedores?.codigo} • {c.fornecedores?.pais}
                       </div>
                     </td>
@@ -231,7 +231,7 @@ function CotacaoDetailPage() {
               })}
               {convites.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-sm text-zinc-500">
+                  <td colSpan={5} className="p-6 text-center text-sm text-[var(--text-muted)]">
                     Nenhum fornecedor convidado ainda.
                   </td>
                 </tr>
@@ -244,11 +244,11 @@ function CotacaoDetailPage() {
       {/* Matriz comparativa */}
       <section className="mt-6">
         <h3 className="mb-2 text-sm font-semibold">Comparativo de propostas</h3>
-        <div className="overflow-x-auto rounded-md border bg-white">
+        <div className="overflow-x-auto rounded-md border bg-[var(--bg-surface)]">
           <table className="w-full text-sm">
-            <thead className="bg-zinc-50 text-left text-xs text-zinc-600">
+            <thead className="bg-[var(--bg-elevated)] text-left text-xs text-[var(--text-secondary)]">
               <tr>
-                <th className="p-2 sticky left-0 bg-zinc-50">Item</th>
+                <th className="p-2 sticky left-0 bg-[var(--bg-elevated)]">Item</th>
                 <th className="p-2">Qtde</th>
                 {propostas.map((p) => {
                   const conv = convites.find((c) => c.id === p.convite_id);
@@ -257,7 +257,7 @@ function CotacaoDetailPage() {
                       <div className="font-medium">
                         {conv?.fornecedores?.nome_fantasia || conv?.fornecedores?.razao_social || "—"}
                       </div>
-                      <div className="text-[11px] text-zinc-500">
+                      <div className="text-[11px] text-[var(--text-muted)]">
                         {p.moeda}
                         {p.valido_ate ? ` • até ${new Date(p.valido_ate).toLocaleDateString("pt-BR")}` : ""}
                       </div>
@@ -277,10 +277,10 @@ function CotacaoDetailPage() {
                   : null;
                 return (
                   <tr key={it.id} className="border-t">
-                    <td className="p-2 sticky left-0 bg-white">
+                    <td className="p-2 sticky left-0 bg-[var(--bg-surface)]">
                       <div className="font-medium">{it.descricao}</div>
                       {it.part_number && (
-                        <div className="text-xs text-zinc-500">PN: {it.part_number}</div>
+                        <div className="text-xs text-[var(--text-muted)]">PN: {it.part_number}</div>
                       )}
                     </td>
                     <td className="p-2 text-xs">
@@ -288,7 +288,7 @@ function CotacaoDetailPage() {
                     </td>
                     {propostas.map((p) => {
                       const pi = itemPriceMap.get(`${p.id}:${it.id}`);
-                      if (!pi) return <td key={p.id} className="p-2 text-zinc-300">—</td>;
+                      if (!pi) return <td key={p.id} className="p-2 text-[var(--text-muted)]">—</td>;
                       const isMin = min != null && Number(pi.preco_unitario) === min;
                       const isWinner = escolha?.proposta_item_id === pi.id;
                       return (
@@ -308,7 +308,7 @@ function CotacaoDetailPage() {
                                 })}
                               </div>
                               {pi.prazo_entrega_dias != null && (
-                                <div className="text-[11px] text-zinc-500">
+                                <div className="text-[11px] text-[var(--text-muted)]">
                                   {pi.prazo_entrega_dias}d
                                 </div>
                               )}
@@ -331,7 +331,7 @@ function CotacaoDetailPage() {
               })}
               {itens.length === 0 && (
                 <tr>
-                  <td colSpan={2 + propostas.length} className="p-6 text-center text-sm text-zinc-500">
+                  <td colSpan={2 + propostas.length} className="p-6 text-center text-sm text-[var(--text-muted)]">
                     Sem itens.
                   </td>
                 </tr>
@@ -339,7 +339,7 @@ function CotacaoDetailPage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-zinc-500">
+        <p className="mt-2 text-xs text-[var(--text-muted)]">
           Linhas verdes indicam o menor preço por item. Use o troféu para selecionar o vencedor.
         </p>
       </section>
@@ -351,7 +351,7 @@ function CotacaoDetailPage() {
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto rounded border">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-zinc-50 text-left text-xs">
+              <thead className="sticky top-0 bg-[var(--bg-elevated)] text-left text-xs">
                 <tr>
                   <th className="p-2 w-10" />
                   <th className="p-2">Fornecedor</th>
@@ -377,7 +377,7 @@ function CotacaoDetailPage() {
                       </td>
                       <td className="p-2">
                         <div className="font-medium">{it.nome_fantasia || it.razao_social}</div>
-                        <div className="text-xs text-zinc-500">{it.codigo}</div>
+                        <div className="text-xs text-[var(--text-muted)]">{it.codigo}</div>
                       </td>
                       <td className="p-2">{it.pais}</td>
                     </tr>

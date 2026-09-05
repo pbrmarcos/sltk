@@ -131,10 +131,10 @@ function SolicitacoesPage() {
           {catsQ.data.slice(0, 12).map((c) => (
             <span
               key={c.categoria_slug ?? "sem"}
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 py-1 text-xs"
             >
               <span className="font-medium">{c.label}</span>
-              <span className="text-zinc-500">{c.total}</span>
+              <span className="text-[var(--text-muted)]">{c.total}</span>
               {c.criticos > 0 ? (
                 <span className="rounded-full bg-amber-100 text-amber-700 px-1.5 py-[1px] text-[10px] font-medium">
                   {c.criticos} crítico{c.criticos > 1 ? "s" : ""}
@@ -148,7 +148,7 @@ function SolicitacoesPage() {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -216,7 +216,7 @@ function SolicitacoesPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-zinc-200 bg-white">
+      <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -233,7 +233,7 @@ function SolicitacoesPage() {
           <TableBody>
             {insumosQ.isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-zinc-500">
+                <TableCell colSpan={8} className="text-center py-8 text-[var(--text-muted)]">
                   Carregando...
                 </TableCell>
               </TableRow>
@@ -243,12 +243,12 @@ function SolicitacoesPage() {
               rows.map((r) => (
                 <TableRow
                   key={r.id}
-                  className="cursor-pointer hover:bg-zinc-50"
+                  className="cursor-pointer hover:bg-[var(--bg-elevated)]"
                   onClick={() => setSelected(r)}
                 >
                   <TableCell>
-                    <div className="font-medium text-zinc-900">{r.descricao}</div>
-                    <div className="text-xs text-zinc-500">
+                    <div className="font-medium text-[var(--text-primary)]">{r.descricao}</div>
+                    <div className="text-xs text-[var(--text-muted)]">
                       {r.codigo_interno ? `${r.codigo_interno} · ` : ""}
                       {r.fabricante_sugerido ?? ""}
                       {r.part_number ? ` · PN ${r.part_number}` : ""}
@@ -262,26 +262,26 @@ function SolicitacoesPage() {
                         </Badge>
                         <div className="mt-1 font-medium">
                           {r.cliente_equipamentos?.codigo ?? r.equipamento_projetos?.cliente_equipamentos?.codigo ?? "EQP"}
-                          <span className="ml-1 text-zinc-500">
+                          <span className="ml-1 text-[var(--text-muted)]">
                             · {r.equipamento_disciplina}
                           </span>
                         </div>
-                        <div className="text-zinc-500">
+                        <div className="text-[var(--text-muted)]">
                           {r.clientes?.codigo ?? ""}
                         </div>
                       </>
                     ) : (
                       <>
-                        <Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-[10px] font-normal text-zinc-700">
+                        <Badge variant="outline" className="border-[var(--bg-border)] bg-[var(--bg-elevated)] text-[10px] font-normal text-[var(--text-secondary)]">
                           Projeto formal
                         </Badge>
                         <div className="mt-1 font-medium">
                           {r.clientes?.codigo ?? "—"}{" "}
-                          <span className="text-zinc-500">
+                          <span className="text-[var(--text-muted)]">
                             {r.equipamento_projetos?.cliente_equipamentos?.codigo ?? ""}
                           </span>
                         </div>
-                        <div className="text-zinc-500">
+                        <div className="text-[var(--text-muted)]">
                           Rev. {r.equipamento_projetos?.revisao ?? "—"}
                         </div>
                       </>
@@ -317,13 +317,13 @@ function SolicitacoesPage() {
                       {INSUMO_STATUS_LABEL[r.status as InsumoStatus]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-xs text-zinc-600">
+                  <TableCell className="text-xs text-[var(--text-secondary)]">
                     {r.necessidade_em
                       ? new Date(r.necessidade_em).toLocaleDateString("pt-BR")
                       : "—"}
                   </TableCell>
                   <TableCell>
-                    <ChevronRight className="h-4 w-4 text-zinc-400" />
+                    <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
                   </TableCell>
                 </TableRow>
               ))
@@ -355,12 +355,12 @@ function KpiCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-4">
+    <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wide text-zinc-500">{label}</span>
+        <span className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{label}</span>
         {icon}
       </div>
-      <div className="mt-1 text-2xl font-semibold text-zinc-900 tabular-nums">{value}</div>
+      <div className="mt-1 text-2xl font-semibold text-[var(--text-primary)] tabular-nums">{value}</div>
     </div>
   );
 }

@@ -47,7 +47,7 @@ const TIPOS: Record<
   anexo_adicionado: { icon: FilePlus2, color: "text-purple-600 bg-purple-50 border-purple-200", label: "Anexo" },
   anexo_removido: { icon: FileMinus2, color: "text-red-600 bg-red-50 border-red-200", label: "Anexo removido" },
   orcamento_recebido: { icon: DollarSign, color: "text-emerald-700 bg-emerald-50 border-emerald-200", label: "Orçamento" },
-  comentario: { icon: MessageCircle, color: "text-zinc-700 bg-zinc-50 border-zinc-200", label: "Comentário" },
+  comentario: { icon: MessageCircle, color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]", label: "Comentário" },
   insumo_removido: { icon: Trash2, color: "text-rose-700 bg-rose-50 border-rose-200", label: "Insumo removido" },
   insumo_restaurado: { icon: RotateCcw, color: "text-emerald-700 bg-emerald-50 border-emerald-200", label: "Insumo restaurado" },
 };
@@ -153,7 +153,7 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
           <Input
             className="pl-8 h-9 text-xs"
             placeholder="Filtrar por responsável…"
@@ -170,14 +170,14 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
               className={cn(
                 "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
                 filter === f.key
-                  ? "bg-zinc-900 border-zinc-900 text-white"
-                  : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50",
+                  ? "bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-surface)]"
+                  : "bg-[var(--bg-surface)] border-[var(--bg-border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]",
               )}
             >
               {f.label}
               <span className={cn(
                 "rounded-full px-1.5 text-[10px]",
-                filter === f.key ? "bg-white/20" : "bg-zinc-100 text-zinc-500",
+                filter === f.key ? "bg-[var(--bg-surface)]/20" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]",
               )}>
                 {counts[f.key]}
               </span>
@@ -186,19 +186,19 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
         </div>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white">
+      <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         {q.isLoading ? (
-          <div className="p-8 text-center text-xs text-zinc-500">Carregando…</div>
+          <div className="p-8 text-center text-xs text-[var(--text-muted)]">Carregando…</div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-xs text-zinc-500 italic">
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] italic">
             Nenhuma atividade registrada para esse filtro.
           </div>
         ) : (
-          <ol className="relative border-l border-zinc-200 ml-4 my-3 space-y-2">
+          <ol className="relative border-l border-[var(--bg-border)] ml-4 my-3 space-y-2">
             {rows.map((r) => {
               const cfg = TIPOS[r.tipo] ?? {
                 icon: History,
-                color: "text-zinc-600 bg-zinc-50 border-zinc-200",
+                color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
                 label: r.tipo,
               };
               const Icon = cfg.icon;
@@ -209,31 +209,31 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
                 <li key={r.id} className="ml-4 mr-3">
                   <span
                     className={cn(
-                      "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border bg-white",
+                      "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border bg-[var(--bg-surface)]",
                       cfg.color,
                     )}
                   >
                     <Icon className="h-2.5 w-2.5" />
                   </span>
-                  <div className="rounded border border-zinc-200 bg-white p-2.5 text-xs">
+                  <div className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] p-2.5 text-xs">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Badge variant="outline" className={cn("font-normal", cfg.color)}>
                         {cfg.label}
                       </Badge>
-                      <span className="text-zinc-800 font-medium truncate max-w-[240px]">
+                      <span className="text-[var(--text-primary)] font-medium truncate max-w-[240px]">
                         {pi?.descricao ?? "—"}
                       </span>
-                      <span className="text-zinc-400">·</span>
-                      <span className="text-zinc-500">
+                      <span className="text-[var(--text-muted)]">·</span>
+                      <span className="text-[var(--text-muted)]">
                         {cli?.codigo ?? "—"} / {proj?.codigo ?? "—"}
                       </span>
-                      <span className="text-zinc-400">·</span>
-                      <span className="inline-flex items-center gap-1 text-zinc-600">
+                      <span className="text-[var(--text-muted)]">·</span>
+                      <span className="inline-flex items-center gap-1 text-[var(--text-secondary)]">
                         <UserIcon className="h-3 w-3" />
                         {r.actor_nome ?? "Sistema"}
                       </span>
-                      <span className="text-zinc-400">·</span>
-                      <span className="text-zinc-400">
+                      <span className="text-[var(--text-muted)]">·</span>
+                      <span className="text-[var(--text-muted)]">
                         {new Date(r.criado_em).toLocaleString("pt-BR")}
                       </span>
                       {r.revertable && (
@@ -248,7 +248,7 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
                         </Button>
                       )}
                     </div>
-                    <div className="text-zinc-800 mt-1 whitespace-pre-wrap">{r.descricao}</div>
+                    <div className="text-[var(--text-primary)] mt-1 whitespace-pre-wrap">{r.descricao}</div>
                     {(r.tipo === "editado" || r.tipo === "status_alterado") &&
                       r.meta &&
                       typeof r.meta === "object" && (
@@ -259,15 +259,15 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
                             return (
                               <div
                                 key={k}
-                                className="rounded bg-zinc-50 border border-zinc-100 px-1.5 py-1 text-[10px]"
+                                className="rounded bg-[var(--bg-elevated)] border border-[var(--bg-border)] px-1.5 py-1 text-[10px]"
                               >
-                                <span className="text-zinc-500">
+                                <span className="text-[var(--text-muted)]">
                                   {FIELD_LABEL[k] ?? k}:{" "}
                                 </span>
                                 <span className="line-through text-red-600/70">
                                   {String(a ?? "—")}
                                 </span>
-                                <span className="mx-1 text-zinc-400">→</span>
+                                <span className="mx-1 text-[var(--text-muted)]">→</span>
                                 <span className="text-emerald-700">{String(b ?? "—")}</span>
                               </div>
                             );
@@ -294,14 +294,14 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-xs text-zinc-700">
+            <div className="rounded border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-2 text-xs text-[var(--text-secondary)]">
               <b>Ação:</b> {revertTarget?.descricao}
-              <div className="text-[10px] text-zinc-500 mt-1">
+              <div className="text-[10px] text-[var(--text-muted)] mt-1">
                 {revertTarget?.actor_nome} · {revertTarget && new Date(revertTarget.criado_em).toLocaleString("pt-BR")}
               </div>
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Justificativa *</label>
+              <label className="text-xs text-[var(--text-secondary)]">Justificativa *</label>
               <Textarea
                 rows={3}
                 value={justificativa}

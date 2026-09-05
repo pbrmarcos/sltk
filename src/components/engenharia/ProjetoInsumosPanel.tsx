@@ -432,8 +432,8 @@ export function ProjetoInsumosPanel({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-zinc-900">Insumos &amp; Materiais</h3>
-          <p className="text-xs text-zinc-500">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Insumos &amp; Materiais</h3>
+          <p className="text-xs text-[var(--text-muted)]">
             BOM do projeto por pilar/disciplina. Itens aprovados aparecem em Compras → Necessidades.
           </p>
         </div>
@@ -467,10 +467,10 @@ export function ProjetoInsumosPanel({
 
 
       {adding ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 space-y-3">
+        <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
             <div className="md:col-span-3">
-              <label className="text-xs text-zinc-600">Descrição *</label>
+              <label className="text-xs text-[var(--text-secondary)]">Descrição *</label>
               <Input
                 value={form.descricao}
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
@@ -478,7 +478,7 @@ export function ProjetoInsumosPanel({
               />
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Disciplina</label>
+              <label className="text-xs text-[var(--text-secondary)]">Disciplina</label>
               <Select
                 value={form.disciplina}
                 onValueChange={(v) => setForm({ ...form, disciplina: v as InsumoDisciplina })}
@@ -492,7 +492,7 @@ export function ProjetoInsumosPanel({
               </Select>
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Qtd</label>
+              <label className="text-xs text-[var(--text-secondary)]">Qtd</label>
               <Input
                 type="number"
                 step="0.01"
@@ -502,7 +502,7 @@ export function ProjetoInsumosPanel({
               />
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Unidade</label>
+              <label className="text-xs text-[var(--text-secondary)]">Unidade</label>
               <Select value={form.unidade} onValueChange={(v) => setForm({ ...form, unidade: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -513,7 +513,7 @@ export function ProjetoInsumosPanel({
               </Select>
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Fabricante</label>
+              <label className="text-xs text-[var(--text-secondary)]">Fabricante</label>
               <Input
                 value={form.fabricante_sugerido}
                 onChange={(e) => setForm({ ...form, fabricante_sugerido: e.target.value })}
@@ -521,21 +521,21 @@ export function ProjetoInsumosPanel({
               />
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Part Number</label>
+              <label className="text-xs text-[var(--text-secondary)]">Part Number</label>
               <Input
                 value={form.part_number}
                 onChange={(e) => setForm({ ...form, part_number: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Código interno</label>
+              <label className="text-xs text-[var(--text-secondary)]">Código interno</label>
               <Input
                 value={form.codigo_interno}
                 onChange={(e) => setForm({ ...form, codigo_interno: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Criticidade</label>
+              <label className="text-xs text-[var(--text-secondary)]">Criticidade</label>
               <Select
                 value={form.criticidade}
                 onValueChange={(v) => setForm({ ...form, criticidade: v as InsumoCriticidade })}
@@ -549,7 +549,7 @@ export function ProjetoInsumosPanel({
               </Select>
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Lead time (dias)</label>
+              <label className="text-xs text-[var(--text-secondary)]">Lead time (dias)</label>
               <Input
                 type="number"
                 min="0"
@@ -563,7 +563,7 @@ export function ProjetoInsumosPanel({
               />
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Necessidade em</label>
+              <label className="text-xs text-[var(--text-secondary)]">Necessidade em</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -571,7 +571,7 @@ export function ProjetoInsumosPanel({
                     type="button"
                     className={cn(
                       "w-full justify-start font-normal",
-                      !form.necessidade_em && "text-zinc-400",
+                      !form.necessidade_em && "text-[var(--text-muted)]",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -602,7 +602,7 @@ export function ProjetoInsumosPanel({
               </Popover>
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs text-zinc-600">Sub-conjunto</label>
+              <label className="text-xs text-[var(--text-secondary)]">Sub-conjunto</label>
               <Input
                 value={form.sub_conjunto}
                 onChange={(e) => setForm({ ...form, sub_conjunto: e.target.value })}
@@ -616,7 +616,7 @@ export function ProjetoInsumosPanel({
               </datalist>
             </div>
             <div>
-              <label className="text-xs text-zinc-600">Custo estimado (un)</label>
+              <label className="text-xs text-[var(--text-secondary)]">Custo estimado (un)</label>
               <Input
                 type="number"
                 step="0.01"
@@ -631,7 +631,7 @@ export function ProjetoInsumosPanel({
               />
             </div>
             <div className="md:col-span-3">
-              <label className="text-xs text-zinc-600">Fornecedor sugerido</label>
+              <label className="text-xs text-[var(--text-secondary)]">Fornecedor sugerido</label>
               <Select
                 value={form.fornecedor_sugerido_id || "__none__"}
                 onValueChange={(v) =>
@@ -653,7 +653,7 @@ export function ProjetoInsumosPanel({
               </Select>
             </div>
             <div className="md:col-span-6">
-              <label className="text-xs text-zinc-600">Observações</label>
+              <label className="text-xs text-[var(--text-secondary)]">Observações</label>
               <Textarea
                 rows={2}
                 value={form.observacoes}
@@ -678,16 +678,16 @@ export function ProjetoInsumosPanel({
 
       {/* Indicadores + Filtros */}
       {rows.length > 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 space-y-2">
+        <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 space-y-2">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <button
               type="button"
               onClick={() => { setAprovacaoFilter("todos"); setStatusFilter("todos"); setSomenteAComprar(false); }}
               className={cn(
-                "rounded-md border px-2 py-1 hover:bg-zinc-50",
+                "rounded-md border px-2 py-1 hover:bg-[var(--bg-elevated)]",
                 aprovacaoFilter === "todos" && statusFilter === "todos" && !somenteAComprar
-                  ? "border-zinc-400 bg-zinc-100 font-medium"
-                  : "border-zinc-200",
+                  ? "border-[var(--bg-border)] bg-[var(--bg-elevated)] font-medium"
+                  : "border-[var(--bg-border)]",
               )}
             >
               Total <b className="ml-1 tabular-nums">{indicadores.total}</b>
@@ -742,7 +742,7 @@ export function ProjetoInsumosPanel({
             </button>
 
             <div className="ml-auto flex items-center gap-2">
-              <span className="text-[11px] text-zinc-500">Status:</span>
+              <span className="text-[11px] text-[var(--text-muted)]">Status:</span>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="h-7 w-[170px] text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -767,7 +767,7 @@ export function ProjetoInsumosPanel({
             </div>
           </div>
           {filteredRows.length !== rows.length && (
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-[var(--text-muted)]">
               Exibindo <b>{filteredRows.length}</b> de {rows.length} insumos com os filtros ativos.
             </p>
           )}
@@ -837,10 +837,10 @@ export function ProjetoInsumosPanel({
       ) : null}
 
       {cotacoes.length > 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
-            <ShoppingCart className="h-3.5 w-3.5 text-zinc-500" />
-            <span className="font-semibold text-zinc-800">
+        <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-[var(--bg-border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs">
+            <ShoppingCart className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+            <span className="font-semibold text-[var(--text-primary)]">
               Cotações desta B.O.M.
             </span>
             <Badge variant="outline" className="font-normal">
@@ -848,7 +848,7 @@ export function ProjetoInsumosPanel({
             </Badge>
           </div>
           <table className="w-full text-xs">
-            <thead className="bg-white text-left text-zinc-500">
+            <thead className="bg-[var(--bg-surface)] text-left text-[var(--text-muted)]">
               <tr>
                 <th className="px-3 py-1.5">Código</th>
                 <th className="px-3 py-1.5">Título</th>
@@ -860,12 +860,12 @@ export function ProjetoInsumosPanel({
             </thead>
             <tbody>
               {cotacoes.map((c) => (
-                <tr key={c.id} className="border-t border-zinc-100">
+                <tr key={c.id} className="border-t border-[var(--bg-border)]">
                   <td className="px-3 py-1.5 font-mono">{c.codigo}</td>
                   <td className="px-3 py-1.5">{c.titulo}</td>
                   <td className="px-3 py-1.5 tabular-nums">{c.itens}</td>
                   <td className="px-3 py-1.5 capitalize">{c.status}</td>
-                  <td className="px-3 py-1.5 text-zinc-500">
+                  <td className="px-3 py-1.5 text-[var(--text-muted)]">
                     {new Date(c.created_at).toLocaleDateString("pt-BR")}
                   </td>
                   <td className="px-3 py-1.5 text-right">
@@ -884,7 +884,7 @@ export function ProjetoInsumosPanel({
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+      <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -912,13 +912,13 @@ export function ProjetoInsumosPanel({
           <TableBody>
             {insumosQ.isLoading ? (
               <TableRow>
-                <TableCell colSpan={12} className="text-center text-xs text-zinc-500 py-6">
+                <TableCell colSpan={12} className="text-center text-xs text-[var(--text-muted)] py-6">
                   Carregando…
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={12} className="text-center text-xs text-zinc-500 py-6">
+                <TableCell colSpan={12} className="text-center text-xs text-[var(--text-muted)] py-6">
                   Nenhum insumo cadastrado para este projeto ainda.
                 </TableCell>
               </TableRow>
@@ -934,23 +934,23 @@ export function ProjetoInsumosPanel({
                   <Fragment key={`g-${grupo}`}>
                     <TableRow
                       key={`g-${grupo}`}
-                      className="bg-zinc-50 hover:bg-zinc-50 cursor-pointer"
+                      className="bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] cursor-pointer"
                       onClick={() => toggleGroup(grupo)}
                     >
                       <TableCell colSpan={12} className="py-2">
                         <div className="flex items-center gap-2 text-xs">
                           {isCollapsed ? (
-                            <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />
+                            <ChevronRight className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                           ) : (
-                            <ChevronDown className="h-3.5 w-3.5 text-zinc-500" />
+                            <ChevronDown className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                           )}
-                          <Package className="h-3.5 w-3.5 text-zinc-500" />
-                          <span className="font-semibold text-zinc-800">{grupo}</span>
+                          <Package className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                          <span className="font-semibold text-[var(--text-primary)]">{grupo}</span>
                           <Badge variant="outline" className="font-normal">
                             {itens.length} {itens.length === 1 ? "item" : "itens"}
                           </Badge>
                           {subtotal > 0 ? (
-                            <span className="ml-auto text-[11px] tabular-nums text-zinc-600">
+                            <span className="ml-auto text-[11px] tabular-nums text-[var(--text-secondary)]">
                               Subtotal estimado: <b>{fmtMoeda(subtotal)}</b>
                             </span>
                           ) : null}
@@ -975,8 +975,8 @@ export function ProjetoInsumosPanel({
                                 />
                               </TableCell>
                               <TableCell>
-                                <div className="text-sm font-medium text-zinc-900">{r.descricao}</div>
-                                <div className="text-[11px] text-zinc-500">
+                                <div className="text-sm font-medium text-[var(--text-primary)]">{r.descricao}</div>
+                                <div className="text-[11px] text-[var(--text-muted)]">
                                   {[r.fabricante_sugerido, r.part_number, r.codigo_interno]
                                     .filter(Boolean)
                                     .join(" · ") || "—"}
@@ -1026,25 +1026,25 @@ export function ProjetoInsumosPanel({
                                 {r.custo_estimado_unit != null ? (
                                   <div>
                                     <div>{fmtMoeda(Number(r.custo_estimado_unit))}</div>
-                                    <div className="text-[10px] text-zinc-500">
+                                    <div className="text-[10px] text-[var(--text-muted)]">
                                       Total: {fmtMoeda(custoTotal)}
                                     </div>
                                   </div>
                                 ) : (
-                                  <span className="text-zinc-400">—</span>
+                                  <span className="text-[var(--text-muted)]">—</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-xs">
                                 {r.fornecedor_sugerido ? (
                                   <span
-                                    className="text-zinc-700"
+                                    className="text-[var(--text-secondary)]"
                                     title={r.fornecedor_sugerido.nome}
                                   >
                                     {r.fornecedor_sugerido.nome_fantasia ||
                                       r.fornecedor_sugerido.nome}
                                   </span>
                                 ) : (
-                                  <span className="text-zinc-400">—</span>
+                                  <span className="text-[var(--text-muted)]">—</span>
                                 )}
                               </TableCell>
                               <TableCell>
@@ -1102,12 +1102,12 @@ export function ProjetoInsumosPanel({
             )}
           </TableBody>
           {rows.length > 0 ? (
-            <tfoot className="bg-zinc-50 border-t border-zinc-200">
+            <tfoot className="bg-[var(--bg-elevated)] border-t border-[var(--bg-border)]">
               <tr>
-                <td colSpan={6} className="px-4 py-2 text-xs text-zinc-600 font-medium">
+                <td colSpan={6} className="px-4 py-2 text-xs text-[var(--text-secondary)] font-medium">
                   Total geral estimado
                 </td>
-                <td className="px-4 py-2 text-right text-xs tabular-nums font-semibold text-zinc-900">
+                <td className="px-4 py-2 text-right text-xs tabular-nums font-semibold text-[var(--text-primary)]">
                   {fmtMoeda(
                     rows.reduce(
                       (acc, r) =>
@@ -1146,9 +1146,9 @@ export function ProjetoInsumosPanel({
               <div className="space-y-2 text-sm">
                 <p>
                   Você está prestes a remover{" "}
-                  <span className="font-medium text-zinc-900">"{delTarget?.descricao}"</span>.
+                  <span className="font-medium text-[var(--text-primary)]">"{delTarget?.descricao}"</span>.
                 </p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   O item é ocultado imediatamente e mantido por 30 dias no histórico. Após esse
                   prazo é excluído permanentemente. A remoção fica registrada com usuário, data e
                   motivo (opcional).
@@ -1157,7 +1157,7 @@ export function ProjetoInsumosPanel({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-1">
-            <label className="text-xs text-zinc-600">Motivo (opcional)</label>
+            <label className="text-xs text-[var(--text-secondary)]">Motivo (opcional)</label>
             <Textarea
               rows={3}
               value={delMotivo}
@@ -1253,7 +1253,7 @@ export function ProjetoInsumosPanel({
           </AlertDialogHeader>
 
           {(previaEnvio.ignEstoque.length + previaEnvio.ignPendente.length + previaEnvio.ignAprovado.length) > 0 && (
-            <div className="max-h-40 overflow-y-auto rounded-md border bg-zinc-50 p-2 text-[11px] space-y-1">
+            <div className="max-h-40 overflow-y-auto rounded-md border bg-[var(--bg-elevated)] p-2 text-[11px] space-y-1">
               {previaEnvio.ignEstoque.slice(0, 8).map((r) => (
                 <div key={`e-${r.id}`}><Badge variant="outline" className="mr-1 border-emerald-200 bg-emerald-50 text-emerald-800 font-normal">estoque</Badge>{r.descricao}</div>
               ))}
@@ -1264,13 +1264,13 @@ export function ProjetoInsumosPanel({
                 <div key={`a-${r.id}`}><Badge variant="outline" className="mr-1 border-emerald-200 bg-emerald-50 text-emerald-800 font-normal">aprovado</Badge>{r.descricao}</div>
               ))}
               {(previaEnvio.ignEstoque.length + previaEnvio.ignPendente.length + previaEnvio.ignAprovado.length) > 24 && (
-                <div className="italic text-zinc-500">…e mais itens.</div>
+                <div className="italic text-[var(--text-muted)]">…e mais itens.</div>
               )}
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-xs text-zinc-600">Nota para o aprovador (opcional)</label>
+            <label className="text-xs text-[var(--text-secondary)]">Nota para o aprovador (opcional)</label>
             <Textarea
               rows={3}
               value={envioNota}
@@ -1332,7 +1332,7 @@ function EstoqueInput({
         }
         if (n !== value) onSave(n);
       }}
-      className="w-16 rounded border border-zinc-200 bg-transparent px-1 py-0.5 text-right tabular-nums text-xs focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      className="w-16 rounded border border-[var(--bg-border)] bg-transparent px-1 py-0.5 text-right tabular-nums text-xs focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     />
   );
 }
