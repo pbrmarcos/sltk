@@ -278,7 +278,34 @@ export const bulkSetRolePermissions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => bulkSchema.parse(d))
   .handler(async ({ data, context }) => {
-    return applyBulkSetRolePermissions(context.supabase, context.userId, data);
+    const result = await applyBulkSetRolePermissions(context.supabase, context.userId, data);
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      const { data: ator } = await context.supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", context.userId)
+        .maybeSingle();
+      const modulos = Object.entries(data.modules)
+        .map(([mod, enabled]) => `${mod} (${enabled ? "ligado" : "desligado"})`)
+        .join(", ");
+      await safeDispatch({
+        eventKey: "admin.permissao_alterada",
+        triggeredBy: context.userId,
+        entityTable: "role_module_permissions",
+        entityId: data.role,
+        vars: {
+          ator: ator?.full_name ?? "",
+          modulo: `papel "${data.role}": ${modulos}`,
+          link: appUrl(`/admin/usuarios`),
+        },
+      });
+    } catch (e) {
+      console.error("[permissoes/bulkSetRolePermissions] email dispatch failed", e);
+    }
+
+    return result;
   });
 
 export type PermissoesAuditEntry = {

@@ -221,5 +221,23 @@ export const exportAuditLog = createServerFn({ method: "POST" })
       } as never,
     });
 
+    try {
+      const { safeDispatch, fmtDate } = await import("@/lib/email/safe-dispatch.server");
+      const { data: ator } = await admin
+        .from("profiles")
+        .select("full_name")
+        .eq("id", context.userId)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey: "audit.export_csv",
+        triggeredBy: context.userId,
+        entityTable: "audit_log",
+        entityId: "export",
+        vars: { ator: ator?.full_name ?? "", data: fmtDate() },
+      });
+    } catch (e) {
+      console.error("[audit-log/exportAuditLog] email dispatch failed", e);
+    }
+
     return { rows: out };
   });
