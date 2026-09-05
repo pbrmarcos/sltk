@@ -181,6 +181,45 @@ export const publicAbrirChamado = createServerFn({ method: "POST" })
       meta: { canal: "email", destino: data.email.trim().toLowerCase() },
     });
 
+    try {
+      const { safeDispatch, appUrl, fmtDate } = await import("@/lib/email/safe-dispatch.server");
+      let clienteNome = data.nome.trim();
+      if (cliente_id) {
+        const { data: cliente } = await sb
+          .from("clientes")
+          .select("razao_social, nome_fantasia")
+          .eq("id", cliente_id)
+          .maybeSingle();
+        clienteNome = cliente?.nome_fantasia || cliente?.razao_social || clienteNome;
+      }
+      const { data: chamadoCriado } = await sb
+        .from("chamados")
+        .select("prioridade")
+        .eq("id", inserted.id)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey: "chamado.aberto",
+        triggeredBy: null,
+        triggeredByKind: "automation",
+        entityTable: "chamados",
+        entityId: inserted.id,
+        vars: {
+          numero: inserted.codigo,
+          codigo: inserted.codigo,
+          titulo: data.assunto?.trim() || "Sem assunto",
+          cliente_nome: clienteNome,
+          prioridade: chamadoCriado?.prioridade ?? "",
+          categoria: "",
+          usuario: data.nome.trim(),
+          descricao: data.descricao.trim(),
+          data: fmtDate(),
+          link: appUrl(`/pos-vendas/chamados/${inserted.id}`),
+        },
+      });
+    } catch (e) {
+      console.error("[suporte-publico/publicAbrirChamado] email dispatch failed", e);
+    }
+
     return {
       codigo: inserted.codigo as string,
       token: tokenRaw,
@@ -251,6 +290,34 @@ export const publicEnviarMensagem = createServerFn({ method: "POST" })
       conteudo: data.conteudo.trim(),
     });
     if (error) throw friendlyDbError(error);
+
+    try {
+      const { safeDispatch, appUrl, fmtDate } = await import("@/lib/email/safe-dispatch.server");
+      const { data: ch } = await sb
+        .from("chamados")
+        .select("codigo, assunto")
+        .eq("id", chamado.id)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey: "chamado.resposta",
+        triggeredBy: null,
+        triggeredByKind: "automation",
+        entityTable: "chamados",
+        entityId: chamado.id,
+        vars: {
+          numero: ch?.codigo ?? "",
+          codigo: ch?.codigo ?? "",
+          titulo: ch?.assunto ?? "",
+          usuario: chamado.visitante_nome,
+          mensagem: data.conteudo.trim(),
+          data: fmtDate(),
+          link: appUrl(`/pos-vendas/chamados/${chamado.id}`),
+        },
+      });
+    } catch (e) {
+      console.error("[suporte-publico/publicEnviarMensagem] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 

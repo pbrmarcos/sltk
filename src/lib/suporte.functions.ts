@@ -361,6 +361,33 @@ export const responderChamado = createServerFn({ method: "POST" })
       conteudo: data.conteudo.trim(),
     });
     if (error) throw friendlyDbError(error);
+
+    try {
+      const { safeDispatch, appUrl, fmtDate } = await import("./email/safe-dispatch.server");
+      const { data: ch } = await sb
+        .from("chamados")
+        .select("codigo, assunto")
+        .eq("id", data.chamado_id)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey: "chamado.resposta",
+        triggeredBy: context.userId,
+        entityTable: "chamados",
+        entityId: data.chamado_id,
+        vars: {
+          numero: ch?.codigo ?? "",
+          codigo: ch?.codigo ?? "",
+          titulo: ch?.assunto ?? "",
+          usuario: nome,
+          mensagem: data.conteudo.trim(),
+          data: fmtDate(),
+          link: appUrl(`/pos-vendas/chamados/${data.chamado_id}`),
+        },
+      });
+    } catch (e) {
+      console.error("[suporte/responderChamado] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
