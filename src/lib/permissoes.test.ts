@@ -8,6 +8,7 @@ import {
   type AppModule,
   type AppRoleName,
 } from "./permissoes.functions";
+import { friendlyDbError } from "./db-errors";
 
 /* -------------------------------------------------------------------------- */
 /* Mock Supabase client                                                       */
@@ -230,7 +231,7 @@ describe("applyBulkSetRolePermissions (integração)", () => {
     expect((upsertCalls[0].rows as Array<{ updated_by: string }>)[0].updated_by).toBe("admin-1");
   });
 
-  it("propaga erro do supabase no upsert", async () => {
+  it("propaga erro do supabase no upsert como mensagem amigável (não vaza o erro cru)", async () => {
     const { client } = makeSupabase({
       isAdmin: true,
       upsertError: { message: "boom" },
@@ -240,7 +241,7 @@ describe("applyBulkSetRolePermissions (integração)", () => {
         role: "sales",
         modules: { dashboard: true },
       }),
-    ).rejects.toThrow("boom");
+    ).rejects.toThrow(friendlyDbError({ message: "boom" }).message);
   });
 });
 
@@ -250,12 +251,14 @@ describe("assertAdmin", () => {
     await expect(assertAdmin(client, "u1")).resolves.toBeUndefined();
   });
 
-  it("propaga erro do supabase", async () => {
+  it("propaga erro do supabase como mensagem amigável (não vaza o erro cru)", async () => {
     const { client } = makeSupabase({
       isAdmin: false,
       selectError: { message: "db down" },
     });
-    await expect(assertAdmin(client, "u1")).rejects.toThrow("db down");
+    await expect(assertAdmin(client, "u1")).rejects.toThrow(
+      friendlyDbError({ message: "db down" }).message,
+    );
   });
 
   it("rejeita non-admin antes de qualquer outra operação", async () => {
