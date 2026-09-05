@@ -1,4 +1,6 @@
 // Tipos compartilhados do CMS "Páginas dos Equipamentos".
+import { z } from "zod";
+
 export type IdiomaPagina = "pt" | "es" | "en";
 
 export type BlocoTipo =
@@ -184,3 +186,124 @@ export function pickTexto(
   const v = (bloco[key] as string) || (bloco[fallback] as string) || "";
   return v;
 }
+
+// ============================================================
+// Ícones do bloco "benefícios" — fonte única usada tanto pelo
+// renderer público (Blocos.tsx) quanto pelo seletor de ícone do
+// formulário admin.
+// ============================================================
+export const BLOCO_ICONES = [
+  "Gauge",
+  "Settings2",
+  "ShieldCheck",
+  "Zap",
+  "Wrench",
+  "Beaker",
+  "Factory",
+  "LineChart",
+  "Sparkles",
+] as const;
+export type IconeNome = (typeof BLOCO_ICONES)[number];
+
+// ============================================================
+// Schemas Zod por tipo de bloco — validam o "shape" de conteudo_json
+// antes de salvar (adminUpdateBloco), pra trocar "JSON sintaticamente
+// válido mas semanticamente quebrado" por um erro explícito. Campos
+// `_pt` são obrigatórios só onde o renderer depende deles como
+// fallback; `_es`/`_en` sempre opcionais (nem toda página está 100%
+// traduzida).
+// ============================================================
+function campoIdiomas(base: string, ptObrigatorio: boolean) {
+  return {
+    [`${base}_pt`]: ptObrigatorio ? z.string().min(1, "obrigatório") : z.string().optional(),
+    [`${base}_es`]: z.string().optional(),
+    [`${base}_en`]: z.string().optional(),
+  };
+}
+
+function campoListaIdiomas(base: string) {
+  return {
+    [`${base}_pt`]: z.array(z.string()).optional(),
+    [`${base}_es`]: z.array(z.string()).optional(),
+    [`${base}_en`]: z.array(z.string()).optional(),
+  };
+}
+
+const especificacaoItemSchema = z.object({
+  ...campoIdiomas("label", true),
+  ...campoIdiomas("valor", true),
+});
+
+const beneficioItemSchema = z.object({
+  icone: z.enum(BLOCO_ICONES).optional(),
+  ...campoIdiomas("titulo", true),
+  ...campoIdiomas("texto", true),
+});
+
+const casoUsoItemSchema = z.object({
+  ...campoIdiomas("titulo", true),
+  ...campoIdiomas("texto", true),
+  imagem_url: z.string().optional(),
+});
+
+const imagemGaleriaSchema = z.object({
+  url: z.string().min(1, "obrigatório"),
+  alt_pt: z.string().optional(),
+});
+
+const faqItemSchema = z.object({
+  ...campoIdiomas("pergunta", true),
+  ...campoIdiomas("resposta", true),
+});
+
+export const BLOCO_SCHEMAS: Record<BlocoTipo, z.ZodTypeAny> = {
+  hero: z.object({
+    ...campoIdiomas("eyebrow", false),
+    ...campoIdiomas("titulo", true),
+    ...campoIdiomas("subtitulo", false),
+    ...campoIdiomas("cta_label", false),
+    imagem_url: z.string().optional(),
+  }),
+  descricao: z.object({
+    ...campoIdiomas("eyebrow", false),
+    ...campoIdiomas("titulo", true),
+    ...campoIdiomas("texto", false),
+    ...campoListaIdiomas("bullets"),
+    imagem_url: z.string().optional(),
+  }),
+  especificacoes: z.object({
+    ...campoIdiomas("eyebrow", false),
+    ...campoIdiomas("titulo", true),
+    ...campoIdiomas("descricao", false),
+    itens: z.array(especificacaoItemSchema).optional(),
+  }),
+  beneficios: z.object({
+    ...campoIdiomas("eyebrow", false),
+    ...campoIdiomas("titulo", true),
+    ...campoIdiomas("descricao", false),
+    itens: z.array(beneficioItemSchema).optional(),
+  }),
+  casos_uso: z.object({
+    ...campoIdiomas("eyebrow", false),
+    ...campoIdiomas("titulo", true),
+    ...campoIdiomas("descricao", false),
+    itens: z.array(casoUsoItemSchema).optional(),
+  }),
+  galeria: z.object({
+    ...campoIdiomas("titulo", false),
+    imagens: z.array(imagemGaleriaSchema).optional(),
+  }),
+  faq: z.object({
+    ...campoIdiomas("titulo", false),
+    itens: z.array(faqItemSchema).optional(),
+  }),
+  video: z.object({
+    ...campoIdiomas("titulo", false),
+    url: z.string().optional(),
+  }),
+  cta_orcamento: z.object({
+    ...campoIdiomas("titulo", true),
+    ...campoIdiomas("subtitulo", false),
+    ...campoIdiomas("cta_label", false),
+  }),
+};

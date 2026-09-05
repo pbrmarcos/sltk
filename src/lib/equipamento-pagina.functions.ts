@@ -7,10 +7,23 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getSupabasePublicConfig } from "@/integrations/supabase/config";
 import {
   defaultBlocoConteudo,
+  BLOCO_SCHEMAS,
   type BlocoTipo,
   type EquipamentoBloco,
   type EquipamentoPagina,
 } from "@/lib/equipamento-pagina.shared";
+
+const BLOCO_TIPOS = [
+  "hero",
+  "descricao",
+  "especificacoes",
+  "beneficios",
+  "casos_uso",
+  "galeria",
+  "faq",
+  "video",
+  "cta_orcamento",
+] as const;
 
 async function ensureAdmin(sb: any, uid: string) {
   const { data } = await sb.rpc("has_role", { _user_id: uid, _role: "admin" });
@@ -178,17 +191,7 @@ export const adminAddBloco = createServerFn({ method: "POST" })
     z
       .object({
         pagina_id: z.string().uuid(),
-        tipo_bloco: z.enum([
-          "hero",
-          "descricao",
-          "especificacoes",
-          "beneficios",
-          "casos_uso",
-          "galeria",
-          "faq",
-          "video",
-          "cta_orcamento",
-        ]),
+        tipo_bloco: z.enum(BLOCO_TIPOS),
       })
       .parse(i),
   )
@@ -231,6 +234,7 @@ export const adminUpdateBloco = createServerFn({ method: "POST" })
     z
       .object({
         bloco_id: z.string().uuid(),
+        tipo_bloco: z.enum(BLOCO_TIPOS).optional(),
         conteudo_json: z.record(z.string(), z.any()).optional(),
         visivel: z.boolean().optional(),
         ordem: z.number().int().optional(),
@@ -240,7 +244,17 @@ export const adminUpdateBloco = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     await ensureAdmin(sb, context.userId);
-    const { bloco_id, ...patch } = data;
+    const { bloco_id, tipo_bloco, ...patch } = data;
+    if (patch.conteudo_json !== undefined) {
+      if (!tipo_bloco) throw new Error("tipo_bloco é obrigatório para validar o conteúdo do bloco.");
+      const result = BLOCO_SCHEMAS[tipo_bloco].safeParse(patch.conteudo_json);
+      if (!result.success) {
+        const detalhes = result.error.issues
+          .map((issue) => `${issue.path.join(".") || "(raiz)"}: ${issue.message}`)
+          .join("; ");
+        throw new Error(`Conteúdo do bloco inválido — ${detalhes}`);
+      }
+    }
     const clean: Record<string, unknown> = { atualizado_em: new Date().toISOString() };
     for (const [k, v] of Object.entries(patch)) if (v !== undefined) clean[k] = v;
     const { error } = await sb.from("equipamento_pagina_bloco").update(clean).eq("id", bloco_id);

@@ -11,7 +11,7 @@ import {
   LineChart,
   Sparkles,
 } from "lucide-react";
-import type { EquipamentoBloco, IdiomaPagina } from "@/lib/equipamento-pagina.shared";
+import type { EquipamentoBloco, IdiomaPagina, IconeNome } from "@/lib/equipamento-pagina.shared";
 import { pickTexto } from "@/lib/equipamento-pagina.shared";
 
 const ICONES = {
@@ -24,8 +24,7 @@ const ICONES = {
   Factory,
   LineChart,
   Sparkles,
-} as const;
-type IconeNome = keyof typeof ICONES;
+} satisfies Record<IconeNome, unknown>;
 
 function pickList<T>(bloco: Record<string, unknown>, base: string, idioma: IdiomaPagina): T[] {
   const key = `${base}_${idioma}`;
