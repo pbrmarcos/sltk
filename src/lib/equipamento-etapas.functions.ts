@@ -55,7 +55,7 @@ export const upsertEtapas = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const { data: eqp, error: eqpErr } = await context.supabase
       .from("cliente_equipamentos")
-      .select("id, cliente_id")
+      .select("id, cliente_id, modelo")
       .eq("id", data.equipamento_id)
       .single();
     if (eqpErr || !eqp) throw new Error("Equipamento não encontrado.");
@@ -67,6 +67,23 @@ export const upsertEtapas = createServerFn({ method: "POST" })
         .update({ deleted_at: new Date().toISOString() })
         .in("id", data.remove_ids);
       if (error) throw friendlyDbError(error);
+    }
+
+    // Estado anterior das etapas existentes — usado só pra decidir quais
+    // e-mails disparar (atribuição/conclusão), não afeta a gravação.
+    const idsExistentes = data.etapas.filter((e) => e.id).map((e) => e.id as string);
+    const anteriorPorId: Record<string, { responsavel_id: string | null; status: string }> = {};
+    if (idsExistentes.length) {
+      const { data: existentes } = await context.supabase
+        .from("equipamento_etapas")
+        .select("id, responsavel_id, status")
+        .in("id", idsExistentes);
+      for (const r of existentes ?? []) {
+        anteriorPorId[(r as any).id] = {
+          responsavel_id: (r as any).responsavel_id,
+          status: (r as any).status,
+        };
+      }
     }
 
     // Upsert (insert ou update)
@@ -91,6 +108,8 @@ export const upsertEtapas = createServerFn({ method: "POST" })
         observacoes: e.observacoes ?? null,
         updated_by: context.userId,
       };
+      const anterior = e.id ? anteriorPorId[e.id] : undefined;
+      let etapaId = e.id;
       if (e.id) {
         const { error } = await context.supabase
           .from("equipamento_etapas")
@@ -98,10 +117,47 @@ export const upsertEtapas = createServerFn({ method: "POST" })
           .eq("id", e.id);
         if (error) throw friendlyDbError(error);
       } else {
-        const { error } = await context.supabase
+        const { data: nova, error } = await context.supabase
           .from("equipamento_etapas")
-          .insert({ ...payload, created_by: context.userId });
+          .insert({ ...payload, created_by: context.userId })
+          .select("id")
+          .single();
         if (error) throw friendlyDbError(error);
+        etapaId = (nova as { id: string } | null)?.id;
+      }
+
+      const atribuiuAgora = !!e.responsavel_id && e.responsavel_id !== anterior?.responsavel_id;
+      const concluiuAgora = e.status === "concluida" && anterior?.status !== "concluida";
+      if (etapaId && (atribuiuAgora || concluiuAgora)) {
+        try {
+          const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+          const vars = {
+            etapa_nome: e.nome,
+            projeto: (eqp as any).modelo ?? "",
+            prazo: e.data_fim_prev ?? "",
+            link: appUrl(`/engenharia/etapas?equipamento_id=${data.equipamento_id}`),
+          };
+          if (atribuiuAgora) {
+            await safeDispatch({
+              eventKey: "etapa.atribuida",
+              triggeredBy: context.userId,
+              entityTable: "equipamento_etapas",
+              entityId: etapaId,
+              vars,
+            });
+          }
+          if (concluiuAgora) {
+            await safeDispatch({
+              eventKey: "etapa.concluida",
+              triggeredBy: context.userId,
+              entityTable: "equipamento_etapas",
+              entityId: etapaId,
+              vars,
+            });
+          }
+        } catch (err) {
+          console.error("[etapas/upsertEtapas] email dispatch failed", err);
+        }
       }
     }
     return { ok: true };
