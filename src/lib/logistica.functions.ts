@@ -215,7 +215,26 @@ export const createEmbarque = createServerFn({ method: "POST" })
       .select("id, numero")
       .single();
     if (error) throw friendlyDbError(error);
-    return row as { id: string; numero: string };
+    const embarque = row as { id: string; numero: string };
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      await safeDispatch({
+        eventKey: "embarque.criado",
+        triggeredBy: context.userId,
+        entityTable: "logistica_embarques",
+        entityId: embarque.id,
+        vars: {
+          codigo: embarque.numero,
+          destino: data.destino ?? "",
+          link: appUrl(`/logistica/embarques/${embarque.id}`),
+        },
+      });
+    } catch (e) {
+      console.error("[logistica/createEmbarque] email dispatch failed", e);
+    }
+
+    return embarque;
   });
 
 // ---------- Atualizar cabeçalho ----------
@@ -302,6 +321,37 @@ export const setStatus = createServerFn({ method: "POST" })
         });
       if (logErr) throw friendlyDbError(logErr);
     }
+
+    const eventKey =
+      data.status === "embarcado"
+        ? "embarque.despachado"
+        : data.status === "entregue"
+          ? "embarque.entregue"
+          : null;
+    if (eventKey && fromStatus !== data.status) {
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        const { data: emb } = await (context.supabase as any)
+          .from("logistica_embarques")
+          .select("numero, destino")
+          .eq("id", data.id)
+          .maybeSingle();
+        await safeDispatch({
+          eventKey,
+          triggeredBy: context.userId,
+          entityTable: "logistica_embarques",
+          entityId: data.id,
+          vars: {
+            codigo: emb?.numero ?? "",
+            destino: emb?.destino ?? "",
+            link: appUrl(`/logistica/embarques/${data.id}`),
+          },
+        });
+      } catch (e) {
+        console.error("[logistica/setStatus] email dispatch failed", e);
+      }
+    }
+
     return { ok: true };
   });
 
