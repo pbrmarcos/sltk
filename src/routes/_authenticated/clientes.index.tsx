@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Plus, Star, Building2 } from "lucide-react";
+import { Plus, Star, Building2, AlertTriangle } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
@@ -60,7 +60,36 @@ export const Route = createFileRoute("/_authenticated/clientes/")({
     );
   },
   component: ClientesListPage,
+  errorComponent: ClientesListError,
 });
+
+function ClientesListError({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  return (
+    <PageContainer>
+      <div className="rounded-lg border border-rose-200 bg-rose-50 p-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-rose-600" />
+          <div className="flex-1">
+            <h2 className="font-semibold text-rose-900">Erro ao carregar clientes</h2>
+            <p className="mt-1 text-sm text-rose-700">{error.message}</p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3"
+              onClick={() => {
+                reset();
+                router.invalidate();
+              }}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    </PageContainer>
+  );
+}
 
 function ClientesListPage() {
   const { q, status, pais, page, pageSize } = Route.useSearch();

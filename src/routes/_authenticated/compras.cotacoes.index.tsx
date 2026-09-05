@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TableEmpty } from "@/components/data/TableStates";
+import { TableEmpty, TableError, TableSkeleton } from "@/components/data/TableStates";
 import { Plus, Search, FileText, ShoppingCart, ExternalLink } from "lucide-react";
 import { listCotacoes } from "@/lib/cotacoes.functions";
 import { listInsumosRfq } from "@/lib/projeto-insumos.functions";
@@ -173,7 +173,22 @@ function CotacoesListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.length === 0 ? (
+              {listQ.isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="p-0">
+                    <TableSkeleton columns={7} rows={4} />
+                  </TableCell>
+                </TableRow>
+              ) : listQ.error ? (
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <TableError
+                      description={(listQ.error as Error).message}
+                      onRetry={() => listQ.refetch()}
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7}>
                     <TableEmpty title="Nenhuma cotação formal encontrada." />
@@ -238,7 +253,22 @@ function CotacoesListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {insumos.length === 0 ? (
+              {insumosQ.isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="p-0">
+                    <TableSkeleton columns={7} rows={4} />
+                  </TableCell>
+                </TableRow>
+              ) : insumosQ.error ? (
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <TableError
+                      description={(insumosQ.error as Error).message}
+                      onRetry={() => insumosQ.refetch()}
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : insumos.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7}>
                     <TableEmpty title="Nenhum checklist emitido a partir de solicitação de compra." />

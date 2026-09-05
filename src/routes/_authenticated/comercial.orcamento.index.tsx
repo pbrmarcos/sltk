@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { listDocumentos, getDocumento, getSignedUrl } from "@/lib/docs/docs.functions";
 import { toast } from "sonner";
+import { TableError } from "@/components/data/TableStates";
 
 export const Route = createFileRoute("/_authenticated/comercial/orcamento/")({
   component: OrcamentosListPage,
@@ -95,6 +96,15 @@ function OrcamentosListPage() {
           <TableBody>
             {list.isLoading ? (
               <TableRow><TableCell colSpan={8} className="py-8 text-center text-[var(--text-muted)]">Carregando…</TableCell></TableRow>
+            ) : list.error ? (
+              <TableRow>
+                <TableCell colSpan={8}>
+                  <TableError
+                    description={(list.error as Error).message}
+                    onRetry={() => list.refetch()}
+                  />
+                </TableCell>
+              </TableRow>
             ) : (list.data ?? []).length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="py-12 text-center text-[var(--text-muted)]">

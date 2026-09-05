@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { Plus, Search, Truck, X } from "lucide-react";
+import { TableError } from "@/components/data/TableStates";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,11 @@ function EmbarquesIndex() {
 
       {embarques.isLoading ? (
         <p className="text-sm text-[var(--text-muted)]">Carregando…</p>
+      ) : embarques.error ? (
+        <TableError
+          description={(embarques.error as Error).message}
+          onRetry={() => embarques.refetch()}
+        />
       ) : (embarques.data?.length ?? 0) === 0 ? (
         <div className="rounded-lg border border-dashed border-[var(--bg-border)] bg-[var(--bg-surface)] p-10 text-center">
           <Truck className="mx-auto mb-3 h-10 w-10 text-[var(--text-muted)] opacity-40" />

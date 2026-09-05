@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { listFats, FAT_STATUS_LABEL } from "@/lib/fat.functions";
+import { TableError } from "@/components/data/TableStates";
 
 export const Route = createFileRoute("/_authenticated/qualidade/fat/")({
   component: FatListPage,
@@ -17,7 +18,7 @@ function FatListPage() {
   const fetchFn = useServerFn(listFats);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("todos");
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["fat", "list", q, status],
     queryFn: () => fetchFn({ data: { q, status } }),
   });
@@ -49,6 +50,8 @@ function FatListPage() {
       <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]">
         {isLoading ? (
           <div className="p-8 text-center text-sm text-[var(--text-muted)]">Carregando…</div>
+        ) : error ? (
+          <TableError description={(error as Error).message} onRetry={() => refetch()} />
         ) : !data?.rows.length ? (
           <div className="p-8 text-center text-sm text-[var(--text-muted)]">
             Nenhum FAT encontrado. Clique em "Novo FAT" para começar.
