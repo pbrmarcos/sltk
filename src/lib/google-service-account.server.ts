@@ -37,7 +37,10 @@ function b64url(buf: Buffer | string): string {
  * Retorna `null` quando as credenciais não estão configuradas — quem chama
  * decide se cai para um fallback ou lança erro.
  */
-export async function getGoogleAccessToken(scope: string, subject?: string): Promise<string | null> {
+export async function getGoogleAccessToken(
+  scope: string,
+  subject?: string,
+): Promise<string | null> {
   const creds = readServiceAccountCreds();
   if (!creds) return null;
 

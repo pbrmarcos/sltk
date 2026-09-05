@@ -10,7 +10,11 @@ import {
   MinusCircle,
   RefreshCw,
 } from "lucide-react";
-import { runDiagnostico, type CapabilityStatus, type DiagnosticoResumo } from "@/lib/system-diagnostics.functions";
+import {
+  runDiagnostico,
+  type CapabilityStatus,
+  type DiagnosticoResumo,
+} from "@/lib/system-diagnostics.functions";
 import { AREA_LABEL, CAPABILITIES, type CapabilityArea } from "@/lib/system-keys";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -91,10 +95,13 @@ export function DiagnosticoTab() {
         <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Chaves & Diagnóstico</h2>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+                Chaves & Diagnóstico
+              </h2>
               <p className="mt-0.5 max-w-2xl text-[12.5px] text-[var(--text-muted)]">
-                Todas as credenciais externas usadas pelo sistema, o que cada uma habilita e o que deixa de
-                funcionar quando está ausente. Os valores nunca são exibidos — apenas mascarados.
+                Todas as credenciais externas usadas pelo sistema, o que cada uma habilita e o que
+                deixa de funcionar quando está ausente. Os valores nunca são exibidos — apenas
+                mascarados.
               </p>
             </div>
             <Button size="sm" onClick={() => rodar.mutate(undefined)} disabled={rodar.isPending}>
@@ -109,9 +116,15 @@ export function DiagnosticoTab() {
 
           {resumo && (
             <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
-              <Badge variant="outline" className="text-[10.5px]">{resumo.ok} funcionando</Badge>
-              <Badge variant="outline" className="text-[10.5px]">{resumo.ausentes} não configuradas</Badge>
-              <Badge variant="outline" className="text-[10.5px]">{resumo.erros} com erro</Badge>
+              <Badge variant="outline" className="text-[10.5px]">
+                {resumo.ok} funcionando
+              </Badge>
+              <Badge variant="outline" className="text-[10.5px]">
+                {resumo.ausentes} não configuradas
+              </Badge>
+              <Badge variant="outline" className="text-[10.5px]">
+                {resumo.erros} com erro
+              </Badge>
               <span className="text-[var(--text-muted)]">
                 Última verificação: {new Date(resumo.verificadoEm).toLocaleString("pt-BR")}
               </span>
@@ -129,15 +142,24 @@ export function DiagnosticoTab() {
                 const meta = STATUS_META[i.status];
                 const Icon = meta.Icon;
                 return (
-                  <div key={i.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
+                  <div
+                    key={i.id}
+                    className="flex flex-wrap items-start justify-between gap-3 px-4 py-3"
+                  >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-[13.5px] font-semibold text-[var(--text-primary)]">{i.label}</h4>
+                        <h4 className="text-[13.5px] font-semibold text-[var(--text-primary)]">
+                          {i.label}
+                        </h4>
                         {i.criticidade === "critica" && (
-                          <Badge variant="secondary" className="text-[10px]">Crítica</Badge>
+                          <Badge variant="secondary" className="text-[10px]">
+                            Crítica
+                          </Badge>
                         )}
                         {typeof i.latencia_ms === "number" && (
-                          <Badge variant="outline" className="text-[10px]">{i.latencia_ms} ms</Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            {i.latencia_ms} ms
+                          </Badge>
                         )}
                       </div>
                       <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">{i.descricao}</p>
@@ -163,7 +185,9 @@ export function DiagnosticoTab() {
                       )}
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`inline-flex items-center gap-1.5 text-[12px] font-medium ${meta.className}`}>
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[12px] font-medium ${meta.className}`}
+                      >
                         <Icon className="h-4 w-4" /> {meta.label}
                       </span>
                       <Button

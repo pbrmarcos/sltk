@@ -91,10 +91,7 @@ export const listSupportUsers = createServerFn({ method: "POST" })
     const rows: SupportUserRow[] = (profiles ?? [])
       .map((p) => {
         const roles = rolesByUser.get(p.id) ?? [];
-        const maxRank = roles.reduce(
-          (m, r) => Math.max(m, ROLE_RANK[r] ?? 0),
-          0,
-        );
+        const maxRank = roles.reduce((m, r) => Math.max(m, ROLE_RANK[r] ?? 0), 0);
         return {
           id: p.id,
           email: p.email,
@@ -130,12 +127,7 @@ export const supportResetPassword = createServerFn({ method: "POST" })
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
 
-    await assertCanActOn(
-      supabaseAdmin,
-      context.userId,
-      data.id,
-      "password_reset",
-    );
+    await assertCanActOn(supabaseAdmin, context.userId, data.id, "password_reset");
 
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, {
       password: data.password,
@@ -170,12 +162,7 @@ export const supportSendPasswordRecovery = createServerFn({ method: "POST" })
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
 
-    await assertCanActOn(
-      supabaseAdmin,
-      context.userId,
-      data.id,
-      "password_reset",
-    );
+    await assertCanActOn(supabaseAdmin, context.userId, data.id, "password_reset");
 
     // Precisamos do email do alvo para gerar o link.
     const { data: prof, error: pErr } = await supabaseAdmin

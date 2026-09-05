@@ -18,12 +18,14 @@ import type { DocumentoLayoutConfig, Idioma } from "@/lib/docs/types";
 const IDIOMAS = ["pt", "es", "en"] as const;
 
 function slugify(s: string): string {
-  return (s || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60) || "sem-segmento";
+  return (
+    (s || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "sem-segmento"
+  );
 }
 
 async function loadLayout(sb: any): Promise<DocumentoLayoutConfig> {
@@ -90,7 +92,9 @@ export const gerarDocumentoEntrevista = createServerFn({ method: "POST" })
         .from("entrevista_perguntas")
         .select("id, numero, enunciado_pt")
         .in("id", pIds);
-      pMap = new Map((perg ?? []).map((p: any) => [p.id, { numero: p.numero, enunciado: p.enunciado_pt }]));
+      pMap = new Map(
+        (perg ?? []).map((p: any) => [p.id, { numero: p.numero, enunciado: p.enunciado_pt }]),
+      );
     }
     const respostas = (resps ?? [])
       .map((r: any) => ({
@@ -123,7 +127,12 @@ export const gerarDocumentoEntrevista = createServerFn({ method: "POST" })
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-    const results: Array<{ idioma: Idioma; file_name: string; drive_view_url: string | null; error?: string }> = [];
+    const results: Array<{
+      idioma: Idioma;
+      file_name: string;
+      drive_view_url: string | null;
+      error?: string;
+    }> = [];
 
     for (const idioma of data.idiomas as Idioma[]) {
       const buffer = await renderToBuffer(
@@ -186,14 +195,25 @@ export const gerarDocumentoEntrevista = createServerFn({ method: "POST" })
       results.push({ idioma, file_name: fileName, drive_view_url: driveViewUrl });
     }
 
-    return { ok: true as const, drive_ok: driveOk && !driveError, drive_error: driveError, folder_url: folderUrl, documentos: results };
+    return {
+      ok: true as const,
+      drive_ok: driveOk && !driveError,
+      drive_error: driveError,
+      folder_url: folderUrl,
+      documentos: results,
+    };
   });
 
 /** Histórico global de PDFs de entrevistas — usado na Central de Documentos. */
 export const listEntrevistaDocumentosGerados = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({ q: z.string().max(120).optional().default(""), limit: z.number().int().min(1).max(500).optional().default(200) }).parse(i),
+    z
+      .object({
+        q: z.string().max(120).optional().default(""),
+        limit: z.number().int().min(1).max(500).optional().default(200),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
@@ -206,18 +226,31 @@ export const listEntrevistaDocumentosGerados = createServerFn({ method: "GET" })
       .limit(data.limit);
     if (error) throw friendlyDbError(error);
 
-    const segIds = Array.from(new Set((rows ?? []).map((r: any) => r.entrevistas?.segmento_id).filter(Boolean)));
+    const segIds = Array.from(
+      new Set((rows ?? []).map((r: any) => r.entrevistas?.segmento_id).filter(Boolean)),
+    );
     let segMap = new Map<string, string>();
     if (segIds.length) {
-      const { data: segs } = await sb.from("entrevista_segmentos").select("id, nome_pt").in("id", segIds);
+      const { data: segs } = await sb
+        .from("entrevista_segmentos")
+        .select("id, nome_pt")
+        .in("id", segIds);
       segMap = new Map((segs ?? []).map((s: any) => [s.id, s.nome_pt]));
     }
 
     const q = (data.q || "").trim().toLowerCase();
     type Row = {
-      id: string; entrevista_id: string; idioma: Idioma; file_name: string | null;
-      drive_view_url: string | null; drive_folder_url: string | null; criado_em: string;
-      codigo: string; lead_nome: string | null; lead_empresa: string | null; segmento: string;
+      id: string;
+      entrevista_id: string;
+      idioma: Idioma;
+      file_name: string | null;
+      drive_view_url: string | null;
+      drive_folder_url: string | null;
+      criado_em: string;
+      codigo: string;
+      lead_nome: string | null;
+      lead_empresa: string | null;
+      segmento: string;
     };
     const mapped: Row[] = (rows ?? []).map((r: any) => ({
       id: r.id as string,

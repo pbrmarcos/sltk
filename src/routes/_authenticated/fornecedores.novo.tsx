@@ -1,7 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, ScanLine, ArrowLeft, Upload, Sparkles, CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  ScanLine,
+  ArrowLeft,
+  Upload,
+  Sparkles,
+  CheckCircle2,
+  Circle,
+  AlertCircle,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -120,7 +130,12 @@ function NovoFornecedorPage() {
 
   // ===== Indicador de progresso do pipeline =====
   type PhaseStatus = "idle" | "running" | "done" | "skipped" | "error";
-  type Phases = { ocr: PhaseStatus; translation: PhaseStatus; enrichment: PhaseStatus; drive: PhaseStatus };
+  type Phases = {
+    ocr: PhaseStatus;
+    translation: PhaseStatus;
+    enrichment: PhaseStatus;
+    drive: PhaseStatus;
+  };
   const [phases, setPhases] = useState<Phases>({
     ocr: "idle",
     translation: "idle",
@@ -152,7 +167,11 @@ function NovoFornecedorPage() {
 
   function clearDraft() {
     draftSuspended.current = true;
-    try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
     setHasDraft(false);
     setForm(EMPTY);
     setEnrichment(null);
@@ -162,11 +181,10 @@ function NovoFornecedorPage() {
     setAiFields({});
     resetPhases();
     // Permite que o autosave volte a operar depois do commit do reset.
-    setTimeout(() => { draftSuspended.current = false; }, 0);
+    setTimeout(() => {
+      draftSuspended.current = false;
+    }, 0);
   }
-
-
-
 
   const categorias = useQuery({
     queryKey: ["fornecedores", "categorias"],
@@ -203,7 +221,8 @@ function NovoFornecedorPage() {
         telefone_ddi: p.telefone_ddi || d.telefone_corporativo_ddi || p.telefone_ddi,
         telefone_numero: p.telefone_numero || d.telefone_corporativo_numero || p.telefone_numero,
         cidade: p.cidade || d.endereco_cidade || p.cidade,
-        endereco_estado_provincia: p.endereco_estado_provincia || d.endereco_estado || p.endereco_estado_provincia,
+        endereco_estado_provincia:
+          p.endereco_estado_provincia || d.endereco_estado || p.endereco_estado_provincia,
         endereco_cep: p.endereco_cep || d.endereco_codigo_postal || p.endereco_cep,
         endereco:
           p.endereco ||
@@ -214,7 +233,8 @@ function NovoFornecedorPage() {
         data_abertura: p.data_abertura || d.data_abertura || p.data_abertura,
         situacao_cadastral: p.situacao_cadastral || d.situacao_cadastral || p.situacao_cadastral,
         capital_social: p.capital_social ?? d.capital_social ?? p.capital_social,
-        natureza_juridica: p.natureza_juridica || d.natureza_juridica_descricao || p.natureza_juridica,
+        natureza_juridica:
+          p.natureza_juridica || d.natureza_juridica_descricao || p.natureza_juridica,
         cnae_principal: p.cnae_principal || d.cnae_principal || p.cnae_principal,
         cnaes_secundarios:
           p.cnaes_secundarios.length > 0
@@ -295,7 +315,11 @@ function NovoFornecedorPage() {
 
       // Suspende o autosave antes de resetar, senão o useEffect reescreve o draft.
       draftSuspended.current = true;
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* ignore */
+      }
       setHasDraft(false);
       setAiFields({});
       // Limpa o formulário para o próximo cadastro
@@ -306,7 +330,11 @@ function NovoFornecedorPage() {
       setScanImages([]);
       setLastExtracted(null);
       // Garante que o draft fique vazio mesmo se algum efeito tentar gravar antes do unmount.
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* ignore */
+      }
       toast.success("Fornecedor cadastrado");
       if (res.id) {
         navigate({ to: "/fornecedores/$id", params: { id: res.id } });
@@ -368,51 +396,107 @@ function NovoFornecedorPage() {
         telefone_ddi: e.telefone_ddi ?? prev.telefone_ddi,
         telefone_numero: e.telefone_numero ?? prev.telefone_numero,
         idioma: e.idioma ?? prev.idioma,
-        observacoes: [
-          e.observacoes,
-          w?.resumo ? `\n— Resumo (web): ${w.resumo}` : "",
-          w?.ano_fundacao ? `Fundada em ${w.ano_fundacao}.` : "",
-          w?.porte ? `Porte: ${w.porte}.` : "",
-          w?.funcionarios ? `Funcionários: ${w.funcionarios}.` : "",
-          w?.certificacoes?.length ? `Certificações: ${w.certificacoes.join(", ")}.` : "",
-          w?.mercados_atendidos?.length ? `Mercados: ${w.mercados_atendidos.join(", ")}.` : "",
-          w?.fontes?.length ? `Fontes: ${w.fontes.slice(0, 3).join(" | ")}` : "",
-        ]
-          .filter(Boolean)
-          .join("\n")
-          .trim() || prev.observacoes,
+        observacoes:
+          [
+            e.observacoes,
+            w?.resumo ? `\n— Resumo (web): ${w.resumo}` : "",
+            w?.ano_fundacao ? `Fundada em ${w.ano_fundacao}.` : "",
+            w?.porte ? `Porte: ${w.porte}.` : "",
+            w?.funcionarios ? `Funcionários: ${w.funcionarios}.` : "",
+            w?.certificacoes?.length ? `Certificações: ${w.certificacoes.join(", ")}.` : "",
+            w?.mercados_atendidos?.length ? `Mercados: ${w.mercados_atendidos.join(", ")}.` : "",
+            w?.fontes?.length ? `Fontes: ${w.fontes.slice(0, 3).join(" | ")}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n")
+            .trim() || prev.observacoes,
         tags: e.categorias_sugeridas ?? prev.tags,
         categorias: matched.length
           ? Array.from(new Set([...prev.categorias, ...matched]))
           : prev.categorias,
         // ===== Mescla campos avançados extraídos pelo Groq/Firecrawl =====
         tax_id: prev.tax_id || (w as { tax_id?: string | null } | null)?.tax_id || prev.tax_id,
-        tax_id_tipo: prev.tax_id_tipo || (w as { tax_id_tipo?: string | null } | null)?.tax_id_tipo || prev.tax_id_tipo,
-        legal_name_local: prev.legal_name_local || (w as { legal_name_local?: string | null } | null)?.legal_name_local || prev.legal_name_local,
-        moeda_padrao: prev.moeda_padrao || (w as { moeda_padrao?: string | null } | null)?.moeda_padrao || prev.moeda_padrao,
-        incoterm_padrao: prev.incoterm_padrao || (w as { incoterm_padrao?: string | null } | null)?.incoterm_padrao || prev.incoterm_padrao,
-        porto_origem: prev.porto_origem || (w as { porto_origem?: string | null } | null)?.porto_origem || prev.porto_origem,
-        lead_time_dias: prev.lead_time_dias ?? (w as { lead_time_dias?: number | null } | null)?.lead_time_dias ?? prev.lead_time_dias,
+        tax_id_tipo:
+          prev.tax_id_tipo ||
+          (w as { tax_id_tipo?: string | null } | null)?.tax_id_tipo ||
+          prev.tax_id_tipo,
+        legal_name_local:
+          prev.legal_name_local ||
+          (w as { legal_name_local?: string | null } | null)?.legal_name_local ||
+          prev.legal_name_local,
+        moeda_padrao:
+          prev.moeda_padrao ||
+          (w as { moeda_padrao?: string | null } | null)?.moeda_padrao ||
+          prev.moeda_padrao,
+        incoterm_padrao:
+          prev.incoterm_padrao ||
+          (w as { incoterm_padrao?: string | null } | null)?.incoterm_padrao ||
+          prev.incoterm_padrao,
+        porto_origem:
+          prev.porto_origem ||
+          (w as { porto_origem?: string | null } | null)?.porto_origem ||
+          prev.porto_origem,
+        lead_time_dias:
+          prev.lead_time_dias ??
+          (w as { lead_time_dias?: number | null } | null)?.lead_time_dias ??
+          prev.lead_time_dias,
         moq: prev.moq ?? (w as { moq?: number | null } | null)?.moq ?? prev.moq,
-        payment_terms: prev.payment_terms || (w as { payment_terms?: string | null } | null)?.payment_terms || prev.payment_terms,
-        funcionarios_faixa: prev.funcionarios_faixa || (w as { funcionarios_faixa?: string | null } | null)?.funcionarios_faixa || prev.funcionarios_faixa,
-        fabrica_area_m2: prev.fabrica_area_m2 ?? (w as { fabrica_area_m2?: number | null } | null)?.fabrica_area_m2 ?? prev.fabrica_area_m2,
-        capacidade_mensal: prev.capacidade_mensal || (w as { capacidade_mensal?: string | null } | null)?.capacidade_mensal || prev.capacidade_mensal,
-        whatsapp_corp: prev.whatsapp_corp || (w as { whatsapp_corp?: string | null } | null)?.whatsapp_corp || prev.whatsapp_corp,
-        wechat_corp: prev.wechat_corp || (w as { wechat_corp?: string | null } | null)?.wechat_corp || prev.wechat_corp,
-        linkedin_url: prev.linkedin_url || (w as { linkedin_url?: string | null } | null)?.linkedin_url || prev.linkedin_url,
-        alibaba_url: prev.alibaba_url || (w as { alibaba_url?: string | null } | null)?.alibaba_url || prev.alibaba_url,
-        made_in_china_url: prev.made_in_china_url || (w as { made_in_china_url?: string | null } | null)?.made_in_china_url || prev.made_in_china_url,
-        endereco_estado_provincia: prev.endereco_estado_provincia || (w as { endereco_estado_provincia?: string | null } | null)?.endereco_estado_provincia || prev.endereco_estado_provincia,
-        fuso_horario: prev.fuso_horario || (w as { fuso_horario?: string | null } | null)?.fuso_horario || prev.fuso_horario,
-        certificacoes: Array.from(new Set([
-          ...prev.certificacoes,
-          ...((w as { certificacoes?: string[] | null } | null)?.certificacoes ?? []),
-        ])),
-        palavras_chave: Array.from(new Set([
-          ...prev.palavras_chave,
-          ...((w as { palavras_chave?: string[] | null } | null)?.palavras_chave ?? []),
-        ])),
+        payment_terms:
+          prev.payment_terms ||
+          (w as { payment_terms?: string | null } | null)?.payment_terms ||
+          prev.payment_terms,
+        funcionarios_faixa:
+          prev.funcionarios_faixa ||
+          (w as { funcionarios_faixa?: string | null } | null)?.funcionarios_faixa ||
+          prev.funcionarios_faixa,
+        fabrica_area_m2:
+          prev.fabrica_area_m2 ??
+          (w as { fabrica_area_m2?: number | null } | null)?.fabrica_area_m2 ??
+          prev.fabrica_area_m2,
+        capacidade_mensal:
+          prev.capacidade_mensal ||
+          (w as { capacidade_mensal?: string | null } | null)?.capacidade_mensal ||
+          prev.capacidade_mensal,
+        whatsapp_corp:
+          prev.whatsapp_corp ||
+          (w as { whatsapp_corp?: string | null } | null)?.whatsapp_corp ||
+          prev.whatsapp_corp,
+        wechat_corp:
+          prev.wechat_corp ||
+          (w as { wechat_corp?: string | null } | null)?.wechat_corp ||
+          prev.wechat_corp,
+        linkedin_url:
+          prev.linkedin_url ||
+          (w as { linkedin_url?: string | null } | null)?.linkedin_url ||
+          prev.linkedin_url,
+        alibaba_url:
+          prev.alibaba_url ||
+          (w as { alibaba_url?: string | null } | null)?.alibaba_url ||
+          prev.alibaba_url,
+        made_in_china_url:
+          prev.made_in_china_url ||
+          (w as { made_in_china_url?: string | null } | null)?.made_in_china_url ||
+          prev.made_in_china_url,
+        endereco_estado_provincia:
+          prev.endereco_estado_provincia ||
+          (w as { endereco_estado_provincia?: string | null } | null)?.endereco_estado_provincia ||
+          prev.endereco_estado_provincia,
+        fuso_horario:
+          prev.fuso_horario ||
+          (w as { fuso_horario?: string | null } | null)?.fuso_horario ||
+          prev.fuso_horario,
+        certificacoes: Array.from(
+          new Set([
+            ...prev.certificacoes,
+            ...((w as { certificacoes?: string[] | null } | null)?.certificacoes ?? []),
+          ]),
+        ),
+        palavras_chave: Array.from(
+          new Set([
+            ...prev.palavras_chave,
+            ...((w as { palavras_chave?: string[] | null } | null)?.palavras_chave ?? []),
+          ]),
+        ),
       }));
 
       // Registrar campos preenchidos pela IA para revisão antes de salvar
@@ -420,12 +504,35 @@ function NovoFornecedorPage() {
       const eRec = e as Record<string, unknown>;
       const wRec = (w ?? {}) as Record<string, unknown>;
       const scalarKeys = [
-        "nome", "nome_fantasia", "pais", "cidade", "endereco", "site",
-        "email_corporativo", "telefone_ddi", "telefone_numero", "idioma", "observacoes",
-        "tax_id", "tax_id_tipo", "legal_name_local", "moeda_padrao", "incoterm_padrao",
-        "porto_origem", "lead_time_dias", "moq", "payment_terms", "funcionarios_faixa",
-        "fabrica_area_m2", "capacidade_mensal", "whatsapp_corp", "wechat_corp",
-        "linkedin_url", "alibaba_url", "made_in_china_url", "endereco_estado_provincia",
+        "nome",
+        "nome_fantasia",
+        "pais",
+        "cidade",
+        "endereco",
+        "site",
+        "email_corporativo",
+        "telefone_ddi",
+        "telefone_numero",
+        "idioma",
+        "observacoes",
+        "tax_id",
+        "tax_id_tipo",
+        "legal_name_local",
+        "moeda_padrao",
+        "incoterm_padrao",
+        "porto_origem",
+        "lead_time_dias",
+        "moq",
+        "payment_terms",
+        "funcionarios_faixa",
+        "fabrica_area_m2",
+        "capacidade_mensal",
+        "whatsapp_corp",
+        "wechat_corp",
+        "linkedin_url",
+        "alibaba_url",
+        "made_in_china_url",
+        "endereco_estado_provincia",
         "fuso_horario",
       ];
       for (const k of scalarKeys) {
@@ -442,7 +549,6 @@ function NovoFornecedorPage() {
 
       toast.success("Dados extraídos — revise os campos preenchidos pela IA antes de salvar.");
       setTab("manual");
-
     } catch (err) {
       setPhases((p) => ({
         ocr: p.ocr === "running" ? "error" : p.ocr,
@@ -455,8 +561,6 @@ function NovoFornecedorPage() {
       setScanning(false);
     }
   }
-
-
 
   useEffect(() => {
     function onPaste(e: ClipboardEvent) {
@@ -503,9 +607,10 @@ function NovoFornecedorPage() {
         if (d.tab) setTab(d.tab);
         setHasDraft(true);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setDraftLoaded(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persiste rascunho a cada mudança relevante (depois do load inicial)
@@ -514,14 +619,20 @@ function NovoFornecedorPage() {
     if (draftSuspended.current) return;
     try {
       const payload = JSON.stringify({
-        form, phases, enrichment, enderecoOriginal, aiFields, scanPreview, tab,
+        form,
+        phases,
+        enrichment,
+        enderecoOriginal,
+        aiFields,
+        scanPreview,
+        tab,
       });
       localStorage.setItem(DRAFT_KEY, payload);
       setHasDraft(true);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [form, phases, enrichment, enderecoOriginal, aiFields, scanPreview, tab, draftLoaded]);
-
-
 
   function toggleCategoria(slug: string) {
     setForm((prev) => ({
@@ -596,11 +707,19 @@ function NovoFornecedorPage() {
               Envie cartões de visita, folders ou catálogos
             </p>
             <p className="mt-1 text-[12.5px] text-[var(--text-muted)]">
-              JPG/PNG/WEBP até 6 imagens — OCR via Groq Llama 4 Scout vision + enriquecimento web (Firecrawl + Llama 3.3 70B).
+              JPG/PNG/WEBP até 6 imagens — OCR via Groq Llama 4 Scout vision + enriquecimento web
+              (Firecrawl + Llama 3.3 70B).
             </p>
 
             <p className="mt-2 text-[11.5px] text-[var(--text-muted)]">
-              Dica: cole imagens com <kbd className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] px-1 text-[10px]">Ctrl</kbd> + <kbd className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] px-1 text-[10px]">V</kbd>
+              Dica: cole imagens com{" "}
+              <kbd className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] px-1 text-[10px]">
+                Ctrl
+              </kbd>{" "}
+              +{" "}
+              <kbd className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] px-1 text-[10px]">
+                V
+              </kbd>
             </p>
 
             <label className="mt-4 inline-flex">
@@ -636,9 +755,7 @@ function NovoFornecedorPage() {
             ) : null}
           </div>
 
-          {(phases.ocr !== "idle" || phases.drive !== "idle") && (
-            <ScanProgress phases={phases} />
-          )}
+          {(phases.ocr !== "idle" || phases.drive !== "idle") && <ScanProgress phases={phases} />}
 
           {driveResult && (
             <div className="mt-4 rounded-[var(--radius-md)] border border-emerald-200 bg-emerald-50/60 p-4">
@@ -676,9 +793,7 @@ function NovoFornecedorPage() {
                 <div className="mt-3">
                   <Button
                     size="sm"
-                    onClick={() =>
-                      navigate({ to: "/fornecedores/$id", params: { id: createdId } })
-                    }
+                    onClick={() => navigate({ to: "/fornecedores/$id", params: { id: createdId } })}
                   >
                     Abrir ficha do fornecedor
                   </Button>
@@ -688,7 +803,6 @@ function NovoFornecedorPage() {
           )}
 
           {scanError ? (
-
             <Alert variant="destructive" className="mt-4">
               <AlertTitle>
                 Groq não conseguiu analisar as imagens
@@ -704,23 +818,13 @@ function NovoFornecedorPage() {
                 ) : null}
                 {scanError.logged_at ? (
                   <p className="text-[11.5px] opacity-80">
-                    Registrado em{" "}
-                    {new Date(scanError.logged_at).toLocaleString("pt-BR")}
+                    Registrado em {new Date(scanError.logged_at).toLocaleString("pt-BR")}
                     {scanError.log_id ? ` · log #${scanError.log_id.slice(0, 8)}` : ""}
                   </p>
                 ) : null}
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    asChild
-                  >
-                    <a
-                      href="https://console.groq.com/keys"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
+                  <Button type="button" variant="outline" size="sm" asChild>
+                    <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">
                       Gerenciar chave no console Groq ↗
                     </a>
                   </Button>
@@ -736,7 +840,6 @@ function NovoFornecedorPage() {
               </AlertDescription>
             </Alert>
           ) : null}
-
         </TabsContent>
 
         <TabsContent value="manual" className="mt-4 space-y-6">
@@ -768,7 +871,7 @@ function NovoFornecedorPage() {
                   for (const k of Object.keys(aiFields)) {
                     if (!accepted[k]) {
                       const orig = (EMPTY as unknown as Record<string, unknown>)[k];
-                      next[k] = Array.isArray(orig) ? [] : orig ?? null;
+                      next[k] = Array.isArray(orig) ? [] : (orig ?? null);
                     }
                   }
                   return next as FornecedorInput;
@@ -787,7 +890,6 @@ function NovoFornecedorPage() {
             />
           )}
 
-
           <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
             <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
               Identificação
@@ -804,9 +906,7 @@ function NovoFornecedorPage() {
                 <Label>Nome fantasia</Label>
                 <Input
                   value={form.nome_fantasia ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, nome_fantasia: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
                 />
               </div>
               <div>
@@ -863,7 +963,8 @@ function NovoFornecedorPage() {
                 />
                 {enderecoOriginal && (
                   <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-                    Original: <span className="font-mono">{enderecoOriginal}</span> (traduzido automaticamente)
+                    Original: <span className="font-mono">{enderecoOriginal}</span> (traduzido
+                    automaticamente)
                   </p>
                 )}
               </div>
@@ -880,9 +981,7 @@ function NovoFornecedorPage() {
                 <Input
                   type="email"
                   value={form.email_corporativo ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, email_corporativo: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, email_corporativo: e.target.value })}
                 />
               </div>
               <div>
@@ -906,9 +1005,7 @@ function NovoFornecedorPage() {
                 <Label>DDI</Label>
                 <Input
                   value={form.telefone_ddi ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, telefone_ddi: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, telefone_ddi: e.target.value })}
                   placeholder="86"
                 />
               </div>
@@ -916,9 +1013,7 @@ function NovoFornecedorPage() {
                 <Label>Telefone</Label>
                 <Input
                   value={form.telefone_numero ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, telefone_numero: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, telefone_numero: e.target.value })}
                 />
               </div>
             </div>
@@ -984,34 +1079,65 @@ function NovoFornecedorPage() {
                 )}
                 <div className="mt-3 grid gap-2 text-[12px] sm:grid-cols-2 md:grid-cols-3">
                   {enrichment.site_oficial && (
-                    <div><span className="text-[var(--text-muted)]">Site:</span> <a className="text-blue-700 hover:underline" href={enrichment.site_oficial.startsWith("http") ? enrichment.site_oficial : `https://${enrichment.site_oficial}`} target="_blank" rel="noreferrer">{enrichment.site_oficial}</a></div>
+                    <div>
+                      <span className="text-[var(--text-muted)]">Site:</span>{" "}
+                      <a
+                        className="text-blue-700 hover:underline"
+                        href={
+                          enrichment.site_oficial.startsWith("http")
+                            ? enrichment.site_oficial
+                            : `https://${enrichment.site_oficial}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {enrichment.site_oficial}
+                      </a>
+                    </div>
                   )}
                   {enrichment.ano_fundacao && (
-                    <div><span className="text-[var(--text-muted)]">Fundada em:</span> {enrichment.ano_fundacao}</div>
+                    <div>
+                      <span className="text-[var(--text-muted)]">Fundada em:</span>{" "}
+                      {enrichment.ano_fundacao}
+                    </div>
                   )}
                   {enrichment.porte && (
-                    <div><span className="text-[var(--text-muted)]">Porte:</span> {enrichment.porte}</div>
+                    <div>
+                      <span className="text-[var(--text-muted)]">Porte:</span> {enrichment.porte}
+                    </div>
                   )}
                   {enrichment.funcionarios && (
-                    <div><span className="text-[var(--text-muted)]">Funcionários:</span> {enrichment.funcionarios}</div>
+                    <div>
+                      <span className="text-[var(--text-muted)]">Funcionários:</span>{" "}
+                      {enrichment.funcionarios}
+                    </div>
                   )}
                 </div>
                 {enrichment.certificacoes && enrichment.certificacoes.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {enrichment.certificacoes.map((c) => (
-                      <Badge key={c} variant="secondary" className="bg-white">{c}</Badge>
+                      <Badge key={c} variant="secondary" className="bg-white">
+                        {c}
+                      </Badge>
                     ))}
                   </div>
                 )}
                 {enrichment.mercados_atendidos && enrichment.mercados_atendidos.length > 0 && (
                   <div className="mt-2 text-[12px]">
-                    <span className="text-[var(--text-muted)]">Mercados:</span> {enrichment.mercados_atendidos.join(", ")}
+                    <span className="text-[var(--text-muted)]">Mercados:</span>{" "}
+                    {enrichment.mercados_atendidos.join(", ")}
                   </div>
                 )}
                 {enrichment.fontes && enrichment.fontes.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
                     {enrichment.fontes.slice(0, 5).map((f, i) => (
-                      <a key={i} href={f} target="_blank" rel="noreferrer" className="rounded border border-blue-200 bg-white px-2 py-0.5 text-blue-700 hover:bg-blue-100">
+                      <a
+                        key={i}
+                        href={f}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded border border-blue-200 bg-white px-2 py-0.5 text-blue-700 hover:bg-blue-100"
+                      >
                         fonte {i + 1}
                       </a>
                     ))}
@@ -1076,9 +1202,7 @@ function NovoFornecedorPage() {
             </h3>
             <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <Label>
-                  {paisAtual?.documento_nome ?? "Tax ID"}
-                </Label>
+                <Label>{paisAtual?.documento_nome ?? "Tax ID"}</Label>
                 <div className="flex gap-2">
                   <Input
                     value={form.tax_id ?? ""}
@@ -1106,7 +1230,9 @@ function NovoFornecedorPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {TAX_ID_TIPOS.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1159,10 +1285,14 @@ function NovoFornecedorPage() {
                       value={form.regime_tributario ?? ""}
                       onValueChange={(v) => setForm({ ...form, regime_tributario: v || null })}
                     >
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
                       <SelectContent>
                         {REGIMES_TRIBUTARIOS_BR.map((r) => (
-                          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                          <SelectItem key={r.value} value={r.value}>
+                            {r.label}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1191,7 +1321,10 @@ function NovoFornecedorPage() {
                       step="0.01"
                       value={form.capital_social ?? ""}
                       onChange={(e) =>
-                        setForm({ ...form, capital_social: e.target.value === "" ? null : Number(e.target.value) })
+                        setForm({
+                          ...form,
+                          capital_social: e.target.value === "" ? null : Number(e.target.value),
+                        })
                       }
                     />
                   </div>
@@ -1242,9 +1375,15 @@ function NovoFornecedorPage() {
                   value={form.moeda_padrao ?? ""}
                   onValueChange={(v) => setForm({ ...form, moeda_padrao: v || null })}
                 >
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {MOEDAS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    {MOEDAS.map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1254,9 +1393,15 @@ function NovoFornecedorPage() {
                   value={form.incoterm_padrao ?? ""}
                   onValueChange={(v) => setForm({ ...form, incoterm_padrao: v || null })}
                 >
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {INCOTERMS.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                    {INCOTERMS.map((i) => (
+                      <SelectItem key={i} value={i}>
+                        {i}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1277,7 +1422,10 @@ function NovoFornecedorPage() {
                   min={0}
                   value={form.lead_time_dias ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, lead_time_dias: e.target.value === "" ? null : Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      lead_time_dias: e.target.value === "" ? null : Number(e.target.value),
+                    })
                   }
                 />
               </div>
@@ -1299,7 +1447,11 @@ function NovoFornecedorPage() {
                   min={0}
                   value={form.condicao_pagamento_dias ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, condicao_pagamento_dias: e.target.value === "" ? null : Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      condicao_pagamento_dias:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    })
                   }
                 />
               </div>
@@ -1335,7 +1487,10 @@ function NovoFornecedorPage() {
                   min={0}
                   value={form.fabrica_area_m2 ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, fabrica_area_m2: e.target.value === "" ? null : Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      fabrica_area_m2: e.target.value === "" ? null : Number(e.target.value),
+                    })
                   }
                 />
               </div>
@@ -1366,30 +1521,48 @@ function NovoFornecedorPage() {
               <div>
                 <Label>Score qualidade (0-100)</Label>
                 <Input
-                  type="number" min={0} max={100} step="0.1"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step="0.1"
                   value={form.score_qualidade ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, score_qualidade: e.target.value === "" ? null : Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      score_qualidade: e.target.value === "" ? null : Number(e.target.value),
+                    })
                   }
                 />
               </div>
               <div>
                 <Label>Score entrega (0-100)</Label>
                 <Input
-                  type="number" min={0} max={100} step="0.1"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step="0.1"
                   value={form.score_entrega ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, score_entrega: e.target.value === "" ? null : Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      score_entrega: e.target.value === "" ? null : Number(e.target.value),
+                    })
                   }
                 />
               </div>
               <div>
                 <Label>Score preço (0-100)</Label>
                 <Input
-                  type="number" min={0} max={100} step="0.1"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step="0.1"
                   value={form.score_preco ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, score_preco: e.target.value === "" ? null : Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      score_preco: e.target.value === "" ? null : Number(e.target.value),
+                    })
                   }
                 />
               </div>
@@ -1420,12 +1593,20 @@ function NovoFornecedorPage() {
                 <Input
                   value={certInput}
                   onChange={(e) => setCertInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomCert(); } }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addCustomCert();
+                    }
+                  }}
                   placeholder="Certificação personalizada"
                 />
-                <Button type="button" variant="outline" onClick={addCustomCert}>Adicionar</Button>
+                <Button type="button" variant="outline" onClick={addCustomCert}>
+                  Adicionar
+                </Button>
               </div>
-              {form.certificacoes.filter((c) => !CERTIFICACOES_SUGERIDAS.includes(c as never)).length > 0 && (
+              {form.certificacoes.filter((c) => !CERTIFICACOES_SUGERIDAS.includes(c as never))
+                .length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {form.certificacoes
                     .filter((c) => !CERTIFICACOES_SUGERIDAS.includes(c as never))
@@ -1553,10 +1734,17 @@ function NovoFornecedorPage() {
               <Input
                 value={keywordInput}
                 onChange={(e) => setKeywordInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addKeyword();
+                  }
+                }}
                 placeholder="ex.: enchimento rotativo, servomotor"
               />
-              <Button type="button" variant="outline" onClick={addKeyword}>Adicionar</Button>
+              <Button type="button" variant="outline" onClick={addKeyword}>
+                Adicionar
+              </Button>
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
               {form.palavras_chave.map((k) => (
@@ -1565,7 +1753,10 @@ function NovoFornecedorPage() {
                   variant="secondary"
                   className="cursor-pointer"
                   onClick={() =>
-                    setForm((p) => ({ ...p, palavras_chave: p.palavras_chave.filter((x) => x !== k) }))
+                    setForm((p) => ({
+                      ...p,
+                      palavras_chave: p.palavras_chave.filter((x) => x !== k),
+                    }))
                   }
                 >
                   {k} ×
@@ -1579,24 +1770,17 @@ function NovoFornecedorPage() {
             <Textarea
               rows={4}
               value={form.observacoes ?? ""}
-              onChange={(e) =>
-                setForm({ ...form, observacoes: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
               placeholder="Anotações sobre escopo, condições comerciais, MOQ, etc."
             />
           </section>
 
           <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate({ to: "/fornecedores" })}
-            >
+            <Button variant="outline" onClick={() => navigate({ to: "/fornecedores" })}>
               Cancelar
             </Button>
             <Button onClick={() => save.mutate()} disabled={save.isPending}>
-              {save.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : null}
+              {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Salvar fornecedor
             </Button>
           </div>
@@ -1611,7 +1795,12 @@ type PhaseStatusUI = "idle" | "running" | "done" | "skipped" | "error";
 function ScanProgress({
   phases,
 }: {
-  phases: { ocr: PhaseStatusUI; translation: PhaseStatusUI; enrichment: PhaseStatusUI; drive: PhaseStatusUI };
+  phases: {
+    ocr: PhaseStatusUI;
+    translation: PhaseStatusUI;
+    enrichment: PhaseStatusUI;
+    drive: PhaseStatusUI;
+  };
 }) {
   const steps: Array<{ key: keyof typeof phases; label: string; hint: string }> = [
     { key: "ocr", label: "OCR (Llama 4 Vision)", hint: "Extraindo dados das imagens" },
@@ -1650,9 +1839,13 @@ function ScanProgress({
               key={s.key}
               className="flex items-start gap-2 rounded border border-[var(--bg-border)] bg-[var(--bg-base)] px-3 py-2"
             >
-              <Icon className={`mt-0.5 h-4 w-4 ${color} ${st === "running" ? "animate-spin" : ""}`} />
+              <Icon
+                className={`mt-0.5 h-4 w-4 ${color} ${st === "running" ? "animate-spin" : ""}`}
+              />
               <div className="min-w-0">
-                <div className="text-[12.5px] font-medium text-[var(--text-primary)]">{s.label}</div>
+                <div className="text-[12.5px] font-medium text-[var(--text-primary)]">
+                  {s.label}
+                </div>
                 <div className="text-[11px] text-[var(--text-muted)]">
                   {st === "skipped" ? "não necessário" : st === "idle" ? "aguardando" : s.hint}
                 </div>
@@ -1755,9 +1948,7 @@ function ReviewAIPanel({
             {totalAccepted}/{keys.length}
           </Badge>
         </div>
-        <span className="text-[11.5px] text-violet-700">
-          {open ? "Recolher" : "Expandir"}
-        </span>
+        <span className="text-[11.5px] text-violet-700">{open ? "Recolher" : "Expandir"}</span>
       </button>
       {open && (
         <div className="border-t border-violet-200 p-4">
@@ -1774,15 +1965,16 @@ function ReviewAIPanel({
                   type="checkbox"
                   className="mt-0.5"
                   checked={!!accepted[k]}
-                  onChange={(e) =>
-                    setAccepted((prev) => ({ ...prev, [k]: e.target.checked }))
-                  }
+                  onChange={(e) => setAccepted((prev) => ({ ...prev, [k]: e.target.checked }))}
                 />
                 <div className="min-w-0">
                   <div className="text-[12px] font-medium text-[var(--text-primary)]">
                     {AI_FIELD_LABELS[k] ?? k}
                   </div>
-                  <div className="truncate text-[11.5px] text-[var(--text-secondary)]" title={formatAIValue(aiFields[k])}>
+                  <div
+                    className="truncate text-[11.5px] text-[var(--text-secondary)]"
+                    title={formatAIValue(aiFields[k])}
+                  >
                     {formatAIValue(aiFields[k])}
                   </div>
                 </div>
@@ -1794,9 +1986,7 @@ function ReviewAIPanel({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() =>
-                setAccepted(Object.fromEntries(keys.map((k) => [k, true])))
-              }
+              onClick={() => setAccepted(Object.fromEntries(keys.map((k) => [k, true])))}
             >
               Marcar todos
             </Button>
@@ -1804,9 +1994,7 @@ function ReviewAIPanel({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() =>
-                setAccepted(Object.fromEntries(keys.map((k) => [k, false])))
-              }
+              onClick={() => setAccepted(Object.fromEntries(keys.map((k) => [k, false])))}
             >
               Desmarcar todos
             </Button>
@@ -1819,4 +2007,3 @@ function ReviewAIPanel({
     </section>
   );
 }
-

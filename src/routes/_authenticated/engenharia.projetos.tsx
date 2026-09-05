@@ -23,12 +23,10 @@ function ProjetosUnified() {
       {showTabs && (
         <div className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
           <div className="flex gap-1 border-b border-[var(--bg-border)]">
-            {(
-              [
-                { label: "Mecânicos", value: "mecanico" as const },
-                { label: "Elétricos", value: "eletrico" as const },
-              ]
-            ).map((t) => {
+            {[
+              { label: "Mecânicos", value: "mecanico" as const },
+              { label: "Elétricos", value: "eletrico" as const },
+            ].map((t) => {
               const active = d === t.value;
               return (
                 <Link

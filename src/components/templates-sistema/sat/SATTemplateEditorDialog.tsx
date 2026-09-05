@@ -82,9 +82,7 @@ export function SATTemplateEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>
-            Editor de template SAT {tpl ? `— v${tpl.versao}` : ""}
-          </DialogTitle>
+          <DialogTitle>Editor de template SAT {tpl ? `— v${tpl.versao}` : ""}</DialogTitle>
         </DialogHeader>
 
         {tplQ.isLoading || !tpl ? (
@@ -205,19 +203,17 @@ function SecaoCard({
   onToggle: () => void;
   onDeleteSec: () => void;
   onRenameSec: (t: string) => Promise<void>;
-  onUpsertItem: (
-    it: {
-      id?: string;
-      secao_id: string;
-      ordem: number;
-      label: string;
-      tipo: SATItemTipo;
-      obrigatorio: boolean;
-      permite_anexo: boolean;
-      ajuda?: string | null;
-      opcoes: string[];
-    },
-  ) => Promise<void>;
+  onUpsertItem: (it: {
+    id?: string;
+    secao_id: string;
+    ordem: number;
+    label: string;
+    tipo: SATItemTipo;
+    obrigatorio: boolean;
+    permite_anexo: boolean;
+    ajuda?: string | null;
+    opcoes: string[];
+  }) => Promise<void>;
   onDeleteItem: (id: string) => Promise<void>;
   onChange: () => void;
 }) {

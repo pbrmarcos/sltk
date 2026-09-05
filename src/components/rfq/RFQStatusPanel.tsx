@@ -42,7 +42,10 @@ const T: Record<
       rascunho: { label: "Rascunho", hint: "Envie o formulário para gerar o protocolo." },
       recebido: { label: "Recebido", hint: "Sua submissão chegou e entrou na fila." },
       em_analise: { label: "Em análise", hint: "Nossa equipe está avaliando as informações." },
-      atendido: { label: "Atendido", hint: "Uma oportunidade foi criada e sua solicitação avançou." },
+      atendido: {
+        label: "Atendido",
+        hint: "Uma oportunidade foi criada e sua solicitação avançou.",
+      },
     },
     anexos: "anexo(s)",
     recebidoEm: "Recebido em",

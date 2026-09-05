@@ -11,42 +11,84 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, MessageSquareText, User2, Building2, CalendarClock, Copy, ExternalLink, FileDown, Link2, Trash2, RotateCcw, ShieldAlert, MoreVertical, Printer, X, FolderUp } from "lucide-react";
 import {
-  listEntrevistas, criarEntrevista, getEntrevista,
-  moverEntrevistaParaLixeira, restaurarEntrevista, excluirEntrevistaDefinitivamente,
+  Plus,
+  MessageSquareText,
+  User2,
+  Building2,
+  CalendarClock,
+  Copy,
+  ExternalLink,
+  FileDown,
+  Link2,
+  Trash2,
+  RotateCcw,
+  ShieldAlert,
+  MoreVertical,
+  Printer,
+  X,
+  FolderUp,
+} from "lucide-react";
+import {
+  listEntrevistas,
+  criarEntrevista,
+  getEntrevista,
+  moverEntrevistaParaLixeira,
+  restaurarEntrevista,
+  excluirEntrevistaDefinitivamente,
   type EntrevistaRow,
 } from "@/lib/entrevistas.functions";
 import { listSegmentos } from "@/lib/entrevistas.functions";
 import { shareMessage, type Idioma } from "@/lib/entrevistas-shared";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useBrandSettings } from "@/hooks/use-brand-settings";
-
-
 
 export const Route = createFileRoute("/_authenticated/comercial/entrevistas")({
   component: EntrevistasListPage,
   head: () => ({
     meta: [
       { title: "Entrevistas — Comercial | SLTK" },
-      { name: "description", content: "Crie entrevistas técnicas por segmento e compartilhe um link público com o lead." },
+      {
+        name: "description",
+        content: "Crie entrevistas técnicas por segmento e compartilhe um link público com o lead.",
+      },
     ],
   }),
 });
 
 const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  pendente:   { label: "Pendente",   className: "bg-amber-100 text-amber-900 border-amber-200" },
-  respondida: { label: "Respondida", className: "bg-emerald-100 text-emerald-900 border-emerald-200" },
-  expirada:   { label: "Expirada",   className: "bg-slate-200 text-slate-700 border-slate-300" },
+  pendente: { label: "Pendente", className: "bg-amber-100 text-amber-900 border-amber-200" },
+  respondida: {
+    label: "Respondida",
+    className: "bg-emerald-100 text-emerald-900 border-emerald-200",
+  },
+  expirada: { label: "Expirada", className: "bg-slate-200 text-slate-700 border-slate-300" },
 };
 
 function EntrevistasListPage() {
@@ -58,7 +100,10 @@ function EntrevistasListPage() {
   const canPurge = role === "admin" || role === "manager";
 
   const [escopo, setEscopo] = useState<"ativas" | "lixeira">("ativas");
-  const list = useQuery({ queryKey: ["entrevistas", escopo], queryFn: () => listFn({ data: { escopo } }) });
+  const list = useQuery({
+    queryKey: ["entrevistas", escopo],
+    queryFn: () => listFn({ data: { escopo } }),
+  });
   const segs = useQuery({ queryKey: ["entrev-segmentos"], queryFn: () => segFn() });
 
   const [open, setOpen] = useState(false);
@@ -76,7 +121,10 @@ function EntrevistasListPage() {
       toast.success(`Entrevista ${r.codigo} criada.`);
       qc.invalidateQueries({ queryKey: ["entrevistas"] });
       setOpen(false);
-      setLeadNome(""); setLeadEmail(""); setLeadEmpresa(""); setNovoSeg("");
+      setLeadNome("");
+      setLeadEmail("");
+      setLeadEmpresa("");
+      setNovoSeg("");
     },
     onError: (e: any) => toast.error(e?.message ?? "Erro ao criar entrevista."),
   });
@@ -85,17 +133,22 @@ function EntrevistasListPage() {
     const rows = list.data ?? [];
     const q = filtroBusca.trim().toLowerCase();
     return rows.filter((r) => {
-      if (escopo === "ativas" && filtroStatus !== "todos" && r.status !== filtroStatus) return false;
+      if (escopo === "ativas" && filtroStatus !== "todos" && r.status !== filtroStatus)
+        return false;
       if (!q) return true;
       return [r.codigo, r.segmento_nome, r.lead_nome, r.lead_empresa, r.criador_nome]
-        .filter(Boolean).some((v) => String(v).toLowerCase().includes(q));
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q));
     });
   }, [list.data, filtroStatus, filtroBusca, escopo]);
 
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Comercial", href: "/comercial/pipeline" }, { label: "Entrevistas" }]}
+        breadcrumbs={[
+          { label: "Comercial", href: "/comercial/pipeline" },
+          { label: "Entrevistas" },
+        ]}
         title="Entrevistas"
         subtitle="Crie entrevistas técnicas por segmento e compartilhe um link público com o lead."
         actions={
@@ -125,7 +178,9 @@ function EntrevistasListPage() {
           />
           {escopo === "ativas" && (
             <Select value={filtroStatus} onValueChange={setFiltroStatus}>
-              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos os status</SelectItem>
                 <SelectItem value="pendente">Pendente</SelectItem>
@@ -141,20 +196,22 @@ function EntrevistasListPage() {
 
         {escopo === "lixeira" && (
           <div className="text-xs text-muted-foreground border rounded-md p-3 bg-muted/40">
-            Entrevistas na lixeira são excluídas automaticamente após <strong>30 dias</strong>.
-            Você pode restaurar a qualquer momento{canPurge ? " ou excluir definitivamente" : ""}.
+            Entrevistas na lixeira são excluídas automaticamente após <strong>30 dias</strong>. Você
+            pode restaurar a qualquer momento{canPurge ? " ou excluir definitivamente" : ""}.
           </div>
         )}
 
         {list.isLoading ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : filtered.length === 0 ? (
-          <Card><CardContent className="py-12 text-center text-muted-foreground">
-            <MessageSquareText className="mx-auto h-8 w-8 mb-2 opacity-50" />
-            {escopo === "lixeira"
-              ? "Lixeira vazia."
-              : `Nenhuma entrevista ${filtroStatus !== "todos" ? `com status ${filtroStatus}` : "por aqui ainda"}.`}
-          </CardContent></Card>
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <MessageSquareText className="mx-auto h-8 w-8 mb-2 opacity-50" />
+              {escopo === "lixeira"
+                ? "Lixeira vazia."
+                : `Nenhuma entrevista ${filtroStatus !== "todos" ? `com status ${filtroStatus}` : "por aqui ainda"}.`}
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {filtered.map((e) => (
@@ -164,18 +221,23 @@ function EntrevistasListPage() {
         )}
       </div>
 
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Nova entrevista</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Nova entrevista</DialogTitle>
+          </DialogHeader>
           <div className="space-y-3">
             <div>
               <Label>Segmento *</Label>
               <Select value={novoSeg} onValueChange={setNovoSeg}>
-                <SelectTrigger><SelectValue placeholder="Selecione o segmento" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o segmento" />
+                </SelectTrigger>
                 <SelectContent className="max-h-80">
                   {(segs.data ?? []).map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.nome_pt}</SelectItem>
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nome_pt}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -184,7 +246,9 @@ function EntrevistasListPage() {
               <div>
                 <Label>Idioma padrão</Label>
                 <Select value={idioma} onValueChange={(v) => setIdioma(v as any)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pt">🇧🇷 Português</SelectItem>
                     <SelectItem value="es">🇪🇸 Español</SelectItem>
@@ -204,12 +268,18 @@ function EntrevistasListPage() {
               </div>
               <div>
                 <Label>E-mail do lead (opcional)</Label>
-                <Input type="email" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} />
+                <Input
+                  type="email"
+                  value={leadEmail}
+                  onChange={(e) => setLeadEmail(e.target.value)}
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
             <Button
               disabled={!novoSeg || criar.isPending}
               onClick={() =>
@@ -236,7 +306,15 @@ function appOrigin(): string {
   return "https://sltkamericas.com";
 }
 
-function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "ativas" | "lixeira"; canPurge: boolean }) {
+function EntrevistaCard({
+  e,
+  escopo,
+  canPurge,
+}: {
+  e: EntrevistaRow;
+  escopo: "ativas" | "lixeira";
+  canPurge: boolean;
+}) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const brand = useBrandSettings();
@@ -265,19 +343,32 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
 
   const trashMut = useMutation({
     mutationFn: () => trashFn({ data: { id: e.id, motivo: motivo || null } }),
-    onSuccess: () => { toast.success("Entrevista movida para a lixeira."); setConfirmTrash(false); setMotivo(""); invalidate(); },
+    onSuccess: () => {
+      toast.success("Entrevista movida para a lixeira.");
+      setConfirmTrash(false);
+      setMotivo("");
+      invalidate();
+    },
     onError: (err: any) => toast.error(err?.message ?? "Falha ao mover para lixeira."),
   });
 
   const restoreMut = useMutation({
     mutationFn: () => restoreFn({ data: { id: e.id } }),
-    onSuccess: () => { toast.success("Entrevista restaurada."); invalidate(); },
+    onSuccess: () => {
+      toast.success("Entrevista restaurada.");
+      invalidate();
+    },
     onError: (err: any) => toast.error(err?.message ?? "Falha ao restaurar."),
   });
 
   const purgeMut = useMutation({
     mutationFn: () => purgeFn({ data: { id: e.id, motivo: motivo || null } }),
-    onSuccess: () => { toast.success("Entrevista excluída definitivamente."); setConfirmPurge(false); setMotivo(""); invalidate(); },
+    onSuccess: () => {
+      toast.success("Entrevista excluída definitivamente.");
+      setConfirmPurge(false);
+      setMotivo("");
+      invalidate();
+    },
     onError: (err: any) => toast.error(err?.message ?? "Falha ao excluir."),
   });
 
@@ -286,15 +377,19 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
     mutationFn: () => arquivarFn({ data: { entrevista_id: e.id, idiomas: ["pt"] } }),
     onSuccess: (r: any) => {
       if (r?.drive_ok) toast.success("PDF arquivado no Drive e na Central de Documentos.");
-      else toast.warning(`PDF registrado na Central de Documentos. Drive: ${r?.drive_error ?? "indisponível"}`);
+      else
+        toast.warning(
+          `PDF registrado na Central de Documentos. Drive: ${r?.drive_error ?? "indisponível"}`,
+        );
       qc.invalidateQueries({ queryKey: ["central-docs", "entrevistas-gerados"] });
     },
     onError: (err: any) => toast.error(err?.message ?? "Falha ao arquivar documento."),
   });
 
-
   const stopClick = (fn: () => void) => (ev: React.MouseEvent) => {
-    ev.preventDefault(); ev.stopPropagation(); fn();
+    ev.preventDefault();
+    ev.stopPropagation();
+    fn();
   };
 
   const naLixeira = escopo === "lixeira";
@@ -307,18 +402,30 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
     <>
       <Card
         className={`hover:shadow-md hover:border-primary/30 transition flex flex-col ${naLixeira ? "opacity-90" : "cursor-pointer"}`}
-        onClick={naLixeira ? undefined : () => navigate({ to: "/comercial/entrevistas/$id", params: { id: e.id } })}
+        onClick={
+          naLixeira
+            ? undefined
+            : () => navigate({ to: "/comercial/entrevistas/$id", params: { id: e.id } })
+        }
       >
         <CardContent className="p-4 space-y-3 flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="font-mono text-xs text-muted-foreground">#{e.codigo}</div>
-              <div className="font-semibold text-base leading-tight mt-0.5 truncate">{e.segmento_nome}</div>
+              <div className="font-semibold text-base leading-tight mt-0.5 truncate">
+                {e.segmento_nome}
+              </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              {naLixeira
-                ? <Badge variant="outline" className="bg-rose-100 text-rose-900 border-rose-200">Na lixeira</Badge>
-                : <Badge variant="outline" className={st.className}>{st.label}</Badge>}
+              {naLixeira ? (
+                <Badge variant="outline" className="bg-rose-100 text-rose-900 border-rose-200">
+                  Na lixeira
+                </Badge>
+              ) : (
+                <Badge variant="outline" className={st.className}>
+                  {st.label}
+                </Badge>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(ev) => ev.stopPropagation()}>
                   <Button size="icon" variant="ghost" className="h-7 w-7">
@@ -327,19 +434,28 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" onClick={(ev) => ev.stopPropagation()}>
                   {!naLixeira && (
-                    <DropdownMenuItem onSelect={() => setConfirmTrash(true)} className="text-rose-700">
+                    <DropdownMenuItem
+                      onSelect={() => setConfirmTrash(true)}
+                      className="text-rose-700"
+                    >
                       <Trash2 className="h-4 w-4 mr-2" /> Mover para lixeira
                     </DropdownMenuItem>
                   )}
                   {naLixeira && (
                     <>
-                      <DropdownMenuItem onSelect={() => restoreMut.mutate()} disabled={restoreMut.isPending}>
+                      <DropdownMenuItem
+                        onSelect={() => restoreMut.mutate()}
+                        disabled={restoreMut.isPending}
+                      >
                         <RotateCcw className="h-4 w-4 mr-2" /> Restaurar
                       </DropdownMenuItem>
                       {canPurge && (
                         <>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onSelect={() => setConfirmPurge(true)} className="text-rose-700">
+                          <DropdownMenuItem
+                            onSelect={() => setConfirmPurge(true)}
+                            className="text-rose-700"
+                          >
                             <ShieldAlert className="h-4 w-4 mr-2" /> Excluir definitivamente
                           </DropdownMenuItem>
                         </>
@@ -354,14 +470,19 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
           {(e.lead_empresa || e.lead_nome) && (
             <div className="text-sm text-muted-foreground flex items-center gap-1.5">
               <Building2 className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{[e.lead_empresa, e.lead_nome].filter(Boolean).join(" · ")}</span>
+              <span className="truncate">
+                {[e.lead_empresa, e.lead_nome].filter(Boolean).join(" · ")}
+              </span>
             </div>
           )}
 
           {naLixeira ? (
             <div className="rounded-md border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-900 space-y-1">
               <div>
-                Exclusão automática em <strong>{diasRestantes ?? "—"} dia{diasRestantes === 1 ? "" : "s"}</strong>
+                Exclusão automática em{" "}
+                <strong>
+                  {diasRestantes ?? "—"} dia{diasRestantes === 1 ? "" : "s"}
+                </strong>
                 {purgeDate && <> ({purgeDate.toLocaleDateString("pt-BR")})</>}.
               </div>
               {e.deleted_reason && <div className="italic opacity-80">"{e.deleted_reason}"</div>}
@@ -378,7 +499,7 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
                     Mensagem para colar
                   </span>
                   <div className="flex gap-1">
-                    {(["pt","es","en"] as const).map((l) => (
+                    {(["pt", "es", "en"] as const).map((l) => (
                       <button
                         key={l}
                         type="button"
@@ -398,27 +519,46 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
                 />
                 <div className="flex gap-1.5 flex-wrap">
                   <Button
-                    size="sm" variant="outline" className="h-7 text-xs flex-1"
-                    onClick={stopClick(() => { navigator.clipboard.writeText(msg); toast.success("Mensagem copiada."); })}
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs flex-1"
+                    onClick={stopClick(() => {
+                      navigator.clipboard.writeText(msg);
+                      toast.success("Mensagem copiada.");
+                    })}
                   >
                     <Copy className="h-3 w-3 mr-1" /> Copiar
                   </Button>
                   <Button
-                    size="sm" variant="outline" className="h-7 text-xs"
-                    onClick={stopClick(() => { navigator.clipboard.writeText(link); toast.success("Link copiado."); })}
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={stopClick(() => {
+                      navigator.clipboard.writeText(link);
+                      toast.success("Link copiado.");
+                    })}
                     title="Copiar apenas o link"
                   >
                     <Link2 className="h-3 w-3" />
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" asChild onClick={(ev) => ev.stopPropagation()}>
-                    <a href={link} target="_blank" rel="noreferrer"><ExternalLink className="h-3 w-3" /></a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    asChild
+                    onClick={(ev) => ev.stopPropagation()}
+                  >
+                    <a href={link} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </Button>
                 </div>
               </div>
 
               {e.status === "respondida" && (
                 <Button
-                  size="sm" className="w-full"
+                  size="sm"
+                  className="w-full"
                   onClick={stopClick(() => setPreviewOpen(true))}
                 >
                   <FileDown className="h-4 w-4 mr-1.5" />
@@ -428,7 +568,9 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
 
               {e.status === "respondida" && (
                 <Button
-                  size="sm" variant="outline" className="w-full"
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
                   disabled={arquivarMut.isPending}
                   onClick={stopClick(() => arquivarMut.mutate())}
                   title="Gera o PDF e arquiva na Central de Documentos + Google Drive"
@@ -441,8 +583,13 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
           )}
 
           <div className="text-xs text-muted-foreground flex items-center gap-3 pt-2 border-t mt-auto">
-            <span className="flex items-center gap-1"><User2 className="h-3 w-3" /> {e.criador_nome ?? e.criador_email ?? "—"}</span>
-            <span className="flex items-center gap-1"><CalendarClock className="h-3 w-3" /> {new Date(e.created_at).toLocaleDateString("pt-BR")}</span>
+            <span className="flex items-center gap-1">
+              <User2 className="h-3 w-3" /> {e.criador_nome ?? e.criador_email ?? "—"}
+            </span>
+            <span className="flex items-center gap-1">
+              <CalendarClock className="h-3 w-3" />{" "}
+              {new Date(e.created_at).toLocaleDateString("pt-BR")}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -452,17 +599,27 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
           <DialogHeader>
             <DialogTitle>Mover para a lixeira</DialogTitle>
             <DialogDescription>
-              A entrevista <strong>#{e.codigo}</strong> ficará na lixeira por 30 dias antes da exclusão automática.
-              Você pode restaurá-la a qualquer momento nesse período.
+              A entrevista <strong>#{e.codigo}</strong> ficará na lixeira por 30 dias antes da
+              exclusão automática. Você pode restaurá-la a qualquer momento nesse período.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label>Motivo (opcional)</Label>
-            <Textarea value={motivo} onChange={(ev) => setMotivo(ev.target.value)} placeholder="Ex.: duplicada, teste, lead desqualificado…" />
+            <Textarea
+              value={motivo}
+              onChange={(ev) => setMotivo(ev.target.value)}
+              placeholder="Ex.: duplicada, teste, lead desqualificado…"
+            />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmTrash(false)}>Cancelar</Button>
-            <Button variant="destructive" disabled={trashMut.isPending} onClick={() => trashMut.mutate()}>
+            <Button variant="outline" onClick={() => setConfirmTrash(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={trashMut.isPending}
+              onClick={() => trashMut.mutate()}
+            >
               {trashMut.isPending ? "Enviando…" : "Enviar para lixeira"}
             </Button>
           </DialogFooter>
@@ -476,8 +633,9 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
               <ShieldAlert className="h-5 w-5" /> Excluir definitivamente
             </DialogTitle>
             <DialogDescription>
-              Esta ação é <strong>irreversível</strong>. Todas as respostas e anexos de <strong>#{e.codigo}</strong> serão apagados.
-              A ação ficará registrada na auditoria com seu usuário.
+              Esta ação é <strong>irreversível</strong>. Todas as respostas e anexos de{" "}
+              <strong>#{e.codigo}</strong> serão apagados. A ação ficará registrada na auditoria com
+              seu usuário.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
@@ -485,8 +643,14 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
             <Textarea value={motivo} onChange={(ev) => setMotivo(ev.target.value)} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmPurge(false)}>Cancelar</Button>
-            <Button variant="destructive" disabled={purgeMut.isPending} onClick={() => purgeMut.mutate()}>
+            <Button variant="outline" onClick={() => setConfirmPurge(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={purgeMut.isPending}
+              onClick={() => purgeMut.mutate()}
+            >
               {purgeMut.isPending ? "Excluindo…" : "Excluir definitivamente"}
             </Button>
           </DialogFooter>
@@ -520,16 +684,27 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
             <div className="flex items-center justify-between gap-3">
               <div>
                 <DialogTitle>Prévia da entrevista #{e.codigo}</DialogTitle>
-                <DialogDescription>Confira o layout com quebra de páginas antes de imprimir ou salvar como PDF.</DialogDescription>
+                <DialogDescription>
+                  Confira o layout com quebra de páginas antes de imprimir ou salvar como PDF.
+                </DialogDescription>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => setPreviewOpen(false)}>
                   <X className="mr-1.5 h-4 w-4" /> Fechar
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => window.print()} disabled={!preview.data || preview.isError}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.print()}
+                  disabled={!preview.data || preview.isError}
+                >
                   <FileDown className="mr-1.5 h-4 w-4" /> Salvar como PDF
                 </Button>
-                <Button size="sm" onClick={() => window.print()} disabled={!preview.data || preview.isError}>
+                <Button
+                  size="sm"
+                  onClick={() => window.print()}
+                  disabled={!preview.data || preview.isError}
+                >
                   <Printer className="mr-1.5 h-4 w-4" /> Imprimir
                 </Button>
               </div>
@@ -546,7 +721,9 @@ function EntrevistaCard({ e, escopo, canPurge }: { e: EntrevistaRow; escopo: "at
                 <ShieldAlert className="h-6 w-6" />
                 <div className="font-semibold">Não foi possível carregar a prévia</div>
                 <div>{(preview.error as any)?.message ?? "Tente fechar e abrir novamente."}</div>
-                <Button size="sm" variant="outline" onClick={() => preview.refetch()}>Tentar novamente</Button>
+                <Button size="sm" variant="outline" onClick={() => preview.refetch()}>
+                  Tentar novamente
+                </Button>
               </div>
             ) : preview.data ? (
               <InterviewPreviewDocument entrevista={preview.data as any} brand={brand.settings} />
@@ -600,7 +777,9 @@ function InterviewPreviewDocument({ entrevista, brand }: { entrevista: any; bran
             <>
               <div className="mb-3 flex items-start justify-between gap-4">
                 <div className="flex flex-1 items-start gap-3">
-                  {logo ? <img src={logo} alt="Logomarca" className="h-14 w-auto object-contain" /> : null}
+                  {logo ? (
+                    <img src={logo} alt="Logomarca" className="h-14 w-auto object-contain" />
+                  ) : null}
                   <div>
                     <h1 className="m-0 text-[22px] font-bold leading-tight">Entrevista Técnica</h1>
                     <div className="mt-1 leading-tight">
@@ -615,19 +794,42 @@ function InterviewPreviewDocument({ entrevista, brand }: { entrevista: any; bran
                   <div>Respondida: {fmtDateTime(entrevista.respondida_em)}</div>
                 </div>
               </div>
-              <div className="mb-2 bg-muted px-2 py-1 text-center text-[13px] font-bold">Entrevista nº {entrevista.codigo}</div>
-              <div className="mb-1 bg-muted/70 px-2 py-1 text-center font-semibold">Identificação</div>
-              <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-0.5">
-                <div><b>Código:</b> #{entrevista.codigo}</div>
-                <div><b>Segmento:</b> {entrevista.segmento?.nome_pt ?? "—"}</div>
-                <div><b>Lead:</b> {entrevista.lead_nome ?? "—"}</div>
-                <div><b>Empresa:</b> {entrevista.lead_empresa ?? "—"}</div>
-                <div><b>E-mail:</b> {entrevista.lead_email ?? "—"}</div>
-                <div><b>Pilar (criador):</b> {entrevista.criador?.full_name || entrevista.criador?.email || "—"}</div>
-                <div><b>Criada em:</b> {fmtDateTime(entrevista.created_at)}</div>
-                <div><b>Respondida em:</b> {fmtDateTime(entrevista.respondida_em)}</div>
+              <div className="mb-2 bg-muted px-2 py-1 text-center text-[13px] font-bold">
+                Entrevista nº {entrevista.codigo}
               </div>
-              <div className="mb-2 mt-1 border-b-2 border-primary pb-1 text-[12px] font-bold">Respostas</div>
+              <div className="mb-1 bg-muted/70 px-2 py-1 text-center font-semibold">
+                Identificação
+              </div>
+              <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-0.5">
+                <div>
+                  <b>Código:</b> #{entrevista.codigo}
+                </div>
+                <div>
+                  <b>Segmento:</b> {entrevista.segmento?.nome_pt ?? "—"}
+                </div>
+                <div>
+                  <b>Lead:</b> {entrevista.lead_nome ?? "—"}
+                </div>
+                <div>
+                  <b>Empresa:</b> {entrevista.lead_empresa ?? "—"}
+                </div>
+                <div>
+                  <b>E-mail:</b> {entrevista.lead_email ?? "—"}
+                </div>
+                <div>
+                  <b>Pilar (criador):</b>{" "}
+                  {entrevista.criador?.full_name || entrevista.criador?.email || "—"}
+                </div>
+                <div>
+                  <b>Criada em:</b> {fmtDateTime(entrevista.created_at)}
+                </div>
+                <div>
+                  <b>Respondida em:</b> {fmtDateTime(entrevista.respondida_em)}
+                </div>
+              </div>
+              <div className="mb-2 mt-1 border-b-2 border-primary pb-1 text-[12px] font-bold">
+                Respostas
+              </div>
             </>
           ) : (
             <div className="mb-2 flex items-center justify-between border-b pb-1 text-[10px] text-muted-foreground">
@@ -649,12 +851,25 @@ function InterviewPreviewDocument({ entrevista, brand }: { entrevista: any; bran
                 const hasText = !!(r.valor_text && String(r.valor_text).trim().length);
                 const hasAny = opts.length > 0 || hasText;
                 return (
-                  <div key={`${r.numero}-${r.pergunta_id}`} className="interview-qblock mb-2 rounded border bg-muted/30 p-2">
-                    <div className="mb-0.5 text-[9px] uppercase text-muted-foreground">Pergunta {r.numero}</div>
+                  <div
+                    key={`${r.numero}-${r.pergunta_id}`}
+                    className="interview-qblock mb-2 rounded border bg-muted/30 p-2"
+                  >
+                    <div className="mb-0.5 text-[9px] uppercase text-muted-foreground">
+                      Pergunta {r.numero}
+                    </div>
                     <div className="mb-1 font-bold">{r.enunciado}</div>
-                    {opts.map((o, i) => <div key={i} className="pl-3">• {o}</div>)}
-                    {hasText ? <div className="mt-1 whitespace-pre-wrap">{r.valor_text}</div> : null}
-                    {!hasAny ? <div className="italic text-muted-foreground">— não respondida —</div> : null}
+                    {opts.map((o, i) => (
+                      <div key={i} className="pl-3">
+                        • {o}
+                      </div>
+                    ))}
+                    {hasText ? (
+                      <div className="mt-1 whitespace-pre-wrap">{r.valor_text}</div>
+                    ) : null}
+                    {!hasAny ? (
+                      <div className="italic text-muted-foreground">— não respondida —</div>
+                    ) : null}
                     {r.descricao_extra ? (
                       <div className="mt-1 border-l-2 border-primary pl-2 text-[10px] text-muted-foreground">
                         Observação: {r.descricao_extra}
@@ -667,8 +882,12 @@ function InterviewPreviewDocument({ entrevista, brand }: { entrevista: any; bran
           </div>
 
           <div className="mt-2 flex items-center justify-between border-t pt-1 text-[10px] text-muted-foreground">
-            <span>{empresa} · {codigoDoc}</span>
-            <span className="font-semibold text-foreground">Pág. {idx + 1} de {total}</span>
+            <span>
+              {empresa} · {codigoDoc}
+            </span>
+            <span className="font-semibold text-foreground">
+              Pág. {idx + 1} de {total}
+            </span>
           </div>
 
           <div className="interview-page-indicator pointer-events-none absolute right-3 top-3 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -679,4 +898,3 @@ function InterviewPreviewDocument({ entrevista, brand }: { entrevista: any; bran
     </div>
   );
 }
-

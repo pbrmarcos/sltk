@@ -3,46 +3,92 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import ExcelJS from "exceljs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { applyEtapaTemplateBulk, DISCIPLINAS, PRIORIDADES, DISCIPLINAS_PROJETO } from "@/lib/etapa-templates.functions";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  applyEtapaTemplateBulk,
+  DISCIPLINAS,
+  PRIORIDADES,
+  DISCIPLINAS_PROJETO,
+} from "@/lib/etapa-templates.functions";
 import { Upload, FileSpreadsheet, CheckCircle2 } from "lucide-react";
 
-const ROLES = ["engineer", "manager", "assembly", "production", "purchasing", "sales", "field", "admin"];
+const ROLES = [
+  "engineer",
+  "manager",
+  "assembly",
+  "production",
+  "purchasing",
+  "sales",
+  "field",
+  "admin",
+];
 const ABAS_EQP = ["planejamento", "engenharia", "producao", "qualidade"];
 
 const ETAPAS_COLS = [
-  "codigo", "disciplina", "ordem", "titulo", "descricao", "prioridade",
-  "duracao_h", "responsavel_role", "entregavel", "requer_anexo", "checklist",
+  "codigo",
+  "disciplina",
+  "ordem",
+  "titulo",
+  "descricao",
+  "prioridade",
+  "duracao_h",
+  "responsavel_role",
+  "entregavel",
+  "requer_anexo",
+  "checklist",
 ];
 const BOM_COLS = [
-  "codigo", "disciplina_projeto", "equipamento_disciplina", "ordem", "descricao",
-  "quantidade", "unidade", "criticidade", "part_number", "fabricante", "link", "observacoes",
+  "codigo",
+  "disciplina_projeto",
+  "equipamento_disciplina",
+  "ordem",
+  "descricao",
+  "quantidade",
+  "unidade",
+  "criticidade",
+  "part_number",
+  "fabricante",
+  "link",
+  "observacoes",
 ];
 
 function addValidation(ws: ExcelJS.Worksheet, col: string, values: readonly string[]) {
   // Excel data-validation via list (comma-separated, no external range)
   const range = `${col}2:${col}5000`;
-  ((ws as any).dataValidations).add(range, {
+  (ws as any).dataValidations.add(range, {
     type: "list",
     allowBlank: true,
     formulae: [`"${values.join(",")}"`],
   });
 }
 
-export async function downloadTemplateXlsx(
-  tpl: any,
-  itens: any[],
-  bom: any[],
-) {
+export async function downloadTemplateXlsx(tpl: any, itens: any[], bom: any[]) {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Solutek Hub";
   wb.created = new Date();
 
   // Etapas
   const wsE = wb.addWorksheet("Etapas");
-  wsE.columns = ETAPAS_COLS.map((k) => ({ header: k, key: k, width: k === "titulo" || k === "descricao" || k === "entregavel" ? 32 : 16 }));
+  wsE.columns = ETAPAS_COLS.map((k) => ({
+    header: k,
+    key: k,
+    width: k === "titulo" || k === "descricao" || k === "entregavel" ? 32 : 16,
+  }));
   wsE.getRow(1).font = { bold: true };
   wsE.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEEEEEE" } };
   for (const it of itens) {
@@ -57,7 +103,9 @@ export async function downloadTemplateXlsx(
       responsavel_role: it.responsavel_role ?? "",
       entregavel: it.entregavel ?? "",
       requer_anexo: it.requer_anexo ? "sim" : "nao",
-      checklist: Array.isArray(it.checklist) ? it.checklist.map((c: any) => c.texto).join(" | ") : "",
+      checklist: Array.isArray(it.checklist)
+        ? it.checklist.map((c: any) => c.texto).join(" | ")
+        : "",
     });
   }
   addValidation(wsE, "B", DISCIPLINAS);
@@ -67,7 +115,11 @@ export async function downloadTemplateXlsx(
 
   // BOM
   const wsB = wb.addWorksheet("BOM");
-  wsB.columns = BOM_COLS.map((k) => ({ header: k, key: k, width: k === "descricao" || k === "observacoes" ? 32 : 16 }));
+  wsB.columns = BOM_COLS.map((k) => ({
+    header: k,
+    key: k,
+    width: k === "descricao" || k === "observacoes" ? 32 : 16,
+  }));
   wsB.getRow(1).font = { bold: true };
   wsB.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEEEEEE" } };
   for (const b of bom) {
@@ -117,7 +169,9 @@ export async function downloadTemplateXlsx(
   wsI.getRow(1).font = { bold: true, size: 13 };
 
   const buf = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const blob = new Blob([buf], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -146,7 +200,11 @@ function normalizeItem(r: any, byCode: Map<string, any>): any {
     entregavel: r.entregavel ? String(r.entregavel) : null,
     requerAnexo: String(r.requer_anexo || "").toLowerCase() === "sim",
     checklist: r.checklist
-      ? String(r.checklist).split("|").map((s: string) => s.trim()).filter(Boolean).map((t: string) => ({ texto: t }))
+      ? String(r.checklist)
+          .split("|")
+          .map((s: string) => s.trim())
+          .filter(Boolean)
+          .map((t: string) => ({ texto: t }))
       : [],
   };
 }
@@ -246,7 +304,9 @@ export function ExcelSyncDialog({
     const wsB = wb.getWorksheet("BOM");
     const rawE = sheetToObjects(wsE, ETAPAS_COLS);
     const rawB = sheetToObjects(wsB, BOM_COLS);
-    const itemByCode = new Map<string, any>(itens.filter((i) => i.codigo).map((i) => [i.codigo, i]));
+    const itemByCode = new Map<string, any>(
+      itens.filter((i) => i.codigo).map((i) => [i.codigo, i]),
+    );
     const bomByCode = new Map<string, any>(bom.filter((b) => b.codigo).map((b) => [b.codigo, b]));
     const normE = rawE.map((r) => normalizeItem(r, itemByCode));
     const normB = rawB.map((r) => normalizeBom(r, bomByCode));
@@ -363,8 +423,8 @@ export function ExcelSyncDialog({
             <div className="flex items-center gap-2 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
               <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               <span>
-                Nova versão <b>v{result.versao}</b> publicada — {result.itensInseridos} etapas novas,{" "}
-                {result.itensAtualizados} atualizadas, {result.bomInseridos} BOM novos,{" "}
+                Nova versão <b>v{result.versao}</b> publicada — {result.itensInseridos} etapas
+                novas, {result.itensAtualizados} atualizadas, {result.bomInseridos} BOM novos,{" "}
                 {result.bomAtualizados} BOM atualizados, {result.removidos} removidos.
               </span>
             </div>
@@ -372,10 +432,16 @@ export function ExcelSyncDialog({
         )}
 
         <DialogFooter>
-          {step === "upload" && <Button variant="ghost" onClick={onClose}>Fechar</Button>}
+          {step === "upload" && (
+            <Button variant="ghost" onClick={onClose}>
+              Fechar
+            </Button>
+          )}
           {step === "preview" && (
             <>
-              <Button variant="ghost" onClick={() => setStep("upload")}>Voltar</Button>
+              <Button variant="ghost" onClick={() => setStep("upload")}>
+                Voltar
+              </Button>
               <Button onClick={() => mut.mutate()} disabled={mut.isPending}>
                 <FileSpreadsheet className="mr-1 h-4 w-4" />
                 {mut.isPending ? "Aplicando..." : "Aplicar mudanças"}
@@ -427,8 +493,8 @@ function DiffSection({
                         (d.kind === "novo"
                           ? "bg-emerald-500/15 text-emerald-700"
                           : d.kind === "alterado"
-                          ? "bg-amber-500/15 text-amber-700"
-                          : "bg-red-500/15 text-red-700")
+                            ? "bg-amber-500/15 text-amber-700"
+                            : "bg-red-500/15 text-red-700")
                       }
                     >
                       {d.kind}
@@ -440,9 +506,13 @@ function DiffSection({
                     const afterVal = (d.row as any)[f];
                     return (
                       <TableCell key={f} className="text-xs">
-                        {d.kind === "alterado" && beforeVal !== undefined && String(beforeVal) !== String(afterVal) ? (
+                        {d.kind === "alterado" &&
+                        beforeVal !== undefined &&
+                        String(beforeVal) !== String(afterVal) ? (
                           <div>
-                            <div className="text-muted-foreground line-through">{String(beforeVal ?? "")}</div>
+                            <div className="text-muted-foreground line-through">
+                              {String(beforeVal ?? "")}
+                            </div>
                             <div className="font-medium">{String(afterVal ?? "")}</div>
                           </div>
                         ) : (

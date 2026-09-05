@@ -77,8 +77,8 @@ export const listSATTemplates = createServerFn({ method: "POST" })
     if (error) throw friendlyDbError(error);
 
     const ids = (tpls ?? []).map((t) => t.id);
-    let secCounts = new Map<string, number>();
-    let itemCounts = new Map<string, number>();
+    const secCounts = new Map<string, number>();
+    const itemCounts = new Map<string, number>();
 
     if (ids.length > 0) {
       const { data: secs } = await context.supabase
@@ -88,10 +88,7 @@ export const listSATTemplates = createServerFn({ method: "POST" })
       const secIdToTpl = new Map<string, string>();
       for (const s of secs ?? []) {
         secIdToTpl.set(s.id as string, s.template_id as string);
-        secCounts.set(
-          s.template_id as string,
-          (secCounts.get(s.template_id as string) ?? 0) + 1,
-        );
+        secCounts.set(s.template_id as string, (secCounts.get(s.template_id as string) ?? 0) + 1);
       }
       const secIds = (secs ?? []).map((s) => s.id as string);
       if (secIds.length > 0) {
@@ -121,9 +118,7 @@ export const getSATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => getInput.parse(input))
   .handler(async ({ data, context }): Promise<SATTemplateDetalhe | null> => {
-    let q = context.supabase
-      .from("sat_template")
-      .select("id, nome, versao, ativo, descricao");
+    let q = context.supabase.from("sat_template").select("id, nome, versao, ativo, descricao");
     if (data.id) q = q.eq("id", data.id);
     else if (data.ativo) q = q.eq("ativo", true);
     else throw new Error("Informe id ou ativo");
@@ -153,7 +148,7 @@ export const getSATTemplate = createServerFn({ method: "POST" })
       arr.push({
         ...(it as unknown as SATTemplateItem),
         opcoes: Array.isArray((it as { opcoes: unknown }).opcoes)
-          ? ((it as { opcoes: string[] }).opcoes)
+          ? (it as { opcoes: string[] }).opcoes
           : [],
       });
       itemsBySec.set(it.secao_id as string, arr);
@@ -229,9 +224,9 @@ export const novaVersaoSATTemplate = createServerFn({ method: "POST" })
           .eq("secao_id", s.id as string)
           .order("ordem");
         if (items && items.length > 0) {
-          await context.supabase.from("sat_template_item").insert(
-            items.map((it) => ({ ...(it as object), secao_id: novaSecId })) as never,
-          );
+          await context.supabase
+            .from("sat_template_item")
+            .insert(items.map((it) => ({ ...(it as object), secao_id: novaSecId })) as never);
         }
       }
     }
@@ -341,10 +336,7 @@ export const deleteSATSecao = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteSecaoInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
-    const { error } = await context.supabase
-      .from("sat_template_secao")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("sat_template_secao").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -399,10 +391,7 @@ export const deleteSATItem = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteItemInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
-    const { error } = await context.supabase
-      .from("sat_template_item")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("sat_template_item").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });

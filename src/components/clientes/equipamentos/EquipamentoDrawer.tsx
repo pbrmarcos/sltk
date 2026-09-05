@@ -175,13 +175,17 @@ export function EquipamentoDrawer({
                 {equipamento.responsavel_engenharia_id && (
                   <>
                     <span className="text-muted-foreground">·</span>
-                    <span className="inline-flex items-center gap-1"><User className="h-3 w-3" /> Engenharia atribuída</span>
+                    <span className="inline-flex items-center gap-1">
+                      <User className="h-3 w-3" /> Engenharia atribuída
+                    </span>
                   </>
                 )}
                 {equipamento.responsavel_automacao_id && (
                   <>
                     <span className="text-muted-foreground">·</span>
-                    <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> Automação atribuída</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Cpu className="h-3 w-3" /> Automação atribuída
+                    </span>
                   </>
                 )}
               </DialogDescription>
@@ -192,7 +196,9 @@ export function EquipamentoDrawer({
                 <div className="mb-1 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
                   <ClipboardCheck className="h-3.5 w-3.5" /> Resumo do equipamento
                 </div>
-                <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed">{equipamento.resumo}</p>
+                <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed">
+                  {equipamento.resumo}
+                </p>
               </div>
             )}
           </div>
@@ -211,43 +217,42 @@ export function EquipamentoDrawer({
                 <TimelinePanel equipamentoId={equipamento.id} />
               </div>
             ) : (
-            <Tabs value={tab} onValueChange={(v) => setTab(v as DrawerTab)} className="mt-4">
-              <TabsList className="grid w-full grid-cols-8">
-                <TabsTrigger value="visao">Visão</TabsTrigger>
-                <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
-                <TabsTrigger value="etp">ETP</TabsTrigger>
-                <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="engenharia">Engenharia</TabsTrigger>
-                <TabsTrigger value="producao">Automação</TabsTrigger>
-                <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
-                <TabsTrigger value="pos_venda">Pós-venda</TabsTrigger>
-              </TabsList>
+              <Tabs value={tab} onValueChange={(v) => setTab(v as DrawerTab)} className="mt-4">
+                <TabsList className="grid w-full grid-cols-8">
+                  <TabsTrigger value="visao">Visão</TabsTrigger>
+                  <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
+                  <TabsTrigger value="etp">ETP</TabsTrigger>
+                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                  <TabsTrigger value="engenharia">Engenharia</TabsTrigger>
+                  <TabsTrigger value="producao">Automação</TabsTrigger>
+                  <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
+                  <TabsTrigger value="pos_venda">Pós-venda</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="etp" className="mt-4">
-                <EtpEquipamentoPanel equipamentoId={equipamento.id} />
-              </TabsContent>
-
-
-              <TabsContent value="visao" className="mt-4 space-y-3">
-                <BomSummaryCard equipamentoId={equipamento.id} />
-                <DataGrid eqp={equipamento} />
-              </TabsContent>
-
-              <TabsContent value="planejamento" className="mt-4">
-                <DisciplinaTab equipamentoId={equipamento.id} disciplina="planejamento" />
-              </TabsContent>
-
-              <TabsContent value="timeline" className="mt-4">
-                <TimelinePanel equipamentoId={equipamento.id} />
-              </TabsContent>
-
-              {(["engenharia", "producao", "qualidade", "pos_venda"] as const).map((area) => (
-                <TabsContent key={area} value={area} className="mt-4 space-y-4">
-                  <DisciplinaTab equipamentoId={equipamento.id} disciplina={area} />
-                  <DocsArea area={area} equipamentoId={equipamento.id} />
+                <TabsContent value="etp" className="mt-4">
+                  <EtpEquipamentoPanel equipamentoId={equipamento.id} />
                 </TabsContent>
-              ))}
-            </Tabs>
+
+                <TabsContent value="visao" className="mt-4 space-y-3">
+                  <BomSummaryCard equipamentoId={equipamento.id} />
+                  <DataGrid eqp={equipamento} />
+                </TabsContent>
+
+                <TabsContent value="planejamento" className="mt-4">
+                  <DisciplinaTab equipamentoId={equipamento.id} disciplina="planejamento" />
+                </TabsContent>
+
+                <TabsContent value="timeline" className="mt-4">
+                  <TimelinePanel equipamentoId={equipamento.id} />
+                </TabsContent>
+
+                {(["engenharia", "producao", "qualidade", "pos_venda"] as const).map((area) => (
+                  <TabsContent key={area} value={area} className="mt-4 space-y-4">
+                    <DisciplinaTab equipamentoId={equipamento.id} disciplina={area} />
+                    <DocsArea area={area} equipamentoId={equipamento.id} />
+                  </TabsContent>
+                ))}
+              </Tabs>
             )}
           </div>
         </div>
@@ -255,7 +260,6 @@ export function EquipamentoDrawer({
     </Dialog>
   );
 }
-
 
 function TimelinePanel({ equipamentoId }: { equipamentoId: string }) {
   const eventsQ = useQuery(equipamentoTimelineQueryOptions(equipamentoId));
@@ -296,13 +300,18 @@ function TimelinePanel({ equipamentoId }: { equipamentoId: string }) {
           <ol className="relative space-y-2 border-l border-border pl-5">
             {etapas.map((e) => (
               <li key={e.id} className="relative">
-                <span className={cn(
-                  "absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-background",
-                  statusDot[e.status] ?? "bg-muted-foreground/60",
-                )} />
+                <span
+                  className={cn(
+                    "absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-background",
+                    statusDot[e.status] ?? "bg-muted-foreground/60",
+                  )}
+                />
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[12.5px] font-medium">{e.titulo}</span>
-                  <Badge variant="outline" className="h-4 border-border bg-muted/40 px-1 text-[9.5px] font-normal">
+                  <Badge
+                    variant="outline"
+                    className="h-4 border-border bg-muted/40 px-1 text-[9.5px] font-normal"
+                  >
                     {discLabel[e.disciplina] ?? e.disciplina}
                   </Badge>
                 </div>
@@ -324,14 +333,20 @@ function TimelinePanel({ equipamentoId }: { equipamentoId: string }) {
           <ol className="relative space-y-3 border-l border-border pl-5">
             {events.map((e, i) => (
               <li key={i} className="relative">
-                <span className={cn(
-                  "absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-background",
-                  e.kind.startsWith("planej_ok") ? "bg-emerald-500" :
-                  e.kind.startsWith("etp_aprov") ? "bg-emerald-500" :
-                  e.kind.startsWith("audit_insert") ? "bg-sky-500" :
-                  e.kind.startsWith("audit_delete") ? "bg-rose-500" :
-                  "bg-muted-foreground/60",
-                )} />
+                <span
+                  className={cn(
+                    "absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-background",
+                    e.kind.startsWith("planej_ok")
+                      ? "bg-emerald-500"
+                      : e.kind.startsWith("etp_aprov")
+                        ? "bg-emerald-500"
+                        : e.kind.startsWith("audit_insert")
+                          ? "bg-sky-500"
+                          : e.kind.startsWith("audit_delete")
+                            ? "bg-rose-500"
+                            : "bg-muted-foreground/60",
+                  )}
+                />
                 <div className="flex items-center gap-2">
                   <History className="h-3.5 w-3.5 text-muted-foreground" />
                   <div className="text-[12.5px] font-medium">{e.titulo}</div>
@@ -339,7 +354,9 @@ function TimelinePanel({ equipamentoId }: { equipamentoId: string }) {
                 <div className="text-[11px] text-muted-foreground">
                   {fmtDateTime(e.at)} {e.autor ? `· ${e.autor}` : ""}
                 </div>
-                {e.detalhe && <div className="mt-0.5 text-[11px] text-muted-foreground">{e.detalhe}</div>}
+                {e.detalhe && (
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">{e.detalhe}</div>
+                )}
               </li>
             ))}
           </ol>
@@ -358,7 +375,9 @@ function TimelinePanel({ equipamentoId }: { equipamentoId: string }) {
 function TimeCard({ eqp }: { eqp: EquipamentoRow }) {
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4 text-[12.5px]">
-      <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Time do equipamento</div>
+      <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+        Time do equipamento
+      </div>
       <div className="grid gap-2 sm:grid-cols-2">
         <div className="inline-flex items-center gap-1.5">
           <User className="h-3.5 w-3.5" /> Engenharia:{" "}
@@ -397,7 +416,9 @@ function DataGrid({ eqp }: { eqp: EquipamentoRow }) {
       </div>
       {eqp.observacoes && (
         <div className="rounded-lg border border-border p-4">
-          <div className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">Observações</div>
+          <div className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+            Observações
+          </div>
           <div className="whitespace-pre-wrap text-[12.5px]">{eqp.observacoes}</div>
         </div>
       )}
@@ -453,8 +474,12 @@ function DocsArea({ area, equipamentoId }: { area: Area; equipamentoId: string }
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate font-medium">{d.nome_final}</span>
-                  <Badge variant="outline" className="border-border bg-muted/40 text-[10px] font-normal">
-                    {EQUIPAMENTO_DOC_CATEGORIA_LABEL[d.categoria as EquipamentoDocCategoria] ?? d.categoria}
+                  <Badge
+                    variant="outline"
+                    className="border-border bg-muted/40 text-[10px] font-normal"
+                  >
+                    {EQUIPAMENTO_DOC_CATEGORIA_LABEL[d.categoria as EquipamentoDocCategoria] ??
+                      d.categoria}
                   </Badge>
                   {d.versao && (
                     <Badge variant="outline" className="border-border text-[10px] font-normal">
@@ -569,24 +594,39 @@ function UploadDocumentoDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onClick={guardedClose}>
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+      onClick={guardedClose}
+    >
       <div
         className="w-full max-w-md rounded-xl border border-border bg-card p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[15px] font-semibold">Adicionar documento</h2>
-          <button onClick={guardedClose} className="rounded p-1 text-muted-foreground hover:bg-muted">✕</button>
+          <button
+            onClick={guardedClose}
+            className="rounded p-1 text-muted-foreground hover:bg-muted"
+          >
+            ✕
+          </button>
         </div>
 
         <div className="space-y-3 text-[12.5px]">
           <label className="space-y-1 block">
             <span className="text-muted-foreground">Categoria</span>
-            <Select value={categoria} onValueChange={(v) => setCategoria(v as EquipamentoDocCategoria)}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <Select
+              value={categoria}
+              onValueChange={(v) => setCategoria(v as EquipamentoDocCategoria)}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {areaCategorias.map((c) => (
-                  <SelectItem key={c} value={c}>{EQUIPAMENTO_DOC_CATEGORIA_LABEL[c]}</SelectItem>
+                  <SelectItem key={c} value={c}>
+                    {EQUIPAMENTO_DOC_CATEGORIA_LABEL[c]}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -612,24 +652,43 @@ function UploadDocumentoDialog({
 
           <label className="space-y-1 block">
             <span className="text-muted-foreground">Nome do arquivo</span>
-            <Input value={chosenName} onChange={(e) => setChosenName(e.target.value)} placeholder="manual-mecanico-rev-a" />
+            <Input
+              value={chosenName}
+              onChange={(e) => setChosenName(e.target.value)}
+              placeholder="manual-mecanico-rev-a"
+            />
           </label>
 
           <label className="space-y-1 block">
             <span className="text-muted-foreground">Versão (opcional)</span>
-            <Input value={versao} onChange={(e) => setVersao(e.target.value)} placeholder="Rev. A" />
+            <Input
+              value={versao}
+              onChange={(e) => setVersao(e.target.value)}
+              placeholder="Rev. A"
+            />
           </label>
 
           <label className="space-y-1 block">
             <span className="text-muted-foreground">Observações (opcional)</span>
-            <Textarea rows={2} value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
+            <Textarea
+              rows={2}
+              value={observacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+            />
           </label>
         </div>
 
         <div className="mt-4 flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={guardedClose} disabled={busy}>Cancelar</Button>
+          <Button variant="outline" size="sm" onClick={guardedClose} disabled={busy}>
+            Cancelar
+          </Button>
           <Button size="sm" disabled={busy || !file} onClick={onUpload}>
-            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />} Enviar
+            {busy ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}{" "}
+            Enviar
           </Button>
         </div>
       </div>

@@ -46,7 +46,12 @@ function HHPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Engenharia" }, { label: "Planejamento" }, { label: "H/H" }]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Engenharia" },
+          { label: "Planejamento" },
+          { label: "H/H" },
+        ]}
         title="Planejamento"
         subtitle="Consolidado mecânico e elétrico por equipamento. Estimado vem das etapas; consumido vem dos projetos."
       />
@@ -57,18 +62,32 @@ function HHPage() {
           className="h-9 max-w-md"
           placeholder="Buscar por código, equipamento ou cliente…"
           value={q}
-          onChange={(e) => { setQ(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(1);
+          }}
         />
         <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
           <input
             type="checkbox"
             checked={onlyWithEtapas}
-            onChange={(e) => { setOnlyWithEtapas(e.target.checked); setPage(1); }}
+            onChange={(e) => {
+              setOnlyWithEtapas(e.target.checked);
+              setPage(1);
+            }}
           />
           Somente com etapas cadastradas
         </label>
         {(q || onlyWithEtapas) && (
-          <Button variant="ghost" size="sm" onClick={() => { setQ(""); setOnlyWithEtapas(false); setPage(1); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setQ("");
+              setOnlyWithEtapas(false);
+              setPage(1);
+            }}
+          >
             Limpar filtros
           </Button>
         )}
@@ -97,9 +116,17 @@ function HHPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">Carregando…</td></tr>
+              <tr>
+                <td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">
+                  Carregando…
+                </td>
+              </tr>
             ) : !data?.rows.length ? (
-              <tr><td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">Sem equipamentos.</td></tr>
+              <tr>
+                <td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">
+                  Sem equipamentos.
+                </td>
+              </tr>
             ) : (
               data.rows.map((r) => {
                 const est = r.hh_mec_est + r.hh_elet_est;
@@ -108,44 +135,63 @@ function HHPage() {
                 const isOpen = expanded === r.id;
                 return (
                   <Fragment key={r.id}>
-                  <tr className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]/30">
-                    <td className="p-3">
-                      <button
-                        type="button"
-                        onClick={() => setExpanded(isOpen ? null : r.id)}
-                        className="flex items-center gap-1 text-left"
+                    <tr className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]/30">
+                      <td className="p-3">
+                        <button
+                          type="button"
+                          onClick={() => setExpanded(isOpen ? null : r.id)}
+                          className="flex items-center gap-1 text-left"
+                        >
+                          {isOpen ? (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          )}
+                          <span className="block">
+                            <span className="block font-medium">{r.modelo}</span>
+                            <span className="block font-mono text-[11px] text-[var(--text-muted)]">
+                              {r.codigo}
+                            </span>
+                          </span>
+                        </button>
+                      </td>
+                      <td className="p-3 text-xs">
+                        <div>{r.cliente_nome}</div>
+                        <div className="font-mono text-[10px] text-[var(--text-muted)]">
+                          {r.cliente_codigo}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[11px]",
+                            EQUIPAMENTO_STATUS_COLOR[r.status as EquipamentoStatus],
+                          )}
+                        >
+                          {EQUIPAMENTO_STATUS_LABEL[r.status as EquipamentoStatus] ?? r.status}
+                        </Badge>
+                      </td>
+                      <td className="p-3 text-right tabular-nums">{r.hh_mec_est.toFixed(1)}</td>
+                      <td className="p-3 text-right tabular-nums">{r.hh_mec_real.toFixed(1)}</td>
+                      <td className="p-3 text-right tabular-nums">{r.hh_elet_est.toFixed(1)}</td>
+                      <td className="p-3 text-right tabular-nums">{r.hh_elet_real.toFixed(1)}</td>
+                      <td
+                        className={cn(
+                          "p-3 text-right tabular-nums font-medium",
+                          pct > 100 && "text-rose-700",
+                        )}
                       >
-                        {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                        <span className="block">
-                          <span className="block font-medium">{r.modelo}</span>
-                          <span className="block font-mono text-[11px] text-[var(--text-muted)]">{r.codigo}</span>
-                        </span>
-                      </button>
-                    </td>
-                    <td className="p-3 text-xs">
-                      <div>{r.cliente_nome}</div>
-                      <div className="font-mono text-[10px] text-[var(--text-muted)]">{r.cliente_codigo}</div>
-                    </td>
-                    <td className="p-3">
-                      <Badge variant="outline" className={cn("text-[11px]", EQUIPAMENTO_STATUS_COLOR[r.status as EquipamentoStatus])}>
-                        {EQUIPAMENTO_STATUS_LABEL[r.status as EquipamentoStatus] ?? r.status}
-                      </Badge>
-                    </td>
-                    <td className="p-3 text-right tabular-nums">{r.hh_mec_est.toFixed(1)}</td>
-                    <td className="p-3 text-right tabular-nums">{r.hh_mec_real.toFixed(1)}</td>
-                    <td className="p-3 text-right tabular-nums">{r.hh_elet_est.toFixed(1)}</td>
-                    <td className="p-3 text-right tabular-nums">{r.hh_elet_real.toFixed(1)}</td>
-                    <td className={cn("p-3 text-right tabular-nums font-medium", pct > 100 && "text-rose-700")}>
-                      {est > 0 ? `${pct}%` : "—"}
-                    </td>
-                  </tr>
-                  {isOpen && (
-                    <tr className="bg-[var(--bg-elevated)]/20">
-                      <td colSpan={8} className="p-3">
-                        <EtapasInline equipamentoId={r.id} />
+                        {est > 0 ? `${pct}%` : "—"}
                       </td>
                     </tr>
-                  )}
+                    {isOpen && (
+                      <tr className="bg-[var(--bg-elevated)]/20">
+                        <td colSpan={8} className="p-3">
+                          <EtapasInline equipamentoId={r.id} />
+                        </td>
+                      </tr>
+                    )}
                   </Fragment>
                 );
               })
@@ -158,8 +204,22 @@ function HHPage() {
         <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>Total: {data.total}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Anterior</Button>
-            <Button variant="outline" size="sm" disabled={page * 50 >= data.total} onClick={() => setPage(page + 1)}>Próxima</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page * 50 >= data.total}
+              onClick={() => setPage(page + 1)}
+            >
+              Próxima
+            </Button>
           </div>
         </div>
       )}
@@ -212,11 +272,14 @@ function EtapasInline({ equipamentoId }: { equipamentoId: string }) {
       const invalid: string[] = [];
       const warns: string[] = [];
       for (const r of rows) {
-        if (r.hh_mecanica_real < 0 || r.hh_eletrica_real < 0) invalid.push(r.nome || `Etapa ${r.ordem}`);
+        if (r.hh_mecanica_real < 0 || r.hh_eletrica_real < 0)
+          invalid.push(r.nome || `Etapa ${r.ordem}`);
         if (Number.isNaN(r.hh_mecanica_real) || Number.isNaN(r.hh_eletrica_real))
           invalid.push(r.nome || `Etapa ${r.ordem}`);
-        const dobroMec = r.hh_mecanica_estimada > 0 && r.hh_mecanica_real > r.hh_mecanica_estimada * 2;
-        const dobroElet = r.hh_eletrica_estimada > 0 && r.hh_eletrica_real > r.hh_eletrica_estimada * 2;
+        const dobroMec =
+          r.hh_mecanica_estimada > 0 && r.hh_mecanica_real > r.hh_mecanica_estimada * 2;
+        const dobroElet =
+          r.hh_eletrica_estimada > 0 && r.hh_eletrica_real > r.hh_eletrica_estimada * 2;
         if (dobroMec || dobroElet) warns.push(r.nome || `Etapa ${r.ordem}`);
       }
       if (invalid.length) {
@@ -287,7 +350,9 @@ function EtapasInline({ equipamentoId }: { equipamentoId: string }) {
                   value={r.hh_mecanica_real}
                   onChange={(e) =>
                     setRows((rs) =>
-                      rs.map((rr, j) => (j === i ? { ...rr, hh_mecanica_real: Number(e.target.value) } : rr)),
+                      rs.map((rr, j) =>
+                        j === i ? { ...rr, hh_mecanica_real: Number(e.target.value) } : rr,
+                      ),
                     )
                   }
                 />
@@ -301,7 +366,9 @@ function EtapasInline({ equipamentoId }: { equipamentoId: string }) {
                   value={r.hh_eletrica_real}
                   onChange={(e) =>
                     setRows((rs) =>
-                      rs.map((rr, j) => (j === i ? { ...rr, hh_eletrica_real: Number(e.target.value) } : rr)),
+                      rs.map((rr, j) =>
+                        j === i ? { ...rr, hh_eletrica_real: Number(e.target.value) } : rr,
+                      ),
                     )
                   }
                 />

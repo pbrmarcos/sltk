@@ -43,7 +43,14 @@ export function NewOportunidadeDialog({
   const [duplicatas, setDuplicatas] = useState<OportunidadeDuplicada[]>([]);
 
   const initialDraft = {
-    titulo: "", empresa: empresaNome ?? "", nome: "", email: "", telefone: "", valor: "", valorUsd: "", prob: "10",
+    titulo: "",
+    empresa: empresaNome ?? "",
+    nome: "",
+    email: "",
+    telefone: "",
+    valor: "",
+    valorUsd: "",
+    prob: "10",
   };
   const draft = { titulo, empresa, nome, email, telefone, valor, valorUsd, prob };
   const { clearDraft, isDirty } = useFormDraft({
@@ -52,15 +59,28 @@ export function NewOportunidadeDialog({
     initialValue: initialDraft,
     enabled: open,
     onRestore: (saved) => {
-      setTitulo(saved.titulo); setEmpresa(saved.empresa); setNome(saved.nome); setEmail(saved.email);
-      setTelefone(saved.telefone); setValor(saved.valor); setValorUsd(saved.valorUsd ?? ""); setProb(saved.prob);
+      setTitulo(saved.titulo);
+      setEmpresa(saved.empresa);
+      setNome(saved.nome);
+      setEmail(saved.email);
+      setTelefone(saved.telefone);
+      setValor(saved.valor);
+      setValorUsd(saved.valorUsd ?? "");
+      setProb(saved.prob);
     },
   });
 
   function reset() {
     setDuplicatas([]);
     idemKey.current = crypto.randomUUID();
-    setTitulo(""); setEmpresa(empresaNome ?? ""); setNome(""); setEmail(""); setTelefone(""); setValor(""); setValorUsd(""); setProb("10");
+    setTitulo("");
+    setEmpresa(empresaNome ?? "");
+    setNome("");
+    setEmail("");
+    setTelefone("");
+    setValor("");
+    setValorUsd("");
+    setProb("10");
   }
 
   function requestClose() {
@@ -93,17 +113,25 @@ export function NewOportunidadeDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) requestClose(); else onOpenChange(true); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) requestClose();
+        else onOpenChange(true);
+      }}
+    >
       <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Nova oportunidade</DialogTitle>
-          <DialogDescription>Entra como suspect e avança no pipeline conforme qualificação.</DialogDescription>
+          <DialogDescription>
+            Entra como suspect e avança no pipeline conforme qualificação.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">Antes de criar: </span>
-          confirme empresa e um contato válido. Depois de criada, o próximo passo é
-          agendar a entrevista e enviar o checklist técnico.
+          confirme empresa e um contato válido. Depois de criada, o próximo passo é agendar a
+          entrevista e enviar o checklist técnico.
           {clienteId && (
             <span className="block mt-1">
               Esta oportunidade já nasce vinculada ao cliente <strong>{empresaNome}</strong>.
@@ -114,49 +142,106 @@ export function NewOportunidadeDialog({
         <div className="grid gap-3">
           <div className="grid gap-1">
             <Label htmlFor="opp-titulo">Título *</Label>
-            <Input id="opp-titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={200} placeholder="Linha de envase — Aurora Foods" />
-            <p className="text-[11px] text-muted-foreground">Resumo curto do escopo + nome da empresa.</p>
+            <Input
+              id="opp-titulo"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              maxLength={200}
+              placeholder="Linha de envase — Aurora Foods"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Resumo curto do escopo + nome da empresa.
+            </p>
           </div>
 
           <Separator />
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Empresa e contato</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Empresa e contato
+          </p>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1">
               <Label htmlFor="opp-empresa">Empresa</Label>
-              <Input id="opp-empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)} maxLength={200} />
+              <Input
+                id="opp-empresa"
+                value={empresa}
+                onChange={(e) => setEmpresa(e.target.value)}
+                maxLength={200}
+              />
             </div>
             <div className="grid gap-1">
               <Label htmlFor="opp-nome">Contato</Label>
-              <Input id="opp-nome" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={200} />
+              <Input
+                id="opp-nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                maxLength={200}
+              />
             </div>
             <div className="grid gap-1">
               <Label htmlFor="opp-email">Email</Label>
-              <Input id="opp-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={200} />
+              <Input
+                id="opp-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                maxLength={200}
+              />
             </div>
             <div className="grid gap-1">
               <Label htmlFor="opp-tel">Telefone</Label>
-              <Input id="opp-tel" value={telefone} onChange={(e) => setTelefone(formatTelefone(e.target.value))} placeholder="(00) 00000-0000" maxLength={16} />
+              <Input
+                id="opp-tel"
+                value={telefone}
+                onChange={(e) => setTelefone(formatTelefone(e.target.value))}
+                placeholder="(00) 00000-0000"
+                maxLength={16}
+              />
             </div>
           </div>
 
           <Separator />
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Valores e probabilidade</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Valores e probabilidade
+          </p>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1">
               <Label htmlFor="opp-valor">Valor estimado (R$)</Label>
-              <Input id="opp-valor" inputMode="decimal" value={valor} onChange={(e) => setValor(formatValor(e.target.value))} placeholder="0,00" />
+              <Input
+                id="opp-valor"
+                inputMode="decimal"
+                value={valor}
+                onChange={(e) => setValor(formatValor(e.target.value))}
+                placeholder="0,00"
+              />
             </div>
             <div className="grid gap-1">
               <Label htmlFor="opp-valor-usd">Valor estimado (US$)</Label>
-              <Input id="opp-valor-usd" inputMode="decimal" value={valorUsd} onChange={(e) => setValorUsd(formatValor(e.target.value))} placeholder="0,00" />
-              <p className="text-[11px] text-muted-foreground">Informe quando a negociação for em dólar.</p>
+              <Input
+                id="opp-valor-usd"
+                inputMode="decimal"
+                value={valorUsd}
+                onChange={(e) => setValorUsd(formatValor(e.target.value))}
+                placeholder="0,00"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Informe quando a negociação for em dólar.
+              </p>
             </div>
             <div className="grid gap-1">
               <Label htmlFor="opp-prob">Probabilidade (%)</Label>
-              <Input id="opp-prob" type="number" min={0} max={100} value={prob} onChange={(e) => setProb(e.target.value)} />
-              <p className="text-[11px] text-muted-foreground">Valor × probabilidade alimenta o “Valor ponderado”.</p>
+              <Input
+                id="opp-prob"
+                type="number"
+                min={0}
+                max={100}
+                value={prob}
+                onChange={(e) => setProb(e.target.value)}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Valor × probabilidade alimenta o “Valor ponderado”.
+              </p>
             </div>
           </div>
         </div>
@@ -173,7 +258,13 @@ export function NewOportunidadeDialog({
                 <li key={d.id}>
                   <strong>{d.codigo}</strong> — {d.titulo}
                   {d.valor_estimado != null && (
-                    <> · R$ {Number(d.valor_estimado).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</>
+                    <>
+                      {" "}
+                      · R${" "}
+                      {Number(d.valor_estimado).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </>
                   )}
                 </li>
               ))}
@@ -183,7 +274,9 @@ export function NewOportunidadeDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={requestClose}>Cancelar</Button>
+          <Button variant="outline" onClick={requestClose}>
+            Cancelar
+          </Button>
           <Button
             disabled={titulo.trim().length < 2 || create.isPending}
             onClick={() => {
@@ -205,7 +298,9 @@ export function NewOportunidadeDialog({
                   onSuccess: (r) => {
                     if (r.needsConfirm) {
                       setDuplicatas(r.duplicatas);
-                      toast.warning("Encontramos oportunidade parecida. Revise antes de confirmar.");
+                      toast.warning(
+                        "Encontramos oportunidade parecida. Revise antes de confirmar.",
+                      );
                       return;
                     }
                     clearDraft();

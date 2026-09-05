@@ -86,10 +86,16 @@ export function Callout({
   return (
     <aside
       className="not-prose my-4 rounded-[var(--radius-md)] border-l-4 p-3"
-      style={{ borderColor: meta.color, background: `color-mix(in oklab, ${meta.bg} 8%, transparent)` }}
+      style={{
+        borderColor: meta.color,
+        background: `color-mix(in oklab, ${meta.bg} 8%, transparent)`,
+      }}
       role="note"
     >
-      <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide" style={{ color: meta.color }}>
+      <div
+        className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
+        style={{ color: meta.color }}
+      >
         <span aria-hidden>{meta.icon}</span>
         <span>{title ?? meta.label}</span>
       </div>

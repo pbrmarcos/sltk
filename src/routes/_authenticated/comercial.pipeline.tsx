@@ -28,11 +28,7 @@ function PipelinePage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Comercial" },
-          { label: "Pipeline" },
-        ]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Comercial" }, { label: "Pipeline" }]}
         title="Pipeline Comercial"
         subtitle="Suspect → Prospect → Cliente. Arraste para mover entre estágios."
         actions={
@@ -62,15 +58,27 @@ function PipelinePage() {
               onClick={() => setView(view === "kanban" ? "table" : "kanban")}
               aria-label="Alternar visualização"
             >
-              {view === "kanban" ? <TableIcon className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+              {view === "kanban" ? (
+                <TableIcon className="w-4 h-4" />
+              ) : (
+                <LayoutGrid className="w-4 h-4" />
+              )}
             </Button>
             <Button size="sm" onClick={() => setNewOpen(true)}>
-              <Plus className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Nova oportunidade</span><span className="sm:hidden">Nova</span>
+              <Plus className="w-4 h-4 mr-1" />{" "}
+              <span className="hidden sm:inline">Nova oportunidade</span>
+              <span className="sm:hidden">Nova</span>
             </Button>
           </>
         }
       />
-      <Suspense fallback={<div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Carregando…</div>}>
+      <Suspense
+        fallback={
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+          </div>
+        }
+      >
         <PipelineBoard view={view} />
       </Suspense>
       <NewOportunidadeDialog open={newOpen} onOpenChange={setNewOpen} />
@@ -92,7 +100,10 @@ function PipelineError({ error, reset }: { error: Error; reset: () => void }) {
               size="sm"
               variant="outline"
               className="mt-3"
-              onClick={() => { reset(); router.invalidate(); }}
+              onClick={() => {
+                reset();
+                router.invalidate();
+              }}
             >
               Tentar novamente
             </Button>

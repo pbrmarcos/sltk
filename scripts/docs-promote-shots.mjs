@@ -109,7 +109,9 @@ for (const cat of cats) {
         uploaded.push({ file: f, caption: captions[f] });
         continue;
       }
-      const r = spawnSync("lovable-assets", ["create", "--file", src, "--filename", f], { encoding: "utf8" });
+      const r = spawnSync("lovable-assets", ["create", "--file", src, "--filename", f], {
+        encoding: "utf8",
+      });
       if (r.status !== 0) {
         console.error(`    ✗ lovable-assets create falhou: ${r.stderr || r.stdout}`);
         continue;

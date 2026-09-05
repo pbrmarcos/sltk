@@ -16,7 +16,8 @@ const CODE_MESSAGES: Record<string, string> = {
   "42501": "Você não tem permissão para executar esta ação.",
 };
 
-const FALLBACK_MESSAGE = "Não foi possível completar a operação. Tente novamente ou contate o suporte.";
+const FALLBACK_MESSAGE =
+  "Não foi possível completar a operação. Tente novamente ou contate o suporte.";
 
 export function friendlyDbError(
   error: { message: string; code?: string | null } | null | undefined,

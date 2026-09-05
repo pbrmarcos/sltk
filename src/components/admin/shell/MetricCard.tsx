@@ -14,22 +14,29 @@ type Props = {
   to?: string;
 };
 
-export function MetricCard({ label, value, deltaPct, invert = false, hint, icon: Icon, to }: Props) {
+export function MetricCard({
+  label,
+  value,
+  deltaPct,
+  invert = false,
+  hint,
+  icon: Icon,
+  to,
+}: Props) {
   const up = deltaPct >= 0;
   const isBad = invert ? up : !up;
-  const color = deltaPct === 0
-    ? "text-muted-foreground"
-    : isBad
-      ? "text-destructive"
-      : "text-emerald-600 dark:text-emerald-400";
+  const color =
+    deltaPct === 0
+      ? "text-muted-foreground"
+      : isBad
+        ? "text-destructive"
+        : "text-emerald-600 dark:text-emerald-400";
   const Arrow = up ? ArrowUp : ArrowDown;
 
   const inner = (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {label}
-        </CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
         {Icon ? <Icon className="h-4 w-4 text-muted-foreground" /> : null}
       </CardHeader>
       <CardContent>

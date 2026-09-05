@@ -27,7 +27,11 @@ export function IntegracoesTab() {
   });
 
   if (list.isLoading) {
-    return <div className="flex justify-center p-10"><Loader2 className="h-5 w-5 animate-spin" /></div>;
+    return (
+      <div className="flex justify-center p-10">
+        <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
+    );
   }
 
   const rows = list.data ?? [];
@@ -35,8 +39,8 @@ export function IntegracoesTab() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-[var(--text-muted)]">
-        Ative ou desative provedores de autocompletar de documento fiscal por país.
-        Provedores marcados como "Futuro" ainda não estão disponíveis.
+        Ative ou desative provedores de autocompletar de documento fiscal por país. Provedores
+        marcados como "Futuro" ainda não estão disponíveis.
       </p>
       <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] divide-y divide-[var(--bg-border)]">
         {rows.map((r) => {
@@ -44,13 +48,27 @@ export function IntegracoesTab() {
           return (
             <div key={r.provider} className="flex items-center justify-between gap-3 px-4 py-3">
               <div className="flex min-w-0 items-start gap-3">
-                <span className="mt-0.5"><Flag code={r.pais} size={22} /></span>
+                <span className="mt-0.5">
+                  <Flag code={r.pais} size={22} />
+                </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-[13.5px] font-semibold text-[var(--text-primary)]">{r.nome}</h3>
-                    <code className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-mono text-muted-foreground">{r.provider}</code>
-                    {disabled && <Badge variant="secondary" className="text-[10px]">Futuro</Badge>}
-                    {r.requer_chave && <Badge variant="outline" className="text-[10px]">Requer chave</Badge>}
+                    <h3 className="text-[13.5px] font-semibold text-[var(--text-primary)]">
+                      {r.nome}
+                    </h3>
+                    <code className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-mono text-muted-foreground">
+                      {r.provider}
+                    </code>
+                    {disabled && (
+                      <Badge variant="secondary" className="text-[10px]">
+                        Futuro
+                      </Badge>
+                    )}
+                    {r.requer_chave && (
+                      <Badge variant="outline" className="text-[10px]">
+                        Requer chave
+                      </Badge>
+                    )}
                   </div>
                   {r.descricao && (
                     <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">{r.descricao}</p>
@@ -67,7 +85,9 @@ export function IntegracoesTab() {
           );
         })}
         {rows.length === 0 && (
-          <p className="p-6 text-center text-sm text-muted-foreground">Nenhum provedor cadastrado.</p>
+          <p className="p-6 text-center text-sm text-muted-foreground">
+            Nenhum provedor cadastrado.
+          </p>
         )}
       </div>
     </div>

@@ -3,10 +3,7 @@ import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  EQUIPAMENTO_CATEGORIAS,
-  EQUIPAMENTO_STATUS,
-} from "@/lib/equipamentos.shared";
+import { EQUIPAMENTO_CATEGORIAS, EQUIPAMENTO_STATUS } from "@/lib/equipamentos.shared";
 
 const clienteIdInput = z.object({ clienteId: z.string().uuid() });
 

@@ -86,7 +86,10 @@ function AuthenticatedShell() {
             {brand?.footer_text && <span>{brand.footer_text}</span>}
             {brand?.footer_text && brand?.support_email && <span className="opacity-40">·</span>}
             {brand?.support_email && (
-              <a href={`mailto:${brand.support_email}`} className="hover:text-[var(--text-primary)] transition-colors">
+              <a
+                href={`mailto:${brand.support_email}`}
+                className="hover:text-[var(--text-primary)] transition-colors"
+              >
                 {brand.support_email}
               </a>
             )}
@@ -105,9 +108,10 @@ function generateIncidentId(): string {
 
 function AuthenticatedErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
   const message = error?.message ?? String(error);
-  const isMissingModule = /Cannot find module|Failed to resolve|Failed to fetch dynamically imported module/i.test(
-    message,
-  );
+  const isMissingModule =
+    /Cannot find module|Failed to resolve|Failed to fetch dynamically imported module/i.test(
+      message,
+    );
   // Stable incident ID for this boundary instance.
   const [incidentId] = useState(() => generateIncidentId());
   const [copied, setCopied] = useState(false);
@@ -164,7 +168,13 @@ function AuthenticatedErrorBoundary({ error, reset }: { error: Error; reset: () 
           <code className="rounded bg-[var(--bg-elevated)] px-2 py-0.5 font-mono text-[var(--text-primary)]">
             {incidentId}
           </code>
-          <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={copyId}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={copyId}
+          >
             {copied ? "Copiado" : "Copiar"}
           </Button>
         </div>

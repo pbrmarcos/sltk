@@ -51,7 +51,6 @@ type Props = {
   onGoToAcoes: () => void;
 };
 
-
 type Anexo = {
   id: string;
   kind: string;
@@ -62,21 +61,29 @@ type Anexo = {
   incoterm: string | null;
   validade_ate: string | null;
   fornecedor_id: string | null;
-  fornecedores?: { nome?: string | null; nome_fantasia?: string | null; codigo?: string | null } | null;
+  fornecedores?: {
+    nome?: string | null;
+    nome_fantasia?: string | null;
+    codigo?: string | null;
+  } | null;
   criado_em: string;
 };
 
 function fmtMoney(v: number | null | undefined, moeda: string | null | undefined) {
   if (v == null) return "—";
   try {
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: moeda ?? "BRL" }).format(Number(v));
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: moeda ?? "BRL" }).format(
+      Number(v),
+    );
   } catch {
     return `${moeda ?? ""} ${v}`;
   }
 }
 
 function fornecedorLabel(a: Anexo) {
-  return a.fornecedores?.nome_fantasia || a.fornecedores?.nome || a.fornecedores?.codigo || "Fornecedor";
+  return (
+    a.fornecedores?.nome_fantasia || a.fornecedores?.nome || a.fornecedores?.codigo || "Fornecedor"
+  );
 }
 
 const STATUS_NEXT: Record<InsumoStatus, string> = {
@@ -162,23 +169,45 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
   const orcamentos = useMemo(() => anexos.filter((a) => a.kind === "orcamento"), [anexos]);
   const rfqsGerados = docsQ.data?.length ?? 0;
 
-
   const { melhorPreco, melhorPrazo } = useMemo(() => {
     let best: Anexo | null = null;
     let fastest: Anexo | null = null;
     for (const o of orcamentos) {
       if (o.valor != null && (!best || Number(o.valor) < Number(best.valor))) best = o;
-      if (o.lead_time_dias != null && (!fastest || Number(o.lead_time_dias) < Number(fastest.lead_time_dias))) fastest = o;
+      if (
+        o.lead_time_dias != null &&
+        (!fastest || Number(o.lead_time_dias) < Number(fastest.lead_time_dias))
+      )
+        fastest = o;
     }
     return { melhorPreco: best, melhorPrazo: fastest };
   }, [orcamentos]);
 
   // Checklist de prontidão
   const checklist = useMemo(() => {
-    const rows: Array<{ key: string; label: React.ReactNode; ok: boolean; hint?: React.ReactNode }> = [
-      { key: "descricao", label: "Descrição preenchida", ok: !!insumo.descricao && insumo.descricao.length >= 3 },
-      { key: "fabricante", label: "Fabricante informado", ok: !!insumo.fabricante_sugerido, hint: "Opcional, mas ajuda o fornecedor" },
-      { key: "part_number", label: "Part Number / código", ok: !!insumo.part_number || !!insumo.codigo_interno, hint: "Ao menos um dos dois" },
+    const rows: Array<{
+      key: string;
+      label: React.ReactNode;
+      ok: boolean;
+      hint?: React.ReactNode;
+    }> = [
+      {
+        key: "descricao",
+        label: "Descrição preenchida",
+        ok: !!insumo.descricao && insumo.descricao.length >= 3,
+      },
+      {
+        key: "fabricante",
+        label: "Fabricante informado",
+        ok: !!insumo.fabricante_sugerido,
+        hint: "Opcional, mas ajuda o fornecedor",
+      },
+      {
+        key: "part_number",
+        label: "Part Number / código",
+        ok: !!insumo.part_number || !!insumo.codigo_interno,
+        hint: "Ao menos um dos dois",
+      },
       { key: "especificacao", label: "Especificação técnica", ok: !!insumo.especificacao_tecnica },
       { key: "necessidade", label: "Necessidade em (data)", ok: !!insumo.necessidade_em },
       { key: "criticidade", label: "Criticidade definida", ok: !!insumo.criticidade },
@@ -195,7 +224,12 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
         ok: rfqsGerados > 0,
         hint: rfqsGerados ? `${rfqsGerados} PDF(s) no Drive` : "Gere na aba Ações",
       },
-      { key: "propostas", label: "Propostas recebidas (≥ 2)", ok: orcamentos.length >= 2, hint: `${orcamentos.length} recebida(s)` },
+      {
+        key: "propostas",
+        label: "Propostas recebidas (≥ 2)",
+        ok: orcamentos.length >= 2,
+        hint: `${orcamentos.length} recebida(s)`,
+      },
     ];
     const done = rows.filter((r) => r.ok).length;
     return { rows, done, total: rows.length, pct: Math.round((done / rows.length) * 100) };
@@ -251,7 +285,9 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
       <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3.5">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-[var(--text-muted)] font-medium">Prontidão do item</span>
+            <span className="text-xs uppercase tracking-wide text-[var(--text-muted)] font-medium">
+              Prontidão do item
+            </span>
             <Badge variant="outline" className="font-mono text-[10px]">
               {checklist.done}/{checklist.total}
             </Badge>
@@ -268,8 +304,14 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
                 <Circle className="h-3.5 w-3.5 text-[var(--text-muted)] mt-0.5 shrink-0" />
               )}
               <div className="flex-1 leading-tight">
-                <span className={cn(r.ok ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}>{r.label}</span>
-                {r.hint && <span className="block text-[10.5px] text-[var(--text-muted)]">{r.hint}</span>}
+                <span
+                  className={cn(r.ok ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}
+                >
+                  {r.label}
+                </span>
+                {r.hint && (
+                  <span className="block text-[10.5px] text-[var(--text-muted)]">{r.hint}</span>
+                )}
               </div>
             </li>
           ))}
@@ -323,13 +365,13 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
             </div>
           </div>
           <div className="flex flex-col gap-1.5 shrink-0">
-            {!aprovAtual || aprovAtual.decidido_em ? (
-              !aprovada && (
-                <Button size="sm" variant="outline" onClick={() => setDlgSolicitar(true)}>
-                  <Send className="h-3.5 w-3.5 mr-1" /> Solicitar aprovação
-                </Button>
-              )
-            ) : null}
+            {!aprovAtual || aprovAtual.decidido_em
+              ? !aprovada && (
+                  <Button size="sm" variant="outline" onClick={() => setDlgSolicitar(true)}>
+                    <Send className="h-3.5 w-3.5 mr-1" /> Solicitar aprovação
+                  </Button>
+                )
+              : null}
             {pendente && (
               <>
                 <Button
@@ -373,7 +415,9 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
             rows={4}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDlgSolicitar(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setDlgSolicitar(false)}>
+              Cancelar
+            </Button>
             <Button onClick={handleSolicitar}>Enviar solicitação</Button>
           </DialogFooter>
         </DialogContent>
@@ -422,19 +466,29 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
                           <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
                             <span className="truncate">{fornecedorLabel(o)}</span>
                             {isBest && (
-                              <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="border-emerald-300 text-emerald-700 text-[10px]"
+                              >
                                 <Trophy className="h-3 w-3 mr-0.5" /> Melhor preço
                               </Badge>
                             )}
                             {isFast && (
-                              <Badge variant="outline" className="border-blue-300 text-blue-700 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="border-blue-300 text-blue-700 text-[10px]"
+                              >
                                 <Timer className="h-3 w-3 mr-0.5" /> Menor prazo
                               </Badge>
                             )}
                           </div>
                           <div className="text-[11px] text-[var(--text-muted)] mt-0.5 flex flex-wrap gap-x-3">
-                            <span>Valor: <b>{fmtMoney(Number(o.valor), o.moeda)}</b></span>
-                            {o.lead_time_dias != null && <span>Prazo: {o.lead_time_dias} dias</span>}
+                            <span>
+                              Valor: <b>{fmtMoney(Number(o.valor), o.moeda)}</b>
+                            </span>
+                            {o.lead_time_dias != null && (
+                              <span>Prazo: {o.lead_time_dias} dias</span>
+                            )}
                             {o.incoterm && <span>Incoterm: {o.incoterm}</span>}
                             {o.condicao_pagamento && <span>Pagto: {o.condicao_pagamento}</span>}
                           </div>
@@ -448,13 +502,17 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
           )}
 
           <Textarea
-            placeholder={dlgDecidir === "aprovado" ? "Justificativa (opcional)" : "Motivo da recusa (opcional)"}
+            placeholder={
+              dlgDecidir === "aprovado" ? "Justificativa (opcional)" : "Motivo da recusa (opcional)"
+            }
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             rows={3}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDlgDecidir(null)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setDlgDecidir(null)}>
+              Cancelar
+            </Button>
             <Button
               onClick={handleDecidir}
               disabled={dlgDecidir === "aprovado" && !anexoEscolhido}
@@ -473,8 +531,12 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
         <div className="flex items-center justify-between px-3.5 py-2.5 border-b bg-[var(--bg-elevated)]">
           <div className="flex items-center gap-2">
             <FileText className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            <span className="text-xs uppercase tracking-wide text-[var(--text-secondary)] font-medium">Comparativo de propostas</span>
-            <Badge variant="outline" className="font-mono text-[10px]">{orcamentos.length}</Badge>
+            <span className="text-xs uppercase tracking-wide text-[var(--text-secondary)] font-medium">
+              Comparativo de propostas
+            </span>
+            <Badge variant="outline" className="font-mono text-[10px]">
+              {orcamentos.length}
+            </Badge>
           </div>
           <button
             type="button"
@@ -498,11 +560,20 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
               <thead className="bg-[var(--bg-elevated)] text-[10.5px] uppercase tracking-wide text-[var(--text-muted)]">
                 <tr>
                   <th className="text-left px-3 py-2 font-medium">Fornecedor</th>
-                  <th className="text-right px-3 py-2 font-medium"><Wallet className="h-3 w-3 inline mr-1" />Valor</th>
-                  <th className="text-center px-3 py-2 font-medium"><Timer className="h-3 w-3 inline mr-1" />Prazo</th>
+                  <th className="text-right px-3 py-2 font-medium">
+                    <Wallet className="h-3 w-3 inline mr-1" />
+                    Valor
+                  </th>
+                  <th className="text-center px-3 py-2 font-medium">
+                    <Timer className="h-3 w-3 inline mr-1" />
+                    Prazo
+                  </th>
                   <th className="text-center px-3 py-2 font-medium">Incoterm</th>
                   <th className="text-left px-3 py-2 font-medium">Pagamento</th>
-                  <th className="text-center px-3 py-2 font-medium"><CalendarClock className="h-3 w-3 inline mr-1" />Validade</th>
+                  <th className="text-center px-3 py-2 font-medium">
+                    <CalendarClock className="h-3 w-3 inline mr-1" />
+                    Validade
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -511,26 +582,55 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
                   const isBestLead = melhorPrazo?.id === o.id;
                   const expired = o.validade_ate ? new Date(o.validade_ate) < new Date() : false;
                   return (
-                    <tr key={o.id} className={cn("hover:bg-[var(--bg-elevated)]", isBestPrice && "bg-emerald-50/30")}>
-                      <td className="px-3 py-2 font-medium text-[var(--text-primary)] truncate max-w-[180px]" title={fornecedorLabel(o)}>
+                    <tr
+                      key={o.id}
+                      className={cn(
+                        "hover:bg-[var(--bg-elevated)]",
+                        isBestPrice && "bg-emerald-50/30",
+                      )}
+                    >
+                      <td
+                        className="px-3 py-2 font-medium text-[var(--text-primary)] truncate max-w-[180px]"
+                        title={fornecedorLabel(o)}
+                      >
                         {fornecedorLabel(o)}
                       </td>
-                      <td className={cn("px-3 py-2 text-right tabular-nums", isBestPrice && "text-emerald-700 font-semibold")}>
+                      <td
+                        className={cn(
+                          "px-3 py-2 text-right tabular-nums",
+                          isBestPrice && "text-emerald-700 font-semibold",
+                        )}
+                      >
                         <div className="flex items-center justify-end gap-1.5">
                           {isBestPrice && <Trophy className="h-3 w-3 text-emerald-600" />}
                           {fmtMoney(o.valor != null ? Number(o.valor) : null, o.moeda)}
                         </div>
                       </td>
-                      <td className={cn("px-3 py-2 text-center tabular-nums", isBestLead && "text-blue-700 font-semibold")}>
+                      <td
+                        className={cn(
+                          "px-3 py-2 text-center tabular-nums",
+                          isBestLead && "text-blue-700 font-semibold",
+                        )}
+                      >
                         {o.lead_time_dias != null ? `${o.lead_time_dias} d` : "—"}
                       </td>
-                      <td className="px-3 py-2 text-center text-[var(--text-secondary)]">{o.incoterm || "—"}</td>
-                      <td className="px-3 py-2 text-[var(--text-secondary)] truncate max-w-[160px]" title={o.condicao_pagamento ?? ""}>
+                      <td className="px-3 py-2 text-center text-[var(--text-secondary)]">
+                        {o.incoterm || "—"}
+                      </td>
+                      <td
+                        className="px-3 py-2 text-[var(--text-secondary)] truncate max-w-[160px]"
+                        title={o.condicao_pagamento ?? ""}
+                      >
                         {o.condicao_pagamento || "—"}
                       </td>
                       <td className="px-3 py-2 text-center">
                         {o.validade_ate ? (
-                          <span className={cn("inline-flex items-center gap-1", expired ? "text-red-600" : "text-[var(--text-secondary)]")}>
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1",
+                              expired ? "text-red-600" : "text-[var(--text-secondary)]",
+                            )}
+                          >
                             {expired && <AlertCircle className="h-3 w-3" />}
                             {format(new Date(o.validade_ate), "dd/MM/yy", { locale: ptBR })}
                           </span>
@@ -587,12 +687,22 @@ function KpiCard({
     muted: "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-secondary)]",
   };
   return (
-    <div className={cn("rounded-lg border p-2.5 flex flex-col justify-between min-h-[74px]", tones[tone])}>
+    <div
+      className={cn(
+        "rounded-lg border p-2.5 flex flex-col justify-between min-h-[74px]",
+        tones[tone],
+      )}
+    >
       <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-wide opacity-80 font-medium">
         {icon}
         <span>{label}</span>
       </div>
-      <div className={cn("font-semibold leading-tight mt-1", small ? "text-[12px]" : "text-lg tabular-nums")}>
+      <div
+        className={cn(
+          "font-semibold leading-tight mt-1",
+          small ? "text-[12px]" : "text-lg tabular-nums",
+        )}
+      >
         {value}
       </div>
       {hint && <div className="text-[10.5px] opacity-70 truncate">{hint}</div>}
@@ -614,12 +724,16 @@ function EmptyState({
       <div className="mx-auto h-10 w-10 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center mb-2">
         <FileText className="h-5 w-5 text-[var(--text-muted)]" />
       </div>
-      <p className="text-sm text-[var(--text-secondary)] font-medium">Nenhuma proposta recebida ainda</p>
+      <p className="text-sm text-[var(--text-secondary)] font-medium">
+        Nenhuma proposta recebida ainda
+      </p>
       <p className="text-xs text-[var(--text-muted)] mt-1 mb-3">
         {hasRfq ? (
           <>
             <RfqTooltip>
-              <span className="cursor-help underline decoration-zinc-300 underline-offset-2">Checklist</span>
+              <span className="cursor-help underline decoration-zinc-300 underline-offset-2">
+                Checklist
+              </span>
             </RfqTooltip>{" "}
             já foi enviado — anexe as propostas retornadas pelos fornecedores.
           </>
@@ -627,7 +741,9 @@ function EmptyState({
           <>
             Gere o{" "}
             <RfqTooltip>
-              <span className="cursor-help underline decoration-zinc-300 underline-offset-2">Checklist</span>
+              <span className="cursor-help underline decoration-zinc-300 underline-offset-2">
+                Checklist
+              </span>
             </RfqTooltip>{" "}
             e depois anexe as propostas recebidas para comparar aqui.
           </>

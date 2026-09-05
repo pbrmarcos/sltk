@@ -31,7 +31,8 @@ function NotFoundComponent() {
           A página que você procura não existe ou foi movida.
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          Rota solicitada: <code className="rounded bg-muted px-1.5 py-0.5 font-mono">{pathname}</code>
+          Rota solicitada:{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 font-mono">{pathname}</code>
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -146,12 +147,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Engenharia de packaging para indústrias que não param." },
       { name: "author", content: "SLTK Americas" },
       { property: "og:title", content: "SLTK Americas" },
-      { property: "og:description", content: "Engenharia de packaging para indústrias que não param." },
+      {
+        property: "og:description",
+        content: "Engenharia de packaging para indústrias que não param.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@sltkamericas" },
       { name: "twitter:title", content: "SLTK Americas" },
-      { name: "twitter:description", content: "Engenharia de packaging para indústrias que não param." },
+      {
+        name: "twitter:description",
+        content: "Engenharia de packaging para indústrias que não param.",
+      },
       // og:image/twitter:image ficam APENAS nas rotas-folha (leaf) para não
       // sobrescrever a preview de páginas que definem sua própria imagem.
     ],

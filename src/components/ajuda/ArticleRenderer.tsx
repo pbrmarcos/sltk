@@ -30,13 +30,7 @@ function remarkDocDirectives() {
   };
 }
 
-export function ArticleRenderer({
-  children,
-  category,
-}: {
-  children: string;
-  category?: string;
-}) {
+export function ArticleRenderer({ children, category }: { children: string; category?: string }) {
   const resolveImg = (name?: string): string | undefined => {
     if (!name) return undefined;
     if (name.startsWith("http") || name.startsWith("/")) return name;
@@ -75,9 +69,7 @@ export function ArticleRenderer({
         <table className="w-full border-collapse text-sm">{children}</table>
       </div>
     ),
-    thead: ({ children }: any) => (
-      <thead className="bg-[var(--bg-elevated)]">{children}</thead>
-    ),
+    thead: ({ children }: any) => <thead className="bg-[var(--bg-elevated)]">{children}</thead>,
     tbody: ({ children }: any) => <tbody>{children}</tbody>,
     tr: ({ children }: any) => (
       <tr className="border-b border-[var(--bg-border)] last:border-0 even:bg-[color-mix(in_oklab,var(--bg-elevated)_40%,transparent)]">
@@ -102,7 +94,6 @@ export function ArticleRenderer({
     ),
   } as unknown as Components;
 
-
   // Remove HTML comments (`<!-- ... -->`) — usados como marcadores no fonte
   // (ex.: `<!-- SHOTS:AUTO -->` para o docs:promote), mas não devem aparecer
   // como texto renderizado.
@@ -120,4 +111,3 @@ export function ArticleRenderer({
     </div>
   );
 }
-

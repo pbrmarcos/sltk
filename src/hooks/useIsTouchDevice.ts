@@ -11,8 +11,7 @@ export function useIsTouchDevice(): boolean {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const coarse =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(pointer: coarse)").matches;
+      typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches;
     const hasTouch =
       "ontouchstart" in window ||
       (typeof navigator !== "undefined" && (navigator.maxTouchPoints ?? 0) > 0);

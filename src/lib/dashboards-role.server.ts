@@ -30,13 +30,23 @@ export type AssemblyData = {
 };
 
 export type PurchasingData = {
-  kpis: { ocsAprovar: number; cotacoesAbertas: number; gastoMes: number; insumosAguardando: number };
+  kpis: {
+    ocsAprovar: number;
+    cotacoesAbertas: number;
+    gastoMes: number;
+    insumosAguardando: number;
+  };
   ocs: ListItem[];
   cotacoes: ListItem[];
 };
 
 export type FieldData = {
-  kpis: { satsPendentes: number; chamadosAbertos: number; slaVencendo: number; satsAssinados30d: number };
+  kpis: {
+    satsPendentes: number;
+    chamadosAbertos: number;
+    slaVencendo: number;
+    satsAssinados30d: number;
+  };
   slaMeter: { atual: number; alvo: number };
   chamados: ListItem[];
   sats: ListItem[];
@@ -75,7 +85,11 @@ const rel = (v: string | null) => {
 };
 
 const brl = (n: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const now = Date.now();
@@ -102,13 +116,21 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     enrichErros,
     audit,
   ] = await Promise.all([
-    sb.from("equipamento_etps").select("id, versao, status, updated_at").is("deleted_at", null).limit(500),
+    sb
+      .from("equipamento_etps")
+      .select("id, versao, status, updated_at")
+      .is("deleted_at", null)
+      .limit(500),
     sb
       .from("equipamento_disciplina_etapas")
       .select("id, titulo, status, disciplina, data_vencimento, progresso, updated_at")
       .is("deleted_at", null)
       .limit(1000),
-    sb.from("equipamento_revisoes").select("id, status, updated_at").is("deleted_at", null).limit(500),
+    sb
+      .from("equipamento_revisoes")
+      .select("id, status, updated_at")
+      .is("deleted_at", null)
+      .limit(500),
     sb
       .from("equipamento_montagens")
       .select("id, status, progresso, fim_previsto, fim_real, updated_at, cliente_id")
@@ -120,7 +142,11 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .select("id, numero, status, valor_total, fornecedor_razao_social, aprovado_em, created_at")
       .is("deleted_at", null)
       .limit(500),
-    sb.from("cotacoes").select("id, codigo, titulo, status, prazo_resposta").is("deleted_at", null).limit(500),
+    sb
+      .from("cotacoes")
+      .select("id, codigo, titulo, status, prazo_resposta")
+      .is("deleted_at", null)
+      .limit(500),
     sb.from("projeto_insumos").select("id, status").is("deleted_at", null).limit(1000),
     sb
       .from("sat_relatorio")
@@ -130,10 +156,16 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .limit(300),
     sb
       .from("chamados")
-      .select("id, codigo, assunto, status, prioridade, sla_resolucao_at, first_response_at, created_at")
+      .select(
+        "id, codigo, assunto, status, prioridade, sla_resolucao_at, first_response_at, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(300),
-    sb.from("rfq_submissao").select("id, criado_em, lida_em").order("criado_em", { ascending: false }).limit(300),
+    sb
+      .from("rfq_submissao")
+      .select("id, criado_em, lida_em")
+      .order("criado_em", { ascending: false })
+      .limit(300),
     sb.from("enrich_log").select("id").eq("success", false).gte("created_at", ago24h).limit(200),
     sb
       .from("audit_log")
@@ -164,14 +196,31 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     kpis: {
       etpsAbertos: rowsEtps.filter((e: any) => etpAberto(e.status)).length,
       etapasAbertas: rowsEtapas.filter((e: any) => !etapaConcluida(e.status)).length,
-      revisoes: rowsRevisoes.filter((r: any) => r.status !== "aprovada" && r.status !== "aprovado").length,
+      revisoes: rowsRevisoes.filter((r: any) => r.status !== "aprovada" && r.status !== "aprovado")
+        .length,
       atrasadas: rowsEtapas.filter(etapaAtrasada).length,
     },
     kanban: [
-      { label: "Rascunho", value: rowsEtps.filter((e: any) => e.status === "rascunho").length, color: "#94a3b8" },
-      { label: "Em revisão", value: rowsEtps.filter((e: any) => e.status === "em_revisao").length, color: "#6366f1" },
-      { label: "Aprovado", value: rowsEtps.filter((e: any) => e.status === "aprovado").length, color: "#22c55e" },
-      { label: "Rejeitado", value: rowsEtps.filter((e: any) => e.status === "rejeitado").length, color: "#ef4444" },
+      {
+        label: "Rascunho",
+        value: rowsEtps.filter((e: any) => e.status === "rascunho").length,
+        color: "#94a3b8",
+      },
+      {
+        label: "Em revisão",
+        value: rowsEtps.filter((e: any) => e.status === "em_revisao").length,
+        color: "#6366f1",
+      },
+      {
+        label: "Aprovado",
+        value: rowsEtps.filter((e: any) => e.status === "aprovado").length,
+        color: "#22c55e",
+      },
+      {
+        label: "Rejeitado",
+        value: rowsEtps.filter((e: any) => e.status === "rejeitado").length,
+        color: "#ef4444",
+      },
     ],
     criticas: rowsEtapas
       .filter((e: any) => !etapaConcluida(e.status))
@@ -185,7 +234,11 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
         id: e.id,
         titulo: e.titulo,
         meta: `${e.disciplina ?? "—"} · vence ${fmtDate(e.data_vencimento)}`,
-        status: etapaAtrasada(e) ? "ATRASADA" : e.status === "em_andamento" ? "EM ANDAMENTO" : "PENDENTE",
+        status: etapaAtrasada(e)
+          ? "ATRASADA"
+          : e.status === "em_andamento"
+            ? "EM ANDAMENTO"
+            : "PENDENTE",
         tone: etapaAtrasada(e) ? "danger" : e.status === "em_andamento" ? "info" : "neutral",
       })),
   };
@@ -193,11 +246,13 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   // ---------- Produção ----------
   const montEmAndamento = rowsMont.filter((m: any) => m.status === "em_andamento");
   const montAtrasadas = rowsMont.filter(
-    (m: any) => m.status !== "concluida" && m.fim_previsto && new Date(m.fim_previsto).getTime() < now,
+    (m: any) =>
+      m.status !== "concluida" && m.fim_previsto && new Date(m.fim_previsto).getTime() < now,
   );
   const concluidas = rowsMont.filter((m: any) => m.status === "concluida" && m.fim_real);
   const noPrazo = concluidas.filter(
-    (m: any) => !m.fim_previsto || new Date(m.fim_real).getTime() <= new Date(m.fim_previsto).getTime(),
+    (m: any) =>
+      !m.fim_previsto || new Date(m.fim_real).getTime() <= new Date(m.fim_previsto).getTime(),
   );
 
   const production: ProductionData = {
@@ -207,14 +262,27 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       entregasSemana: rowsMont.filter(
         (m: any) => m.fim_previsto && m.fim_previsto >= iso(now) && m.fim_previsto <= in7d,
       ).length,
-      ncAbertas: rowsRnc.filter((r: any) => r.status === "aberta" || r.status === "em_tratativa").length,
+      ncAbertas: rowsRnc.filter((r: any) => r.status === "aberta" || r.status === "em_tratativa")
+        .length,
     },
     aderencia: concluidas.length > 0 ? noPrazo.length / concluidas.length : 0,
     etapasHeat: [
-      { label: "Não iniciada", value: rowsMont.filter((m: any) => m.status === "nao_iniciada").length, color: "#94a3b8" },
+      {
+        label: "Não iniciada",
+        value: rowsMont.filter((m: any) => m.status === "nao_iniciada").length,
+        color: "#94a3b8",
+      },
       { label: "Em andamento", value: montEmAndamento.length, color: "#6366f1" },
-      { label: "Bloqueada", value: rowsMont.filter((m: any) => m.status === "bloqueada").length, color: "#f59e0b" },
-      { label: "Concluída", value: rowsMont.filter((m: any) => m.status === "concluida").length, color: "#22c55e" },
+      {
+        label: "Bloqueada",
+        value: rowsMont.filter((m: any) => m.status === "bloqueada").length,
+        color: "#f59e0b",
+      },
+      {
+        label: "Concluída",
+        value: rowsMont.filter((m: any) => m.status === "concluida").length,
+        color: "#22c55e",
+      },
     ],
     entregas: rowsMont
       .filter((m: any) => m.status !== "concluida")
@@ -231,7 +299,11 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
           titulo: `Montagem ${m.id.slice(0, 8)}`,
           meta: `Previsão ${fmtDate(m.fim_previsto)} · ${m.progresso ?? 0}%`,
           status: atrasada ? "ATRASADO" : m.status === "bloqueada" ? "BLOQUEADO" : "NO PRAZO",
-          tone: (atrasada ? "danger" : m.status === "bloqueada" ? "warning" : "success") as ListItem["tone"],
+          tone: (atrasada
+            ? "danger"
+            : m.status === "bloqueada"
+              ? "warning"
+              : "success") as ListItem["tone"],
         };
       }),
   };
@@ -244,7 +316,9 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const assembly: AssemblyData = {
     kpis: {
       etapasAbertas: etapasAbertas.length,
-      emAndamento: rowsEtapas.filter((e: any) => e.status === "em_andamento" || e.status === "em_progresso").length,
+      emAndamento: rowsEtapas.filter(
+        (e: any) => e.status === "em_andamento" || e.status === "em_progresso",
+      ).length,
       concluidas7d: etapasConcluidas7d.length,
       atrasadas: rowsEtapas.filter(etapaAtrasada).length,
     },
@@ -256,8 +330,16 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       id: e.id,
       titulo: e.titulo,
       meta: `${e.disciplina ?? "—"} · ${e.progresso ?? 0}%`,
-      status: etapaAtrasada(e) ? "ATRASADO" : e.status === "em_andamento" ? "EM ANDAMENTO" : "PRÓXIMA",
-      tone: (etapaAtrasada(e) ? "danger" : e.status === "em_andamento" ? "info" : "neutral") as ListItem["tone"],
+      status: etapaAtrasada(e)
+        ? "ATRASADO"
+        : e.status === "em_andamento"
+          ? "EM ANDAMENTO"
+          : "PRÓXIMA",
+      tone: (etapaAtrasada(e)
+        ? "danger"
+        : e.status === "em_andamento"
+          ? "info"
+          : "neutral") as ListItem["tone"],
     })),
   };
 
@@ -270,9 +352,13 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const purchasing: PurchasingData = {
     kpis: {
       ocsAprovar: ocsAprovar.length,
-      cotacoesAbertas: rowsCot.filter((c: any) => c.status === "aberta" || c.status === "respondida").length,
+      cotacoesAbertas: rowsCot.filter(
+        (c: any) => c.status === "aberta" || c.status === "respondida",
+      ).length,
       gastoMes: rowsOcs
-        .filter((o: any) => (o.aprovado_em ?? o.created_at) >= monthStart && o.status !== "cancelada")
+        .filter(
+          (o: any) => (o.aprovado_em ?? o.created_at) >= monthStart && o.status !== "cancelada",
+        )
         .reduce((s: number, o: any) => s + Number(o.valor_total ?? 0), 0),
       insumosAguardando: rowsInsumos.filter(
         (i: any) => i.status === "pronto_aprovacao" || i.status === "em_cotacao",
@@ -306,15 +392,20 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   );
   const chamados30d = rowsCham.filter((c: any) => c.created_at >= ago30d);
   const dentroSla = chamados30d.filter(
-    (c: any) => !c.sla_resolucao_at || (c.first_response_at && c.first_response_at <= c.sla_resolucao_at),
+    (c: any) =>
+      !c.sla_resolucao_at || (c.first_response_at && c.first_response_at <= c.sla_resolucao_at),
   );
 
   const field: FieldData = {
     kpis: {
-      satsPendentes: rowsSats.filter((s: any) => s.status === "rascunho" || s.status === "preenchendo").length,
+      satsPendentes: rowsSats.filter(
+        (s: any) => s.status === "rascunho" || s.status === "preenchendo",
+      ).length,
       chamadosAbertos: chamadosAbertos.length,
       slaVencendo: slaVencendo.length,
-      satsAssinados30d: rowsSats.filter((s: any) => s.status === "assinado" && s.updated_at >= ago30d).length,
+      satsAssinados30d: rowsSats.filter(
+        (s: any) => s.status === "assinado" && s.updated_at >= ago30d,
+      ).length,
     },
     slaMeter: {
       atual: chamados30d.length > 0 ? Math.round((dentroSla.length / chamados30d.length) * 100) : 0,
@@ -324,7 +415,8 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       id: c.id,
       titulo: `${c.codigo ?? "Chamado"} · ${c.assunto ?? "sem assunto"}`,
       meta: `${c.prioridade ?? "—"} · aberto ${rel(c.created_at)}`,
-      status: c.prioridade === "critica" ? "CRÍTICO" : c.status === "aberto" ? "ABERTO" : "EM ANÁLISE",
+      status:
+        c.prioridade === "critica" ? "CRÍTICO" : c.status === "aberto" ? "ABERTO" : "EM ANÁLISE",
       tone: (c.prioridade === "critica" ? "danger" : "info") as ListItem["tone"],
     })),
     sats: rowsSats
@@ -408,5 +500,13 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     })),
   };
 
-  return { generatedAt: new Date().toISOString(), engineering, production, assembly, purchasing, field, admin };
+  return {
+    generatedAt: new Date().toISOString(),
+    engineering,
+    production,
+    assembly,
+    purchasing,
+    field,
+    admin,
+  };
 }

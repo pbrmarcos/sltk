@@ -43,7 +43,8 @@ export function ProximoPassoBar({
         </Button>
         {proximo && (
           <Button size="sm" variant="outline" onClick={() => actions.onAvancar(proximo)}>
-            Marcar como {STAGE_LABEL[proximo].toLowerCase()} <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            Marcar como {STAGE_LABEL[proximo].toLowerCase()}{" "}
+            <ArrowRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         )}
       </>
@@ -72,7 +73,8 @@ export function ProximoPassoBar({
     acoes = (
       <>
         <Button size="sm" onClick={actions.onGerarOrcamento}>
-          <FileText className="h-3.5 w-3.5 mr-1" /> {orcamentos > 0 ? "Nova versão / orçamento" : "Gerar orçamento"}
+          <FileText className="h-3.5 w-3.5 mr-1" />{" "}
+          {orcamentos > 0 ? "Nova versão / orçamento" : "Gerar orçamento"}
         </Button>
         {proximo && (
           <Button size="sm" variant="outline" onClick={() => actions.onAvancar(proximo)}>
@@ -94,7 +96,11 @@ export function ProximoPassoBar({
             <FileText className="h-3.5 w-3.5 mr-1" /> Gerar orçamento
           </Button>
         )}
-        <Button size="sm" variant={orcamentos > 0 ? "default" : "outline"} onClick={() => actions.onAvancar("ganho")}>
+        <Button
+          size="sm"
+          variant={orcamentos > 0 ? "default" : "outline"}
+          onClick={() => actions.onAvancar("ganho")}
+        >
           <Trophy className="h-3.5 w-3.5 mr-1" /> Marcar como ganho
         </Button>
       </>
@@ -119,7 +125,9 @@ export function ProximoPassoBar({
         {!locked && <div className="flex flex-wrap gap-2">{acoes}</div>}
       </div>
       {locked && (
-        <p className="text-[11px] text-amber-700">Oportunidade convertida em processo — ações desabilitadas.</p>
+        <p className="text-[11px] text-amber-700">
+          Oportunidade convertida em processo — ações desabilitadas.
+        </p>
       )}
     </div>
   );

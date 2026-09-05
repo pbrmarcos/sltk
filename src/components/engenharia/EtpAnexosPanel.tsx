@@ -35,8 +35,7 @@ import {
 } from "@/lib/equipamento-etp-anexos.functions";
 import { useAuth } from "@/hooks/use-auth";
 
-const ACCEPT =
-  ".pdf,.jpg,.jpeg,.png,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv";
+const ACCEPT = ".pdf,.jpg,.jpeg,.png,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv";
 
 function fmtBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -44,10 +43,7 @@ function fmtBytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(2)} MB`;
 }
 
-async function fileToBase64(
-  file: File,
-  onProgress?: (pct: number) => void,
-): Promise<string> {
+async function fileToBase64(file: File, onProgress?: (pct: number) => void): Promise<string> {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
     fr.onprogress = (e) => {
@@ -63,13 +59,7 @@ async function fileToBase64(
   });
 }
 
-export function EtpAnexosPanel({
-  etpId,
-  readOnly,
-}: {
-  etpId: string;
-  readOnly?: boolean;
-}) {
+export function EtpAnexosPanel({ etpId, readOnly }: { etpId: string; readOnly?: boolean }) {
   const qc = useQueryClient();
   const { role } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -169,8 +159,8 @@ export function EtpAnexosPanel({
         <p className="text-xs text-[var(--text-muted)]">Carregando…</p>
       ) : anexos.length === 0 ? (
         <p className="rounded-[var(--radius-md)] border border-dashed border-[var(--bg-border)] bg-[var(--bg-elevated)]/30 p-3 text-xs text-[var(--text-muted)]">
-          Nenhum anexo. Arquivos enviados ficam organizados no Google Drive
-          (cliente → AAAAMM → etps → este ETP).
+          Nenhum anexo. Arquivos enviados ficam organizados no Google Drive (cliente → AAAAMM → etps
+          → este ETP).
         </p>
       ) : (
         <ul className="divide-y divide-[var(--bg-border)] overflow-hidden rounded-[var(--radius-md)] border border-[var(--bg-border)]">
@@ -197,8 +187,7 @@ export function EtpAnexosPanel({
                     </p>
                     <p className="mt-1 text-[10px] text-[var(--text-muted)]">
                       Original: <span className="font-mono">{a.nome_original}</span> ·{" "}
-                      {a.user_nome ?? "—"} ·{" "}
-                      {new Date(a.created_at).toLocaleString("pt-BR")}
+                      {a.user_nome ?? "—"} · {new Date(a.created_at).toLocaleString("pt-BR")}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
@@ -208,15 +197,9 @@ export function EtpAnexosPanel({
                         variant="ghost"
                         className="h-8 w-8"
                         title={isOpen ? "Fechar pré-visualização" : "Pré-visualizar aqui"}
-                        onClick={() =>
-                          setOpenPreview((s) => ({ ...s, [a.id]: !s[a.id] }))
-                        }
+                        onClick={() => setOpenPreview((s) => ({ ...s, [a.id]: !s[a.id] }))}
                       >
-                        {isOpen ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     ) : null}
                     {a.drive_view_url ? (
@@ -264,8 +247,8 @@ export function EtpAnexosPanel({
                       loading="lazy"
                     />
                     <div className="flex items-center gap-1 px-2 py-1 text-[10px] text-[var(--text-muted)]">
-                      <ChevronRight className="h-3 w-3" /> Pré-visualização do
-                      Google Drive (requer login na mesma conta do workspace).
+                      <ChevronRight className="h-3 w-3" /> Pré-visualização do Google Drive (requer
+                      login na mesma conta do workspace).
                     </div>
                   </div>
                 ) : null}
@@ -288,7 +271,6 @@ export function EtpAnexosPanel({
     </section>
   );
 }
-
 
 function UploadDialog({
   etpId,
@@ -370,9 +352,8 @@ function UploadDialog({
   const nameInvalid = name.trim().length < 3 || !/^[a-zA-Z0-9._\- ]+$/.test(name);
   const descInvalid = descricao.trim().length < 5;
   const looksGeneric =
-    /^(img|image|photo|foto|document|doc|scan|untitled|sem[-_ ]?nome|new)/i.test(
-      name.trim(),
-    ) || /^\d{6,}$/.test(name.trim().replace(/[._-]/g, ""));
+    /^(img|image|photo|foto|document|doc|scan|untitled|sem[-_ ]?nome|new)/i.test(name.trim()) ||
+    /^\d{6,}$/.test(name.trim().replace(/[._-]/g, ""));
 
   const busy = uploadMut.isPending || phase !== "idle";
 
@@ -457,9 +438,7 @@ function UploadDialog({
               />
               <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
                 <span>{descricao.length} / 500</span>
-                {descInvalid ? (
-                  <span className="text-rose-600">Mínimo 5 caracteres.</span>
-                ) : null}
+                {descInvalid ? <span className="text-rose-600">Mínimo 5 caracteres.</span> : null}
               </div>
             </label>
 
@@ -467,9 +446,7 @@ function UploadDialog({
               <div className="space-y-1.5 rounded-[var(--radius-md)] border border-blue-200 bg-blue-50/60 p-3">
                 <div className="flex items-center gap-2 text-xs font-medium text-blue-800">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  {phase === "reading"
-                    ? `Lendo arquivo… ${readPct}%`
-                    : "Enviando ao Google Drive…"}
+                  {phase === "reading" ? `Lendo arquivo… ${readPct}%` : "Enviando ao Google Drive…"}
                 </div>
                 <Progress value={phase === "reading" ? readPct : undefined} className="h-1.5" />
                 <p className="text-[10px] text-blue-700/80">

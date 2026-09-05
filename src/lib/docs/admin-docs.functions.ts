@@ -59,22 +59,29 @@ export const listDocumentoTipos = createServerFn({ method: "GET" })
       .eq("ativo", true)
       .order("nome");
     if (error) throw friendlyDbError(error);
-    return (data || []) as Array<{ codigo: string; nome: string; prefixo_codigo: string; ativo: boolean }>;
+    return (data || []) as Array<{
+      codigo: string;
+      nome: string;
+      prefixo_codigo: string;
+      ativo: boolean;
+    }>;
   });
 
 export const updateBloco = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    id: string;
-    conteudo_pt?: any;
-    conteudo_es?: any;
-    conteudo_en?: any;
-    obrigatorio?: boolean;
-    ordem_padrao?: number;
-    ativo?: boolean;
-    largura?: 50 | 100;
-    comentario?: string;
-  }) => d)
+  .inputValidator(
+    (d: {
+      id: string;
+      conteudo_pt?: any;
+      conteudo_es?: any;
+      conteudo_en?: any;
+      obrigatorio?: boolean;
+      ordem_padrao?: number;
+      ativo?: boolean;
+      largura?: 50 | 100;
+      comentario?: string;
+    }) => d,
+  )
   .handler(async ({ data, context }) => {
     const [{ data: isAdmin }, { data: isMgr }] = await Promise.all([
       context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
@@ -82,12 +89,19 @@ export const updateBloco = createServerFn({ method: "POST" })
     ]);
     if (!isAdmin && !isMgr) throw new Error("Acesso restrito.");
 
-
     const { id, comentario, ...patch } = data;
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const userNome = await getUserDisplayName(supabaseAdmin, context.userId);
-    await snapshotBloco(supabaseAdmin, id, context.userId, userNome, "editado", comentario ?? null, null);
+    await snapshotBloco(
+      supabaseAdmin,
+      id,
+      context.userId,
+      userNome,
+      "editado",
+      comentario ?? null,
+      null,
+    );
 
     const { error } = await (supabaseAdmin as any)
       .from("documento_blocos")
@@ -203,11 +217,9 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
 
 export const translateBloco = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    bloco_id: string;
-    alvo: "es" | "en" | "both";
-    sobrescrever?: boolean;
-  }) => d)
+  .inputValidator(
+    (d: { bloco_id: string; alvo: "es" | "en" | "both"; sobrescrever?: boolean }) => d,
+  )
   .handler(async ({ data, context }) => {
     const [{ data: isAdmin }, { data: isMgr }] = await Promise.all([
       context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
@@ -216,7 +228,8 @@ export const translateBloco = createServerFn({ method: "POST" })
     if (!isAdmin && !isMgr) throw new Error("Acesso restrito.");
 
     const { aiConfigured } = await import("@/lib/ai-gateway.server");
-    if (!aiConfigured()) throw new Error("Recurso de IA indisponível — a integração não está configurada.");
+    if (!aiConfigured())
+      throw new Error("Recurso de IA indisponível — a integração não está configurada.");
 
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
@@ -244,14 +257,26 @@ export const translateBloco = createServerFn({ method: "POST" })
         ptTitulo ? translateText(ptTitulo, alvo) : Promise.resolve(""),
         ptTexto ? translateText(ptTexto, alvo) : Promise.resolve(""),
       ]);
-      patch[`conteudo_${alvo}`] = { ...atual, titulo: tTitulo || atual.titulo || "", texto: tTexto };
+      patch[`conteudo_${alvo}`] = {
+        ...atual,
+        titulo: tTitulo || atual.titulo || "",
+        texto: tTexto,
+      };
       alterou = true;
     }
 
     if (!alterou) return { ok: true, skipped: true };
 
     const userNome = await getUserDisplayName(supabaseAdmin, context.userId);
-    await snapshotBloco(supabaseAdmin, data.bloco_id, context.userId, userNome, "traduzido_auto", `Tradução automática (${alvos.join("/")})`, null);
+    await snapshotBloco(
+      supabaseAdmin,
+      data.bloco_id,
+      context.userId,
+      userNome,
+      "traduzido_auto",
+      `Tradução automática (${alvos.join("/")})`,
+      null,
+    );
     const { error: uErr } = await (supabaseAdmin as any)
       .from("documento_blocos")
       .update({ ...patch, updated_at: new Date().toISOString() })

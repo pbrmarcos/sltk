@@ -23,14 +23,11 @@ if (!TOKEN) {
 }
 
 async function sql(query) {
-  const res = await fetch(
-    `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
-    },
-  );
+  const res = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
   const json = await res.json();
   if (!res.ok || json?.message) throw new Error(json?.message ?? `HTTP ${res.status}`);
   return json;

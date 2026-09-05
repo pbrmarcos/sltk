@@ -24,7 +24,11 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/comercial/orcamento/novo", category: "comercial", slug: "novo-orcamento" },
   { route: "/comercial/orcamento/$id", category: "comercial", slug: "novo-orcamento" },
   { route: "/comercial/orcamento/$id/corrigir", category: "comercial", slug: "corrigir-orcamento" },
-  { route: "/comercial/checklists", category: "comercial", slug: "checklist-publico-e-formularios" },
+  {
+    route: "/comercial/checklists",
+    category: "comercial",
+    slug: "checklist-publico-e-formularios",
+  },
   { route: "/comercial/entrevistas", category: "comercial", slug: "entrevistas" },
 
   // Clientes & Fornecedores
@@ -33,7 +37,11 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/clientes/$codigo", category: "clientes-fornecedores", slug: "cadastrar-cliente" },
   { route: "/fornecedores", category: "clientes-fornecedores", slug: "cadastrar-fornecedor" },
   { route: "/fornecedores/novo", category: "clientes-fornecedores", slug: "cadastrar-fornecedor" },
-  { route: "/fornecedores/$id", category: "clientes-fornecedores", slug: "categorias-e-homologacao" },
+  {
+    route: "/fornecedores/$id",
+    category: "clientes-fornecedores",
+    slug: "categorias-e-homologacao",
+  },
   { route: "/importar", category: "clientes-fornecedores", slug: "importar-clientes-em-lote" },
 
   // Engenharia
@@ -98,8 +106,16 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/admin/entrevistas/$segmentoId", category: "admin", slug: "formularios-entrevista" },
   { route: "/admin/sla-chamados", category: "admin", slug: "sla-chamados" },
   { route: "/admin/etapas-equipamentos", category: "admin", slug: "paginas-e-etapas-equipamentos" },
-  { route: "/admin/etapas-equipamentos/$id", category: "admin", slug: "paginas-e-etapas-equipamentos" },
-  { route: "/admin/paginas-equipamentos", category: "admin", slug: "paginas-e-etapas-equipamentos" },
+  {
+    route: "/admin/etapas-equipamentos/$id",
+    category: "admin",
+    slug: "paginas-e-etapas-equipamentos",
+  },
+  {
+    route: "/admin/paginas-equipamentos",
+    category: "admin",
+    slug: "paginas-e-etapas-equipamentos",
+  },
   { route: "/admin/suporte", category: "admin", slug: "visao-geral" },
 
   // Conta

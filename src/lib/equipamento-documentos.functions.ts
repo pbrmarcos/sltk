@@ -23,7 +23,12 @@ const MIME_LIMITS: Record<string, number> = {
 };
 
 function sanitizeFolderName(s: string): string {
-  return s.replace(/[\\/:*?"<>|]/g, "-").trim().slice(0, 120) || "sem-nome";
+  return (
+    s
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .trim()
+      .slice(0, 120) || "sem-nome"
+  );
 }
 
 async function driveFindFolder(name: string, parentId: string): Promise<string | null> {
@@ -41,7 +46,11 @@ async function driveCreateFolder(name: string, parentId: string): Promise<string
   const r = await fetch(`${baseUrl}/drive/v3/files?fields=id`, {
     method: "POST",
     headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", parents: [parentId] }),
+    body: JSON.stringify({
+      name,
+      mimeType: "application/vnd.google-apps.folder",
+      parents: [parentId],
+    }),
   });
   if (!r.ok) throw new Error(`Drive create folder ${r.status}: ${await r.text()}`);
   const j = (await r.json()) as { id: string };
@@ -77,7 +86,11 @@ async function driveUploadMultipart(opts: {
   bytes: ArrayBuffer;
 }): Promise<{ id: string; webViewLink: string }> {
   const boundary = `lvbl_${crypto.randomUUID()}`;
-  const meta = JSON.stringify({ name: opts.name, parents: [opts.parentId], mimeType: opts.mimeType });
+  const meta = JSON.stringify({
+    name: opts.name,
+    parents: [opts.parentId],
+    mimeType: opts.mimeType,
+  });
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
@@ -150,7 +163,9 @@ export const uploadEquipamentoDocumento = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) {
-      throw new Error(`Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`);
+      throw new Error(
+        `Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`,
+      );
     }
     if (data.size_bytes > limit) {
       const mb = (limit / 1024 / 1024).toFixed(0);
@@ -165,9 +180,11 @@ export const uploadEquipamentoDocumento = createServerFn({ method: "POST" })
     if (eErr) throw friendlyDbError(eErr);
     if (!eqp) throw new Error("Equipamento não encontrado ou sem acesso.");
 
-    const cliente = (eqp as unknown as {
-      clientes: { codigo: string; razao_social: string } | null;
-    }).clientes;
+    const cliente = (
+      eqp as unknown as {
+        clientes: { codigo: string; razao_social: string } | null;
+      }
+    ).clientes;
     if (!cliente) throw new Error("Cliente do equipamento não encontrado.");
 
     const now = new Date();

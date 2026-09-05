@@ -17,7 +17,6 @@ import {
   type PentaColuna,
 } from "@/lib/mineracao/mapear";
 
-
 /**
  * As tabelas de mineração ainda não constam nos tipos gerados do Supabase.
  * Usamos um cliente sem tipagem de schema apenas para elas.
@@ -47,9 +46,12 @@ async function assertComercial(supabase: AnyDb, userId: string) {
 async function loadCreds(supabase: AnyDb) {
   const { data, error } = await supabase.rpc("mineracao_creds");
   if (error) throw friendlyDbError(error);
-  const row = (Array.isArray(data) ? data[0] : data) as
-    | { api_base_url: string; usuario: string | null; senha: string | null; delay_ms: number }
-    | null;
+  const row = (Array.isArray(data) ? data[0] : data) as {
+    api_base_url: string;
+    usuario: string | null;
+    senha: string | null;
+    delay_ms: number;
+  } | null;
   if (!row?.usuario || !row?.senha) {
     const err = new Error(
       "A mineração de leads ainda não foi configurada. Um administrador precisa informar o acesso do provedor em Configurações › Mineração.",
@@ -90,7 +92,6 @@ export const getMineracaoConfig = createServerFn({ method: "GET" })
     };
   });
 
-
 const configInput = z.object({
   api_base_url: z.string().url().max(300),
   usuario: z.string().trim().max(200).optional(),
@@ -125,10 +126,7 @@ export const saveMineracaoConfig = createServerFn({ method: "POST" })
     if (data.usuario !== undefined) patch["usuario"] = data.usuario || null;
     if (data.senha) patch["senha"] = data.senha;
 
-    const { error } = await db
-      .from("mineracao_config")
-      .update(patch)
-      .eq("singleton", true);
+    const { error } = await db.from("mineracao_config").update(patch).eq("singleton", true);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -201,9 +199,10 @@ export const getMineracaoStatus = createServerFn({ method: "GET" })
     await assertComercial(db, context.userId);
     const { data, error } = await db.rpc("mineracao_restricoes_get");
     if (error) return { dados: null, atualizado_em: null, erro: error.message };
-    const row = (Array.isArray(data) ? data[0] : data) as
-      | { snapshot: MineracaoRestricoes | null; atualizado_em: string | null }
-      | null;
+    const row = (Array.isArray(data) ? data[0] : data) as {
+      snapshot: MineracaoRestricoes | null;
+      atualizado_em: string | null;
+    } | null;
     return {
       dados: (row?.snapshot ?? null) as MineracaoRestricoes | null,
       atualizado_em: row?.atualizado_em ?? null,
@@ -230,8 +229,6 @@ export const atualizarRestricoes = createServerFn({ method: "POST" })
     }
   });
 
-
-
 export const testarMineracao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -242,9 +239,18 @@ export const testarMineracao = createServerFn({ method: "POST" })
       const creds = await loadCreds(db);
       const { pentaRestrictions } = await import("@/lib/mineracao/penta.server");
       const r = await pentaRestrictions(creds);
-      return { ok: true as const, latencia_ms: Date.now() - started, conta: r.name, estado: r.serviceState };
+      return {
+        ok: true as const,
+        latencia_ms: Date.now() - started,
+        conta: r.name,
+        estado: r.serviceState,
+      };
     } catch (err) {
-      return { ok: false as const, latencia_ms: Date.now() - started, erro: (err as Error).message };
+      return {
+        ok: false as const,
+        latencia_ms: Date.now() - started,
+        erro: (err as Error).message,
+      };
     }
   });
 
@@ -324,9 +330,7 @@ export const statusSincronizacaoBases = createServerFn({ method: "GET" })
       .order("synced_at", { ascending: false })
       .limit(1);
     if (error) throw friendlyDbError(error);
-    const { count } = await db
-      .from("penta_bases")
-      .select("id", { count: "exact", head: true });
+    const { count } = await db.from("penta_bases").select("id", { count: "exact", head: true });
     const row = (data ?? [])[0] as { synced_at?: string } | undefined;
     return { ultima_sincronizacao: row?.synced_at ?? null, total: count ?? 0 };
   });
@@ -339,7 +343,12 @@ export const sincronizarBases = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
-      .object({ paises: z.array(z.object({ key: z.string(), value: z.string() })).max(8).optional() })
+      .object({
+        paises: z
+          .array(z.object({ key: z.string(), value: z.string() }))
+          .max(8)
+          .optional(),
+      })
       .parse(input ?? {}),
   )
   .handler(async ({ data, context }) => {
@@ -352,7 +361,9 @@ export const sincronizarBases = createServerFn({ method: "POST" })
 
     // Sem lista informada, sincroniza no máximo 4 países por chamada para não
     // estourar o tempo limite do servidor (cada país exige uma chamada externa).
-    const paises = data.paises?.length ? data.paises : ((await pentaCountries(creds)) ?? []).slice(0, 4);
+    const paises = data.paises?.length
+      ? data.paises
+      : ((await pentaCountries(creds)) ?? []).slice(0, 4);
     const agora = new Date().toISOString();
     const registros: Array<Record<string, unknown>> = [];
     const erros: string[] = [];
@@ -435,7 +446,6 @@ export const solicitarSincronizacaoBases = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 export const listarPaises = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -453,7 +463,10 @@ const buscaInput = z.object({
   keyVersion: z.number().int().min(0).max(99),
   baseTitulo: z.string().max(200).optional(),
   queryLimit: z.number().int().min(0).max(1000000).optional(),
-  rubros: z.array(z.string().regex(/^\d{4}$/)).min(1).max(30),
+  rubros: z
+    .array(z.string().regex(/^\d{4}$/))
+    .min(1)
+    .max(30),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   empresaParam: z.string().max(60).optional(),
@@ -485,10 +498,6 @@ export type LeadMinerado = {
   parceiros: Array<{ nome: string; operacoes: number; valor: number }>;
 };
 
-
-
-
-
 export const buscarOperacoes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => buscaInput.parse(input))
@@ -512,7 +521,12 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
       .eq("key_operation", data.keyOperation)
       .eq("key_version", data.keyVersion)
       .maybeSingle();
-    const bd = baseRow as { title?: string; pais?: string; start_date?: string | null; updated_date?: string | null } | null;
+    const bd = baseRow as {
+      title?: string;
+      pais?: string;
+      start_date?: string | null;
+      updated_date?: string | null;
+    } | null;
     if (bd?.start_date || bd?.updated_date) {
       const fmt = (d: string) => d.slice(0, 10).split("-").reverse().join("/");
       const ini = bd.start_date ? bd.start_date.slice(0, 10) : null;
@@ -529,7 +543,6 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
       if (ini && buscaIni < ini) data.startDate = ini;
       if (fim && buscaFim > fim) data.endDate = fim;
     }
-
 
     const modo = data.modo ?? "empresas";
     if (modo === "rota" && !data.paisOrigem) {
@@ -571,13 +584,14 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
     const disponiveis = cols.map((c) => c.name);
     const empresaCol = pickColumn(disponiveis, COL_EMPRESA, data.empresaColuna);
     const contraCol = pickColumn(disponiveis, COL_CONTRA, data.contraparteColuna);
-    const valorCol = pickColumn(
-      disponiveis.filter((n) => {
-        const c = cols.find((x) => x.name === n);
-        return !c?.type || /num|dec|money|float|int/i.test(String(c.type));
-      }),
-      COL_VALOR,
-    ) ?? pickColumn(disponiveis, COL_VALOR);
+    const valorCol =
+      pickColumn(
+        disponiveis.filter((n) => {
+          const c = cols.find((x) => x.name === n);
+          return !c?.type || /num|dec|money|float|int/i.test(String(c.type));
+        }),
+        COL_VALOR,
+      ) ?? pickColumn(disponiveis, COL_VALOR);
     const periodoCol = pickColumn(disponiveis, COL_PERIODO);
     const rubroCol = pickColumn(disponiveis, COL_RUBRO);
 
@@ -593,14 +607,19 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
     // Bases que não expõem o nome do exportador ao menos trazem o país de
     // procedência — usado como contraparte para não deixar o par vazio.
     const contraFallback =
-      contraCol ?? cols.find((c) => /paisProcedencia|paisOrigen|paisOrigem/i.test(c.name))?.name ?? null;
+      contraCol ??
+      cols.find((c) => /paisProcedencia|paisOrigen|paisOrigem/i.test(c.name))?.name ??
+      null;
     const iContra = indexOfColumn(cols, contraFallback);
     const contraparteDisponivel = iContra >= 0;
 
     const contem = (valor: string, filtro?: string) =>
       !filtro || valor.toLowerCase().includes(filtro.toLowerCase());
 
-    const agrupado = new Map<string, LeadMinerado & { _parc: Map<string, { operacoes: number; valor: number }> }>();
+    const agrupado = new Map<
+      string,
+      LeadMinerado & { _parc: Map<string, { operacoes: number; valor: number }> }
+    >();
     let totalValor = 0;
     let totalLinhas = 0;
 
@@ -617,23 +636,20 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
       totalValor += valor;
       totalLinhas += 1;
 
-
       const porPar = modo === "pares" || modo === "rota";
       const chave = porPar ? `${empresa}||${contraparte}` : empresa;
-      const cur =
-        agrupado.get(chave) ??
-        {
-          empresa,
-          contraparte: porPar ? contraparte || null : null,
+      const cur = agrupado.get(chave) ?? {
+        empresa,
+        contraparte: porPar ? contraparte || null : null,
 
-          operacoes: 0,
-          valor_total: 0,
-          rubros: [] as string[],
-          primeira_operacao: null as string | null,
-          ultima_operacao: null as string | null,
-          parceiros: [] as LeadMinerado["parceiros"],
-          _parc: new Map<string, { operacoes: number; valor: number }>(),
-        };
+        operacoes: 0,
+        valor_total: 0,
+        rubros: [] as string[],
+        primeira_operacao: null as string | null,
+        ultima_operacao: null as string | null,
+        parceiros: [] as LeadMinerado["parceiros"],
+        _parc: new Map<string, { operacoes: number; valor: number }>(),
+      };
       cur.operacoes += 1;
       cur.valor_total += valor;
       if (rubro && !cur.rubros.includes(rubro.slice(0, 4))) cur.rubros.push(rubro.slice(0, 4));
@@ -644,7 +660,8 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
         cur._parc.set(contraparte, p);
       }
       if (periodo) {
-        if (!cur.primeira_operacao || periodo < cur.primeira_operacao) cur.primeira_operacao = periodo;
+        if (!cur.primeira_operacao || periodo < cur.primeira_operacao)
+          cur.primeira_operacao = periodo;
         if (!cur.ultima_operacao || periodo > cur.ultima_operacao) cur.ultima_operacao = periodo;
       }
       agrupado.set(chave, cur);
@@ -735,7 +752,6 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
       contraparte_disponivel: contraparteDisponivel,
       colunas_base: disponiveis,
     };
-
   });
 
 /* --------------------------------------------------- rota origem → destino */
@@ -776,7 +792,6 @@ export const descobrirBaseImportacao = createServerFn({ method: "POST" })
       queryLimit: Number(base["query_limit"] ?? 0),
       underMaintenance: Boolean(base["under_maintenance"]),
       colunas: ((base["parameters"] ?? []) as Array<{ name: string }>).map((p) => p.name),
-
     };
   });
 
@@ -811,9 +826,7 @@ export const listarPaisesOrigem = createServerFn({ method: "POST" })
 export const salvarAnotacaoLead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({ resultado_id: z.string().uuid(), anotacao: z.string().max(2000) })
-      .parse(input),
+    z.object({ resultado_id: z.string().uuid(), anotacao: z.string().max(2000) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const db = anyDb(context.supabase);
@@ -825,7 +838,6 @@ export const salvarAnotacaoLead = createServerFn({ method: "POST" })
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
-
 
 /* -------------------------------------------------------------- campanhas */
 
@@ -876,8 +888,6 @@ export const buscaAnterior = createServerFn({ method: "POST" })
     };
   });
 
-
-
 export const listarCampanhas = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -911,8 +921,6 @@ export const listarCampanhas = createServerFn({ method: "GET" })
       ...r,
       responsavel: r["criado_por"] ? (nomes.get(r["criado_por"]) ?? "Usuário") : "—",
     })) as Array<Record<string, any>>;
-
-
   });
 
 export const listarResultados = createServerFn({ method: "POST" })
@@ -993,8 +1001,7 @@ export const converterLeadEmOportunidade = createServerFn({ method: "POST" })
       let primeira: { id: string; codigo: string } | null = null;
       for (const empresa of alvos) {
         if (!empresa) continue;
-        const contraponto =
-          empresa === importador ? fornecedor : importador;
+        const contraponto = empresa === importador ? fornecedor : importador;
         const observacoes = [
           `Origem: mineração de leads (NCM ${rubros.join(", ") || "—"}).`,
           contraponto ? `Contraparte: ${contraponto}.` : null,
@@ -1039,7 +1046,6 @@ export const converterLeadEmOportunidade = createServerFn({ method: "POST" })
 
           .eq("id", row["id"]);
       }
-
     }
 
     return { criadas, ignorados };

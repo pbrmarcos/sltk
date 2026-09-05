@@ -15,7 +15,9 @@ export const Route = createFileRoute("/_authenticated/ajuda/documentacao/$catego
     const cat = getCategory(params.categoria);
     const article = cat ? getArticle(cat.id, params.slug) : undefined;
     if (!cat || !article) throw notFound();
-    const related = getArticlesByCategory(cat.id).filter((a) => a.slug !== article.slug).slice(0, 5);
+    const related = getArticlesByCategory(cat.id)
+      .filter((a) => a.slug !== article.slug)
+      .slice(0, 5);
     return { cat, article, related };
   },
   head: ({ loaderData }) => ({
@@ -82,7 +84,11 @@ function ArtigoPage() {
             ))}
           </div>
           <ArticleRenderer category={cat.id}>{article.body}</ArticleRenderer>
-          <ArticleFooter slug={article.slug} atualizadoEm={article.atualizado_em} appVersion={article.app_version} />
+          <ArticleFooter
+            slug={article.slug}
+            atualizadoEm={article.atualizado_em}
+            appVersion={article.app_version}
+          />
         </article>
 
         {related.length > 0 && (
@@ -91,7 +97,7 @@ function ArtigoPage() {
               Artigos relacionados
             </h2>
             <ul className="space-y-1 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3">
-              {related.map((a: typeof related[number]) => (
+              {related.map((a: (typeof related)[number]) => (
                 <li key={a.slug} className="text-sm">
                   <Link
                     to="/ajuda/documentacao/$categoria/$slug"

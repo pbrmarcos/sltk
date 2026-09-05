@@ -19,34 +19,34 @@ function projectRefFromUrl(url?: string | null) {
 export const getBackendInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-  await assertAdmin(context.supabase, context.userId);
-  const fallback = getSupabasePublicConfig();
-  const url = process.env.SUPABASE_URL ?? fallback.url ?? null;
-  const projectId = process.env.SUPABASE_PROJECT_ID ?? projectRefFromUrl(url);
-  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY ?? fallback.publishableKey ?? null;
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY ?? null;
+    await assertAdmin(context.supabase, context.userId);
+    const fallback = getSupabasePublicConfig();
+    const url = process.env.SUPABASE_URL ?? fallback.url ?? null;
+    const projectId = process.env.SUPABASE_PROJECT_ID ?? projectRefFromUrl(url);
+    const publishable = process.env.SUPABASE_PUBLISHABLE_KEY ?? fallback.publishableKey ?? null;
+    const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY ?? null;
 
-  // Ping leve no Auth health endpoint pra validar se o projeto está ativo — reaproveita o helper do motor de diagnóstico.
-  async function ping(target?: string | null) {
-    if (!target) return { ok: false, status: 0, error: "URL não configurada" };
-    const r = await pingSupabaseHealth(target, publishable);
-    return { ok: r.ok, status: r.status, error: r.ok ? null : (r.erro ?? `HTTP ${r.status}`) };
-  }
+    // Ping leve no Auth health endpoint pra validar se o projeto está ativo — reaproveita o helper do motor de diagnóstico.
+    async function ping(target?: string | null) {
+      if (!target) return { ok: false, status: 0, error: "URL não configurada" };
+      const r = await pingSupabaseHealth(target, publishable);
+      return { ok: r.ok, status: r.status, error: r.ok ? null : (r.erro ?? `HTTP ${r.status}`) };
+    }
 
-  const activePing = await ping(url);
+    const activePing = await ping(url);
 
-  return {
-    active: {
-      label: "Banco de dados do sistema",
-      url,
-      projectId,
-      projectRef: projectRefFromUrl(url) ?? projectId,
-      dashboardUrl: projectId ? `https://supabase.com/dashboard/project/${projectId}` : null,
-      publishableKeyMasked: mask(publishable),
-      hasServiceRole: Boolean(serviceRole),
-      ping: activePing,
-    },
-    dest: null,
-    checkedAt: new Date().toISOString(),
-  };
-});
+    return {
+      active: {
+        label: "Banco de dados do sistema",
+        url,
+        projectId,
+        projectRef: projectRefFromUrl(url) ?? projectId,
+        dashboardUrl: projectId ? `https://supabase.com/dashboard/project/${projectId}` : null,
+        publishableKeyMasked: mask(publishable),
+        hasServiceRole: Boolean(serviceRole),
+        ping: activePing,
+      },
+      dest: null,
+      checkedAt: new Date().toISOString(),
+    };
+  });

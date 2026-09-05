@@ -25,7 +25,12 @@ type EtpData = {
   clientes?: { codigo?: string | null; razao_social?: string | null } | null;
 };
 
-type Anexo = { nome_final: string; descricao?: string | null; user_nome?: string | null; created_at: string };
+type Anexo = {
+  nome_final: string;
+  descricao?: string | null;
+  user_nome?: string | null;
+  created_at: string;
+};
 
 function fmt(d?: string | null) {
   return d ? new Date(d).toLocaleString("pt-BR") : "—";
@@ -112,10 +117,7 @@ async function buildAndDownload(etp: EtpData, anexos: Anexo[]) {
   ];
 
   const doc = (
-    <Document
-      title={`ETP v${etp.versao} — ${eqp?.codigo ?? "Equipamento"}`}
-      author="SLTK Americas"
-    >
+    <Document title={`ETP v${etp.versao} — ${eqp?.codigo ?? "Equipamento"}`} author="SLTK Americas">
       <Page size="A4" style={s.page}>
         <Text style={s.brand}>SLTK AMERICAS</Text>
         <Text style={s.title}>Especificação Técnica do Produto (ETP)</Text>

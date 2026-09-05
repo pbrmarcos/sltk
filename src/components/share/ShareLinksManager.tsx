@@ -39,16 +39,29 @@ export function ShareLinksManager({ tipo, relatorioId, relatorioCodigo }: Props)
   }
 
   const links = (linksQ.data ?? []) as Array<{
-    id: string; rotulo: string | null; scope: string[];
-    created_by_nome: string | null; created_at: string;
-    expires_at: string; revoked_at: string | null; revoked_by_nome: string | null;
-    last_used_at: string | null; use_count: number;
+    id: string;
+    rotulo: string | null;
+    scope: string[];
+    created_by_nome: string | null;
+    created_at: string;
+    expires_at: string;
+    revoked_at: string | null;
+    revoked_by_nome: string | null;
+    last_used_at: string | null;
+    use_count: number;
   }>;
   const subs = (subsQ.data ?? []) as Array<{
-    id: string; share_link_id: string; acao: string; alvo_id: string | null;
-    payload: Record<string, unknown> | null; signatario_nome: string | null;
-    signatario_cargo: string | null; status: string; created_at: string;
-    ip: string | null; user_agent: string | null;
+    id: string;
+    share_link_id: string;
+    acao: string;
+    alvo_id: string | null;
+    payload: Record<string, unknown> | null;
+    signatario_nome: string | null;
+    signatario_cargo: string | null;
+    status: string;
+    created_at: string;
+    ip: string | null;
+    user_agent: string | null;
   }>;
 
   const ACAO_LABEL: Record<string, string> = {
@@ -57,7 +70,6 @@ export function ShareLinksManager({ tipo, relatorioId, relatorioCodigo }: Props)
     assinatura: "Assinatura",
     pdf_export: "Exportação PDF",
   };
-
 
   return (
     <div className="space-y-4">
@@ -95,21 +107,31 @@ export function ShareLinksManager({ tipo, relatorioId, relatorioCodigo }: Props)
                   const active = !l.revoked_at && new Date(l.expires_at).getTime() > Date.now();
                   return (
                     <tr key={l.id} className="border-t border-[var(--border)]">
-                      <td className="py-2 pr-3 whitespace-nowrap">{new Date(l.created_at).toLocaleString("pt-BR")}</td>
+                      <td className="py-2 pr-3 whitespace-nowrap">
+                        {new Date(l.created_at).toLocaleString("pt-BR")}
+                      </td>
                       <td className="py-2 pr-3">{l.created_by_nome ?? "—"}</td>
-                      <td className="py-2 pr-3 whitespace-nowrap">{new Date(l.expires_at).toLocaleString("pt-BR")}</td>
+                      <td className="py-2 pr-3 whitespace-nowrap">
+                        {new Date(l.expires_at).toLocaleString("pt-BR")}
+                      </td>
                       <td className="py-2 pr-3">
                         <div className="flex flex-wrap gap-1">
-                          {l.scope.map((s) => <Badge key={s} variant="outline" className="text-[10px]">{s}</Badge>)}
+                          {l.scope.map((s) => (
+                            <Badge key={s} variant="outline" className="text-[10px]">
+                              {s}
+                            </Badge>
+                          ))}
                         </div>
                       </td>
                       <td className="py-2 pr-3 tabular-nums">{l.use_count}</td>
                       <td className="py-2 pr-3">
-                        {l.revoked_at
-                          ? <Badge variant="destructive">Revogado</Badge>
-                          : active
-                            ? <Badge>Ativo</Badge>
-                            : <Badge variant="secondary">Expirado</Badge>}
+                        {l.revoked_at ? (
+                          <Badge variant="destructive">Revogado</Badge>
+                        ) : active ? (
+                          <Badge>Ativo</Badge>
+                        ) : (
+                          <Badge variant="secondary">Expirado</Badge>
+                        )}
                       </td>
                       <td className="py-2 pr-3 text-right">
                         {!l.revoked_at && (
@@ -152,22 +174,49 @@ export function ShareLinksManager({ tipo, relatorioId, relatorioCodigo }: Props)
               <tbody>
                 {subs.map((s) => (
                   <tr key={s.id} className="border-t border-[var(--border)]">
-                    <td className="py-2 pr-3 whitespace-nowrap">{new Date(s.created_at).toLocaleString("pt-BR")}</td>
-                    <td className="py-2 pr-3"><Badge variant="outline">{ACAO_LABEL[s.acao] ?? s.acao}</Badge></td>
+                    <td className="py-2 pr-3 whitespace-nowrap">
+                      {new Date(s.created_at).toLocaleString("pt-BR")}
+                    </td>
                     <td className="py-2 pr-3">
-                      {s.signatario_nome
-                        ? <span>{s.signatario_nome}{s.signatario_cargo ? <span className="text-[var(--text-muted)]"> · {s.signatario_cargo}</span> : null}</span>
-                        : "—"}
+                      <Badge variant="outline">{ACAO_LABEL[s.acao] ?? s.acao}</Badge>
+                    </td>
+                    <td className="py-2 pr-3">
+                      {s.signatario_nome ? (
+                        <span>
+                          {s.signatario_nome}
+                          {s.signatario_cargo ? (
+                            <span className="text-[var(--text-muted)]">
+                              {" "}
+                              · {s.signatario_cargo}
+                            </span>
+                          ) : null}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="py-2 pr-3 text-xs text-[var(--text-muted)]">
                       {s.alvo_id && <span className="mr-2">item: {s.alvo_id.slice(0, 8)}…</span>}
-                      {s.payload && (s.payload as any).status ? <span className="mr-2">status: {String((s.payload as any).status)}</span> : null}
-                      {s.payload && (s.payload as any).codigo ? <span className="mr-2">doc: {String((s.payload as any).codigo)} v{String((s.payload as any).versao ?? "")}</span> : null}
-                      {s.payload && (s.payload as any).motivo ? <span className="mr-2">motivo: {String((s.payload as any).motivo)}</span> : null}
+                      {s.payload && (s.payload as any).status ? (
+                        <span className="mr-2">status: {String((s.payload as any).status)}</span>
+                      ) : null}
+                      {s.payload && (s.payload as any).codigo ? (
+                        <span className="mr-2">
+                          doc: {String((s.payload as any).codigo)} v
+                          {String((s.payload as any).versao ?? "")}
+                        </span>
+                      ) : null}
+                      {s.payload && (s.payload as any).motivo ? (
+                        <span className="mr-2">motivo: {String((s.payload as any).motivo)}</span>
+                      ) : null}
                       {s.ip ? <span className="mr-2">ip: {s.ip}</span> : null}
                     </td>
                     <td className="py-2 pr-3">
-                      {s.status === "aplicada" ? <Badge>Aplicada</Badge> : <Badge variant="destructive">Rejeitada</Badge>}
+                      {s.status === "aplicada" ? (
+                        <Badge>Aplicada</Badge>
+                      ) : (
+                        <Badge variant="destructive">Rejeitada</Badge>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -176,7 +225,6 @@ export function ShareLinksManager({ tipo, relatorioId, relatorioCodigo }: Props)
           </div>
         )}
       </Card>
-
 
       <ShareLinkDialog
         open={shareOpen}

@@ -16,7 +16,17 @@ export const KH_MEDIA_BUCKET = "know-how-media";
 export const getMediaSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ path: z.string().min(1), expiresIn: z.number().int().positive().max(60 * 60 * 24).optional() }).parse(input),
+    z
+      .object({
+        path: z.string().min(1),
+        expiresIn: z
+          .number()
+          .int()
+          .positive()
+          .max(60 * 60 * 24)
+          .optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { data: res, error } = await (context.supabase as any).storage
@@ -58,20 +68,23 @@ export type KhItem = {
 };
 
 function slugify(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "item";
+  return (
+    s
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "item"
+  );
 }
 
 // ---------- Coleções ----------
 export const listColecoes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any).from("kh_colecoes")
+    const { data, error } = await (context.supabase as any)
+      .from("kh_colecoes")
       .select("id, slug, nome, descricao, cor, ordem, ativo")
       .eq("ativo", true)
       .order("ordem", { ascending: true });
@@ -95,7 +108,8 @@ export const listItens = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => (input ? listInput.parse(input) : undefined))
   .handler(async ({ data, context }) => {
-    let query = (context.supabase as any).from("kh_itens")
+    let query = (context.supabase as any)
+      .from("kh_itens")
       .select(
         "id, colecao_id, slug, tipo, titulo, resumo, corpo, midia_url, status, versao, papeis_alvo, tags, created_by, created_at, atualizado_em",
       )
@@ -121,7 +135,8 @@ export const listItens = createServerFn({ method: "GET" })
 export const listFavoritos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any).from("kh_favoritos")
+    const { data, error } = await (context.supabase as any)
+      .from("kh_favoritos")
       .select("item_id")
       .eq("user_id", context.userId);
     if (error) throw friendlyDbError(error);
@@ -132,21 +147,24 @@ export const toggleFavorito = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ itemId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { data: existing } = await (context.supabase as any).from("kh_favoritos")
+    const { data: existing } = await (context.supabase as any)
+      .from("kh_favoritos")
       .select("id")
       .eq("item_id", data.itemId)
       .eq("user_id", context.userId)
       .maybeSingle();
 
     if (existing) {
-      const { error } = await (context.supabase as any).from("kh_favoritos")
+      const { error } = await (context.supabase as any)
+        .from("kh_favoritos")
         .delete()
         .eq("id", (existing as { id: string }).id);
       if (error) throw friendlyDbError(error);
       return { favorito: false };
     }
 
-    const { error } = await (context.supabase as any).from("kh_favoritos")
+    const { error } = await (context.supabase as any)
+      .from("kh_favoritos")
       .insert({ item_id: data.itemId, user_id: context.userId });
     if (error) throw friendlyDbError(error);
     return { favorito: true };
@@ -156,7 +174,8 @@ export const toggleFavorito = createServerFn({ method: "POST" })
 export const listHistorico = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any).from("kh_visualizacoes")
+    const { data, error } = await (context.supabase as any)
+      .from("kh_visualizacoes")
       .select("item_id, viewed_at")
       .eq("user_id", context.userId)
       .order("viewed_at", { ascending: false })
@@ -169,13 +188,13 @@ export const listHistorico = createServerFn({ method: "GET" })
     return Array.from(seen.entries()).map(([item_id, viewed_at]) => ({ item_id, viewed_at }));
   });
 
-
 // ---------- Itens: obter por slug ----------
 export const getItemBySlug = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ slug: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { data: item, error } = await (context.supabase as any).from("kh_itens")
+    const { data: item, error } = await (context.supabase as any)
+      .from("kh_itens")
       .select("*")
       .eq("slug", data.slug)
       .maybeSingle();
@@ -212,7 +231,8 @@ export const createItem = createServerFn({ method: "POST" })
     const suffix = Math.random().toString(36).slice(2, 6);
     const slug = `${base}-${suffix}`;
 
-    const { data: row, error } = await (context.supabase as any).from("kh_itens")
+    const { data: row, error } = await (context.supabase as any)
+      .from("kh_itens")
       .insert({
         colecao_id: data.colecao_id,
         slug,
@@ -253,7 +273,10 @@ export const updateItem = createServerFn({ method: "POST" })
     for (const k of ["titulo", "resumo", "corpo", "midia_url", "tags", "papeis_alvo"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
-    const { error } = await (context.supabase as any).from("kh_itens").update(patch).eq("id", data.id);
+    const { error } = await (context.supabase as any)
+      .from("kh_itens")
+      .update(patch)
+      .eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -263,7 +286,8 @@ export const enviarParaRevisao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { error } = await (context.supabase as any).from("kh_itens")
+    const { error } = await (context.supabase as any)
+      .from("kh_itens")
       .update({ status: "em_revisao" })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
@@ -274,7 +298,8 @@ export const enviarParaRevisao = createServerFn({ method: "POST" })
 export const listRevisao = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any).from("kh_itens")
+    const { data, error } = await (context.supabase as any)
+      .from("kh_itens")
       .select(
         "id, slug, titulo, resumo, tipo, status, colecao_id, versao, tags, created_by, atualizado_em",
       )
@@ -291,7 +316,8 @@ export const aprovarItem = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "know_how");
     // Registrar versão atual antes de publicar
-    const { data: cur } = await (context.supabase as any).from("kh_itens")
+    const { data: cur } = await (context.supabase as any)
+      .from("kh_itens")
       .select("versao, titulo, resumo, corpo, midia_url")
       .eq("id", data.id)
       .maybeSingle();
@@ -307,7 +333,8 @@ export const aprovarItem = createServerFn({ method: "POST" })
       });
     }
 
-    const { error } = await (context.supabase as any).from("kh_itens")
+    const { error } = await (context.supabase as any)
+      .from("kh_itens")
       .update({
         status: "publicado",
         aprovado_em: new Date().toISOString(),
@@ -325,7 +352,8 @@ export const solicitarAjuste = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "know_how");
-    const { error } = await (context.supabase as any).from("kh_itens")
+    const { error } = await (context.supabase as any)
+      .from("kh_itens")
       .update({ status: "rascunho", revisor_id: context.userId })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);

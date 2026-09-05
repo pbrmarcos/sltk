@@ -67,10 +67,7 @@ const searchSchema = z.object({
   palavras_chave: fallback(z.array(z.string()), []).default([]),
   certificacoes: fallback(z.array(z.string()), []).default([]),
   page: fallback(z.number().int().min(1), 1).default(1),
-  pageSize: fallback(
-    z.union([z.literal(25), z.literal(50), z.literal(100)]),
-    25,
-  ).default(25),
+  pageSize: fallback(z.union([z.literal(25), z.literal(50), z.literal(100)]), 25).default(25),
 });
 
 type SearchParams = z.infer<typeof searchSchema>;
@@ -140,7 +137,6 @@ const filtrosPopularesQueryOptions = queryOptions({
   staleTime: 1000 * 60 * 5,
 });
 
-
 export const Route = createFileRoute("/_authenticated/fornecedores/")({
   validateSearch: zodValidator(searchSchema),
   staleTime: 1000 * 60 * 5,
@@ -169,48 +165,95 @@ function FornecedoresListPage() {
     return Array.from(set).sort();
   }, [listData.rows]);
 
-  const countFor = (
-    arr: ReadonlyArray<{ value: string; count: number }>,
-    v: string,
-  ) => arr.find((x) => x.value === v)?.count ?? 0;
+  const countFor = (arr: ReadonlyArray<{ value: string; count: number }>, v: string) =>
+    arr.find((x) => x.value === v)?.count ?? 0;
 
   const activeFilters: Array<{ key: string; label: string; clear: () => void }> = [];
   const setSearch = (patch: Partial<SearchParams>) =>
     navigate({ search: (s: SearchParams) => ({ ...s, ...patch, page: 1 }) });
   if (search.status !== "todos")
-    activeFilters.push({ key: "status", label: `Status: ${search.status}`, clear: () => setSearch({ status: "todos" }) });
+    activeFilters.push({
+      key: "status",
+      label: `Status: ${search.status}`,
+      clear: () => setSearch({ status: "todos" }),
+    });
   if (search.ranking !== "todos")
-    activeFilters.push({ key: "ranking", label: `Rank ${search.ranking}`, clear: () => setSearch({ ranking: "todos" }) });
-  const selectedCats: string[] = search.categorias.length > 0
-    ? search.categorias
-    : (search.categoria !== "todos" ? [search.categoria] : []);
-  const catLabel = (slug: string) =>
-    categoriasData.find((c) => c.slug === slug)?.nome_pt ?? slug;
+    activeFilters.push({
+      key: "ranking",
+      label: `Rank ${search.ranking}`,
+      clear: () => setSearch({ ranking: "todos" }),
+    });
+  const selectedCats: string[] =
+    search.categorias.length > 0
+      ? search.categorias
+      : search.categoria !== "todos"
+        ? [search.categoria]
+        : [];
+  const catLabel = (slug: string) => categoriasData.find((c) => c.slug === slug)?.nome_pt ?? slug;
   for (const c of selectedCats)
     activeFilters.push({
       key: `cat-${c}`,
       label: `Categoria: ${catLabel(c)}`,
-      clear: () => setSearch({
-        categorias: selectedCats.filter((x) => x !== c),
-        categoria: "todos",
-      }),
+      clear: () =>
+        setSearch({
+          categorias: selectedCats.filter((x) => x !== c),
+          categoria: "todos",
+        }),
     });
   if (search.incoterm !== "todos")
-    activeFilters.push({ key: "incoterm", label: `Incoterm: ${search.incoterm}`, clear: () => setSearch({ incoterm: "todos" }) });
+    activeFilters.push({
+      key: "incoterm",
+      label: `Incoterm: ${search.incoterm}`,
+      clear: () => setSearch({ incoterm: "todos" }),
+    });
   if (search.moeda !== "todos")
-    activeFilters.push({ key: "moeda", label: `Moeda: ${search.moeda}`, clear: () => setSearch({ moeda: "todos" }) });
+    activeFilters.push({
+      key: "moeda",
+      label: `Moeda: ${search.moeda}`,
+      clear: () => setSearch({ moeda: "todos" }),
+    });
   if (search.funcionarios_faixa !== "todos")
-    activeFilters.push({ key: "funcionarios_faixa", label: `Funcionários: ${search.funcionarios_faixa}`, clear: () => setSearch({ funcionarios_faixa: "todos" }) });
+    activeFilters.push({
+      key: "funcionarios_faixa",
+      label: `Funcionários: ${search.funcionarios_faixa}`,
+      clear: () => setSearch({ funcionarios_faixa: "todos" }),
+    });
   if (search.lead_time_max != null)
-    activeFilters.push({ key: "lead", label: `Lead ≤ ${search.lead_time_max}d`, clear: () => setSearch({ lead_time_max: null }) });
+    activeFilters.push({
+      key: "lead",
+      label: `Lead ≤ ${search.lead_time_max}d`,
+      clear: () => setSearch({ lead_time_max: null }),
+    });
   if (search.pais !== "todos")
-    activeFilters.push({ key: "pais", label: `País: ${search.pais}`, clear: () => setSearch({ pais: "todos" }) });
+    activeFilters.push({
+      key: "pais",
+      label: `País: ${search.pais}`,
+      clear: () => setSearch({ pais: "todos" }),
+    });
   for (const t of search.tags)
-    activeFilters.push({ key: `tag-${t}`, label: `tag: ${t}`, clear: () => setSearch({ tags: (search.tags as string[]).filter((x: string) => x !== t) }) });
+    activeFilters.push({
+      key: `tag-${t}`,
+      label: `tag: ${t}`,
+      clear: () => setSearch({ tags: (search.tags as string[]).filter((x: string) => x !== t) }),
+    });
   for (const t of search.palavras_chave)
-    activeFilters.push({ key: `kw-${t}`, label: `kw: ${t}`, clear: () => setSearch({ palavras_chave: (search.palavras_chave as string[]).filter((x: string) => x !== t) }) });
+    activeFilters.push({
+      key: `kw-${t}`,
+      label: `kw: ${t}`,
+      clear: () =>
+        setSearch({
+          palavras_chave: (search.palavras_chave as string[]).filter((x: string) => x !== t),
+        }),
+    });
   for (const t of search.certificacoes)
-    activeFilters.push({ key: `cert-${t}`, label: `cert: ${t}`, clear: () => setSearch({ certificacoes: (search.certificacoes as string[]).filter((x: string) => x !== t) }) });
+    activeFilters.push({
+      key: `cert-${t}`,
+      label: `cert: ${t}`,
+      clear: () =>
+        setSearch({
+          certificacoes: (search.certificacoes as string[]).filter((x: string) => x !== t),
+        }),
+    });
 
   const clearAllFilters = () =>
     navigate({
@@ -243,14 +286,10 @@ function FornecedoresListPage() {
     });
   };
 
-
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Compras" },
-          { label: "Fornecedores" },
-        ]}
+        breadcrumbs={[{ label: "Compras" }, { label: "Fornecedores" }]}
         title="Fornecedores"
         subtitle="Cadastro de fornecedores (China, EUA, Europa, Brasil) e contatos."
         actions={
@@ -299,7 +338,9 @@ function FornecedoresListPage() {
             {FORNECEDOR_STATUS.map((s) => (
               <SelectItem key={s} value={s}>
                 {FORNECEDOR_STATUS_LABEL[s]}{" "}
-                <span className="text-[10px] opacity-60">({countFor(filtrosPopulares.status, s)})</span>
+                <span className="text-[10px] opacity-60">
+                  ({countFor(filtrosPopulares.status, s)})
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -319,7 +360,9 @@ function FornecedoresListPage() {
             {FORNECEDOR_RANKINGS.map((r) => (
               <SelectItem key={r} value={r}>
                 Rank {r}{" "}
-                <span className="text-[10px] opacity-60">({countFor(filtrosPopulares.ranking, r)})</span>
+                <span className="text-[10px] opacity-60">
+                  ({countFor(filtrosPopulares.ranking, r)})
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -339,7 +382,9 @@ function FornecedoresListPage() {
             {INCOTERMS.map((i) => (
               <SelectItem key={i} value={i}>
                 {i}{" "}
-                <span className="text-[10px] opacity-60">({countFor(filtrosPopulares.incoterm, i)})</span>
+                <span className="text-[10px] opacity-60">
+                  ({countFor(filtrosPopulares.incoterm, i)})
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -373,7 +418,10 @@ function FornecedoresListPage() {
               navigate({ search: (s: SearchParams) => ({ ...s, funcionarios_faixa: v, page: 1 }) })
             }
           >
-            <SelectTrigger className="w-full lg:w-[160px]" aria-label="Filtrar por faixa de funcionários">
+            <SelectTrigger
+              className="w-full lg:w-[160px]"
+              aria-label="Filtrar por faixa de funcionários"
+            >
               <SelectValue placeholder="Funcionários" />
             </SelectTrigger>
             <SelectContent>
@@ -406,8 +454,7 @@ function FornecedoresListPage() {
             <SelectItem value="todos">Qualquer lead time</SelectItem>
             {filtrosPopulares.lead_time_buckets.map((b) => (
               <SelectItem key={b.value} value={b.value}>
-                Lead time {b.value} d{" "}
-                <span className="text-[10px] opacity-60">({b.count})</span>
+                Lead time {b.value} d <span className="text-[10px] opacity-60">({b.count})</span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -428,7 +475,9 @@ function FornecedoresListPage() {
               {paisesUnicos.map((p) => (
                 <SelectItem key={p} value={p}>
                   {p}{" "}
-                  <span className="text-[10px] opacity-60">({countFor(filtrosPopulares.pais, p)})</span>
+                  <span className="text-[10px] opacity-60">
+                    ({countFor(filtrosPopulares.pais, p)})
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -468,8 +517,6 @@ function FornecedoresListPage() {
         )}
       </div>
 
-
-
       {/* Chips de tags / palavras-chave / certificações / categorias */}
       <div className="mb-4 space-y-3">
         {categoriasData.length > 0 && (
@@ -493,7 +540,14 @@ function FornecedoresListPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    navigate({ search: (s: SearchParams) => ({ ...s, categoria: "todos", categorias: [], page: 1 }) })
+                    navigate({
+                      search: (s: SearchParams) => ({
+                        ...s,
+                        categoria: "todos",
+                        categorias: [],
+                        page: 1,
+                      }),
+                    })
                   }
                   className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[var(--primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                 >
@@ -509,9 +563,12 @@ function FornecedoresListPage() {
                 onToggle={(slug) =>
                   navigate({
                     search: (s: SearchParams) => {
-                      const base: string[] = s.categorias.length > 0
-                        ? s.categorias
-                        : (s.categoria !== "todos" ? [s.categoria] : []);
+                      const base: string[] =
+                        s.categorias.length > 0
+                          ? s.categorias
+                          : s.categoria !== "todos"
+                            ? [s.categoria]
+                            : [];
                       const next = base.includes(slug)
                         ? base.filter((x) => x !== slug)
                         : [...base, slug];
@@ -550,7 +607,6 @@ function FornecedoresListPage() {
         )}
       </div>
 
-
       {/* Mobile: cards · md+ : tabela */}
       {listData.rows.length === 0 ? (
         <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
@@ -568,10 +624,7 @@ function FornecedoresListPage() {
         </div>
       ) : (
         <>
-          <ul
-            aria-label="Lista de fornecedores"
-            className="space-y-2 md:hidden"
-          >
+          <ul aria-label="Lista de fornecedores" className="space-y-2 md:hidden">
             {listData.rows.map((row) => (
               <li key={row.id}>
                 <Link
@@ -647,9 +700,7 @@ function FornecedoresListPage() {
                     role="link"
                     aria-label={`Abrir ficha de ${row.nome}`}
                     className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
-                    onClick={() =>
-                      navigate({ to: "/fornecedores/$id", params: { id: row.id } })
-                    }
+                    onClick={() => navigate({ to: "/fornecedores/$id", params: { id: row.id } })}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
@@ -659,9 +710,7 @@ function FornecedoresListPage() {
                   >
                     <TableCell className="font-mono text-[12px]">{row.codigo}</TableCell>
                     <TableCell>
-                      <div className="font-medium text-[var(--text-primary)]">
-                        {row.nome}
-                      </div>
+                      <div className="font-medium text-[var(--text-primary)]">{row.nome}</div>
                       {row.nome_fantasia ? (
                         <div className="text-[11.5px] text-[var(--text-muted)]">
                           {row.nome_fantasia}
@@ -718,9 +767,7 @@ function FornecedoresListPage() {
             page={search.page}
             pageSize={search.pageSize}
             total={listData.total}
-            onPageChange={(p) =>
-              navigate({ search: (s: SearchParams) => ({ ...s, page: p }) })
-            }
+            onPageChange={(p) => navigate({ search: (s: SearchParams) => ({ ...s, page: p }) })}
             onPageSizeChange={(sz) =>
               navigate({
                 search: (s: SearchParams) => ({
@@ -750,11 +797,7 @@ function ChipRow({
 }) {
   const groupId = `chiprow-${label.toLowerCase().replace(/\s+/g, "-")}`;
   return (
-    <div
-      role="group"
-      aria-labelledby={groupId}
-      className="flex flex-wrap items-center gap-1.5"
-    >
+    <div role="group" aria-labelledby={groupId} className="flex flex-wrap items-center gap-1.5">
       <span
         id={groupId}
         className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]"
@@ -785,4 +828,3 @@ function ChipRow({
     </div>
   );
 }
-

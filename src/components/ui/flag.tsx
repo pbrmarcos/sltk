@@ -22,7 +22,10 @@ export function Flag({
       width={size}
       height={Math.round(size * 0.75)}
       loading="lazy"
-      className={cn("inline-block rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.06)]", className)}
+      className={cn(
+        "inline-block rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.06)]",
+        className,
+      )}
       style={{ width: size, height: Math.round(size * 0.75) }}
     />
   );

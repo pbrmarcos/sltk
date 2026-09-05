@@ -74,7 +74,9 @@ export function SidebarSearch({
         Promise.resolve({ data: [] as { id: string; codigo: string; titulo: string }[] }),
         supabase
           .from("equipamento_projetos")
-          .select("id, revisao, disciplina, equipamento_id, cliente_equipamentos!inner(codigo,modelo)")
+          .select(
+            "id, revisao, disciplina, equipamento_id, cliente_equipamentos!inner(codigo,modelo)",
+          )
           .is("deleted_at", null)
           .or(`revisao.ilike.${term}`)
           .limit(5),
@@ -92,11 +94,12 @@ export function SidebarSearch({
     };
   }, [open, debouncedQ]);
 
-  const filteredNav = q.trim().length === 0
-    ? navItems.slice(0, 8)
-    : navItems.filter((n) =>
-        (n.label + " " + n.section).toLowerCase().includes(q.toLowerCase()),
-      ).slice(0, 12);
+  const filteredNav =
+    q.trim().length === 0
+      ? navItems.slice(0, 8)
+      : navItems
+          .filter((n) => (n.label + " " + n.section).toLowerCase().includes(q.toLowerCase()))
+          .slice(0, 12);
 
   function go(to: string) {
     setOpen(false);
@@ -142,7 +145,11 @@ export function SidebarSearch({
           {filteredNav.length > 0 && (
             <CommandGroup heading="Navegação">
               {filteredNav.map((n) => (
-                <CommandItem key={n.to} value={`nav ${n.label} ${n.section}`} onSelect={() => go(n.to)}>
+                <CommandItem
+                  key={n.to}
+                  value={`nav ${n.label} ${n.section}`}
+                  onSelect={() => go(n.to)}
+                >
                   <span className="flex-1">{n.label}</span>
                   <span className="text-[10px] text-muted-foreground">{n.section}</span>
                 </CommandItem>
@@ -153,7 +160,11 @@ export function SidebarSearch({
           {results.clientes.length > 0 && (
             <CommandGroup heading="Clientes">
               {results.clientes.map((c: any) => (
-                <CommandItem key={c.id} value={`cli ${c.codigo} ${c.razao_social}`} onSelect={() => go(`/clientes/${c.codigo}`)}>
+                <CommandItem
+                  key={c.id}
+                  value={`cli ${c.codigo} ${c.razao_social}`}
+                  onSelect={() => go(`/clientes/${c.codigo}`)}
+                >
                   <span className="font-mono text-xs mr-2">{c.codigo}</span>
                   <span className="flex-1 truncate">{c.razao_social}</span>
                 </CommandItem>
@@ -171,12 +182,13 @@ export function SidebarSearch({
                 >
                   <span className="font-mono text-xs mr-2">{e.codigo}</span>
                   <span className="flex-1 truncate">{e.modelo}</span>
-                  <span className="text-[10px] text-muted-foreground truncate ml-2">{e.clientes?.razao_social}</span>
+                  <span className="text-[10px] text-muted-foreground truncate ml-2">
+                    {e.clientes?.razao_social}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>
           )}
-
 
           {results.projetos.length > 0 && (
             <CommandGroup heading="Revisões de projeto">
@@ -184,7 +196,14 @@ export function SidebarSearch({
                 <CommandItem
                   key={p.id}
                   value={`prj ${p.revisao} ${p.cliente_equipamentos?.codigo}`}
-                  onSelect={() => { setOpen(false); setQ(""); navigate({ to: "/engenharia/projetos", search: { d: p.disciplina === "mecanico" ? "mecanico" : "eletrico" } }); }}
+                  onSelect={() => {
+                    setOpen(false);
+                    setQ("");
+                    navigate({
+                      to: "/engenharia/projetos",
+                      search: { d: p.disciplina === "mecanico" ? "mecanico" : "eletrico" },
+                    });
+                  }}
                 >
                   <span className="font-mono text-xs mr-2">{p.revisao}</span>
                   <span className="flex-1 truncate">{p.cliente_equipamentos?.modelo}</span>

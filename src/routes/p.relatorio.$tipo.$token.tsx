@@ -50,7 +50,6 @@ function PublicRelatorioPage() {
     return <PublicLinkErrorState error={error as Error | null} />;
   }
 
-
   const r = data.relatorio as Record<string, unknown>;
   const codigo = (r.codigo as string) ?? "—";
 
@@ -66,8 +65,12 @@ function PublicRelatorioPage() {
             {data.tipo.toUpperCase()} · {codigo}
           </h1>
           <p className="text-sm text-[var(--text-muted)]">
-            {data.cliente ? (data.cliente as any).nome_fantasia || (data.cliente as any).razao_social : ""}
-            {data.processo ? ` · ${(data.processo as any).codigo} ${(data.processo as any).titulo ?? ""}` : ""}
+            {data.cliente
+              ? (data.cliente as any).nome_fantasia || (data.cliente as any).razao_social
+              : ""}
+            {data.processo
+              ? ` · ${(data.processo as any).codigo} ${(data.processo as any).titulo ?? ""}`
+              : ""}
           </p>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
             Link válido até {new Date(data.exp * 1000).toLocaleString("pt-BR")}
@@ -76,18 +79,29 @@ function PublicRelatorioPage() {
         <ExportPdfButton token={token} />
       </header>
 
-      {data.tipo === "fat"
-        ? <FatPublicForm data={data} token={token} onChange={refresh} />
-        : <SatPublicForm data={data} token={token} onChange={refresh} />}
+      {data.tipo === "fat" ? (
+        <FatPublicForm data={data} token={token} onChange={refresh} />
+      ) : (
+        <SatPublicForm data={data} token={token} onChange={refresh} />
+      )}
     </div>
   );
 }
 
 function CenteredMsg({ children }: { children: React.ReactNode }) {
-  return <div className="flex min-h-screen items-center justify-center p-6 text-sm">{children}</div>;
+  return (
+    <div className="flex min-h-screen items-center justify-center p-6 text-sm">{children}</div>
+  );
 }
 
-type LinkErrorKind = "expired" | "revoked" | "notfound" | "invalid" | "tampered" | "mismatch" | "unknown";
+type LinkErrorKind =
+  | "expired"
+  | "revoked"
+  | "notfound"
+  | "invalid"
+  | "tampered"
+  | "mismatch"
+  | "unknown";
 
 function parseLinkError(error: Error | null): { kind: LinkErrorKind; message: string } {
   const raw = error?.message ?? "";
@@ -96,7 +110,10 @@ function parseLinkError(error: Error | null): { kind: LinkErrorKind; message: st
   return { kind: "unknown", message: raw || "Token inválido, revogado ou expirado." };
 }
 
-const LINK_ERROR_COPY: Record<LinkErrorKind, { title: string; hint: string; tone: "warn" | "danger" | "info" }> = {
+const LINK_ERROR_COPY: Record<
+  LinkErrorKind,
+  { title: string; hint: string; tone: "warn" | "danger" | "info" }
+> = {
   expired: {
     title: "Este link expirou",
     hint: "Peça ao responsável (engenharia ou gestão) para gerar um novo link de campo.",
@@ -180,7 +197,6 @@ function PublicLinkErrorState({ error }: { error: Error | null }) {
   );
 }
 
-
 function ExportPdfButton({ token }: { token: string }) {
   const exportFn = useServerFn(publicExportRelatorioPdf);
   const [loading, setLoading] = useState(false);
@@ -218,19 +234,44 @@ function ExportPdfButton({ token }: { token: string }) {
  * FAT
  * ====================================================*/
 
-function FatPublicForm({ data, token, onChange }: { data: PublicData; token: string; onChange: () => void }) {
-  const r = data.relatorio as { progresso?: number; ok_count?: number; nok_count?: number; na_count?: number };
+function FatPublicForm({
+  data,
+  token,
+  onChange,
+}: {
+  data: PublicData;
+  token: string;
+  onChange: () => void;
+}) {
+  const r = data.relatorio as {
+    progresso?: number;
+    ok_count?: number;
+    nok_count?: number;
+    na_count?: number;
+  };
   const respMap = useMemo(() => {
     const m = new Map<string, { status: string; comentario: string | null }>();
-    for (const x of data.respostas as Array<{ template_id: string; status: string; comentario: string | null }>) {
+    for (const x of data.respostas as Array<{
+      template_id: string;
+      status: string;
+      comentario: string | null;
+    }>) {
       m.set(x.template_id, { status: x.status, comentario: x.comentario });
     }
     return m;
   }, [data.respostas]);
 
   const grouped = useMemo(() => {
-    const g = new Map<string, Array<{ id: string; titulo: string; descricao: string | null; secao: string }>>();
-    for (const t of data.template as Array<{ id: string; titulo: string; descricao: string | null; secao: string }>) {
+    const g = new Map<
+      string,
+      Array<{ id: string; titulo: string; descricao: string | null; secao: string }>
+    >();
+    for (const t of data.template as Array<{
+      id: string;
+      titulo: string;
+      descricao: string | null;
+      secao: string;
+    }>) {
       const arr = g.get(t.secao) ?? [];
       arr.push(t);
       g.set(t.secao, arr);
@@ -285,11 +326,19 @@ function FatPublicForm({ data, token, onChange }: { data: PublicData; token: str
 }
 
 function FatChecklistRow({
-  templateId, titulo, descricao, current, token, onSaved,
+  templateId,
+  titulo,
+  descricao,
+  current,
+  token,
+  onSaved,
 }: {
-  templateId: string; titulo: string; descricao: string | null;
+  templateId: string;
+  titulo: string;
+  descricao: string | null;
   current?: { status: string; comentario: string | null };
-  token: string; onSaved: () => void;
+  token: string;
+  onSaved: () => void;
 }) {
   const setResp = useServerFn(publicSetChecklistResposta);
   const [status, setStatus] = useState<string>(current?.status ?? "pendente");
@@ -300,7 +349,14 @@ function FatChecklistRow({
     setSaving(true);
     setStatus(next);
     try {
-      await setResp({ data: { token, template_id: templateId, status: next, comentario: coment ?? comentario ?? null } });
+      await setResp({
+        data: {
+          token,
+          template_id: templateId,
+          status: next,
+          comentario: coment ?? comentario ?? null,
+        },
+      });
       onSaved();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao salvar");
@@ -316,9 +372,36 @@ function FatChecklistRow({
         {descricao && <p className="text-xs text-[var(--text-muted)]">{descricao}</p>}
       </div>
       <div className="mb-2 flex flex-wrap gap-2">
-        <TriBtn val="ok" current={status} disabled={saving} onClick={() => save("ok")} Icon={CheckCircle2} color="bg-green-600 hover:bg-green-700">OK</TriBtn>
-        <TriBtn val="nok" current={status} disabled={saving} onClick={() => save("nok")} Icon={XCircle} color="bg-red-600 hover:bg-red-700">NOK</TriBtn>
-        <TriBtn val="na" current={status} disabled={saving} onClick={() => save("na")} Icon={MinusCircle} color="bg-zinc-500 hover:bg-zinc-600">N/A</TriBtn>
+        <TriBtn
+          val="ok"
+          current={status}
+          disabled={saving}
+          onClick={() => save("ok")}
+          Icon={CheckCircle2}
+          color="bg-green-600 hover:bg-green-700"
+        >
+          OK
+        </TriBtn>
+        <TriBtn
+          val="nok"
+          current={status}
+          disabled={saving}
+          onClick={() => save("nok")}
+          Icon={XCircle}
+          color="bg-red-600 hover:bg-red-700"
+        >
+          NOK
+        </TriBtn>
+        <TriBtn
+          val="na"
+          current={status}
+          disabled={saving}
+          onClick={() => save("na")}
+          Icon={MinusCircle}
+          color="bg-zinc-500 hover:bg-zinc-600"
+        >
+          N/A
+        </TriBtn>
       </div>
       <Textarea
         placeholder="Observação (opcional)"
@@ -336,16 +419,29 @@ function FatChecklistRow({
 }
 
 function TriBtn({
-  val, current, onClick, Icon, color, disabled, children,
+  val,
+  current,
+  onClick,
+  Icon,
+  color,
+  disabled,
+  children,
 }: {
-  val: string; current: string; onClick: () => void; Icon: typeof CheckCircle2; color: string;
-  disabled?: boolean; children: React.ReactNode;
+  val: string;
+  current: string;
+  onClick: () => void;
+  Icon: typeof CheckCircle2;
+  color: string;
+  disabled?: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <Button
-      type="button" size="sm"
+      type="button"
+      size="sm"
       variant={current === val ? "default" : "outline"}
-      onClick={onClick} disabled={disabled}
+      onClick={onClick}
+      disabled={disabled}
       className={current === val ? color : ""}
     >
       <Icon className="mr-1 h-4 w-4" /> {children}
@@ -357,13 +453,33 @@ function TriBtn({
  * SAT
  * ====================================================*/
 
-function SatPublicForm({ data, token, onChange }: { data: PublicData; token: string; onChange: () => void }) {
+function SatPublicForm({
+  data,
+  token,
+  onChange,
+}: {
+  data: PublicData;
+  token: string;
+  onChange: () => void;
+}) {
   type Sec = {
-    id: string; ordem: number; titulo: string; descricao: string | null;
-    sat_template_item: Array<{ id: string; secao_id: string; ordem: number; label: string; tipo: string; obrigatorio: boolean; opcoes: string[] | null; ajuda: string | null }>;
+    id: string;
+    ordem: number;
+    titulo: string;
+    descricao: string | null;
+    sat_template_item: Array<{
+      id: string;
+      secao_id: string;
+      ordem: number;
+      label: string;
+      tipo: string;
+      obrigatorio: boolean;
+      opcoes: string[] | null;
+      ajuda: string | null;
+    }>;
   };
   const secoes = (data.template as unknown as Sec[]) ?? [];
-  const dados = (((data.relatorio as any).dados) as Record<string, any>) ?? {};
+  const dados = ((data.relatorio as any).dados as Record<string, any>) ?? {};
 
   return (
     <div className="space-y-4">
@@ -373,23 +489,27 @@ function SatPublicForm({ data, token, onChange }: { data: PublicData; token: str
           <AlertDescription>O relatório SAT ainda não tem template vinculado.</AlertDescription>
         </Alert>
       )}
-      {[...secoes].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0)).map((s) => (
-        <Card key={s.id} className="p-4">
-          <h2 className="text-sm font-semibold">{s.titulo}</h2>
-          {s.descricao && <p className="mb-3 text-xs text-[var(--text-muted)]">{s.descricao}</p>}
-          <div className="space-y-3">
-            {(s.sat_template_item ?? []).sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0)).map((it) => (
-              <SatItemRow
-                key={it.id}
-                item={it}
-                current={dados[it.id]}
-                token={token}
-                onSaved={onChange}
-              />
-            ))}
-          </div>
-        </Card>
-      ))}
+      {[...secoes]
+        .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))
+        .map((s) => (
+          <Card key={s.id} className="p-4">
+            <h2 className="text-sm font-semibold">{s.titulo}</h2>
+            {s.descricao && <p className="mb-3 text-xs text-[var(--text-muted)]">{s.descricao}</p>}
+            <div className="space-y-3">
+              {(s.sat_template_item ?? [])
+                .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))
+                .map((it) => (
+                  <SatItemRow
+                    key={it.id}
+                    item={it}
+                    current={dados[it.id]}
+                    token={token}
+                    onSaved={onChange}
+                  />
+                ))}
+            </div>
+          </Card>
+        ))}
 
       <Card className="p-4">
         <h2 className="mb-3 text-sm font-semibold">Assinatura em campo</h2>
@@ -400,10 +520,22 @@ function SatPublicForm({ data, token, onChange }: { data: PublicData; token: str
 }
 
 function SatItemRow({
-  item, current, token, onSaved,
+  item,
+  current,
+  token,
+  onSaved,
 }: {
-  item: { id: string; label: string; tipo: string; obrigatorio: boolean; opcoes: string[] | null; ajuda: string | null };
-  current: any; token: string; onSaved: () => void;
+  item: {
+    id: string;
+    label: string;
+    tipo: string;
+    obrigatorio: boolean;
+    opcoes: string[] | null;
+    ajuda: string | null;
+  };
+  current: any;
+  token: string;
+  onSaved: () => void;
 }) {
   const setResp = useServerFn(publicSetSatResposta);
   const [valor, setValor] = useState<any>(current?.valor ?? "");
@@ -413,7 +545,14 @@ function SatItemRow({
   async function persist(nextValor: any, nextComent?: string) {
     setSaving(true);
     try {
-      await setResp({ data: { token, item_id: item.id, valor: nextValor ?? null, comentario: (nextComent ?? comentario) || null } });
+      await setResp({
+        data: {
+          token,
+          item_id: item.id,
+          valor: nextValor ?? null,
+          comentario: (nextComent ?? comentario) || null,
+        },
+      });
       onSaved();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao salvar");
@@ -426,41 +565,110 @@ function SatItemRow({
   return (
     <div className="rounded border border-[var(--border)] p-3">
       <p className="text-sm font-medium">
-        {item.label}{item.obrigatorio && <span className="text-red-500"> *</span>}
+        {item.label}
+        {item.obrigatorio && <span className="text-red-500"> *</span>}
       </p>
       {item.ajuda && <p className="mb-2 text-xs text-[var(--text-muted)]">{item.ajuda}</p>}
 
       {tipo === "ok_nok_na" || tipo === "checklist" ? (
         <div className="mb-2 flex flex-wrap gap-2">
-          <TriBtn val="ok" current={String(valor)} disabled={saving} onClick={() => { setValor("ok"); void persist("ok"); }} Icon={CheckCircle2} color="bg-green-600 hover:bg-green-700">OK</TriBtn>
-          <TriBtn val="nok" current={String(valor)} disabled={saving} onClick={() => { setValor("nok"); void persist("nok"); }} Icon={XCircle} color="bg-red-600 hover:bg-red-700">NOK</TriBtn>
-          <TriBtn val="na" current={String(valor)} disabled={saving} onClick={() => { setValor("na"); void persist("na"); }} Icon={MinusCircle} color="bg-zinc-500 hover:bg-zinc-600">N/A</TriBtn>
+          <TriBtn
+            val="ok"
+            current={String(valor)}
+            disabled={saving}
+            onClick={() => {
+              setValor("ok");
+              void persist("ok");
+            }}
+            Icon={CheckCircle2}
+            color="bg-green-600 hover:bg-green-700"
+          >
+            OK
+          </TriBtn>
+          <TriBtn
+            val="nok"
+            current={String(valor)}
+            disabled={saving}
+            onClick={() => {
+              setValor("nok");
+              void persist("nok");
+            }}
+            Icon={XCircle}
+            color="bg-red-600 hover:bg-red-700"
+          >
+            NOK
+          </TriBtn>
+          <TriBtn
+            val="na"
+            current={String(valor)}
+            disabled={saving}
+            onClick={() => {
+              setValor("na");
+              void persist("na");
+            }}
+            Icon={MinusCircle}
+            color="bg-zinc-500 hover:bg-zinc-600"
+          >
+            N/A
+          </TriBtn>
         </div>
       ) : tipo === "choice" || tipo === "select" ? (
         <select
           className="mb-2 w-full rounded border border-[var(--border)] bg-transparent px-2 py-1.5 text-sm"
           value={valor ?? ""}
-          onChange={(e) => { setValor(e.target.value); void persist(e.target.value); }}
+          onChange={(e) => {
+            setValor(e.target.value);
+            void persist(e.target.value);
+          }}
           disabled={saving}
         >
           <option value="">Selecione…</option>
-          {(item.opcoes ?? []).map((op) => <option key={op} value={op}>{op}</option>)}
+          {(item.opcoes ?? []).map((op) => (
+            <option key={op} value={op}>
+              {op}
+            </option>
+          ))}
         </select>
       ) : tipo === "boolean" || tipo === "sim_nao" ? (
         <div className="mb-2 flex gap-2">
-          <Button type="button" size="sm" variant={valor === true || valor === "sim" ? "default" : "outline"} onClick={() => { setValor("sim"); void persist("sim"); }} disabled={saving}>Sim</Button>
-          <Button type="button" size="sm" variant={valor === false || valor === "nao" ? "default" : "outline"} onClick={() => { setValor("nao"); void persist("nao"); }} disabled={saving}>Não</Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={valor === true || valor === "sim" ? "default" : "outline"}
+            onClick={() => {
+              setValor("sim");
+              void persist("sim");
+            }}
+            disabled={saving}
+          >
+            Sim
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={valor === false || valor === "nao" ? "default" : "outline"}
+            onClick={() => {
+              setValor("nao");
+              void persist("nao");
+            }}
+            disabled={saving}
+          >
+            Não
+          </Button>
         </div>
       ) : tipo === "number" || tipo === "numero" ? (
         <Input
-          type="number" inputMode="decimal"
-          value={valor ?? ""} onChange={(e) => setValor(e.target.value)}
+          type="number"
+          inputMode="decimal"
+          value={valor ?? ""}
+          onChange={(e) => setValor(e.target.value)}
           onBlur={() => void persist(valor === "" ? null : Number(valor))}
           className="mb-2"
         />
       ) : (
         <Input
-          value={valor ?? ""} onChange={(e) => setValor(e.target.value)}
+          value={valor ?? ""}
+          onChange={(e) => setValor(e.target.value)}
           onBlur={() => void persist(valor)}
           className="mb-2"
         />
@@ -468,7 +676,8 @@ function SatItemRow({
 
       <Textarea
         placeholder="Observação (opcional)"
-        value={comentario} onChange={(e) => setComentario(e.target.value)}
+        value={comentario}
+        onChange={(e) => setComentario(e.target.value)}
         onBlur={() => void persist(valor, comentario)}
         rows={2}
       />
@@ -480,7 +689,15 @@ function SatItemRow({
  * Signature pad (shared)
  * ====================================================*/
 
-function SignaturePad({ token, kind, onSaved }: { token: string; kind: "fat" | "sat"; onSaved: () => void }) {
+function SignaturePad({
+  token,
+  kind,
+  onSaved,
+}: {
+  token: string;
+  kind: "fat" | "sat";
+  onSaved: () => void;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawing = useRef(false);
   const submit = useServerFn(publicSubmitAssinatura);
@@ -500,45 +717,71 @@ function SignaturePad({ token, kind, onSaved }: { token: string; kind: "fat" | "
     drawing.current = true;
     const ctx = canvasRef.current!.getContext("2d")!;
     const p = pos(e);
-    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
   }
   function move(e: RPointerEvent<HTMLCanvasElement>) {
     if (!drawing.current) return;
     const ctx = canvasRef.current!.getContext("2d")!;
     const p = pos(e);
     ctx.lineTo(p.x, p.y);
-    ctx.strokeStyle = "#111"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
     ctx.stroke();
   }
-  function end() { drawing.current = false; }
+  function end() {
+    drawing.current = false;
+  }
   function limpar() {
     const c = canvasRef.current!;
     c.getContext("2d")!.clearRect(0, 0, c.width, c.height);
   }
   async function salvar() {
-    if (!nome.trim()) { toast.error("Informe o nome de quem assina"); return; }
+    if (!nome.trim()) {
+      toast.error("Informe o nome de quem assina");
+      return;
+    }
     const c = canvasRef.current!;
     const blank = document.createElement("canvas");
-    blank.width = c.width; blank.height = c.height;
+    blank.width = c.width;
+    blank.height = c.height;
     if (c.toDataURL() === blank.toDataURL()) {
-      toast.error("Assine no campo antes de enviar"); return;
+      toast.error("Assine no campo antes de enviar");
+      return;
     }
     const dataUrl = c.toDataURL("image/png");
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${c.width}" height="${c.height}"><image href="${dataUrl}" width="${c.width}" height="${c.height}"/></svg>`;
     setSaving(true);
     try {
-      await submit({ data: { token, tipo: papel, nome, cargo: cargo || null, assinatura_svg: svg } });
+      await submit({
+        data: { token, tipo: papel, nome, cargo: cargo || null, assinatura_svg: svg },
+      });
       toast.success("Assinatura registrada");
-      onSaved(); limpar(); setNome(""); setCargo("");
+      onSaved();
+      limpar();
+      setNome("");
+      setCargo("");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao assinar");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const papelOpts: Array<{ value: "tecnico" | "cliente" | "inspetor" | "testemunha"; label: string }> =
+  const papelOpts: Array<{
+    value: "tecnico" | "cliente" | "inspetor" | "testemunha";
+    label: string;
+  }> =
     kind === "fat"
-      ? [{ value: "inspetor", label: "Inspetor" }, { value: "testemunha", label: "Testemunha" }]
-      : [{ value: "tecnico", label: "Técnico" }, { value: "cliente", label: "Cliente" }];
+      ? [
+          { value: "inspetor", label: "Inspetor" },
+          { value: "testemunha", label: "Testemunha" },
+        ]
+      : [
+          { value: "tecnico", label: "Técnico" },
+          { value: "cliente", label: "Cliente" },
+        ];
 
   return (
     <div className="space-y-3">
@@ -551,7 +794,11 @@ function SignaturePad({ token, kind, onSaved }: { token: string; kind: "fat" | "
             value={papel}
             onChange={(e) => setPapel(e.target.value as typeof papel)}
           >
-            {papelOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {papelOpts.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -565,13 +812,20 @@ function SignaturePad({ token, kind, onSaved }: { token: string; kind: "fat" | "
       </div>
       <div className="rounded border border-[var(--border)] bg-white">
         <canvas
-          ref={canvasRef} width={600} height={180}
+          ref={canvasRef}
+          width={600}
+          height={180}
           className="block w-full touch-none"
-          onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end}
+          onPointerDown={start}
+          onPointerMove={move}
+          onPointerUp={end}
+          onPointerLeave={end}
         />
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={limpar} type="button">Limpar</Button>
+        <Button variant="outline" onClick={limpar} type="button">
+          Limpar
+        </Button>
         <Button onClick={salvar} disabled={saving} type="button">
           {saving ? "Enviando…" : "Registrar assinatura"}
         </Button>

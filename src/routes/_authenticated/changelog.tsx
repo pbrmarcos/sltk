@@ -267,7 +267,10 @@ function ChangelogPage() {
               )}
             </div>
             <h2 className="mt-2 text-lg font-semibold">{e.title}</h2>
-            <ul className="mt-3 space-y-1.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            <ul
+              className="mt-3 space-y-1.5 text-sm"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               {e.items.map((it, idx) => {
                 if (it.startsWith("__SECTION__")) {
                   return (

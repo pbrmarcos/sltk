@@ -7,12 +7,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -94,11 +89,15 @@ function EtpListPage() {
             setPage(1);
           }}
         >
-          <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos os status</SelectItem>
             {ETP_STATUS.map((s) => (
-              <SelectItem key={s} value={s}>{ETP_STATUS_LABEL[s]}</SelectItem>
+              <SelectItem key={s} value={s}>
+                {ETP_STATUS_LABEL[s]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -120,9 +119,7 @@ function EtpListPage() {
                   params={{ id: r.id }}
                   className="grid grid-cols-[120px_1fr_auto_auto] items-center gap-3 p-4 hover:bg-[var(--bg-elevated)]"
                 >
-                  <span className="font-mono text-xs">
-                    {r.cliente_equipamentos?.codigo ?? "—"}
-                  </span>
+                  <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium">
                       {r.cliente_equipamentos?.modelo}
@@ -131,7 +128,9 @@ function EtpListPage() {
                       {r.clientes?.razao_social}
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[11px]">v{r.versao}</Badge>
+                  <Badge variant="outline" className="text-[11px]">
+                    v{r.versao}
+                  </Badge>
                   <Badge
                     variant="outline"
                     className={cn("text-[11px]", ETP_STATUS_COLOR[r.status as EtpStatus])}
@@ -149,7 +148,12 @@ function EtpListPage() {
         <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>Total: {data.total}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
               Anterior
             </Button>
             <Button
@@ -246,8 +250,13 @@ function NovoEtpDialog({
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button disabled={!equipamentoId || createMut.isPending} onClick={() => createMut.mutate()}>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={!equipamentoId || createMut.isPending}
+            onClick={() => createMut.mutate()}
+          >
             Criar e abrir editor
           </Button>
         </div>

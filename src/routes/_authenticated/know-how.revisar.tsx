@@ -96,7 +96,9 @@ function KnowHowRevisar() {
                   >
                     {it.titulo}
                   </Link>
-                  <Badge variant="outline" className="text-[10px] uppercase">{it.tipo}</Badge>
+                  <Badge variant="outline" className="text-[10px] uppercase">
+                    {it.tipo}
+                  </Badge>
                   <span className="text-xs text-[var(--text-muted)]">v{it.versao}</span>
                 </div>
                 {it.resumo && (
@@ -113,7 +115,11 @@ function KnowHowRevisar() {
                   <RotateCcw className="mr-1.5 h-4 w-4" />
                   Ajuste
                 </Button>
-                <Button size="sm" onClick={() => aprovar.mutate(it.id)} disabled={aprovar.isPending}>
+                <Button
+                  size="sm"
+                  onClick={() => aprovar.mutate(it.id)}
+                  disabled={aprovar.isPending}
+                >
                   <Check className="mr-1.5 h-4 w-4" />
                   Aprovar
                 </Button>

@@ -34,7 +34,9 @@ export interface DispatchInput {
 export async function dispatchEmail(admin: Admin, input: DispatchInput): Promise<void> {
   const { data: cfgRaw, error: cfgErr } = await admin
     .from("email_event_config")
-    .select("event_key, module, enabled, subject_template, body_template, create_calendar_event, calendar_duration_min, required_vars" as "*")
+    .select(
+      "event_key, module, enabled, subject_template, body_template, create_calendar_event, calendar_duration_min, required_vars" as "*",
+    )
     .eq("event_key", input.eventKey)
     .maybeSingle();
 
@@ -52,7 +54,6 @@ export async function dispatchEmail(admin: Admin, input: DispatchInput): Promise
     calendar_duration_min: number | null;
     required_vars: string[] | null;
   };
-
 
   const subject = renderTemplate(cfg.subject_template, input.vars);
   const bodyRendered = renderTemplate(cfg.body_template, input.vars);
@@ -92,11 +93,11 @@ export async function dispatchEmail(admin: Admin, input: DispatchInput): Promise
     insert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
   };
 
-
   // Validação de variáveis obrigatórias — bloqueia envio se faltar alguma.
   const required = (cfg.required_vars ?? []) as string[];
   const missing = required.filter(
-    (k) => input.vars[k] === null || input.vars[k] === undefined || String(input.vars[k]).trim() === "",
+    (k) =>
+      input.vars[k] === null || input.vars[k] === undefined || String(input.vars[k]).trim() === "",
   );
   if (missing.length > 0) {
     await logTable.insert({
@@ -120,7 +121,6 @@ export async function dispatchEmail(admin: Admin, input: DispatchInput): Promise
     return;
   }
 
-
   // Resolve papéis destinatários
   const { data: recs } = await admin
     .from("email_event_recipients")
@@ -139,13 +139,8 @@ export async function dispatchEmail(admin: Admin, input: DispatchInput): Promise
       .in("role", rs as Database["public"]["Enums"]["app_role"][]);
     const ids = Array.from(new Set((data ?? []).map((r) => r.user_id)));
     if (ids.length === 0) return [];
-    const { data: profs } = await admin
-      .from("profiles")
-      .select("id, email")
-      .in("id", ids);
-    return (profs ?? [])
-      .map((p) => p.email)
-      .filter((e): e is string => !!e && e.includes("@"));
+    const { data: profs } = await admin.from("profiles").select("id, email").in("id", ids);
+    return (profs ?? []).map((p) => p.email).filter((e): e is string => !!e && e.includes("@"));
   }
 
   const to = Array.from(new Set([...(await resolveEmails(toRoles)), ...(input.extraTo ?? [])]));

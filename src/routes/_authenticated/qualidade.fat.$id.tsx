@@ -1,7 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type PointerEvent as RPointerEvent,
+} from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -169,7 +175,13 @@ function FatDetailPage() {
             <Badge variant="outline">OK: {fat.ok_count ?? 0}</Badge>
             <Badge variant="outline">NOK: {fat.nok_count ?? 0}</Badge>
             <Badge variant="outline">N/A: {fat.na_count ?? 0}</Badge>
-            <Badge variant="outline">RNCs abertas: {data.rncs.filter((r: any) => r.status === "aberta" || r.status === "em_tratativa").length}</Badge>
+            <Badge variant="outline">
+              RNCs abertas:{" "}
+              {
+                data.rncs.filter((r: any) => r.status === "aberta" || r.status === "em_tratativa")
+                  .length
+              }
+            </Badge>
             <Badge variant="outline">Assinaturas: {data.assinaturas.length}/2</Badge>
           </div>
         </Card>
@@ -193,7 +205,8 @@ function FatDetailPage() {
         <Alert className="mb-4">
           <AlertTitle>FAT homologado</AlertTitle>
           <AlertDescription>
-            Homologado em {fat.homologado_em ? new Date(fat.homologado_em).toLocaleString("pt-BR") : "—"}.
+            Homologado em{" "}
+            {fat.homologado_em ? new Date(fat.homologado_em).toLocaleString("pt-BR") : "—"}.
           </AlertDescription>
         </Alert>
       )}
@@ -249,10 +262,18 @@ function computeBlockers(data: FatData | undefined): Blocker[] {
   const out: Blocker[] = [];
   const fat = data.fat as any;
   if (!fat.tag_equipamento || !fat.data_ensaio) {
-    out.push({ code: "ident", step: "Identificação", message: "Preencha TAG do equipamento e data do ensaio." });
+    out.push({
+      code: "ident",
+      step: "Identificação",
+      message: "Preencha TAG do equipamento e data do ensaio.",
+    });
   }
   if ((fat.progresso ?? 0) < 100) {
-    out.push({ code: "checklist", step: "Checklist", message: `Faltam itens para responder (${fat.progresso ?? 0}% concluído).` });
+    out.push({
+      code: "checklist",
+      step: "Checklist",
+      message: `Faltam itens para responder (${fat.progresso ?? 0}% concluído).`,
+    });
   }
   const nokSemFoto = (data.respostas as any[]).filter((r) => {
     if (r.status !== "nok") return false;
@@ -260,20 +281,48 @@ function computeBlockers(data: FatData | undefined): Blocker[] {
     return tpl?.requer_foto_nok && !r.foto_path;
   });
   if (nokSemFoto.length > 0) {
-    out.push({ code: "foto", step: "Checklist", message: `${nokSemFoto.length} item(ns) NOK exigem foto de evidência.` });
+    out.push({
+      code: "foto",
+      step: "Checklist",
+      message: `${nokSemFoto.length} item(ns) NOK exigem foto de evidência.`,
+    });
   }
-  const rncAbertas = (data.rncs as any[]).filter((r) => r.status === "aberta" || r.status === "em_tratativa");
+  const rncAbertas = (data.rncs as any[]).filter(
+    (r) => r.status === "aberta" || r.status === "em_tratativa",
+  );
   if (rncAbertas.length > 0) {
-    out.push({ code: "rnc", step: "RNCs", message: `${rncAbertas.length} RNC(s) em aberto. Feche ou cancele antes de homologar.` });
+    out.push({
+      code: "rnc",
+      step: "RNCs",
+      message: `${rncAbertas.length} RNC(s) em aberto. Feche ou cancele antes de homologar.`,
+    });
   }
   const tipos = new Set((data.assinaturas as any[]).map((a) => a.tipo));
-  if (!tipos.has("inspetor")) out.push({ code: "ass-insp", step: "Assinaturas", message: "Assinatura do inspetor pendente." });
-  if (!tipos.has("testemunha")) out.push({ code: "ass-test", step: "Assinaturas", message: "Assinatura da testemunha pendente." });
+  if (!tipos.has("inspetor"))
+    out.push({
+      code: "ass-insp",
+      step: "Assinaturas",
+      message: "Assinatura do inspetor pendente.",
+    });
+  if (!tipos.has("testemunha"))
+    out.push({
+      code: "ass-test",
+      step: "Assinaturas",
+      message: "Assinatura da testemunha pendente.",
+    });
   return out;
 }
 
 // ====================== Identificação ======================
-function IdentificacaoCard({ fat, disabled, onSaved }: { fat: any; disabled: boolean; onSaved: () => void }) {
+function IdentificacaoCard({
+  fat,
+  disabled,
+  onSaved,
+}: {
+  fat: any;
+  disabled: boolean;
+  onSaved: () => void;
+}) {
   const update = useServerFn(updateFatIdentificacao);
   const [form, setForm] = useState<any>({
     os_codigo: fat.os_codigo ?? "",
@@ -327,16 +376,82 @@ function IdentificacaoCard({ fat, disabled, onSaved }: { fat: any; disabled: boo
   return (
     <Card className="p-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Field label="OS"><Input value={form.os_codigo} onChange={(e) => setForm({ ...form, os_codigo: e.target.value })} disabled={disabled} /></Field>
-        <Field label="TAG do equipamento *"><Input value={form.tag_equipamento} onChange={(e) => setForm({ ...form, tag_equipamento: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Local do ensaio"><Input value={form.local_ensaio} onChange={(e) => setForm({ ...form, local_ensaio: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Data *"><Input type="date" value={form.data_ensaio} onChange={(e) => setForm({ ...form, data_ensaio: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Hora início"><Input type="time" value={form.hora_inicio} onChange={(e) => setForm({ ...form, hora_inicio: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Testemunha (cliente)"><Input value={form.testemunha_nome} onChange={(e) => setForm({ ...form, testemunha_nome: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Temperatura (°C)"><Input type="number" step="0.1" value={form.temperatura_c} onChange={(e) => setForm({ ...form, temperatura_c: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Umidade (%)"><Input type="number" step="0.1" value={form.umidade_rel} onChange={(e) => setForm({ ...form, umidade_rel: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Tensão alimentação"><Input value={form.tensao_alimentacao} onChange={(e) => setForm({ ...form, tensao_alimentacao: e.target.value })} disabled={disabled} /></Field>
-        <Field label="Técnicos"><Input value={form.tecnicos} onChange={(e) => setForm({ ...form, tecnicos: e.target.value })} disabled={disabled} /></Field>
+        <Field label="OS">
+          <Input
+            value={form.os_codigo}
+            onChange={(e) => setForm({ ...form, os_codigo: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="TAG do equipamento *">
+          <Input
+            value={form.tag_equipamento}
+            onChange={(e) => setForm({ ...form, tag_equipamento: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Local do ensaio">
+          <Input
+            value={form.local_ensaio}
+            onChange={(e) => setForm({ ...form, local_ensaio: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Data *">
+          <Input
+            type="date"
+            value={form.data_ensaio}
+            onChange={(e) => setForm({ ...form, data_ensaio: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Hora início">
+          <Input
+            type="time"
+            value={form.hora_inicio}
+            onChange={(e) => setForm({ ...form, hora_inicio: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Testemunha (cliente)">
+          <Input
+            value={form.testemunha_nome}
+            onChange={(e) => setForm({ ...form, testemunha_nome: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Temperatura (°C)">
+          <Input
+            type="number"
+            step="0.1"
+            value={form.temperatura_c}
+            onChange={(e) => setForm({ ...form, temperatura_c: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Umidade (%)">
+          <Input
+            type="number"
+            step="0.1"
+            value={form.umidade_rel}
+            onChange={(e) => setForm({ ...form, umidade_rel: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Tensão alimentação">
+          <Input
+            value={form.tensao_alimentacao}
+            onChange={(e) => setForm({ ...form, tensao_alimentacao: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
+        <Field label="Técnicos">
+          <Input
+            value={form.tecnicos}
+            onChange={(e) => setForm({ ...form, tecnicos: e.target.value })}
+            disabled={disabled}
+          />
+        </Field>
       </div>
       <div className="mt-4">
         <div className="mb-2 text-sm font-medium">Motivos da viagem</div>
@@ -356,11 +471,18 @@ function IdentificacaoCard({ fat, disabled, onSaved }: { fat: any; disabled: boo
       </div>
       <div className="mt-4">
         <Field label="Observações gerais">
-          <Textarea rows={4} value={form.observacoes_gerais} onChange={(e) => setForm({ ...form, observacoes_gerais: e.target.value })} disabled={disabled} />
+          <Textarea
+            rows={4}
+            value={form.observacoes_gerais}
+            onChange={(e) => setForm({ ...form, observacoes_gerais: e.target.value })}
+            disabled={disabled}
+          />
         </Field>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button onClick={save} disabled={disabled || saving}>{saving ? "Salvando…" : "Salvar identificação"}</Button>
+        <Button onClick={save} disabled={disabled || saving}>
+          {saving ? "Salvando…" : "Salvar identificação"}
+        </Button>
       </div>
     </Card>
   );
@@ -376,7 +498,15 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 // ====================== Checklist ======================
-function ChecklistCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean; onSaved: () => void }) {
+function ChecklistCard({
+  data,
+  disabled,
+  onSaved,
+}: {
+  data: FatData;
+  disabled: boolean;
+  onSaved: () => void;
+}) {
   const setResp = useServerFn(setChecklistResposta);
   const fat = data.fat as any;
   const respMap = useMemo(() => {
@@ -406,7 +536,9 @@ function ChecklistCard({ data, disabled, onSaved }: { data: FatData; disabled: b
   async function uploadFoto(file: File, templateId: string) {
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `${fat.id}/${templateId}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("fat-evidencias").upload(path, file, { upsert: true });
+    const { error } = await supabase.storage
+      .from("fat-evidencias")
+      .upload(path, file, { upsert: true });
     if (error) {
       toast.error(error.message);
       return;
@@ -441,7 +573,9 @@ function ChecklistCard({ data, disabled, onSaved }: { data: FatData; disabled: b
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">{t.titulo}</div>
-                        {t.descricao && <div className="text-xs text-[var(--text-muted)]">{t.descricao}</div>}
+                        {t.descricao && (
+                          <div className="text-xs text-[var(--text-muted)]">{t.descricao}</div>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         {(["ok", "nok", "na"] as const).map((k) => (
@@ -473,7 +607,8 @@ function ChecklistCard({ data, disabled, onSaved }: { data: FatData; disabled: b
                         defaultValue={r?.comentario ?? ""}
                         disabled={disabled}
                         onBlur={(e) => {
-                          if ((e.target.value ?? "") !== (r?.comentario ?? "")) update(t.id, { comentario: e.target.value });
+                          if ((e.target.value ?? "") !== (r?.comentario ?? ""))
+                            update(t.id, { comentario: e.target.value });
                         }}
                       />
                     )}
@@ -488,7 +623,9 @@ function ChecklistCard({ data, disabled, onSaved }: { data: FatData; disabled: b
                           type="file"
                           accept="image/*"
                           disabled={disabled}
-                          onChange={(e) => e.target.files?.[0] && uploadFoto(e.target.files[0], t.id)}
+                          onChange={(e) =>
+                            e.target.files?.[0] && uploadFoto(e.target.files[0], t.id)
+                          }
                         />
                       </div>
                     )}
@@ -505,17 +642,38 @@ function ChecklistCard({ data, disabled, onSaved }: { data: FatData; disabled: b
 
 function FotoPreview({ path }: { path: string }) {
   const sign = useServerFn(getFatFotoSignedUrl);
-  const { data } = useQuery({ queryKey: ["fat-foto", path], queryFn: () => sign({ data: { path } }) });
+  const { data } = useQuery({
+    queryKey: ["fat-foto", path],
+    queryFn: () => sign({ data: { path } }),
+  });
   if (!data?.url) return <span className="text-[var(--text-muted)]">Carregando…</span>;
-  return <a href={data.url} target="_blank" rel="noreferrer" className="underline">Ver foto</a>;
+  return (
+    <a href={data.url} target="_blank" rel="noreferrer" className="underline">
+      Ver foto
+    </a>
+  );
 }
 
 // ====================== Medições ======================
-function MedicoesCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean; onSaved: () => void }) {
+function MedicoesCard({
+  data,
+  disabled,
+  onSaved,
+}: {
+  data: FatData;
+  disabled: boolean;
+  onSaved: () => void;
+}) {
   const upsert = useServerFn(upsertMedicao);
   const del = useServerFn(deleteMedicao);
   const fat = data.fat as any;
-  const [novo, setNovo] = useState({ parametro: "", unidade: "", nominal: "", tolerancia: "", medido: "" });
+  const [novo, setNovo] = useState({
+    parametro: "",
+    unidade: "",
+    nominal: "",
+    tolerancia: "",
+    medido: "",
+  });
 
   async function addRow() {
     if (!novo.parametro) return;
@@ -541,7 +699,9 @@ function MedicoesCard({ data, disabled, onSaved }: { data: FatData; disabled: bo
     try {
       await del({ data: { id } });
       onSaved();
-    } catch (e: any) { toast.error(e?.message ?? "Erro"); }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro");
+    }
   }
 
   return (
@@ -569,23 +729,68 @@ function MedicoesCard({ data, disabled, onSaved }: { data: FatData; disabled: bo
                 <td className="p-2 tabular-nums">{m.medido ?? "—"}</td>
                 <td className="p-2">
                   {m.status_auto ? (
-                    <Badge variant={m.status_auto === "Aprovado" ? "default" : "destructive"}>{m.status_auto}</Badge>
-                  ) : "—"}
+                    <Badge variant={m.status_auto === "Aprovado" ? "default" : "destructive"}>
+                      {m.status_auto}
+                    </Badge>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="p-2 text-right">
-                  <Button size="sm" variant="ghost" disabled={disabled} onClick={() => removeRow(m.id)}>Remover</Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={disabled}
+                    onClick={() => removeRow(m.id)}
+                  >
+                    Remover
+                  </Button>
                 </td>
               </tr>
             ))}
             {!disabled && (
               <tr className="border-t border-[var(--bg-border)] bg-[var(--bg-elevated)]">
-                <td className="p-2"><Input value={novo.parametro} onChange={(e) => setNovo({ ...novo, parametro: e.target.value })} placeholder="Ex: Velocidade" /></td>
-                <td className="p-2"><Input value={novo.unidade} onChange={(e) => setNovo({ ...novo, unidade: e.target.value })} placeholder="ppm" /></td>
-                <td className="p-2"><Input type="number" value={novo.nominal} onChange={(e) => setNovo({ ...novo, nominal: e.target.value })} /></td>
-                <td className="p-2"><Input value={novo.tolerancia} onChange={(e) => setNovo({ ...novo, tolerancia: e.target.value })} placeholder="±5%" /></td>
-                <td className="p-2"><Input type="number" value={novo.medido} onChange={(e) => setNovo({ ...novo, medido: e.target.value })} /></td>
+                <td className="p-2">
+                  <Input
+                    value={novo.parametro}
+                    onChange={(e) => setNovo({ ...novo, parametro: e.target.value })}
+                    placeholder="Ex: Velocidade"
+                  />
+                </td>
+                <td className="p-2">
+                  <Input
+                    value={novo.unidade}
+                    onChange={(e) => setNovo({ ...novo, unidade: e.target.value })}
+                    placeholder="ppm"
+                  />
+                </td>
+                <td className="p-2">
+                  <Input
+                    type="number"
+                    value={novo.nominal}
+                    onChange={(e) => setNovo({ ...novo, nominal: e.target.value })}
+                  />
+                </td>
+                <td className="p-2">
+                  <Input
+                    value={novo.tolerancia}
+                    onChange={(e) => setNovo({ ...novo, tolerancia: e.target.value })}
+                    placeholder="±5%"
+                  />
+                </td>
+                <td className="p-2">
+                  <Input
+                    type="number"
+                    value={novo.medido}
+                    onChange={(e) => setNovo({ ...novo, medido: e.target.value })}
+                  />
+                </td>
                 <td className="p-2">—</td>
-                <td className="p-2 text-right"><Button size="sm" onClick={addRow}>Adicionar</Button></td>
+                <td className="p-2 text-right">
+                  <Button size="sm" onClick={addRow}>
+                    Adicionar
+                  </Button>
+                </td>
               </tr>
             )}
           </tbody>
@@ -596,7 +801,15 @@ function MedicoesCard({ data, disabled, onSaved }: { data: FatData; disabled: bo
 }
 
 // ====================== RNC ======================
-function RncCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean; onSaved: () => void }) {
+function RncCard({
+  data,
+  disabled,
+  onSaved,
+}: {
+  data: FatData;
+  disabled: boolean;
+  onSaved: () => void;
+}) {
   const upsert = useServerFn(upsertRnc);
   const fat = data.fat as any;
 
@@ -614,7 +827,9 @@ function RncCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean
         },
       });
       onSaved();
-    } catch (e: any) { toast.error(e?.message ?? "Erro"); }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro");
+    }
   }
 
   async function novaRnc() {
@@ -623,14 +838,18 @@ function RncCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean
         data: { fat_id: fat.id, titulo: "Nova não conformidade", status: "aberta" },
       });
       onSaved();
-    } catch (e: any) { toast.error(e?.message ?? "Erro"); }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro");
+    }
   }
 
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Não conformidades</h3>
-        <Button size="sm" onClick={novaRnc} disabled={disabled}>Adicionar RNC</Button>
+        <Button size="sm" onClick={novaRnc} disabled={disabled}>
+          Adicionar RNC
+        </Button>
       </div>
       {!(data.rncs as any[]).length ? (
         <div className="rounded border border-dashed border-[var(--bg-border)] p-6 text-center text-sm text-[var(--text-muted)]">
@@ -666,7 +885,10 @@ function RncCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean
                 placeholder="Descrição"
                 defaultValue={r.descricao ?? ""}
                 disabled={disabled}
-                onBlur={(e) => (e.target.value ?? "") !== (r.descricao ?? "") && patch(r, { descricao: e.target.value })}
+                onBlur={(e) =>
+                  (e.target.value ?? "") !== (r.descricao ?? "") &&
+                  patch(r, { descricao: e.target.value })
+                }
               />
               <Textarea
                 className="mt-2"
@@ -674,7 +896,10 @@ function RncCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean
                 placeholder="Plano de ação"
                 defaultValue={r.plano_acao ?? ""}
                 disabled={disabled}
-                onBlur={(e) => (e.target.value ?? "") !== (r.plano_acao ?? "") && patch(r, { plano_acao: e.target.value })}
+                onBlur={(e) =>
+                  (e.target.value ?? "") !== (r.plano_acao ?? "") &&
+                  patch(r, { plano_acao: e.target.value })
+                }
               />
             </li>
           ))}
@@ -685,23 +910,55 @@ function RncCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean
 }
 
 // ====================== Assinaturas ======================
-function AssinaturasCard({ data, disabled, onSaved }: { data: FatData; disabled: boolean; onSaved: () => void }) {
+function AssinaturasCard({
+  data,
+  disabled,
+  onSaved,
+}: {
+  data: FatData;
+  disabled: boolean;
+  onSaved: () => void;
+}) {
   const fat = data.fat as any;
   const byTipo: Record<string, any> = {};
   (data.assinaturas as any[]).forEach((a) => (byTipo[a.tipo] = a));
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <AssinaturaBox tipo="inspetor" label="Inspetor (Solutek)" fatId={fat.id} disabled={disabled} existing={byTipo.inspetor} onSaved={onSaved} />
-      <AssinaturaBox tipo="testemunha" label="Testemunha (Cliente)" fatId={fat.id} disabled={disabled} existing={byTipo.testemunha} onSaved={onSaved} />
+      <AssinaturaBox
+        tipo="inspetor"
+        label="Inspetor (Solutek)"
+        fatId={fat.id}
+        disabled={disabled}
+        existing={byTipo.inspetor}
+        onSaved={onSaved}
+      />
+      <AssinaturaBox
+        tipo="testemunha"
+        label="Testemunha (Cliente)"
+        fatId={fat.id}
+        disabled={disabled}
+        existing={byTipo.testemunha}
+        onSaved={onSaved}
+      />
     </div>
   );
 }
 
 function AssinaturaBox({
-  tipo, label, fatId, disabled, existing, onSaved,
+  tipo,
+  label,
+  fatId,
+  disabled,
+  existing,
+  onSaved,
 }: {
-  tipo: "inspetor" | "testemunha"; label: string; fatId: string; disabled: boolean; existing?: any; onSaved: () => void;
+  tipo: "inspetor" | "testemunha";
+  label: string;
+  fatId: string;
+  disabled: boolean;
+  existing?: any;
+  onSaved: () => void;
 }) {
   const submit = useServerFn(submitAssinatura);
   const remove = useServerFn(removeAssinatura);
@@ -730,30 +987,51 @@ function AssinaturaBox({
     ctx.lineCap = "round";
     ctx.stroke();
   }
-  function end() { drawing.current = false; }
+  function end() {
+    drawing.current = false;
+  }
   function clear() {
     const c = canvasRef.current!;
     c.getContext("2d")!.clearRect(0, 0, c.width, c.height);
   }
   async function save() {
-    if (!nome.trim()) { toast.error("Informe o nome"); return; }
+    if (!nome.trim()) {
+      toast.error("Informe o nome");
+      return;
+    }
     const c = canvasRef.current!;
     const dataUrl = c.toDataURL("image/png");
     // detect empty canvas
     const ctx = c.getContext("2d")!;
     const pixels = ctx.getImageData(0, 0, c.width, c.height).data;
     let hasInk = false;
-    for (let i = 3; i < pixels.length; i += 4) { if (pixels[i] !== 0) { hasInk = true; break; } }
-    if (!hasInk) { toast.error("Assine no quadro"); return; }
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] !== 0) {
+        hasInk = true;
+        break;
+      }
+    }
+    if (!hasInk) {
+      toast.error("Assine no quadro");
+      return;
+    }
     try {
-      await submit({ data: { fat_id: fatId, tipo, nome, cargo: cargo || null, assinatura_svg: dataUrl } });
+      await submit({
+        data: { fat_id: fatId, tipo, nome, cargo: cargo || null, assinatura_svg: dataUrl },
+      });
       toast.success("Assinatura registrada");
       onSaved();
-    } catch (e: any) { toast.error(e?.message ?? "Erro"); }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro");
+    }
   }
   async function reset() {
-    try { await remove({ data: { fat_id: fatId, tipo } }); onSaved(); }
-    catch (e: any) { toast.error(e?.message ?? "Erro"); }
+    try {
+      await remove({ data: { fat_id: fatId, tipo } });
+      onSaved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro");
+    }
   }
 
   return (
@@ -763,17 +1041,35 @@ function AssinaturaBox({
         {existing && <Badge>Assinado</Badge>}
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
-        <Input placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} disabled={disabled || !!existing} />
-        <Input placeholder="Cargo" value={cargo} onChange={(e) => setCargo(e.target.value)} disabled={disabled || !!existing} />
+        <Input
+          placeholder="Nome"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          disabled={disabled || !!existing}
+        />
+        <Input
+          placeholder="Cargo"
+          value={cargo}
+          onChange={(e) => setCargo(e.target.value)}
+          disabled={disabled || !!existing}
+        />
       </div>
       {existing ? (
         <div className="mt-3">
-          <img src={existing.assinatura_svg} alt="assinatura" className="max-h-32 rounded border border-[var(--bg-border)] bg-white" />
+          <img
+            src={existing.assinatura_svg}
+            alt="assinatura"
+            className="max-h-32 rounded border border-[var(--bg-border)] bg-white"
+          />
           <div className="mt-1 text-xs text-[var(--text-muted)]">
-            Assinado em {existing.assinado_em ? new Date(existing.assinado_em).toLocaleString("pt-BR") : "—"} · hash {existing.hash_sha256?.slice(0, 12)}…
+            Assinado em{" "}
+            {existing.assinado_em ? new Date(existing.assinado_em).toLocaleString("pt-BR") : "—"} ·
+            hash {existing.hash_sha256?.slice(0, 12)}…
           </div>
           <div className="mt-2">
-            <Button size="sm" variant="outline" onClick={reset} disabled={disabled}>Refazer</Button>
+            <Button size="sm" variant="outline" onClick={reset} disabled={disabled}>
+              Refazer
+            </Button>
           </div>
         </div>
       ) : (
@@ -789,8 +1085,12 @@ function AssinaturaBox({
             className="w-full touch-none rounded border border-[var(--bg-border)] bg-white"
           />
           <div className="mt-2 flex gap-2">
-            <Button size="sm" onClick={save} disabled={disabled}>Salvar assinatura</Button>
-            <Button size="sm" variant="outline" onClick={clear} disabled={disabled}>Limpar</Button>
+            <Button size="sm" onClick={save} disabled={disabled}>
+              Salvar assinatura
+            </Button>
+            <Button size="sm" variant="outline" onClick={clear} disabled={disabled}>
+              Limpar
+            </Button>
           </div>
         </div>
       )}
@@ -814,8 +1114,10 @@ function HistoricoCard({ fatId }: { fatId: string }) {
       return data ?? [];
     },
   });
-  if (isLoading) return <Card className="p-4 text-sm text-[var(--text-muted)]">Carregando histórico…</Card>;
-  if (!data?.length) return <Card className="p-4 text-sm text-[var(--text-muted)]">Sem eventos registrados.</Card>;
+  if (isLoading)
+    return <Card className="p-4 text-sm text-[var(--text-muted)]">Carregando histórico…</Card>;
+  if (!data?.length)
+    return <Card className="p-4 text-sm text-[var(--text-muted)]">Sem eventos registrados.</Card>;
   return (
     <Card className="p-4">
       <ul className="divide-y divide-[var(--bg-border)] text-sm">
@@ -827,7 +1129,9 @@ function HistoricoCard({ fatId }: { fatId: string }) {
             </div>
             {e.field_changed && (
               <div className="text-sm">
-                <strong>{e.field_changed}</strong>: <span className="text-[var(--text-muted)]">{JSON.stringify(e.old_value)}</span> → {JSON.stringify(e.new_value)}
+                <strong>{e.field_changed}</strong>:{" "}
+                <span className="text-[var(--text-muted)]">{JSON.stringify(e.old_value)}</span> →{" "}
+                {JSON.stringify(e.new_value)}
               </div>
             )}
           </li>

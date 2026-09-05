@@ -9,7 +9,11 @@ import type { Database } from "@/integrations/supabase/types";
 
 const ALLOWED_ROLES = ["admin", "manager", "sales"] as const;
 
-async function assertRole(supabase: SupabaseClient<Database>, userId: string, allowed: readonly string[]) {
+async function assertRole(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  allowed: readonly string[],
+) {
   const ok = await hasAnyRole(supabase, userId, allowed as AppRoleName[]);
   if (!ok) throw new Error("Acesso restrito.");
   return supabase;

@@ -26,7 +26,9 @@ export function RecommendedArticles({ exclude, title = "Artigos recomendados", m
 
   const suggestions = useMemo(() => {
     const excluded = (a: { category: string; slug: string }) =>
-      exclude && a.category === exclude.category && (exclude.slug ? a.slug === exclude.slug : false);
+      exclude &&
+      a.category === exclude.category &&
+      (exclude.slug ? a.slug === exclude.slug : false);
 
     const seen = new Set<string>();
     const items: Array<{
@@ -49,7 +51,9 @@ export function RecommendedArticles({ exclude, title = "Artigos recomendados", m
     // 2) Correlatos com o último tópico (mesma categoria / tags)
     const lastTopic = recent[0];
     if (lastTopic) {
-      const anchor = ARTICLES.find((a) => a.category === lastTopic.category && a.slug === lastTopic.slug);
+      const anchor = ARTICLES.find(
+        (a) => a.category === lastTopic.category && a.slug === lastTopic.slug,
+      );
       const anchorTags = new Set(anchor?.tags ?? []);
       const scored = ARTICLES.map((a) => {
         if (excluded(a)) return null;
@@ -80,7 +84,9 @@ export function RecommendedArticles({ exclude, title = "Artigos recomendados", m
     <section className="mt-6 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)]">
       <header className="mb-3 flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-[var(--info)]" />
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">{title}</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+          {title}
+        </h2>
         <span className="ml-auto text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
           Baseado no seu histórico
         </span>
@@ -105,7 +111,9 @@ export function RecommendedArticles({ exclude, title = "Artigos recomendados", m
                         ? "bg-[var(--info)]/10 text-[var(--info)]"
                         : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
                     }`}
-                    title={reason === "recent" ? "Visitado recentemente" : "Relacionado ao último tópico"}
+                    title={
+                      reason === "recent" ? "Visitado recentemente" : "Relacionado ao último tópico"
+                    }
                   >
                     {reason === "recent" ? (
                       <span className="inline-flex items-center gap-1">
@@ -116,7 +124,9 @@ export function RecommendedArticles({ exclude, title = "Artigos recomendados", m
                     )}
                   </span>
                 </div>
-                <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">{article.description}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">
+                  {article.description}
+                </p>
                 <div className="mt-2 text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
                   {cat?.label ?? article.category}
                 </div>

@@ -6,10 +6,21 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 type AnySb = any;
 
-export const DISCIPLINAS = ["planejamento", "engenharia", "producao", "qualidade", "pos_venda"] as const;
+export const DISCIPLINAS = [
+  "planejamento",
+  "engenharia",
+  "producao",
+  "qualidade",
+  "pos_venda",
+] as const;
 export type Disciplina = (typeof DISCIPLINAS)[number];
 
-export const ETAPA_STATUS_LIST = ["nao_iniciado", "em_progresso", "bloqueado", "concluido"] as const;
+export const ETAPA_STATUS_LIST = [
+  "nao_iniciado",
+  "em_progresso",
+  "bloqueado",
+  "concluido",
+] as const;
 export type EtapaStatus = (typeof ETAPA_STATUS_LIST)[number];
 
 export const PRIORIDADES = ["baixa", "media", "alta", "urgente"] as const;
@@ -43,7 +54,7 @@ export const listDisciplinaEtapas = createServerFn({ method: "POST" })
     if (error) throw friendlyDbError(error);
 
     const ids = (rows ?? []).map((r: any) => r.id);
-    let commentCounts: Record<string, number> = {};
+    const commentCounts: Record<string, number> = {};
     if (ids.length) {
       const { data: cs } = await sb
         .from("equipamento_etapa_comentarios")
@@ -59,9 +70,7 @@ export const listDisciplinaEtapas = createServerFn({ method: "POST" })
 // Todas as etapas (todas as disciplinas) de um equipamento — usada na Timeline.
 export const listAllEquipamentoEtapas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ equipamentoId: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ equipamentoId: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
     const { data: rows, error } = await sb
@@ -165,7 +174,11 @@ const reorderInput = z.object({
   equipamento_id: z.string().uuid(),
   disciplina: z.enum(DISCIPLINAS),
   items: z.array(
-    z.object({ id: z.string().uuid(), ordem: z.number().int().min(0), status: z.enum(ETAPA_STATUS_LIST).optional() }),
+    z.object({
+      id: z.string().uuid(),
+      ordem: z.number().int().min(0),
+      status: z.enum(ETAPA_STATUS_LIST).optional(),
+    }),
   ),
 });
 export const reorderEtapas = createServerFn({ method: "POST" })
@@ -215,11 +228,13 @@ export const listEtapaComentarios = createServerFn({ method: "POST" })
 export const addEtapaComentario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      etapa_id: z.string().uuid(),
-      texto: z.string().min(1).max(4000),
-      mentions: z.array(z.string().uuid()).optional().default([]),
-    }).parse(i),
+    z
+      .object({
+        etapa_id: z.string().uuid(),
+        texto: z.string().min(1).max(4000),
+        mentions: z.array(z.string().uuid()).optional().default([]),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");

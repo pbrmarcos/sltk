@@ -8,7 +8,10 @@ import { REVISAO_DISCIPLINAS, REVISAO_STATUS } from "@/lib/engenharia.shared";
 const listAllInput = z.object({
   disciplina: z.enum(REVISAO_DISCIPLINAS),
   q: z.string().optional(),
-  status: z.enum(["todos", ...REVISAO_STATUS]).optional().default("todos"),
+  status: z
+    .enum(["todos", ...REVISAO_STATUS])
+    .optional()
+    .default("todos"),
   page: z.number().int().min(1).optional().default(1),
   per_page: z.number().int().min(1).max(100).optional().default(50),
 });
@@ -34,9 +37,11 @@ export const listAllRevisoes = createServerFn({ method: "POST" })
         `cliente_equipamentos.modelo.ilike.${term},cliente_equipamentos.codigo.ilike.${term},clientes.razao_social.ilike.${term}`,
       );
     }
-    const { data: rows, count, error } = await q
-      .order("updated_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("updated_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });

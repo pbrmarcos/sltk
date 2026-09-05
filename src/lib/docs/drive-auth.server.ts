@@ -4,7 +4,10 @@
  * `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`). Usado por `drive.server.ts` e pelos
  * módulos de anexos que ainda montam suas próprias chamadas à API do Drive.
  */
-import { getGoogleAccessToken, serviceAccountConfigured } from "@/lib/google-service-account.server";
+import {
+  getGoogleAccessToken,
+  serviceAccountConfigured,
+} from "@/lib/google-service-account.server";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 const DIRECT_BASE = "https://www.googleapis.com";

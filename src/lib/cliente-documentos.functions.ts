@@ -74,7 +74,12 @@ async function ensureFolder(name: string, parentId: string): Promise<string> {
 }
 
 function sanitizeFolderName(s: string): string {
-  return s.replace(/[\\/:*?"<>|]/g, "-").trim().slice(0, 120) || "sem-nome";
+  return (
+    s
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .trim()
+      .slice(0, 120) || "sem-nome"
+  );
 }
 
 async function driveUploadMultipart(opts: {
@@ -84,7 +89,11 @@ async function driveUploadMultipart(opts: {
   bytes: ArrayBuffer;
 }): Promise<{ id: string; webViewLink: string }> {
   const boundary = `lvbl_${crypto.randomUUID()}`;
-  const meta = JSON.stringify({ name: opts.name, parents: [opts.parentId], mimeType: opts.mimeType });
+  const meta = JSON.stringify({
+    name: opts.name,
+    parents: [opts.parentId],
+    mimeType: opts.mimeType,
+  });
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
@@ -125,7 +134,9 @@ export const uploadClienteDocumento = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "clientes");
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) {
-      throw new Error(`Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`);
+      throw new Error(
+        `Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`,
+      );
     }
     if (data.size_bytes > limit) {
       const mb = (limit / 1024 / 1024).toFixed(0);

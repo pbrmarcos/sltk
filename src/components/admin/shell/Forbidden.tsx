@@ -13,16 +13,11 @@ export function Forbidden() {
     <div className="flex min-h-[60vh] items-center justify-center p-6">
       <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
         <Lock className="mx-auto mb-4 h-10 w-10 text-destructive" />
-        <h1 className="text-lg font-semibold">
-          Você não tem permissão para acessar esta área
-        </h1>
+        <h1 className="text-lg font-semibold">Você não tem permissão para acessar esta área</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Se acredita que isso é um engano, procure um administrador.
         </p>
-        <Button
-          className="mt-6"
-          onClick={() => navigate({ to: "/dashboard", replace: true })}
-        >
+        <Button className="mt-6" onClick={() => navigate({ to: "/dashboard", replace: true })}>
           Voltar ao início
         </Button>
       </div>

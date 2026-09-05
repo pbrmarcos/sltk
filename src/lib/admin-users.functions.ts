@@ -22,7 +22,7 @@ export type AdminUserRow = {
   id: string;
   email: string | null;
   full_name: string | null;
-  roles: typeof ROLES[number][];
+  roles: (typeof ROLES)[number][];
   deleted_at: string | null;
   created_at: string;
 };
@@ -36,7 +36,10 @@ async function assertAdmin(userId: string) {
 
 const listInput = z.object({
   search: z.string().max(120).optional().default(""),
-  role: z.union([roleEnum, z.literal("all")]).optional().default("all"),
+  role: z
+    .union([roleEnum, z.literal("all")])
+    .optional()
+    .default("all"),
   status: z.enum(["active", "inactive", "all"]).optional().default("active"),
   page: z.number().int().min(1).max(10_000).optional().default(1),
   pageSize: z.number().int().min(1).max(50).optional().default(50),
@@ -87,13 +90,15 @@ export const listAdminUsers = createServerFn({ method: "POST" })
 
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: profiles, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: profiles,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
 
     const ids = (profiles ?? []).map((p) => p.id);
-    let rolesByUser = new Map<string, typeof ROLES[number][]>();
+    const rolesByUser = new Map<string, (typeof ROLES)[number][]>();
     if (ids.length > 0) {
       const { data: roleRows, error: rrErr } = await admin
         .from("user_roles")
@@ -102,7 +107,7 @@ export const listAdminUsers = createServerFn({ method: "POST" })
       if (rrErr) throw friendlyDbError(rrErr);
       for (const r of roleRows ?? []) {
         const arr = rolesByUser.get(r.user_id) ?? [];
-        arr.push(r.role as typeof ROLES[number]);
+        arr.push(r.role as (typeof ROLES)[number]);
         rolesByUser.set(r.user_id, arr);
       }
     }
@@ -162,8 +167,7 @@ export const createAdminUser = createServerFn({ method: "POST" })
       privilegedClient = supabaseAdmin;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      const unavailable =
-        error instanceof Error && error.name === "ServiceRoleUnavailableError";
+      const unavailable = error instanceof Error && error.name === "ServiceRoleUnavailableError";
       if (!unavailable) {
         throw new Error(message);
       }
@@ -203,10 +207,7 @@ export const createAdminUser = createServerFn({ method: "POST" })
       // Trigger handle_new_user inserts profile; ensure full_name is set.
       const { error: profileError } = await privilegedClient
         .from("profiles")
-        .upsert(
-          { id: newId, email: data.email, full_name: data.full_name },
-          { onConflict: "id" },
-        );
+        .upsert({ id: newId, email: data.email, full_name: data.full_name }, { onConflict: "id" });
       if (profileError) throw friendlyDbError(profileError);
 
       const { error: rolesError } = await privilegedClient
@@ -216,10 +217,12 @@ export const createAdminUser = createServerFn({ method: "POST" })
     } else {
       // O RPC revalida auth.uid() como admin e executa perfil + roles
       // atomicamente, sem expor privilégios de escrita no cliente.
-      const { error: finalizeError } = await (context.supabase.rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ error: { message: string } | null }>)('admin_finalize_new_user', {
+      const { error: finalizeError } = await (
+        context.supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ error: { message: string } | null }>
+      )("admin_finalize_new_user", {
         _user_id: newId,
         _email: data.email,
         _full_name: data.full_name,
@@ -270,7 +273,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
       .select("role")
       .eq("user_id", data.id);
     if (erErr) throw friendlyDbError(erErr);
-    const oldRoles = (existingRoles ?? []).map((r) => r.role as typeof ROLES[number]);
+    const oldRoles = (existingRoles ?? []).map((r) => r.role as (typeof ROLES)[number]);
     const newRoles = Array.from(new Set(data.roles));
 
     const toAdd = newRoles.filter((r) => !oldRoles.includes(r));
@@ -362,10 +365,7 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (upErr) throw friendlyDbError(upErr);
 
-    const { error: delErr } = await admin
-      .from("user_roles")
-      .delete()
-      .eq("user_id", data.id);
+    const { error: delErr } = await admin.from("user_roles").delete().eq("user_id", data.id);
     if (delErr) throw friendlyDbError(delErr);
 
     // Bane a conta no Auth (revoga refresh tokens).
@@ -485,15 +485,15 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
 
     // Fallback (ambiente sem service role): define a senha via função
     // SECURITY DEFINER no banco, que revalida admin + hierarquia de roles.
-    const { error: rpcErr } = await (context.supabase.rpc as unknown as (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ error: { message: string } | null }>)("admin_set_user_password", {
+    const { error: rpcErr } = await (
+      context.supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ error: { message: string } | null }>
+    )("admin_set_user_password", {
       _user_id: data.id,
       _password: data.password,
     });
     if (rpcErr) throw friendlyDbError(rpcErr);
     return { ok: true, mode: "password" as const, email: null as string | null };
-
-
   });

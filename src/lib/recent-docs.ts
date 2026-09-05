@@ -20,7 +20,10 @@ function safeParse(raw: string | null): RecentDoc[] {
     return Array.isArray(arr)
       ? arr.filter(
           (x): x is RecentDoc =>
-            !!x && typeof x === "object" && typeof x.category === "string" && typeof x.slug === "string",
+            !!x &&
+            typeof x === "object" &&
+            typeof x.category === "string" &&
+            typeof x.slug === "string",
         )
       : [];
   } catch {

@@ -2,7 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, UserPlus, Pencil, UserX, UserCheck, KeyRound, Copy, RefreshCw, Eye, EyeOff } from "lucide-react";
+import {
+  ShieldAlert,
+  UserPlus,
+  Pencil,
+  UserX,
+  UserCheck,
+  KeyRound,
+  Copy,
+  RefreshCw,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -130,9 +141,10 @@ function UsuariosPanel({
     | { kind: "created"; password: string }
     | null
   >(null);
-  const [confirm, setConfirm] = useState<
-    { kind: "deactivate" | "reactivate"; row: AdminUserRow } | null
-  >(null);
+  const [confirm, setConfirm] = useState<{
+    kind: "deactivate" | "reactivate";
+    row: AdminUserRow;
+  } | null>(null);
   const [resetTarget, setResetTarget] = useState<AdminUserRow | null>(null);
   const [resetResult, setResetResult] = useState<{ row: AdminUserRow; password: string } | null>(
     null,
@@ -210,14 +222,12 @@ function UsuariosPanel({
   const resetMut = useMutation({
     mutationFn: (vars: { id: string; password: string }) => resetFn({ data: vars }),
     onSuccess: (_res, vars) => {
-
       toast.success("Senha redefinida");
       if (resetTarget) setResetResult({ row: resetTarget, password: vars.password });
       setResetTarget(null);
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
 
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -249,220 +259,224 @@ function UsuariosPanel({
           {!isAdmin && <TabsTrigger value="senha">Redefinir senha</TabsTrigger>}
         </TabsList>
         {isAdmin && (
-        <TabsContent value="usuarios" className="mt-4 flex flex-col gap-4">
-      <Toolbar>
-        <ToolbarSearch
-          value={search}
-          onChange={(v) => {
-            setSearch(v);
-            setPage(1);
-          }}
-          placeholder="Buscar por nome ou email…"
-        />
-        <Select
-          value={roleFilter}
-          onValueChange={(v) => {
-            setRoleFilter(v as AppRole | "all");
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="h-9 w-[160px] text-[12.5px]">
-            <SelectValue placeholder="Role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as roles</SelectItem>
-            {ALL_ROLES.map((r) => (
-              <SelectItem key={r.value} value={r.value}>
-                {r.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={status}
-          onValueChange={(v) => {
-            setStatus(v as "active" | "inactive" | "all");
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="h-9 w-[140px] text-[12.5px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Ativos</SelectItem>
-            <SelectItem value="inactive">Desativados</SelectItem>
-            <SelectItem value="all">Todos</SelectItem>
-          </SelectContent>
-        </Select>
-        <ToolbarSpacer />
-        <span className="text-[11.5px] text-[var(--text-muted)]">
-          {total} {total === 1 ? "usuário" : "usuários"}
-        </span>
-      </Toolbar>
+          <TabsContent value="usuarios" className="mt-4 flex flex-col gap-4">
+            <Toolbar>
+              <ToolbarSearch
+                value={search}
+                onChange={(v) => {
+                  setSearch(v);
+                  setPage(1);
+                }}
+                placeholder="Buscar por nome ou email…"
+              />
+              <Select
+                value={roleFilter}
+                onValueChange={(v) => {
+                  setRoleFilter(v as AppRole | "all");
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[160px] text-[12.5px]">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as roles</SelectItem>
+                  {ALL_ROLES.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={status}
+                onValueChange={(v) => {
+                  setStatus(v as "active" | "inactive" | "all");
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[140px] text-[12.5px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="inactive">Desativados</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
+                </SelectContent>
+              </Select>
+              <ToolbarSpacer />
+              <span className="text-[11.5px] text-[var(--text-muted)]">
+                {total} {total === 1 ? "usuário" : "usuários"}
+              </span>
+            </Toolbar>
 
-      {isLoading ? (
-        <TableSkeleton
-          columns={6}
-          rows={8}
-          headers={["Nome", "Email", "Roles", "Status", "Criado em", ""]}
-        />
-      ) : error ? (
-        <TableError
-          title="Erro ao carregar usuários"
-          description={(error as Error).message}
-          onRetry={() => refetch()}
-        />
-      ) : rows.length === 0 ? (
-        <TableEmpty
-          title="Nenhum usuário encontrado"
-          description="Ajuste os filtros ou crie um novo usuário."
-        />
-      ) : (
-        <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="whitespace-nowrap">Criado em</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((r) => {
-                const isSelf = r.id === user?.id;
-                const inactive = !!r.deleted_at;
-                return (
-                  <TableRow key={r.id} className={inactive ? "opacity-60" : undefined}>
-                    <TableCell className="font-medium">
-                      {r.full_name ?? "—"}
-                      {isSelf && (
-                        <span className="ml-2 rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
-                          você
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-[var(--text-secondary)]">{r.email ?? "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {r.roles.length === 0 ? (
-                          <span className="text-[11px] text-[var(--text-muted)]">—</span>
-                        ) : (
-                          r.roles.map((role) => (
-                            <span
-                              key={role}
-                              className="rounded bg-blue-50 px-1.5 py-0.5 text-[10.5px] font-medium text-blue-700"
-                            >
-                              {role}
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {inactive ? (
-                        <span className="rounded bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
-                          Desativado
-                        </span>
-                      ) : (
-                        <span className="rounded bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                          Ativo
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="tabular-nums whitespace-nowrap text-[12px]">
-                      {new Date(r.created_at).toLocaleDateString("pt-BR")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setDialog({ kind: "edit", row: r })}
-                          disabled={inactive}
-                          title="Editar"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setResetTarget(r)}
-                          disabled={inactive || isSelf}
-                          title={
-                            isSelf
-                              ? "Use a página Minha conta para sua senha"
-                              : "Redefinir senha"
-                          }
-                        >
-                          <KeyRound className="h-3.5 w-3.5 text-blue-600" />
-                        </Button>
-                        {inactive ? (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setConfirm({ kind: "reactivate", row: r })}
-                            title="Reativar"
-                          >
-                            <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setConfirm({ kind: "deactivate", row: r })}
-                            disabled={isSelf}
-                            title={isSelf ? "Você não pode desativar a si mesmo" : "Desativar"}
-                          >
-                            <UserX className="h-3.5 w-3.5 text-rose-600" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+            {isLoading ? (
+              <TableSkeleton
+                columns={6}
+                rows={8}
+                headers={["Nome", "Email", "Roles", "Status", "Criado em", ""]}
+              />
+            ) : error ? (
+              <TableError
+                title="Erro ao carregar usuários"
+                description={(error as Error).message}
+                onRetry={() => refetch()}
+              />
+            ) : rows.length === 0 ? (
+              <TableEmpty
+                title="Nenhum usuário encontrado"
+                description="Ajuste os filtros ou crie um novo usuário."
+              />
+            ) : (
+              <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Roles</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="whitespace-nowrap">Criado em</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((r) => {
+                      const isSelf = r.id === user?.id;
+                      const inactive = !!r.deleted_at;
+                      return (
+                        <TableRow key={r.id} className={inactive ? "opacity-60" : undefined}>
+                          <TableCell className="font-medium">
+                            {r.full_name ?? "—"}
+                            {isSelf && (
+                              <span className="ml-2 rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
+                                você
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-[var(--text-secondary)]">
+                            {r.email ?? "—"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {r.roles.length === 0 ? (
+                                <span className="text-[11px] text-[var(--text-muted)]">—</span>
+                              ) : (
+                                r.roles.map((role) => (
+                                  <span
+                                    key={role}
+                                    className="rounded bg-blue-50 px-1.5 py-0.5 text-[10.5px] font-medium text-blue-700"
+                                  >
+                                    {role}
+                                  </span>
+                                ))
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {inactive ? (
+                              <span className="rounded bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
+                                Desativado
+                              </span>
+                            ) : (
+                              <span className="rounded bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                                Ativo
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="tabular-nums whitespace-nowrap text-[12px]">
+                            {new Date(r.created_at).toLocaleDateString("pt-BR")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setDialog({ kind: "edit", row: r })}
+                                disabled={inactive}
+                                title="Editar"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setResetTarget(r)}
+                                disabled={inactive || isSelf}
+                                title={
+                                  isSelf
+                                    ? "Use a página Minha conta para sua senha"
+                                    : "Redefinir senha"
+                                }
+                              >
+                                <KeyRound className="h-3.5 w-3.5 text-blue-600" />
+                              </Button>
+                              {inactive ? (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setConfirm({ kind: "reactivate", row: r })}
+                                  title="Reativar"
+                                >
+                                  <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setConfirm({ kind: "deactivate", row: r })}
+                                  disabled={isSelf}
+                                  title={
+                                    isSelf ? "Você não pode desativar a si mesmo" : "Desativar"
+                                  }
+                                >
+                                  <UserX className="h-3.5 w-3.5 text-rose-600" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-end gap-2 text-[12px]">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page <= 1 || isFetching}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            Anterior
-          </Button>
-          <span className="text-[var(--text-muted)]">
-            Página {page} de {totalPages}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page >= totalPages || isFetching}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Próxima
-          </Button>
-        </div>
-      )}
-        </TabsContent>
+            {totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-end gap-2 text-[12px]">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page <= 1 || isFetching}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Anterior
+                </Button>
+                <span className="text-[var(--text-muted)]">
+                  Página {page} de {totalPages}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page >= totalPages || isFetching}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Próxima
+                </Button>
+              </div>
+            )}
+          </TabsContent>
         )}
         {isAdmin && (
-        <TabsContent value="permissoes" className="mt-4">
-          <PermissoesMatrixTab />
-        </TabsContent>
+          <TabsContent value="permissoes" className="mt-4">
+            <PermissoesMatrixTab />
+          </TabsContent>
         )}
         {!isAdmin && (
-        <TabsContent value="senha" className="mt-4">
-          <SupportPasswordResetPanel />
-        </TabsContent>
+          <TabsContent value="senha" className="mt-4">
+            <SupportPasswordResetPanel />
+          </TabsContent>
         )}
       </Tabs>
 
@@ -512,9 +526,9 @@ function UsuariosPanel({
             <AlertDialogDescription>
               {confirm?.kind === "deactivate" ? (
                 <>
-                  Esta ação remove todas as roles, bloqueia o login e marca a conta como
-                  desativada. O usuário <strong>{confirm.row.full_name ?? confirm.row.email}</strong>{" "}
-                  deixará de acessar o sistema. É possível reativar depois.
+                  Esta ação remove todas as roles, bloqueia o login e marca a conta como desativada.
+                  O usuário <strong>{confirm.row.full_name ?? confirm.row.email}</strong> deixará de
+                  acessar o sistema. É possível reativar depois.
                 </>
               ) : (
                 confirm && (
@@ -548,16 +562,11 @@ function UsuariosPanel({
       <ResetPasswordDialog
         target={resetTarget}
         onCancel={() => setResetTarget(null)}
-        onConfirm={(password) =>
-          resetTarget && resetMut.mutate({ id: resetTarget.id, password })
-        }
+        onConfirm={(password) => resetTarget && resetMut.mutate({ id: resetTarget.id, password })}
         submitting={resetMut.isPending}
       />
 
-      <ResetResultDialog
-        result={resetResult}
-        onClose={() => setResetResult(null)}
-      />
+      <ResetResultDialog result={resetResult} onClose={() => setResetResult(null)} />
     </PageContainer>
   );
 }
@@ -598,8 +607,8 @@ function ResetPasswordDialog({
         <DialogHeader>
           <DialogTitle>Redefinir senha</DialogTitle>
           <DialogDescription>
-            Gerar nova senha temporária para{" "}
-            <strong>{target?.full_name ?? target?.email}</strong>. A senha será exibida uma única vez.
+            Gerar nova senha temporária para <strong>{target?.full_name ?? target?.email}</strong>.
+            A senha será exibida uma única vez.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-1.5">

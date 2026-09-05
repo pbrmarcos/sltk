@@ -50,24 +50,16 @@ function TemplateDocumentosPage() {
           };
 
   const view = aba === "projetos" ? viewProjetos : aba === "fat" ? viewFat : viewSat;
-  const setView =
-    aba === "projetos" ? setViewProjetos : aba === "fat" ? setViewFat : setViewSat;
+  const setView = aba === "projetos" ? setViewProjetos : aba === "fat" ? setViewFat : setViewSat;
 
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Documentos" },
-          { label: "Templates de Documentos" },
-        ]}
+        breadcrumbs={[{ label: "Documentos" }, { label: "Templates de Documentos" }]}
         title="Templates de Documentos"
         subtitle="Padrões reutilizáveis de documentos do sistema (Projetos, FAT, SAT)"
       />
-      <Tabs
-        value={aba}
-        onValueChange={(v) => setAba(v as MainAba)}
-        className="space-y-4"
-      >
+      <Tabs value={aba} onValueChange={(v) => setAba(v as MainAba)} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <TabsList>
             <TabsTrigger value="projetos">Projetos</TabsTrigger>
@@ -78,9 +70,7 @@ function TemplateDocumentosPage() {
           <Tabs value={view} onValueChange={(v) => setView(v as ViewAba)}>
             <TabsList>
               <TabsTrigger value="ativos">Ativos ({counts.ativos})</TabsTrigger>
-              <TabsTrigger value="arquivados">
-                Arquivados ({counts.arquivados})
-              </TabsTrigger>
+              <TabsTrigger value="arquivados">Arquivados ({counts.arquivados})</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

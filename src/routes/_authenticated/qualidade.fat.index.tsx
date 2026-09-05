@@ -35,7 +35,11 @@ function FatListPage() {
         }
       />
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_200px]">
-        <Input placeholder="Buscar por código ou TAG…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input
+          placeholder="Buscar por código ou TAG…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
@@ -43,7 +47,9 @@ function FatListPage() {
         >
           <option value="todos">Todos os status</option>
           {Object.entries(FAT_STATUS_LABEL).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+            <option key={k} value={k}>
+              {v}
+            </option>
           ))}
         </select>
       </div>

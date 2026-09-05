@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, Upload, FileSpreadsheet, CheckCircle2 } from "lucide-react";
 import ExcelJS from "exceljs";
@@ -102,10 +108,13 @@ export function ImportarInsumosDialog({
           part_number: obj.part_number || null,
           quantidade: Number(obj.quantidade ?? 1),
           unidade: String(obj.unidade ?? "UN"),
-          qtd_estoque: obj.qtd_estoque == null || obj.qtd_estoque === "" ? 0 : Number(obj.qtd_estoque),
+          qtd_estoque:
+            obj.qtd_estoque == null || obj.qtd_estoque === "" ? 0 : Number(obj.qtd_estoque),
           criticidade: obj.criticidade || null,
           custo_estimado_unit:
-            obj.custo_estimado_unit == null || obj.custo_estimado_unit === "" ? null : Number(obj.custo_estimado_unit),
+            obj.custo_estimado_unit == null || obj.custo_estimado_unit === ""
+              ? null
+              : Number(obj.custo_estimado_unit),
           necessidade_em: obj.necessidade_em || null,
           observacoes: obj.observacoes || null,
         });
@@ -157,7 +166,8 @@ export function ImportarInsumosDialog({
         <DialogHeader>
           <DialogTitle>Importar Excel — Insumos</DialogTitle>
           <DialogDescription>
-            Baixe o template pré-preenchido, edite no Excel (inclusive quantidade em estoque) e envie de volta.
+            Baixe o template pré-preenchido, edite no Excel (inclusive quantidade em estoque) e
+            envie de volta.
           </DialogDescription>
         </DialogHeader>
 
@@ -170,7 +180,9 @@ export function ImportarInsumosDialog({
             >
               <Download className="h-6 w-6 text-primary" />
               <span className="font-medium">Baixar template</span>
-              <span className="text-[11px] text-muted-foreground">Insumos atuais deste projeto</span>
+              <span className="text-[11px] text-muted-foreground">
+                Insumos atuais deste projeto
+              </span>
             </button>
             <label className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-6 text-sm hover:bg-muted cursor-pointer">
               <Upload className="h-6 w-6 text-primary" />
@@ -198,7 +210,13 @@ export function ImportarInsumosDialog({
             </div>
             <div className="grid gap-2 text-[12px] md:grid-cols-3">
               <DiffBlock title="Novos" color="emerald" items={diff.added} labelKey="titulo" />
-              <DiffBlock title="Atualizados" color="amber" items={diff.updated} labelKey="codigo" extraKey="changed" />
+              <DiffBlock
+                title="Atualizados"
+                color="amber"
+                items={diff.updated}
+                labelKey="codigo"
+                extraKey="changed"
+              />
               <DiffBlock title="Removidos" color="rose" items={diff.removed} labelKey="titulo" />
             </div>
             <div className="flex justify-end gap-2 pt-2">

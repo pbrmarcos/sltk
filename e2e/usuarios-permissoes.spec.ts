@@ -90,7 +90,10 @@ test.describe("/admin/usuarios — Aba Usuários (admin)", () => {
     const row = page.getByRole("row", { name: new RegExp(TEST_EMAIL, "i") });
     await row.getByRole("button", { name: /redefinir senha/i }).click();
     // Confirma no AlertDialog.
-    await page.getByRole("button", { name: /redefinir|confirmar/i }).last().click();
+    await page
+      .getByRole("button", { name: /redefinir|confirmar/i })
+      .last()
+      .click();
 
     await expect(page.getByText(/senha redefinida|nova senha/i)).toBeVisible();
   });
@@ -99,25 +102,37 @@ test.describe("/admin/usuarios — Aba Usuários (admin)", () => {
     await page.getByPlaceholder(/buscar por nome/i).fill(TEST_EMAIL);
     const row = page.getByRole("row", { name: new RegExp(TEST_EMAIL, "i") });
     await row.getByRole("button", { name: /desativar/i }).click();
-    await page.getByRole("button", { name: /desativar|confirmar/i }).last().click();
+    await page
+      .getByRole("button", { name: /desativar|confirmar/i })
+      .last()
+      .click();
 
     await expect(page.getByText(/usu[aá]rio desativado/i)).toBeVisible();
 
     // Trocar filtro para "Desativados".
-    await page.getByRole("combobox").filter({ hasText: /ativos/i }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: /ativos/i })
+      .click();
     await page.getByRole("option", { name: /desativados/i }).click();
 
     await expect(page.getByRole("cell", { name: TEST_EMAIL })).toBeVisible();
   });
 
   test("reativar usuário desativado", async ({ page }) => {
-    await page.getByRole("combobox").filter({ hasText: /ativos/i }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: /ativos/i })
+      .click();
     await page.getByRole("option", { name: /desativados/i }).click();
     await page.getByPlaceholder(/buscar por nome/i).fill(TEST_EMAIL);
 
     const row = page.getByRole("row", { name: new RegExp(TEST_EMAIL, "i") });
     await row.getByRole("button", { name: /reativar/i }).click();
-    await page.getByRole("button", { name: /reativar|confirmar/i }).last().click();
+    await page
+      .getByRole("button", { name: /reativar|confirmar/i })
+      .last()
+      .click();
     await expect(page.getByText(/usu[aá]rio reativado/i)).toBeVisible();
   });
 
@@ -174,7 +189,9 @@ test.describe("/admin/usuarios?tab=permissoes — Matriz de permissões", () => 
     await expect(page.getByTestId("permissoes-blocking-errors")).toBeHidden();
   });
 
-  test("Administração habilitada em role != admin/manager → 'admin-only-manager'", async ({ page }) => {
+  test("Administração habilitada em role != admin/manager → 'admin-only-manager'", async ({
+    page,
+  }) => {
     const row = page.locator("tr", { hasText: /administra/i });
     const salesSwitch = row.locator("button[role='switch']").last();
     await salesSwitch.click();

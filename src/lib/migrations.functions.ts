@@ -24,20 +24,21 @@ function migrationsFromDisk() {
 async function runSql(sql: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const token = process.env.SB_MANAGEMENT_ACCESS_TOKEN;
   const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || process.env.SUPABASE_PROJECT_ID;
-  if (!token) return { ok: false, error: "Acesso administrativo ao provedor do banco não configurado neste ambiente." };
+  if (!token)
+    return {
+      ok: false,
+      error: "Acesso administrativo ao provedor do banco não configurado neste ambiente.",
+    };
   if (!projectRef) return { ok: false, error: "Project ref do Supabase não encontrado." };
 
-  const res = await fetch(
-    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query: sql }),
+  const res = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ query: sql }),
+  });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     return { ok: false, error: `HTTP ${res.status}: ${text.slice(0, 800)}` };
@@ -65,9 +66,16 @@ export const listarMigrations = createServerFn({ method: "GET" })
     await ensureTrackingTable();
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
-    const { data, error } = await (supabaseAdmin as unknown as {
-      from: (t: string) => { select: (c: string) => Promise<{ data: Array<{ filename: string; applied_at: string }> | null; error: { code?: string; message: string } | null }> };
-    })
+    const { data, error } = await (
+      supabaseAdmin as unknown as {
+        from: (t: string) => {
+          select: (c: string) => Promise<{
+            data: Array<{ filename: string; applied_at: string }> | null;
+            error: { code?: string; message: string } | null;
+          }>;
+        };
+      }
+    )
       .from("_migrations_applied")
       .select("filename, applied_at");
     if (error && error.code !== "42P01") {
@@ -95,13 +103,18 @@ export const aplicarMigration = createServerFn({ method: "POST" })
     // Verifica se já foi aplicada (via service-role para contornar RLS)
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
-    const { data: existing } = await (supabaseAdmin as unknown as {
-      from: (t: string) => {
-        select: (c: string) => {
-          eq: (c: string, v: string) => { maybeSingle: () => Promise<{ data: { filename: string } | null }> };
+    const { data: existing } = await (
+      supabaseAdmin as unknown as {
+        from: (t: string) => {
+          select: (c: string) => {
+            eq: (
+              c: string,
+              v: string,
+            ) => { maybeSingle: () => Promise<{ data: { filename: string } | null }> };
+          };
         };
-      };
-    })
+      }
+    )
       .from("_migrations_applied")
       .select("filename")
       .eq("filename", data.name)

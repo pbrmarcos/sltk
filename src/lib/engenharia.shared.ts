@@ -1,10 +1,4 @@
-export const ETP_STATUS = [
-  "rascunho",
-  "em_revisao",
-  "aprovado",
-  "rejeitado",
-  "obsoleto",
-] as const;
+export const ETP_STATUS = ["rascunho", "em_revisao", "aprovado", "rejeitado", "obsoleto"] as const;
 export type EtpStatus = (typeof ETP_STATUS)[number];
 export const ETP_STATUS_LABEL: Record<EtpStatus, string> = {
   rascunho: "Rascunho",
@@ -30,7 +24,14 @@ export const ETP_TRANSICOES: Record<EtpStatus, EtpStatus[]> = {
   obsoleto: [],
 };
 
-export const ETP_HISTORICO_TIPO = ["alteracao", "nota", "aprovacao", "status", "anexo", "reabertura"] as const;
+export const ETP_HISTORICO_TIPO = [
+  "alteracao",
+  "nota",
+  "aprovacao",
+  "status",
+  "anexo",
+  "reabertura",
+] as const;
 export type EtpHistoricoTipo = (typeof ETP_HISTORICO_TIPO)[number];
 export const ETP_HISTORICO_TIPO_LABEL: Record<EtpHistoricoTipo, string> = {
   alteracao: "Alteração de campo",
@@ -131,12 +132,7 @@ export const PROJETO_STATUS_COLOR: Record<ProjetoStatus, string> = {
 
 /* ============ PRODUÇÃO & QUALIDADE ============ */
 
-export const MONTAGEM_STATUS = [
-  "nao_iniciada",
-  "em_andamento",
-  "concluida",
-  "bloqueada",
-] as const;
+export const MONTAGEM_STATUS = ["nao_iniciada", "em_andamento", "concluida", "bloqueada"] as const;
 export type MontagemStatus = (typeof MONTAGEM_STATUS)[number];
 export const MONTAGEM_STATUS_LABEL: Record<MontagemStatus, string> = {
   nao_iniciada: "Não iniciada",

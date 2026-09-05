@@ -34,7 +34,11 @@ export function normalizarCodigo(input: string): string | null {
 
 /** Token cru base64url — só volta ao cliente na abertura e por "resolver código". */
 export function novoTokenChamado(): { token: string; hash: string } {
-  const raw = randomBytes(32).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const raw = randomBytes(32)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
   return { token: raw, hash: hashToken(raw) };
 }
 

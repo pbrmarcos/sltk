@@ -7,9 +7,7 @@ import { ETAPA_FASES, ETAPA_STATUS } from "@/lib/engenharia.shared";
 
 export const listEquipamentoEtapas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ equipamento_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("equipamento_etapas")
@@ -129,10 +127,7 @@ export const listHHConsolidado = createServerFn({ method: "POST" })
     const to = from + data.per_page - 1;
     let q = context.supabase
       .from("cliente_equipamentos")
-      .select(
-        "id, codigo, modelo, status, clientes!inner(codigo,razao_social)",
-        { count: "exact" },
-      )
+      .select("id, codigo, modelo, status, clientes!inner(codigo,razao_social)", { count: "exact" })
       .is("deleted_at", null);
     if (data.cliente_id) q = q.eq("cliente_id", data.cliente_id);
     if (data.q && data.q.trim()) {
@@ -142,16 +137,22 @@ export const listHHConsolidado = createServerFn({ method: "POST" })
       );
     }
 
-    const { data: eqps, count, error } = await q.order("created_at", { ascending: false }).range(from, to);
+    const {
+      data: eqps,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
 
     const ids = (eqps ?? []).map((e) => e.id);
-    let etapasAgg: Record<string, { mec: number; elet: number }> = {};
-    let projetosAgg: Record<string, { mec: number; elet: number }> = {};
+    const etapasAgg: Record<string, { mec: number; elet: number }> = {};
+    const projetosAgg: Record<string, { mec: number; elet: number }> = {};
     if (ids.length) {
       const { data: etapas } = await context.supabase
         .from("equipamento_etapas")
-        .select("equipamento_id, hh_mecanica_estimada, hh_eletrica_estimada, hh_mecanica_real, hh_eletrica_real")
+        .select(
+          "equipamento_id, hh_mecanica_estimada, hh_eletrica_estimada, hh_mecanica_real, hh_eletrica_real",
+        )
         .in("equipamento_id", ids)
         .is("deleted_at", null);
       for (const e of etapas ?? []) {

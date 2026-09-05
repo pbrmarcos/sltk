@@ -47,7 +47,9 @@ export const MOTIVOS_VIAGEM = [
 // ============================================================
 export const listFats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { q?: string; status?: string; page?: number } | undefined) => input ?? {})
+  .inputValidator(
+    (input: { q?: string; status?: string; page?: number } | undefined) => input ?? {},
+  )
   .handler(async ({ data, context }) => {
     const page = Math.max(1, data.page ?? 1);
     const from = (page - 1) * 50;
@@ -71,13 +73,24 @@ export const listFats = createServerFn({ method: "GET" })
     const processoIds = Array.from(new Set((rows ?? []).map((r) => r.processo_id)));
     const [{ data: cli }, { data: proc }] = await Promise.all([
       clienteIds.length
-        ? context.supabase.from("clientes").select("id, razao_social, nome_fantasia").in("id", clienteIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; razao_social: string | null; nome_fantasia: string | null }> }),
+        ? context.supabase
+            .from("clientes")
+            .select("id, razao_social, nome_fantasia")
+            .in("id", clienteIds)
+        : Promise.resolve({
+            data: [] as Array<{
+              id: string;
+              razao_social: string | null;
+              nome_fantasia: string | null;
+            }>,
+          }),
       processoIds.length
         ? context.supabase.from("processos").select("id, codigo, titulo").in("id", processoIds)
         : Promise.resolve({ data: [] as Array<{ id: string; codigo: string; titulo: string }> }),
     ]);
-    const cliMap = new Map((cli ?? []).map((c) => [c.id, c.nome_fantasia || c.razao_social || "—"]));
+    const cliMap = new Map(
+      (cli ?? []).map((c) => [c.id, c.nome_fantasia || c.razao_social || "—"]),
+    );
     const procMap = new Map((proc ?? []).map((p) => [p.id, `${p.codigo} · ${p.titulo}`]));
     return {
       total: count ?? 0,
@@ -137,28 +150,39 @@ export const getFat = createServerFn({ method: "GET" })
       .single();
     if (error || !fat) throw new Error("FAT não encontrado.");
 
-    const [{ data: tpl }, { data: resp }, { data: meds }, { data: rncs }, { data: ass }, { data: cli }, { data: proc }] =
-      await Promise.all([
-        context.supabase
-          .from("fat_checklist_template")
-          .select("id, secao, ordem, titulo, descricao, requer_foto_nok")
-          .eq("ativo", true)
-          .order("secao")
-          .order("ordem"),
-        context.supabase
-          .from("fat_checklist_resposta")
-          .select("id, template_id, status, comentario, foto_path")
-          .eq("fat_id", data.id),
-        context.supabase
-          .from("fat_medicoes")
-          .select("*")
-          .eq("fat_id", data.id)
-          .order("ordem"),
-        context.supabase.from("fat_rnc").select("*").eq("fat_id", data.id).order("created_at"),
-        context.supabase.from("fat_assinaturas").select("*").eq("fat_id", data.id),
-        context.supabase.from("clientes").select("id, razao_social, nome_fantasia").eq("id", fat.cliente_id).single(),
-        context.supabase.from("processos").select("id, codigo, titulo").eq("id", fat.processo_id).single(),
-      ]);
+    const [
+      { data: tpl },
+      { data: resp },
+      { data: meds },
+      { data: rncs },
+      { data: ass },
+      { data: cli },
+      { data: proc },
+    ] = await Promise.all([
+      context.supabase
+        .from("fat_checklist_template")
+        .select("id, secao, ordem, titulo, descricao, requer_foto_nok")
+        .eq("ativo", true)
+        .order("secao")
+        .order("ordem"),
+      context.supabase
+        .from("fat_checklist_resposta")
+        .select("id, template_id, status, comentario, foto_path")
+        .eq("fat_id", data.id),
+      context.supabase.from("fat_medicoes").select("*").eq("fat_id", data.id).order("ordem"),
+      context.supabase.from("fat_rnc").select("*").eq("fat_id", data.id).order("created_at"),
+      context.supabase.from("fat_assinaturas").select("*").eq("fat_id", data.id),
+      context.supabase
+        .from("clientes")
+        .select("id, razao_social, nome_fantasia")
+        .eq("id", fat.cliente_id)
+        .single(),
+      context.supabase
+        .from("processos")
+        .select("id, codigo, titulo")
+        .eq("id", fat.processo_id)
+        .single(),
+    ]);
 
     return {
       fat,
@@ -225,19 +249,17 @@ export const setChecklistResposta = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     // upsert pela única (fat_id, template_id)
-    const { error } = await context.supabase
-      .from("fat_checklist_resposta")
-      .upsert(
-        {
-          fat_id: data.fat_id,
-          template_id: data.template_id,
-          status: data.status,
-          comentario: data.comentario ?? null,
-          foto_path: data.foto_path ?? null,
-          updated_by: context.userId,
-        },
-        { onConflict: "fat_id,template_id" },
-      );
+    const { error } = await context.supabase.from("fat_checklist_resposta").upsert(
+      {
+        fat_id: data.fat_id,
+        template_id: data.template_id,
+        status: data.status,
+        comentario: data.comentario ?? null,
+        foto_path: data.foto_path ?? null,
+        updated_by: context.userId,
+      },
+      { onConflict: "fat_id,template_id" },
+    );
     if (error) throw friendlyDbError(error);
 
     // Cria RNC automática se NOK e ainda não existe
@@ -314,7 +336,11 @@ const medSchema = z.object({
   tolerancia: z.string().max(60).nullish(),
   medido: z.number().nullish(),
 });
-function computeStatus(nominal: number | null | undefined, tol: string | null | undefined, med: number | null | undefined) {
+function computeStatus(
+  nominal: number | null | undefined,
+  tol: string | null | undefined,
+  med: number | null | undefined,
+) {
   if (med == null || nominal == null) return null;
   if (!tol) return med === nominal ? "Aprovado" : "Reprovado";
   const m = tol.replace(/\s/g, "");
@@ -355,7 +381,11 @@ export const upsertMedicao = createServerFn({ method: "POST" })
       if (error) throw friendlyDbError(error);
       return { id: data.id };
     }
-    const { data: ins, error } = await context.supabase.from("fat_medicoes").insert(row).select("id").single();
+    const { data: ins, error } = await context.supabase
+      .from("fat_medicoes")
+      .insert(row)
+      .select("id")
+      .single();
     if (error) throw friendlyDbError(error);
     return { id: ins!.id };
   });
@@ -395,7 +425,11 @@ export const upsertRnc = createServerFn({ method: "POST" })
       if (error) throw friendlyDbError(error);
       return { id };
     }
-    const { data: ins, error } = await context.supabase.from("fat_rnc").insert(rest).select("id").single();
+    const { data: ins, error } = await context.supabase
+      .from("fat_rnc")
+      .insert(rest)
+      .select("id")
+      .single();
     if (error) throw friendlyDbError(error);
     return { id: ins!.id };
   });
@@ -425,20 +459,18 @@ export const submitAssinatura = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const hash = await sha256Hex(`${data.fat_id}|${data.tipo}|${data.nome}|${data.assinatura_svg}`);
-    const { error } = await context.supabase
-      .from("fat_assinaturas")
-      .upsert(
-        {
-          fat_id: data.fat_id,
-          tipo: data.tipo,
-          nome: data.nome,
-          cargo: data.cargo ?? null,
-          assinatura_svg: data.assinatura_svg,
-          hash_sha256: hash,
-          assinado_em: new Date().toISOString(),
-        },
-        { onConflict: "fat_id,tipo" },
-      );
+    const { error } = await context.supabase.from("fat_assinaturas").upsert(
+      {
+        fat_id: data.fat_id,
+        tipo: data.tipo,
+        nome: data.nome,
+        cargo: data.cargo ?? null,
+        assinatura_svg: data.assinatura_svg,
+        hash_sha256: hash,
+        assinado_em: new Date().toISOString(),
+      },
+      { onConflict: "fat_id,tipo" },
+    );
     if (error) throw friendlyDbError(error);
     return { hash };
   });
@@ -500,14 +532,19 @@ export const homologarFat = createServerFn({ method: "POST" })
 
     try {
       const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+      const supabaseAdmin = await getCriticalClient();
       const { dispatchEmail } = await import("@/lib/email/dispatch.server");
       const { data: full } = await supabaseAdmin
         .from("fat_relatorios")
         .select("codigo, tag_equipamento, cliente_id")
-        .eq("id", data.id).maybeSingle();
+        .eq("id", data.id)
+        .maybeSingle();
       const { data: cli } = full?.cliente_id
-        ? await supabaseAdmin.from("clientes").select("razao_social, nome_fantasia").eq("id", full.cliente_id).maybeSingle()
+        ? await supabaseAdmin
+            .from("clientes")
+            .select("razao_social, nome_fantasia")
+            .eq("id", full.cliente_id)
+            .maybeSingle()
         : { data: null };
       await dispatchEmail(supabaseAdmin, {
         eventKey: "fat.homologado",

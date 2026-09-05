@@ -61,7 +61,12 @@ async function ensureFolder(name: string, parentId: string): Promise<string> {
 }
 
 function sanitizeFolderName(s: string): string {
-  return s.replace(/[\\/:*?"<>|]/g, "-").trim().slice(0, 120) || "sem-nome";
+  return (
+    s
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .trim()
+      .slice(0, 120) || "sem-nome"
+  );
 }
 
 async function ensureOportunidadeFolder(opts: {
@@ -74,7 +79,9 @@ async function ensureOportunidadeFolder(opts: {
   ano: string;
 }): Promise<string> {
   const root = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || "root";
-  const oppName = sanitizeFolderName(`${opts.oppCodigo} - ${opts.oppTitulo || opts.empresaLead || "Sem título"}`);
+  const oppName = sanitizeFolderName(
+    `${opts.oppCodigo} - ${opts.oppTitulo || opts.empresaLead || "Sem título"}`,
+  );
 
   let opp: string;
   if (opts.clienteCodigo && opts.clienteNome) {
@@ -99,7 +106,11 @@ async function driveUploadMultipart(opts: {
   bytes: ArrayBuffer;
 }): Promise<{ id: string; webViewLink: string }> {
   const boundary = `lvbl_${crypto.randomUUID()}`;
-  const meta = JSON.stringify({ name: opts.name, parents: [opts.parentId], mimeType: opts.mimeType });
+  const meta = JSON.stringify({
+    name: opts.name,
+    parents: [opts.parentId],
+    mimeType: opts.mimeType,
+  });
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
@@ -141,7 +152,9 @@ export const uploadOportunidadeAnexo = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) {
-      throw new Error(`Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`);
+      throw new Error(
+        `Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`,
+      );
     }
     if (data.size_bytes > limit) {
       const mb = (limit / 1024 / 1024).toFixed(0);
@@ -156,9 +169,11 @@ export const uploadOportunidadeAnexo = createServerFn({ method: "POST" })
     if (oErr) throw friendlyDbError(oErr);
     if (!opp) throw new Error("Oportunidade não encontrada ou sem acesso.");
 
-    const cliente = (opp as unknown as {
-      clientes: { codigo: string; razao_social: string } | null;
-    }).clientes;
+    const cliente = (
+      opp as unknown as {
+        clientes: { codigo: string; razao_social: string } | null;
+      }
+    ).clientes;
 
     const now = new Date();
     const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;

@@ -17,10 +17,34 @@ export function AdministracaoTab() {
   const d = data?.admin;
 
   const metrics = [
-    { key: "sla", label: "Chamados fora do SLA", value: d?.kpis.chamadosSla ?? 0, to: "/pos-vendas/chamados", bad: true },
-    { key: "forms", label: "Formulários sem leitura (72h)", value: d?.kpis.formulariosPendentes ?? 0, to: "/central-documentos", bad: true },
-    { key: "ocs", label: "OCs aguardando aprovação", value: d?.kpis.ocsAprovar ?? 0, to: "/compras/ordens", bad: false },
-    { key: "erros", label: "Erros de enriquecimento (24h)", value: d?.kpis.erros24h ?? 0, to: "/admin/configuracoes", bad: true },
+    {
+      key: "sla",
+      label: "Chamados fora do SLA",
+      value: d?.kpis.chamadosSla ?? 0,
+      to: "/pos-vendas/chamados",
+      bad: true,
+    },
+    {
+      key: "forms",
+      label: "Formulários sem leitura (72h)",
+      value: d?.kpis.formulariosPendentes ?? 0,
+      to: "/central-documentos",
+      bad: true,
+    },
+    {
+      key: "ocs",
+      label: "OCs aguardando aprovação",
+      value: d?.kpis.ocsAprovar ?? 0,
+      to: "/compras/ordens",
+      bad: false,
+    },
+    {
+      key: "erros",
+      label: "Erros de enriquecimento (24h)",
+      value: d?.kpis.erros24h ?? 0,
+      to: "/admin/configuracoes",
+      bad: true,
+    },
   ];
 
   return (
@@ -32,7 +56,9 @@ export function AdministracaoTab() {
             to={m.to}
             className="block rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/40 hover:bg-accent"
           >
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{m.label}</div>
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {m.label}
+            </div>
             <div className="mt-2 flex items-baseline justify-between gap-2">
               <div className="text-2xl font-semibold tabular-nums">{isLoading ? "…" : m.value}</div>
               <StatusBadge tone={m.value === 0 ? "success" : m.bad ? "danger" : "info"}>
@@ -102,7 +128,9 @@ export function AdministracaoTab() {
               </li>
             ))}
             {!isLoading && !d?.auditoria.length && (
-              <li className="py-6 text-center text-xs text-muted-foreground">Sem registros ainda.</li>
+              <li className="py-6 text-center text-xs text-muted-foreground">
+                Sem registros ainda.
+              </li>
             )}
           </ul>
         </CardContent>

@@ -65,7 +65,11 @@ async function driveUploadMultipart(opts: {
   bytes: ArrayBuffer;
 }): Promise<{ id: string; webViewLink: string }> {
   const boundary = `lvbl_${crypto.randomUUID()}`;
-  const meta = JSON.stringify({ name: opts.name, parents: [opts.parentId], mimeType: opts.mimeType });
+  const meta = JSON.stringify({
+    name: opts.name,
+    parents: [opts.parentId],
+    mimeType: opts.mimeType,
+  });
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
@@ -117,10 +121,7 @@ const uploadInput = z.object({
     .min(3, "Nome muito curto")
     .max(120, "Nome muito longo")
     .regex(/^[a-zA-Z0-9._\- ]+$/, "Use apenas letras, números, espaços, ponto, hífen e underline."),
-  descricao: z
-    .string()
-    .min(5, "Descrição muito curta")
-    .max(500, "Descrição muito longa"),
+  descricao: z.string().min(5, "Descrição muito curta").max(500, "Descrição muito longa"),
 });
 
 export const uploadEtpAnexo = createServerFn({ method: "POST" })
@@ -174,7 +175,11 @@ export const uploadEtpAnexo = createServerFn({ method: "POST" })
     const etpFolder = await ensureFolder(etpLabel, etpsFolder);
 
     const ext = data.filename.includes(".") ? "." + data.filename.split(".").pop() : "";
-    const safe = data.chosen_name.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 100);
+    const safe = data.chosen_name
+      .trim()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .slice(0, 100);
     const finalName = safe.toLowerCase().endsWith(ext.toLowerCase()) ? safe : `${safe}${ext}`;
 
     const bytes = Uint8Array.from(atob(data.data_base64), (c) => c.charCodeAt(0)).buffer;
@@ -391,13 +396,15 @@ export const reindexEtpAnexos = createServerFn({ method: "POST" })
         }
 
         if (r.drive_folder_id !== targetFolder) {
-          await (context.supabase as unknown as {
-            from: (t: string) => {
-              update: (v: Record<string, unknown>) => {
-                eq: (c: string, v: string) => Promise<unknown>;
+          await (
+            context.supabase as unknown as {
+              from: (t: string) => {
+                update: (v: Record<string, unknown>) => {
+                  eq: (c: string, v: string) => Promise<unknown>;
+                };
               };
-            };
-          })
+            }
+          )
             .from("equipamento_etp_anexos")
             .update({ drive_folder_id: targetFolder })
             .eq("id", r.id);
@@ -409,4 +416,3 @@ export const reindexEtpAnexos = createServerFn({ method: "POST" })
 
     return { ok: true, moved, skipped, errors };
   });
-

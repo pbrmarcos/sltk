@@ -67,7 +67,7 @@ export const listEnrichLogs = createServerFn({ method: "POST" })
     return (rows ?? []).map<EnrichLogRow>((r) => ({
       id: r.id,
       user_id: r.user_id,
-      user_email: r.user_id ? emailById.get(r.user_id) ?? null : null,
+      user_email: r.user_id ? (emailById.get(r.user_id) ?? null) : null,
       pais: r.pais,
       documento: r.documento,
       provider: r.provider,

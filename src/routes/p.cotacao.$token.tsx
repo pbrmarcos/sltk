@@ -36,7 +36,9 @@ function PublicCotacaoPage() {
     retry: false,
   });
 
-  const [prices, setPrices] = useState<Record<string, { preco: string; prazo: string; obs: string }>>({});
+  const [prices, setPrices] = useState<
+    Record<string, { preco: string; prazo: string; obs: string }>
+  >({});
   const [moeda, setMoeda] = useState("BRL");
   const [validoAte, setValidoAte] = useState("");
   const [condPag, setCondPag] = useState("");
@@ -45,13 +47,23 @@ function PublicCotacaoPage() {
 
   useEffect(() => {
     if (q.data?.proposta) {
-      const p = q.data.proposta as { moeda: string; valido_ate: string | null; condicoes_pagamento: string | null; observacoes: string | null };
+      const p = q.data.proposta as {
+        moeda: string;
+        valido_ate: string | null;
+        condicoes_pagamento: string | null;
+        observacoes: string | null;
+      };
       setMoeda(p.moeda || "BRL");
       setValidoAte(p.valido_ate?.slice(0, 10) ?? "");
       setCondPag(p.condicoes_pagamento ?? "");
       setObs(p.observacoes ?? "");
       const initial: typeof prices = {};
-      for (const pi of (q.data.proposta_itens ?? []) as Array<{ cotacao_item_id: string; preco_unitario: number; prazo_entrega_dias: number | null; observacao: string | null }>) {
+      for (const pi of (q.data.proposta_itens ?? []) as Array<{
+        cotacao_item_id: string;
+        preco_unitario: number;
+        prazo_entrega_dias: number | null;
+        observacao: string | null;
+      }>) {
         initial[pi.cotacao_item_id] = {
           preco: String(pi.preco_unitario ?? ""),
           prazo: pi.prazo_entrega_dias != null ? String(pi.prazo_entrega_dias) : "",
@@ -70,9 +82,7 @@ function PublicCotacaoPage() {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
         <h1 className="text-lg font-semibold">Convite inválido</h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Este link pode ter expirado ou está incorreto.
-        </p>
+        <p className="mt-2 text-sm text-zinc-500">Este link pode ter expirado ou está incorreto.</p>
       </div>
     );
   }
@@ -87,10 +97,19 @@ function PublicCotacaoPage() {
     condicoes_pagamento: string | null;
   };
   const itens = (q.data.itens ?? []) as Item[];
-  const fornecedor = (q.data.convite as { fornecedores?: { nome_fantasia: string; razao_social: string; codigo: string } | null }).fornecedores;
+  const fornecedor = (
+    q.data.convite as {
+      fornecedores?: { nome_fantasia: string; razao_social: string; codigo: string } | null;
+    }
+  ).fornecedores;
 
   async function submit() {
-    const linhas: Array<{ cotacao_item_id: string; preco_unitario: number; prazo_entrega_dias: number | null; observacao: string | null }> = [];
+    const linhas: Array<{
+      cotacao_item_id: string;
+      preco_unitario: number;
+      prazo_entrega_dias: number | null;
+      observacao: string | null;
+    }> = [];
     for (const it of itens) {
       const p = prices[it.id];
       const preco = p ? Number(p.preco.replace(",", ".")) : NaN;
@@ -146,8 +165,7 @@ function PublicCotacaoPage() {
               {cot.descricao && <p className="mt-1 text-sm text-zinc-600">{cot.descricao}</p>}
               {fornecedor && (
                 <p className="mt-2 text-sm">
-                  Fornecedor:{" "}
-                  <strong>{fornecedor.nome_fantasia || fornecedor.razao_social}</strong>
+                  Fornecedor: <strong>{fornecedor.nome_fantasia || fornecedor.razao_social}</strong>
                 </p>
               )}
             </div>
@@ -235,7 +253,11 @@ function PublicCotacaoPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label>Moeda</Label>
-              <Input value={moeda} onChange={(e) => setMoeda(e.target.value.toUpperCase())} maxLength={5} />
+              <Input
+                value={moeda}
+                onChange={(e) => setMoeda(e.target.value.toUpperCase())}
+                maxLength={5}
+              />
             </div>
             <div>
               <Label>Válido até</Label>

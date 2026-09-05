@@ -3,7 +3,19 @@ import { useState, useMemo } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ShieldAlert, Plus, Trash2, ArrowUp, ArrowDown, History, RotateCcw, CheckCircle2, Download, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  ShieldAlert,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  History,
+  RotateCcw,
+  CheckCircle2,
+  Download,
+  Upload,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,7 +26,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   getEtapaTemplate,
   updateEtapaTemplate,
@@ -78,7 +96,9 @@ function Page() {
 
   const reorderMut = useMutation({
     mutationFn: (v: { disciplina: string; idsInOrder: string[] }) =>
-      reorderEtapaTemplateItens({ data: { templateId: id, disciplina: v.disciplina as any, idsInOrder: v.idsInOrder } }),
+      reorderEtapaTemplateItens({
+        data: { templateId: id, disciplina: v.disciplina as any, idsInOrder: v.idsInOrder },
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["etapa-tpl", id] }),
   });
 
@@ -131,8 +151,12 @@ function Page() {
     );
   }
 
-  if (isLoading || !data || !tpl) return <PageContainer><p className="text-muted-foreground text-sm">Carregando…</p></PageContainer>;
-
+  if (isLoading || !data || !tpl)
+    return (
+      <PageContainer>
+        <p className="text-muted-foreground text-sm">Carregando…</p>
+      </PageContainer>
+    );
 
   return (
     <PageContainer>
@@ -147,7 +171,9 @@ function Page() {
         actions={
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm">
-              <Link to="/admin/etapas-equipamentos"><ArrowLeft className="mr-1 h-4 w-4" /> Voltar</Link>
+              <Link to="/admin/etapas-equipamentos">
+                <ArrowLeft className="mr-1 h-4 w-4" /> Voltar
+              </Link>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setOpenHist(true)}>
               <History className="mr-1 h-4 w-4" /> Histórico
@@ -155,7 +181,11 @@ function Page() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => downloadTemplateXlsx(tpl, itens, bom).catch((e) => toast.error(e?.message ?? "Falha no download"))}
+              onClick={() =>
+                downloadTemplateXlsx(tpl, itens, bom).catch((e) =>
+                  toast.error(e?.message ?? "Falha no download"),
+                )
+              }
             >
               <Download className="mr-1 h-4 w-4" /> Baixar Excel
             </Button>
@@ -179,15 +209,25 @@ function Page() {
       <div className="mb-6 grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-2">
         <div>
           <Label>Nome</Label>
-          <Input defaultValue={tpl.nome} onBlur={(e) => e.target.value !== tpl.nome && patch.mutate({ nome: e.target.value })} />
+          <Input
+            defaultValue={tpl.nome}
+            onBlur={(e) => e.target.value !== tpl.nome && patch.mutate({ nome: e.target.value })}
+          />
         </div>
         <div>
           <Label>Família</Label>
-          <Input defaultValue={tpl.familia ?? ""} onBlur={(e) => patch.mutate({ familia: e.target.value || null })} />
+          <Input
+            defaultValue={tpl.familia ?? ""}
+            onBlur={(e) => patch.mutate({ familia: e.target.value || null })}
+          />
         </div>
         <div className="md:col-span-2">
           <Label>Descrição</Label>
-          <Textarea defaultValue={tpl.descricao ?? ""} rows={2} onBlur={(e) => patch.mutate({ descricao: e.target.value || null })} />
+          <Textarea
+            defaultValue={tpl.descricao ?? ""}
+            rows={2}
+            onBlur={(e) => patch.mutate({ descricao: e.target.value || null })}
+          />
         </div>
         <div className="flex items-center gap-3">
           <Switch checked={tpl.publicado} onCheckedChange={(v) => patch.mutate({ publicado: v })} />
@@ -199,41 +239,79 @@ function Page() {
         <TabsList className="flex flex-wrap">
           {DISCIPLINAS.map((d) => (
             <TabsTrigger key={d} value={d}>
-              {DISCIPLINA_LABEL[d]} <Badge variant="secondary" className="ml-2">{itensByDisc[d].length}</Badge>
+              {DISCIPLINA_LABEL[d]}{" "}
+              <Badge variant="secondary" className="ml-2">
+                {itensByDisc[d].length}
+              </Badge>
             </TabsTrigger>
           ))}
-          <TabsTrigger value="bom">BOM sugerido <Badge variant="secondary" className="ml-2">{bom.length}</Badge></TabsTrigger>
+          <TabsTrigger value="bom">
+            BOM sugerido{" "}
+            <Badge variant="secondary" className="ml-2">
+              {bom.length}
+            </Badge>
+          </TabsTrigger>
         </TabsList>
 
         {DISCIPLINAS.map((d) => (
           <TabsContent key={d} value={d} className="mt-4">
             <div className="mb-3 flex justify-end">
-              <Button size="sm" onClick={() => setEditingItem({ disciplina: d, prioridade: "media" })}>
+              <Button
+                size="sm"
+                onClick={() => setEditingItem({ disciplina: d, prioridade: "media" })}
+              >
                 <Plus className="mr-1 h-4 w-4" /> Nova etapa
               </Button>
             </div>
             <div className="rounded-lg border border-border bg-card">
-              {itensByDisc[d].length === 0 && <p className="p-4 text-center text-sm text-muted-foreground">Sem etapas.</p>}
+              {itensByDisc[d].length === 0 && (
+                <p className="p-4 text-center text-sm text-muted-foreground">Sem etapas.</p>
+              )}
               {itensByDisc[d].map((it, idx) => (
-                <div key={it.id} className="flex items-start gap-2 border-b border-border p-3 last:border-b-0">
+                <div
+                  key={it.id}
+                  className="flex items-start gap-2 border-b border-border p-3 last:border-b-0"
+                >
                   <div className="flex flex-col">
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => move(d, it.id, -1)} disabled={idx === 0}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => move(d, it.id, -1)}
+                      disabled={idx === 0}
+                    >
                       <ArrowUp className="h-3.5 w-3.5" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => move(d, it.id, 1)} disabled={idx === itensByDisc[d].length - 1}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => move(d, it.id, 1)}
+                      disabled={idx === itensByDisc[d].length - 1}
+                    >
                       <ArrowDown className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <button className="font-medium text-left hover:underline" onClick={() => setEditingItem(it)}>
+                      <button
+                        className="font-medium text-left hover:underline"
+                        onClick={() => setEditingItem(it)}
+                      >
                         {it.titulo}
                       </button>
                       <PrioridadeBadge p={it.prioridade} />
                     </div>
-                    {it.descricao && <p className="text-xs text-muted-foreground mt-0.5">{it.descricao}</p>}
+                    {it.descricao && (
+                      <p className="text-xs text-muted-foreground mt-0.5">{it.descricao}</p>
+                    )}
                   </div>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => confirm("Remover etapa?") && deleteItem.mutate(it.id)}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => confirm("Remover etapa?") && deleteItem.mutate(it.id)}
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
@@ -244,7 +322,17 @@ function Page() {
 
         <TabsContent value="bom" className="mt-4">
           <div className="mb-3 flex justify-end">
-            <Button size="sm" onClick={() => setEditingBom({ disciplinaProjeto: "mecanico", criticidade: "media", quantidade: 1, unidade: "un" })}>
+            <Button
+              size="sm"
+              onClick={() =>
+                setEditingBom({
+                  disciplinaProjeto: "mecanico",
+                  criticidade: "media",
+                  quantidade: 1,
+                  unidade: "un",
+                })
+              }
+            >
               <Plus className="mr-1 h-4 w-4" /> Novo item BOM
             </Button>
           </div>
@@ -261,18 +349,38 @@ function Page() {
                 </tr>
               </thead>
               <tbody>
-                {bom.length === 0 && <tr><td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">Sem itens.</td></tr>}
+                {bom.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">
+                      Sem itens.
+                    </td>
+                  </tr>
+                )}
                 {bom.map((b) => (
                   <tr key={b.id} className="border-b last:border-b-0">
                     <td className="px-3 py-2">
-                      <button className="text-left hover:underline" onClick={() => setEditingBom(b)}>{b.descricao}</button>
+                      <button
+                        className="text-left hover:underline"
+                        onClick={() => setEditingBom(b)}
+                      >
+                        {b.descricao}
+                      </button>
                     </td>
-                    <td className="px-3 py-2"><Badge variant="secondary">{b.disciplina_projeto}</Badge></td>
+                    <td className="px-3 py-2">
+                      <Badge variant="secondary">{b.disciplina_projeto}</Badge>
+                    </td>
                     <td className="px-3 py-2">{b.quantidade}</td>
                     <td className="px-3 py-2">{b.unidade}</td>
-                    <td className="px-3 py-2"><PrioridadeBadge p={b.criticidade} /></td>
+                    <td className="px-3 py-2">
+                      <PrioridadeBadge p={b.criticidade} />
+                    </td>
                     <td className="px-3 py-2 text-right">
-                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => confirm("Remover item?") && deleteBom.mutate(b.id)}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => confirm("Remover item?") && deleteBom.mutate(b.id)}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </td>
@@ -288,7 +396,11 @@ function Page() {
         <EtapaDialog
           templateId={id}
           item={editingItem}
-          outrasEtapas={itens.map((i: any) => ({ id: i.id, titulo: i.titulo, disciplina: i.disciplina }))}
+          outrasEtapas={itens.map((i: any) => ({
+            id: i.id,
+            titulo: i.titulo,
+            disciplina: i.disciplina,
+          }))}
           onClose={() => setEditingItem(null)}
           onSaved={() => {
             setEditingItem(null);
@@ -317,7 +429,17 @@ function Page() {
           onApplied={() => qc.invalidateQueries({ queryKey: ["etapa-tpl", id] })}
         />
       )}
-      {openHist && <HistoricoDialog templateId={id} versoes={data.versoes as any[]} onClose={() => setOpenHist(false)} onReverted={() => { setOpenHist(false); qc.invalidateQueries({ queryKey: ["etapa-tpl", id] }); }} />}
+      {openHist && (
+        <HistoricoDialog
+          templateId={id}
+          versoes={data.versoes as any[]}
+          onClose={() => setOpenHist(false)}
+          onReverted={() => {
+            setOpenHist(false);
+            qc.invalidateQueries({ queryKey: ["etapa-tpl", id] });
+          }}
+        />
+      )}
     </PageContainer>
   );
 }
@@ -332,21 +454,38 @@ function PrioridadeBadge({ p }: { p: string }) {
   return <Badge className={`${map[p] ?? ""} text-xs`}>{p}</Badge>;
 }
 
-
-function HistoricoDialog({ templateId, versoes, onClose, onReverted }: { templateId: string; versoes: any[]; onClose: () => void; onReverted: () => void }) {
+function HistoricoDialog({
+  templateId,
+  versoes,
+  onClose,
+  onReverted,
+}: {
+  templateId: string;
+  versoes: any[];
+  onClose: () => void;
+  onReverted: () => void;
+}) {
   const revertMut = useMutation({
     mutationFn: (versao: number) => revertEtapaTemplateVersao({ data: { templateId, versao } }),
-    onSuccess: (r: any) => { toast.success(`Revertido — nova v${r.versao} criada.`); onReverted(); },
+    onSuccess: (r: any) => {
+      toast.success(`Revertido — nova v${r.versao} criada.`);
+      onReverted();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Erro."),
   });
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Histórico de versões</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Histórico de versões</DialogTitle>
+        </DialogHeader>
         <div className="max-h-[400px] overflow-y-auto">
           {versoes.length === 0 && <p className="text-sm text-muted-foreground">Sem versões.</p>}
           {versoes.map((v) => (
-            <div key={v.id} className="flex items-center justify-between border-b py-2 last:border-b-0">
+            <div
+              key={v.id}
+              className="flex items-center justify-between border-b py-2 last:border-b-0"
+            >
               <div>
                 <p className="font-medium">v{v.versao}</p>
                 <p className="text-xs text-muted-foreground">
@@ -357,14 +496,22 @@ function HistoricoDialog({ templateId, versoes, onClose, onReverted }: { templat
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => confirm(`Reverter para v${v.versao}? Isso substitui o conteúdo atual e cria uma nova versão.`) && revertMut.mutate(v.versao)}
+                onClick={() =>
+                  confirm(
+                    `Reverter para v${v.versao}? Isso substitui o conteúdo atual e cria uma nova versão.`,
+                  ) && revertMut.mutate(v.versao)
+                }
               >
                 <RotateCcw className="mr-1 h-4 w-4" /> Reverter
               </Button>
             </div>
           ))}
         </div>
-        <DialogFooter><Button variant="ghost" onClick={onClose}>Fechar</Button></DialogFooter>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            Fechar
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -16,7 +16,10 @@ import {
 } from "@/lib/clientes.queries";
 import { clienteEquipamentosQueryOptions } from "@/lib/equipamentos.queries";
 import { createEquipamento, softDeleteEquipamento } from "@/lib/equipamentos.functions";
-import { EquipamentoDrawer, type EquipamentoRow } from "@/components/clientes/equipamentos/EquipamentoDrawer";
+import {
+  EquipamentoDrawer,
+  type EquipamentoRow,
+} from "@/components/clientes/equipamentos/EquipamentoDrawer";
 import { CriarEquipamentoWizard } from "@/components/clientes/equipamentos/CriarEquipamentoWizard";
 import { ClienteRfqTab } from "@/components/rfq/ClienteRfqTab";
 import { ClienteTimeComercialTab } from "@/components/rfq/ClienteTimeComercialTab";
@@ -67,9 +70,7 @@ import {
   CLIENTE_DOC_CATEGORIAS,
   CLIENTE_DOC_CATEGORIA_LABEL,
 } from "@/lib/cliente-documentos.functions";
-import {
-  formatDocumento,
-} from "@/lib/clientes.shared";
+import { formatDocumento } from "@/lib/clientes.shared";
 import { ClienteStatusBadge } from "@/components/clientes/ClienteStatusBadge";
 import { cn } from "@/lib/utils";
 import { approveDocument } from "@/lib/docs/docs.functions";
@@ -77,7 +78,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -182,18 +189,40 @@ export const Route = createFileRoute("/_authenticated/clientes/$codigo")({
 
 function fmtMoney(v: number | null | undefined) {
   if (v == null) return "—";
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(Number(v));
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(Number(v));
 }
 function fmtDate(d: string | null | undefined) {
   if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("pt-BR"); } catch { return "—"; }
+  try {
+    return new Date(d).toLocaleDateString("pt-BR");
+  } catch {
+    return "—";
+  }
 }
 function fmtDateTime(d: string | null | undefined) {
   if (!d) return "—";
-  try { return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }); } catch { return "—"; }
+  try {
+    return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  } catch {
+    return "—";
+  }
 }
 
-function EmptyState({ icon: Icon, title, hint, action }: { icon: any; title: string; hint?: string; action?: React.ReactNode }) {
+function EmptyState({
+  icon: Icon,
+  title,
+  hint,
+  action,
+}: {
+  icon: any;
+  title: string;
+  hint?: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
       <div className="grid h-10 w-10 place-items-center rounded-full bg-muted text-muted-foreground">
@@ -230,25 +259,42 @@ function ClientePage() {
     .join("")
     .toUpperCase();
 
-
   const setTab = (next: TabId) =>
-    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tab: next }), replace: true });
+    navigate({
+      search: (prev: Record<string, unknown>) => ({ ...prev, tab: next }),
+      replace: true,
+    });
   const setSec = (next: GestaoSecao) =>
-    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tab: "gestao", sec: next }), replace: true });
+    navigate({
+      search: (prev: Record<string, unknown>) => ({ ...prev, tab: "gestao", sec: next }),
+      replace: true,
+    });
 
   return (
     <div className="w-full bg-muted/30 text-foreground">
       <main className="flex-1 overflow-y-auto">
         {/* Topbar */}
         <div className="sticky top-0 z-20 flex min-h-14 flex-wrap items-center gap-2 border-b border-border bg-card/85 px-4 py-2 backdrop-blur md:gap-3 md:px-6">
-          <Link to="/clientes" className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12.5px] text-muted-foreground hover:bg-muted">
+          <Link
+            to="/clientes"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12.5px] text-muted-foreground hover:bg-muted"
+          >
             <ArrowLeft className="h-3.5 w-3.5" /> Clientes
           </Link>
           <ChevronRight className="hidden h-3.5 w-3.5 text-muted-foreground/60 sm:inline" />
-          <span className="truncate text-[12.5px] font-medium text-foreground">{cliente.razao_social}</span>
-          <ClienteStatusBadge status={cliente.status ?? cliente.lifecycle_stage} withLabel className="ml-2" />
+          <span className="truncate text-[12.5px] font-medium text-foreground">
+            {cliente.razao_social}
+          </span>
+          <ClienteStatusBadge
+            status={cliente.status ?? cliente.lifecycle_stage}
+            withLabel
+            className="ml-2"
+          />
           {cliente.key_account && (
-            <Badge variant="outline" className="ml-1 hidden items-center gap-1 border-amber-300 bg-amber-50 text-amber-700 sm:inline-flex">
+            <Badge
+              variant="outline"
+              className="ml-1 hidden items-center gap-1 border-amber-300 bg-amber-50 text-amber-700 sm:inline-flex"
+            >
               <Star className="h-3 w-3 fill-amber-500 stroke-amber-500" /> Key Account
             </Badge>
           )}
@@ -281,10 +327,14 @@ function ClientePage() {
                     <h1 className="truncate text-[17px] font-semibold tracking-tight text-foreground md:text-[20px]">
                       {cliente.razao_social}
                     </h1>
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-mono text-muted-foreground">#{cliente.codigo}</span>
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-mono text-muted-foreground">
+                      #{cliente.codigo}
+                    </span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" /> {cliente.segmento ?? "Segmento —"}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5" /> {cliente.segmento ?? "Segmento —"}
+                    </span>
                     <AddressLine cliente={cliente} paisNome={paisCfg?.nome ?? cliente.pais} />
                     <button
                       type="button"
@@ -297,35 +347,87 @@ function ClientePage() {
                   </div>
                   {showDetalhes && (
                     <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5"><Hash className="h-3.5 w-3.5" /> {paisCfg?.documento_nome ?? "Doc"} <RevealableValue value={documentoFmt} masked={maskDocumento(documentoFmt)} /></span>
-                      <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Desde {fmtDate(cliente.created_at)}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Hash className="h-3.5 w-3.5" /> {paisCfg?.documento_nome ?? "Doc"}{" "}
+                        <RevealableValue
+                          value={documentoFmt}
+                          masked={maskDocumento(documentoFmt)}
+                        />
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" /> Desde {fmtDate(cliente.created_at)}
+                      </span>
                     </div>
                   )}
                   {showDetalhes && (
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       {cliente.telefone_corporativo_numero && (
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px]"><Phone className="h-3 w-3" /><RevealableValue value={`${cliente.telefone_corporativo_ddi ?? ""} ${cliente.telefone_corporativo_numero}`} masked={maskPhone(cliente.telefone_corporativo_numero)} /></span>
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px]">
+                          <Phone className="h-3 w-3" />
+                          <RevealableValue
+                            value={`${cliente.telefone_corporativo_ddi ?? ""} ${cliente.telefone_corporativo_numero}`}
+                            masked={maskPhone(cliente.telefone_corporativo_numero)}
+                          />
+                        </span>
                       )}
                       {cliente.email_corporativo &&
                         (canSeeSensivel ? (
-                          <a href={`mailto:${cliente.email_corporativo}`} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px] hover:bg-muted/30"><Mail className="h-3 w-3" />{cliente.email_corporativo}</a>
+                          <a
+                            href={`mailto:${cliente.email_corporativo}`}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px] hover:bg-muted/30"
+                          >
+                            <Mail className="h-3 w-3" />
+                            {cliente.email_corporativo}
+                          </a>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px]"><Mail className="h-3 w-3" /><RevealableValue value={cliente.email_corporativo} masked={maskEmail(cliente.email_corporativo)} /></span>
+                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px]">
+                            <Mail className="h-3 w-3" />
+                            <RevealableValue
+                              value={cliente.email_corporativo}
+                              masked={maskEmail(cliente.email_corporativo)}
+                            />
+                          </span>
                         ))}
                       {cliente.site && (
-                        <a href={cliente.site.startsWith("http") ? cliente.site : `https://${cliente.site}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px] hover:bg-muted/30"><Globe className="h-3 w-3" />{cliente.site}</a>
+                        <a
+                          href={
+                            cliente.site.startsWith("http")
+                              ? cliente.site
+                              : `https://${cliente.site}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px] hover:bg-muted/30"
+                        >
+                          <Globe className="h-3 w-3" />
+                          {cliente.site}
+                        </a>
                       )}
                     </div>
                   )}
-
                 </div>
               </div>
 
               {/* KPIs reais */}
               <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3 lg:shrink-0">
-                <KpiCard label="Op. abertas" value={String(cliente.oportunidades_abertas ?? 0)} icon={Briefcase} color="blue" />
-                <KpiCard label="Processos ativos" value={`${cliente.processos_ativos ?? 0} / ${cliente.processos_total ?? 0}`} icon={Factory} color="violet" />
-                <KpiCard label="Último contato" value={cliente.ultimo_contato_em ? fmtDate(cliente.ultimo_contato_em) : "—"} icon={MessageSquare} color="amber" />
+                <KpiCard
+                  label="Op. abertas"
+                  value={String(cliente.oportunidades_abertas ?? 0)}
+                  icon={Briefcase}
+                  color="blue"
+                />
+                <KpiCard
+                  label="Processos ativos"
+                  value={`${cliente.processos_ativos ?? 0} / ${cliente.processos_total ?? 0}`}
+                  icon={Factory}
+                  color="violet"
+                />
+                <KpiCard
+                  label="Último contato"
+                  value={cliente.ultimo_contato_em ? fmtDate(cliente.ultimo_contato_em) : "—"}
+                  icon={MessageSquare}
+                  color="amber"
+                />
               </div>
             </div>
 
@@ -338,7 +440,9 @@ function ClientePage() {
                   </SelectTrigger>
                   <SelectContent>
                     {TABS.map((t) => (
-                      <SelectItem key={t.id} value={t.id} className="text-[13px]">{t.label}</SelectItem>
+                      <SelectItem key={t.id} value={t.id} className="text-[13px]">
+                        {t.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -353,11 +457,15 @@ function ClientePage() {
                         onClick={() => setTab(t.id)}
                         className={cn(
                           "relative shrink-0 px-3 py-2.5 text-[12.5px] font-medium whitespace-nowrap transition-colors",
-                          active ? "text-[var(--brand-blue,#1e40af)]" : "text-muted-foreground hover:text-foreground",
+                          active
+                            ? "text-[var(--brand-blue,#1e40af)]"
+                            : "text-muted-foreground hover:text-foreground",
                         )}
                       >
                         {t.label}
-                        {active && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-[var(--brand-blue,#1e40af)]" />}
+                        {active && (
+                          <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-[var(--brand-blue,#1e40af)]" />
+                        )}
                       </button>
                     );
                   })}
@@ -387,16 +495,28 @@ function ClientePage() {
                   </button>
                 ))}
               </div>
-              {sec === "visao" && <VisaoTab clienteId={cliente.id} contatosCount={contatos.length} onGoToTab={setTab} />}
+              {sec === "visao" && (
+                <VisaoTab
+                  clienteId={cliente.id}
+                  contatosCount={contatos.length}
+                  onGoToTab={setTab}
+                />
+              )}
               {sec === "equipamentos" && <EquipamentosTab clienteId={cliente.id} />}
               {sec === "rfq" && <ClienteRfqTab clienteId={cliente.id} />}
               {sec === "socios" && (
                 <SensitiveOnly fallback={<RestrictedNotice what="Quadro societário" />}>
-                  <SociosTab clienteId={cliente.id} socios={(data as any).socios ?? []} codigo={cliente.codigo} />
+                  <SociosTab
+                    clienteId={cliente.id}
+                    socios={(data as any).socios ?? []}
+                    codigo={cliente.codigo}
+                  />
                 </SensitiveOnly>
               )}
               {sec === "documentos" && (
-                <SensitiveOnly fallback={<RestrictedNotice what="Documentos e anexos do cliente" />}>
+                <SensitiveOnly
+                  fallback={<RestrictedNotice what="Documentos e anexos do cliente" />}
+                >
                   <DocumentosTab clienteId={cliente.id} />
                 </SensitiveOnly>
               )}
@@ -415,25 +535,49 @@ function ClientePage() {
   );
 }
 
-function KpiCard({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: "emerald" | "blue" | "violet" | "amber" }) {
+function KpiCard({
+  label,
+  value,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: string;
+  icon: any;
+  color: "emerald" | "blue" | "violet" | "amber";
+}) {
   return (
     <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5 lg:min-w-[140px]">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
-        <Icon className={cn(
-          "h-3.5 w-3.5",
-          color === "emerald" && "text-emerald-500",
-          color === "blue" && "text-blue-500",
-          color === "violet" && "text-violet-500",
-          color === "amber" && "text-amber-500",
-        )} />
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </span>
+        <Icon
+          className={cn(
+            "h-3.5 w-3.5",
+            color === "emerald" && "text-emerald-500",
+            color === "blue" && "text-blue-500",
+            color === "violet" && "text-violet-500",
+            color === "amber" && "text-amber-500",
+          )}
+        />
       </div>
-      <div className="mt-1 truncate text-[15px] font-semibold tabular-nums text-foreground">{value}</div>
+      <div className="mt-1 truncate text-[15px] font-semibold tabular-nums text-foreground">
+        {value}
+      </div>
     </div>
   );
 }
 
-function SectionCard({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+function SectionCard({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between border-b border-border px-5 py-3">
@@ -472,7 +616,7 @@ const PROC_STAGE_COLOR: Record<string, string> = {
   // Projeto
   Lead: "border-slate-200 bg-slate-50 text-slate-700",
   ETP: "border-sky-200 bg-sky-50 text-sky-700",
-  "Orçamento": "border-indigo-200 bg-indigo-50 text-indigo-700",
+  Orçamento: "border-indigo-200 bg-indigo-50 text-indigo-700",
   OC: "border-violet-200 bg-violet-50 text-violet-700",
   "Eng. Mecânica": "border-indigo-200 bg-indigo-50 text-indigo-700",
   "Eng. Elétrica": "border-indigo-200 bg-indigo-50 text-indigo-700",
@@ -481,13 +625,13 @@ const PROC_STAGE_COLOR: Record<string, string> = {
   Embarque: "border-cyan-200 bg-cyan-50 text-cyan-700",
   "Pós-venda": "border-teal-200 bg-teal-50 text-teal-700",
   // Atendimento
-  "Solicitação": "border-slate-200 bg-slate-50 text-slate-700",
-  "Análise": "border-sky-200 bg-sky-50 text-sky-700",
+  Solicitação: "border-slate-200 bg-slate-50 text-slate-700",
+  Análise: "border-sky-200 bg-sky-50 text-sky-700",
   Registro: "border-indigo-200 bg-indigo-50 text-indigo-700",
-  "Resolução": "border-amber-200 bg-amber-50 text-amber-700",
+  Resolução: "border-amber-200 bg-amber-50 text-amber-700",
   Encerrado: "border-emerald-200 bg-emerald-50 text-emerald-700",
   // Instalação
-  "Preparação": "border-slate-200 bg-slate-50 text-slate-700",
+  Preparação: "border-slate-200 bg-slate-50 text-slate-700",
   Agendamento: "border-sky-200 bg-sky-50 text-sky-700",
   Arranque: "border-amber-200 bg-amber-50 text-amber-700",
   Treinamento: "border-violet-200 bg-violet-50 text-violet-700",
@@ -495,24 +639,37 @@ const PROC_STAGE_COLOR: Record<string, string> = {
 };
 
 function MiniKpi({
-  label, value, sub, icon: Icon, color,
+  label,
+  value,
+  sub,
+  icon: Icon,
+  color,
 }: {
-  label: string; value: string; sub?: string; icon: any;
+  label: string;
+  value: string;
+  sub?: string;
+  icon: any;
   color: "emerald" | "blue" | "violet" | "amber";
 }) {
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2.5 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
-        <Icon className={cn(
-          "h-3.5 w-3.5",
-          color === "emerald" && "text-emerald-500",
-          color === "blue" && "text-blue-500",
-          color === "violet" && "text-violet-500",
-          color === "amber" && "text-amber-500",
-        )} />
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </span>
+        <Icon
+          className={cn(
+            "h-3.5 w-3.5",
+            color === "emerald" && "text-emerald-500",
+            color === "blue" && "text-blue-500",
+            color === "violet" && "text-violet-500",
+            color === "amber" && "text-amber-500",
+          )}
+        />
       </div>
-      <div className="mt-1 truncate text-[15px] font-semibold tabular-nums text-foreground">{value}</div>
+      <div className="mt-1 truncate text-[15px] font-semibold tabular-nums text-foreground">
+        {value}
+      </div>
       {sub && <div className="truncate text-[10.5px] text-muted-foreground">{sub}</div>}
     </div>
   );
@@ -546,8 +703,7 @@ function AddressLine({ cliente, paisNome }: { cliente: ClienteAddr; paisNome: st
     cliente.endereco_codigo_postal,
     paisNome,
   ].filter(Boolean) as string[];
-  const hasCoords =
-    typeof cliente.latitude === "number" && typeof cliente.longitude === "number";
+  const hasCoords = typeof cliente.latitude === "number" && typeof cliente.longitude === "number";
   const mapsHref = hasCoords
     ? `https://www.openstreetmap.org/?mlat=${cliente.latitude}&mlon=${cliente.longitude}#map=15/${cliente.latitude}/${cliente.longitude}`
     : queryParts.length > 0
@@ -562,12 +718,15 @@ function AddressLine({ cliente, paisNome }: { cliente: ClienteAddr; paisNome: st
       qc.invalidateQueries({ queryKey: ["clientes", "detail-codigo"] });
       qc.invalidateQueries({ queryKey: ["clientes", cliente.id, "timeline"] });
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "Falha ao geocodificar."),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Falha ao geocodificar."),
   });
 
   const geoErrorMsg =
-    geoMut.error instanceof Error ? geoMut.error.message : geoMut.isError ? "Falha ao geocodificar." : null;
+    geoMut.error instanceof Error
+      ? geoMut.error.message
+      : geoMut.isError
+        ? "Falha ao geocodificar."
+        : null;
 
   return (
     <span className="inline-flex items-center gap-1.5">
@@ -638,7 +797,15 @@ function AddressLine({ cliente, paisNome }: { cliente: ClienteAddr; paisNome: st
 
 /* -------------- Tabs -------------- */
 
-function VisaoTab({ clienteId, contatosCount, onGoToTab }: { clienteId: string; contatosCount: number; onGoToTab: (t: TabId) => void }) {
+function VisaoTab({
+  clienteId,
+  contatosCount,
+  onGoToTab,
+}: {
+  clienteId: string;
+  contatosCount: number;
+  onGoToTab: (t: TabId) => void;
+}) {
   const equips = useQuery(clienteEquipamentosQueryOptions(clienteId));
   const procs = useQuery(clienteProcessosQueryOptions(clienteId));
   const docs = useQuery(clienteDocumentosQueryOptions(clienteId));
@@ -660,129 +827,222 @@ function VisaoTab({ clienteId, contatosCount, onGoToTab }: { clienteId: string; 
       <div className="col-span-12 space-y-5 lg:col-span-8">
         <SectionCard
           title="Equipamentos do cliente"
-          action={<span className="text-[11px] text-muted-foreground">{equips.data?.length ?? 0} no total</span>}
+          action={
+            <span className="text-[11px] text-muted-foreground">
+              {equips.data?.length ?? 0} no total
+            </span>
+          }
         >
-          {equips.isLoading ? <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div> :
-            (equips.data?.length ?? 0) === 0 ? (
-              <EmptyState icon={Wrench} title="Nenhum equipamento" hint="Cadastre os equipamentos deste cliente — engenharia, produção, qualidade ou operação." />
-            ) : (
-              <ul className="divide-y divide-border">
-                {equips.data!.slice(0, 5).map((e) => {
-                  const status = e.status as EquipamentoStatus;
-                  return (
-                    <li
-                      key={e.id}
-                      className="flex cursor-pointer items-center gap-3 px-5 py-3 hover:bg-muted/30"
-                      onClick={() => setSelected(e as unknown as EquipamentoRow)}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10.5px] text-muted-foreground">{e.codigo ?? "—"}</span>
-                          <Badge variant="outline" className={cn("text-[10px]", EQUIPAMENTO_STATUS_COLOR[status])}>
-                            {EQUIPAMENTO_STATUS_LABEL[status] ?? status}
-                          </Badge>
-                        </div>
-                        <div className="truncate text-[12.5px] font-medium">{e.modelo}</div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {EQUIPAMENTO_CATEGORIA_LABEL[e.categoria as EquipamentoCategoria] ?? e.categoria}
-                          {e.localizacao ? ` · ${e.localizacao}` : ""}
-                        </div>
+          {equips.isLoading ? (
+            <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div>
+          ) : (equips.data?.length ?? 0) === 0 ? (
+            <EmptyState
+              icon={Wrench}
+              title="Nenhum equipamento"
+              hint="Cadastre os equipamentos deste cliente — engenharia, produção, qualidade ou operação."
+            />
+          ) : (
+            <ul className="divide-y divide-border">
+              {equips.data!.slice(0, 5).map((e) => {
+                const status = e.status as EquipamentoStatus;
+                return (
+                  <li
+                    key={e.id}
+                    className="flex cursor-pointer items-center gap-3 px-5 py-3 hover:bg-muted/30"
+                    onClick={() => setSelected(e as unknown as EquipamentoRow)}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10.5px] text-muted-foreground">
+                          {e.codigo ?? "—"}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={cn("text-[10px]", EQUIPAMENTO_STATUS_COLOR[status])}
+                        >
+                          {EQUIPAMENTO_STATUS_LABEL[status] ?? status}
+                        </Badge>
                       </div>
-                      <div className="text-right text-[12px] tabular-nums">{fmtMoney(e.valor_venda)}</div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+                      <div className="truncate text-[12.5px] font-medium">{e.modelo}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {EQUIPAMENTO_CATEGORIA_LABEL[e.categoria as EquipamentoCategoria] ??
+                          e.categoria}
+                        {e.localizacao ? ` · ${e.localizacao}` : ""}
+                      </div>
+                    </div>
+                    <div className="text-right text-[12px] tabular-nums">
+                      {fmtMoney(e.valor_venda)}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </SectionCard>
 
         <SectionCard
           title="Processos recentes"
-          action={<span className="text-[11px] text-muted-foreground">{procs.data?.length ?? 0} no total</span>}
+          action={
+            <span className="text-[11px] text-muted-foreground">
+              {procs.data?.length ?? 0} no total
+            </span>
+          }
         >
-          {procs.isLoading ? <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div> :
-            (procs.data?.length ?? 0) === 0 ? (
-              <EmptyState icon={Factory} title="Sem processos" hint="Os processos aparecerão aqui quando forem abertos." />
-            ) : (
-              <ul className="divide-y divide-border">
-                {procs.data!.slice(0, 5).map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10.5px] text-muted-foreground">{p.codigo}</span>
-                        <Badge variant="outline" className="text-[10px] capitalize">{p.stage}</Badge>
-                        {p.lost_at && <Badge variant="outline" className="text-[10px] border-rose-200 text-rose-700">arquivado</Badge>}
-                      </div>
-                      <div className="truncate text-[12.5px] font-medium">{p.titulo}</div>
+          {procs.isLoading ? (
+            <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div>
+          ) : (procs.data?.length ?? 0) === 0 ? (
+            <EmptyState
+              icon={Factory}
+              title="Sem processos"
+              hint="Os processos aparecerão aqui quando forem abertos."
+            />
+          ) : (
+            <ul className="divide-y divide-border">
+              {procs.data!.slice(0, 5).map((p) => (
+                <li key={p.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10.5px] text-muted-foreground">
+                        {p.codigo}
+                      </span>
+                      <Badge variant="outline" className="text-[10px] capitalize">
+                        {p.stage}
+                      </Badge>
+                      {p.lost_at && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] border-rose-200 text-rose-700"
+                        >
+                          arquivado
+                        </Badge>
+                      )}
                     </div>
-                    <div className="text-right text-[12px] tabular-nums text-muted-foreground">{p.progresso}%</div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    <div className="truncate text-[12.5px] font-medium">{p.titulo}</div>
+                  </div>
+                  <div className="text-right text-[12px] tabular-nums text-muted-foreground">
+                    {p.progresso}%
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </SectionCard>
 
         <SectionCard
           title="Orçamentos"
-          action={<span className="text-[11px] text-muted-foreground">{orcamentos.data?.length ?? 0} no total</span>}
+          action={
+            <span className="text-[11px] text-muted-foreground">
+              {orcamentos.data?.length ?? 0} no total
+            </span>
+          }
         >
-          {orcamentos.isLoading ? <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div> :
-            (orcamentos.data?.length ?? 0) === 0 ? (
-              <EmptyState icon={FileText} title="Nenhum orçamento" hint="Gere o primeiro orçamento deste cliente em Comercial → Orçamentos." />
-            ) : (
-              <ul className="divide-y divide-border">
-                {orcamentos.data!.slice(0, 8).map((o: any) => {
-                  const ORC_STATUS_META: Record<string, { label: string; cls: string }> = {
-                    rascunho:   { label: "Rascunho",   cls: "bg-slate-100 text-slate-700 border-slate-200" },
-                    emitido:    { label: "Emitido",    cls: "bg-slate-100 text-slate-700 border-slate-200" },
-                    em_revisao: { label: "Em revisão", cls: "bg-amber-50 text-amber-800 border-amber-200" },
-                    aprovado:   { label: "Aprovado",   cls: "bg-emerald-50 text-emerald-800 border-emerald-200" },
-                    publicado:  { label: "Publicado",  cls: "bg-sky-50 text-sky-800 border-sky-200" },
-                    arquivado:  { label: "Arquivado",  cls: "bg-rose-50 text-rose-800 border-rose-200" },
-                  };
-                  const sm = ORC_STATUS_META[o.status] ?? { label: o.status, cls: "" };
-                  return (
-                    <li key={o.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <Link to="/documentos/$id" params={{ id: o.id }} className="font-mono text-[10.5px] text-muted-foreground hover:underline">{o.codigo}</Link>
-                          <Badge variant="outline" className={cn("text-[10px]", sm.cls)}>{sm.label}</Badge>
-                          <span className="font-mono text-[10.5px] text-muted-foreground">v{o.versao}</span>
-                        </div>
-                        <div className="truncate text-[12.5px] font-medium">{o.titulo || "Sem título"}</div>
-                        <div className="text-[11px] text-muted-foreground">{fmtDateTime(o.created_at)}</div>
-                      </div>
-                      {["rascunho", "emitido", "em_revisao"].includes(o.status) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 shrink-0 text-[11px]"
-                          disabled={aprovarMut.isPending}
-                          onClick={() => aprovarMut.mutate(o.id)}
+          {orcamentos.isLoading ? (
+            <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div>
+          ) : (orcamentos.data?.length ?? 0) === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title="Nenhum orçamento"
+              hint="Gere o primeiro orçamento deste cliente em Comercial → Orçamentos."
+            />
+          ) : (
+            <ul className="divide-y divide-border">
+              {orcamentos.data!.slice(0, 8).map((o: any) => {
+                const ORC_STATUS_META: Record<string, { label: string; cls: string }> = {
+                  rascunho: {
+                    label: "Rascunho",
+                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                  },
+                  emitido: {
+                    label: "Emitido",
+                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                  },
+                  em_revisao: {
+                    label: "Em revisão",
+                    cls: "bg-amber-50 text-amber-800 border-amber-200",
+                  },
+                  aprovado: {
+                    label: "Aprovado",
+                    cls: "bg-emerald-50 text-emerald-800 border-emerald-200",
+                  },
+                  publicado: { label: "Publicado", cls: "bg-sky-50 text-sky-800 border-sky-200" },
+                  arquivado: {
+                    label: "Arquivado",
+                    cls: "bg-rose-50 text-rose-800 border-rose-200",
+                  },
+                };
+                const sm = ORC_STATUS_META[o.status] ?? { label: o.status, cls: "" };
+                return (
+                  <li key={o.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to="/documentos/$id"
+                          params={{ id: o.id }}
+                          className="font-mono text-[10.5px] text-muted-foreground hover:underline"
                         >
-                          Marcar como aprovado
-                        </Button>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+                          {o.codigo}
+                        </Link>
+                        <Badge variant="outline" className={cn("text-[10px]", sm.cls)}>
+                          {sm.label}
+                        </Badge>
+                        <span className="font-mono text-[10.5px] text-muted-foreground">
+                          v{o.versao}
+                        </span>
+                      </div>
+                      <div className="truncate text-[12.5px] font-medium">
+                        {o.titulo || "Sem título"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {fmtDateTime(o.created_at)}
+                      </div>
+                    </div>
+                    {["rascunho", "emitido", "em_revisao"].includes(o.status) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 shrink-0 text-[11px]"
+                        disabled={aprovarMut.isPending}
+                        onClick={() => aprovarMut.mutate(o.id)}
+                      >
+                        Marcar como aprovado
+                      </Button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </SectionCard>
       </div>
 
       <aside className="col-span-12 space-y-5 lg:col-span-4">
-        <SectionCard title="Contatos-chave" action={<span className="text-[11px] text-muted-foreground">{contatosCount}</span>}>
+        <SectionCard
+          title="Contatos-chave"
+          action={<span className="text-[11px] text-muted-foreground">{contatosCount}</span>}
+        >
           {contatosCount === 0 ? (
             <EmptyState icon={Users} title="Sem contatos cadastrados" />
           ) : (
             <div className="px-5 py-3 text-[12px] text-muted-foreground">
-              Veja a aba <button type="button" className="font-medium text-foreground hover:underline" onClick={() => onGoToTab("time")}>Contatos</button> para detalhes.
+              Veja a aba{" "}
+              <button
+                type="button"
+                className="font-medium text-foreground hover:underline"
+                onClick={() => onGoToTab("time")}
+              >
+                Contatos
+              </button>{" "}
+              para detalhes.
             </div>
           )}
         </SectionCard>
 
-        <SectionCard title="Documentos recentes" action={<span className="text-[11px] text-muted-foreground">{docs.data?.length ?? 0}</span>}>
+        <SectionCard
+          title="Documentos recentes"
+          action={
+            <span className="text-[11px] text-muted-foreground">{docs.data?.length ?? 0}</span>
+          }
+        >
           {(docs.data?.length ?? 0) === 0 ? (
             <EmptyState icon={FileText} title="Sem documentos" />
           ) : (
@@ -792,7 +1052,14 @@ function VisaoTab({ clienteId, contatosCount, onGoToTab }: { clienteId: string; 
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <div className="min-w-0 flex-1 truncate">{d.nome_final}</div>
                   {d.drive_view_url && (
-                    <a href={d.drive_view_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground"><ExternalLink className="h-3.5 w-3.5" /></a>
+                    <a
+                      href={d.drive_view_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
                   )}
                 </li>
               ))}
@@ -808,7 +1075,10 @@ function VisaoTab({ clienteId, contatosCount, onGoToTab }: { clienteId: string; 
               {timeline.data!.slice(0, 5).map((t) => (
                 <li key={t.id} className="px-5 py-2.5 text-[12px]">
                   <div className="font-medium text-foreground">{t.titulo}</div>
-                  <div className="text-muted-foreground">{fmtDateTime(t.ts)}{t.user_nome ? ` · ${t.user_nome}` : ""}</div>
+                  <div className="text-muted-foreground">
+                    {fmtDateTime(t.ts)}
+                    {t.user_nome ? ` · ${t.user_nome}` : ""}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -860,16 +1130,28 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
   const list = data ?? [];
   const total = list.length;
   const emOperacao = list.filter((e) => e.status === "operacional").length;
-  const emEngenharia = list.filter((e) => EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] === "engenharia").length;
-  const emProducao = list.filter((e) => EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] === "producao").length;
-  const emQualidade = list.filter((e) => EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] === "qualidade").length;
+  const emEngenharia = list.filter(
+    (e) => EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] === "engenharia",
+  ).length;
+  const emProducao = list.filter(
+    (e) => EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] === "producao",
+  ).length;
+  const emQualidade = list.filter(
+    (e) => EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] === "qualidade",
+  ).length;
   const emManutencao = list.filter((e) => e.status === "manutencao").length;
   const valorTotal = list.reduce((s, e) => s + Number(e.valor_venda ?? 0), 0);
-  const garantiasExpirando = list.filter((e) => garantiaStatus(e.data_garantia_fim) === "expirando").length;
+  const garantiasExpirando = list.filter(
+    (e) => garantiaStatus(e.data_garantia_fim) === "expirando",
+  ).length;
 
   const q = query.trim().toLowerCase();
   const filtered = list.filter((e) => {
-    if (faseFilter !== "todos" && EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] !== faseFilter) return false;
+    if (
+      faseFilter !== "todos" &&
+      EQUIPAMENTO_STATUS_FASE[e.status as EquipamentoStatus] !== faseFilter
+    )
+      return false;
     if (categoriaFilter !== "todos" && e.categoria !== categoriaFilter) return false;
     if (!q) return true;
     return (
@@ -884,11 +1166,41 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-3">
         <MiniKpi label="Total" value={String(total)} sub="equipamentos" icon={Cog} color="blue" />
-        <MiniKpi label="Em operação" value={String(emOperacao)} sub={total ? `${Math.round((emOperacao / total) * 100)}%` : "—"} icon={ShieldCheck} color="emerald" />
-        <MiniKpi label="Em fabricação" value={String(emProducao)} sub={`${emEngenharia} engenharia · ${emQualidade} qualidade`} icon={Factory} color="blue" />
-        <MiniKpi label="Em manutenção" value={String(emManutencao)} sub="operação" icon={Wrench} color="amber" />
-        <MiniKpi label="Valor total" value={fmtMoney(valorTotal)} sub="todos equipamentos" icon={DollarSign} color="violet" />
-        <MiniKpi label="Garantias expirando" value={String(garantiasExpirando)} sub="≤ 60 dias" icon={ShieldAlert} color="amber" />
+        <MiniKpi
+          label="Em operação"
+          value={String(emOperacao)}
+          sub={total ? `${Math.round((emOperacao / total) * 100)}%` : "—"}
+          icon={ShieldCheck}
+          color="emerald"
+        />
+        <MiniKpi
+          label="Em fabricação"
+          value={String(emProducao)}
+          sub={`${emEngenharia} engenharia · ${emQualidade} qualidade`}
+          icon={Factory}
+          color="blue"
+        />
+        <MiniKpi
+          label="Em manutenção"
+          value={String(emManutencao)}
+          sub="operação"
+          icon={Wrench}
+          color="amber"
+        />
+        <MiniKpi
+          label="Valor total"
+          value={fmtMoney(valorTotal)}
+          sub="todos equipamentos"
+          icon={DollarSign}
+          color="violet"
+        />
+        <MiniKpi
+          label="Garantias expirando"
+          value={String(garantiasExpirando)}
+          sub="≤ 60 dias"
+          icon={ShieldAlert}
+          color="amber"
+        />
       </div>
 
       <SectionCard
@@ -905,7 +1217,9 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
               size="sm"
               variant="outline"
               className="h-8"
-              onClick={() => nav({ to: "/comercial/orcamento/novo", search: { cliente: clienteId } })}
+              onClick={() =>
+                nav({ to: "/comercial/orcamento/novo", search: { cliente: clienteId } })
+              }
             >
               <FileText className="h-3.5 w-3.5" /> Criar orçamento
             </Button>
@@ -959,14 +1273,20 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
                 <SelectContent>
                   <SelectItem value="todos">Todas categorias</SelectItem>
                   {EQUIPAMENTO_CATEGORIAS.map((c) => (
-                    <SelectItem key={c} value={c}>{EQUIPAMENTO_CATEGORIA_LABEL[c]}</SelectItem>
+                    <SelectItem key={c} value={c}>
+                      {EQUIPAMENTO_CATEGORIA_LABEL[c]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             {filtered.length === 0 ? (
-              <EmptyState icon={Filter} title="Nenhum equipamento no filtro" hint="Ajuste a busca ou os filtros." />
+              <EmptyState
+                icon={Filter}
+                title="Nenhum equipamento no filtro"
+                hint="Ajuste a busca ou os filtros."
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-[12.5px]">
@@ -995,40 +1315,65 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
                           className="cursor-pointer hover:bg-muted/20"
                           onClick={() => setSelected(e as unknown as EquipamentoRow)}
                         >
-                          <td className="px-4 py-2 font-mono text-[11.5px] text-muted-foreground">{e.codigo ?? "—"}</td>
+                          <td className="px-4 py-2 font-mono text-[11.5px] text-muted-foreground">
+                            {e.codigo ?? "—"}
+                          </td>
                           <td className="px-4 py-2">
                             <div className="font-medium">{e.modelo}</div>
-                            {e.localizacao && <div className="text-[11px] text-muted-foreground">{e.localizacao}</div>}
+                            {e.localizacao && (
+                              <div className="text-[11px] text-muted-foreground">
+                                {e.localizacao}
+                              </div>
+                            )}
                           </td>
-                          <td className="px-4 py-2 text-muted-foreground">{EQUIPAMENTO_CATEGORIA_LABEL[cat] ?? cat}</td>
-                          <td className="px-4 py-2 text-[11.5px] text-muted-foreground">{EQUIPAMENTO_FASE_LABEL[fase]}</td>
+                          <td className="px-4 py-2 text-muted-foreground">
+                            {EQUIPAMENTO_CATEGORIA_LABEL[cat] ?? cat}
+                          </td>
+                          <td className="px-4 py-2 text-[11.5px] text-muted-foreground">
+                            {EQUIPAMENTO_FASE_LABEL[fase]}
+                          </td>
                           <td className="px-4 py-2">
-                            <Badge variant="outline" className={cn(EQUIPAMENTO_STATUS_COLOR[status])}>
+                            <Badge
+                              variant="outline"
+                              className={cn(EQUIPAMENTO_STATUS_COLOR[status])}
+                            >
                               {EQUIPAMENTO_STATUS_LABEL[status] ?? status}
                             </Badge>
                           </td>
                           <td className="px-4 py-2 text-[11.5px] text-muted-foreground">
-                            {e.numero_serie ?? "—"}{e.tag_cliente ? ` · ${e.tag_cliente}` : ""}
+                            {e.numero_serie ?? "—"}
+                            {e.tag_cliente ? ` · ${e.tag_cliente}` : ""}
                           </td>
                           <td className="px-4 py-2 text-[11.5px]">
                             {e.data_garantia_fim ? (
-                              <span className={cn(
-                                "inline-flex items-center gap-1",
-                                garStat === "ativa" && "text-emerald-700",
-                                garStat === "expirando" && "text-amber-700",
-                                garStat === "expirada" && "text-rose-700",
-                              )}>
-                                {garStat === "expirada" ? <ShieldAlert className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1",
+                                  garStat === "ativa" && "text-emerald-700",
+                                  garStat === "expirando" && "text-amber-700",
+                                  garStat === "expirada" && "text-rose-700",
+                                )}
+                              >
+                                {garStat === "expirada" ? (
+                                  <ShieldAlert className="h-3 w-3" />
+                                ) : (
+                                  <ShieldCheck className="h-3 w-3" />
+                                )}
                                 {fmtDate(e.data_garantia_fim)}
                               </span>
-                            ) : <span className="text-muted-foreground">—</span>}
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
                           </td>
-                          <td className="px-4 py-2 text-right tabular-nums">{fmtMoney(e.valor_venda)}</td>
+                          <td className="px-4 py-2 text-right tabular-nums">
+                            {fmtMoney(e.valor_venda)}
+                          </td>
                           <td className="px-4 py-2 text-right">
                             <button
                               onClick={(ev) => {
                                 ev.stopPropagation();
-                                if (confirm(`Remover equipamento ${e.codigo}?`)) deleteMut.mutate(e.id);
+                                if (confirm(`Remover equipamento ${e.codigo}?`))
+                                  deleteMut.mutate(e.id);
                               }}
                               className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-rose-700"
                               title="Remover"
@@ -1096,75 +1441,134 @@ function NovoEquipamentoDialog({
   });
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[15px] font-semibold">Adicionar equipamento</h2>
-          <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-muted">✕</button>
+          <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-muted">
+            ✕
+          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-[12.5px]">
           <label className="col-span-2 space-y-1">
             <span className="text-muted-foreground">Modelo *</span>
-            <Input value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} placeholder="Ex.: Envasadora STK-Fill 8000" />
+            <Input
+              value={form.modelo}
+              onChange={(e) => setForm({ ...form, modelo: e.target.value })}
+              placeholder="Ex.: Envasadora STK-Fill 8000"
+            />
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Categoria</span>
-            <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v as EquipamentoCategoria })}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <Select
+              value={form.categoria}
+              onValueChange={(v) => setForm({ ...form, categoria: v as EquipamentoCategoria })}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {EQUIPAMENTO_CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{EQUIPAMENTO_CATEGORIA_LABEL[c]}</SelectItem>)}
+                {EQUIPAMENTO_CATEGORIAS.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {EQUIPAMENTO_CATEGORIA_LABEL[c]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Status</span>
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as EquipamentoStatus })}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <Select
+              value={form.status}
+              onValueChange={(v) => setForm({ ...form, status: v as EquipamentoStatus })}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {EQUIPAMENTO_STATUS.map((s) => <SelectItem key={s} value={s}>{EQUIPAMENTO_STATUS_LABEL[s]}</SelectItem>)}
+                {EQUIPAMENTO_STATUS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {EQUIPAMENTO_STATUS_LABEL[s]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Nº de série</span>
-            <Input value={form.numero_serie} onChange={(e) => setForm({ ...form, numero_serie: e.target.value })} />
+            <Input
+              value={form.numero_serie}
+              onChange={(e) => setForm({ ...form, numero_serie: e.target.value })}
+            />
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Tag do cliente</span>
-            <Input value={form.tag_cliente} onChange={(e) => setForm({ ...form, tag_cliente: e.target.value })} />
+            <Input
+              value={form.tag_cliente}
+              onChange={(e) => setForm({ ...form, tag_cliente: e.target.value })}
+            />
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Data entrega</span>
-            <Input type="date" value={form.data_entrega} onChange={(e) => setForm({ ...form, data_entrega: e.target.value })} />
+            <Input
+              type="date"
+              value={form.data_entrega}
+              onChange={(e) => setForm({ ...form, data_entrega: e.target.value })}
+            />
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Data instalação</span>
-            <Input type="date" value={form.data_instalacao} onChange={(e) => setForm({ ...form, data_instalacao: e.target.value })} />
+            <Input
+              type="date"
+              value={form.data_instalacao}
+              onChange={(e) => setForm({ ...form, data_instalacao: e.target.value })}
+            />
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Fim da garantia</span>
-            <Input type="date" value={form.data_garantia_fim} onChange={(e) => setForm({ ...form, data_garantia_fim: e.target.value })} />
+            <Input
+              type="date"
+              value={form.data_garantia_fim}
+              onChange={(e) => setForm({ ...form, data_garantia_fim: e.target.value })}
+            />
           </label>
           <label className="space-y-1">
             <span className="text-muted-foreground">Valor de venda (R$)</span>
-            <Input type="number" value={form.valor_venda} onChange={(e) => setForm({ ...form, valor_venda: e.target.value })} />
+            <Input
+              type="number"
+              value={form.valor_venda}
+              onChange={(e) => setForm({ ...form, valor_venda: e.target.value })}
+            />
           </label>
           <label className="col-span-2 space-y-1">
             <span className="text-muted-foreground">Localização</span>
-            <Input value={form.localizacao} onChange={(e) => setForm({ ...form, localizacao: e.target.value })} placeholder="Ex.: Linha 1 - Planta SP" />
+            <Input
+              value={form.localizacao}
+              onChange={(e) => setForm({ ...form, localizacao: e.target.value })}
+              placeholder="Ex.: Linha 1 - Planta SP"
+            />
           </label>
           <label className="col-span-2 space-y-1">
             <span className="text-muted-foreground">Observações</span>
-            <Textarea rows={3} value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} />
+            <Textarea
+              rows={3}
+              value={form.observacoes}
+              onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+            />
           </label>
         </div>
 
         <div className="mt-4 flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={onClose} disabled={loading}>Cancelar</Button>
+          <Button variant="outline" size="sm" onClick={onClose} disabled={loading}>
+            Cancelar
+          </Button>
           <Button
             size="sm"
             disabled={loading || form.modelo.trim().length < 2}
@@ -1185,14 +1589,18 @@ function NovoEquipamentoDialog({
               })
             }
           >
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />} Adicionar
+            {loading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Plus className="h-3.5 w-3.5" />
+            )}{" "}
+            Adicionar
           </Button>
         </div>
       </div>
     </div>
   );
 }
-
 
 type ContatoFilter = "todos" | "principal" | "com_email" | "com_telefone";
 const CONTATO_FILTER_LABEL: Record<ContatoFilter, string> = {
@@ -1209,7 +1617,11 @@ function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editH
   if (contatos.length === 0)
     return (
       <SectionCard title="Contatos">
-        <EmptyState icon={Users} title="Sem contatos" hint="Adicione contatos editando o cadastro do cliente." />
+        <EmptyState
+          icon={Users}
+          title="Sem contatos"
+          hint="Adicione contatos editando o cadastro do cliente."
+        />
       </SectionCard>
     );
 
@@ -1233,20 +1645,56 @@ function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editH
       if (filter === "com_telefone" && !c.telefone_numero) return false;
       if (!q) return true;
       return (
-        String(c.nome ?? "").toLowerCase().includes(q) ||
-        String(c.cargo ?? "").toLowerCase().includes(q) ||
-        String(c.email ?? "").toLowerCase().includes(q)
+        String(c.nome ?? "")
+          .toLowerCase()
+          .includes(q) ||
+        String(c.cargo ?? "")
+          .toLowerCase()
+          .includes(q) ||
+        String(c.email ?? "")
+          .toLowerCase()
+          .includes(q)
       );
     })
-    .sort((a, b) => (a.principal === b.principal ? String(a.nome).localeCompare(String(b.nome)) : a.principal ? -1 : 1));
+    .sort((a, b) =>
+      a.principal === b.principal
+        ? String(a.nome).localeCompare(String(b.nome))
+        : a.principal
+          ? -1
+          : 1,
+    );
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-        <MiniKpi label="Total" value={String(total)} sub={`${principais} principais`} icon={Users} color="blue" />
-        <MiniKpi label="Principais" value={String(principais)} sub="marcados como chave" icon={Star} color="amber" />
-        <MiniKpi label="Com e-mail" value={String(comEmail)} sub={total ? `${Math.round((comEmail / total) * 100)}% cobertura` : "—"} icon={Mail} color="emerald" />
-        <MiniKpi label="Com telefone" value={String(comTelefone)} sub={total ? `${Math.round((comTelefone / total) * 100)}% cobertura` : "—"} icon={Phone} color="violet" />
+        <MiniKpi
+          label="Total"
+          value={String(total)}
+          sub={`${principais} principais`}
+          icon={Users}
+          color="blue"
+        />
+        <MiniKpi
+          label="Principais"
+          value={String(principais)}
+          sub="marcados como chave"
+          icon={Star}
+          color="amber"
+        />
+        <MiniKpi
+          label="Com e-mail"
+          value={String(comEmail)}
+          sub={total ? `${Math.round((comEmail / total) * 100)}% cobertura` : "—"}
+          icon={Mail}
+          color="emerald"
+        />
+        <MiniKpi
+          label="Com telefone"
+          value={String(comTelefone)}
+          sub={total ? `${Math.round((comTelefone / total) * 100)}% cobertura` : "—"}
+          icon={Phone}
+          color="violet"
+        />
       </div>
 
       <SectionCard
@@ -1278,7 +1726,12 @@ function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editH
                 )}
               >
                 {CONTATO_FILTER_LABEL[f]}
-                <span className={cn("rounded px-1 text-[10px] tabular-nums", active ? "bg-[var(--brand-blue,#1e40af)]/15" : "bg-muted")}>
+                <span
+                  className={cn(
+                    "rounded px-1 text-[10px] tabular-nums",
+                    active ? "bg-[var(--brand-blue,#1e40af)]/15" : "bg-muted",
+                  )}
+                >
                   {counts[f]}
                 </span>
               </button>
@@ -1286,36 +1739,61 @@ function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editH
           })}
         </div>
         {filtered.length === 0 ? (
-          <EmptyState icon={Filter} title="Nenhum contato no filtro" hint="Ajuste a busca ou o filtro acima." />
+          <EmptyState
+            icon={Filter}
+            title="Nenhum contato no filtro"
+            hint="Ajuste a busca ou o filtro acima."
+          />
         ) : (
           <ul className="divide-y divide-border">
             {filtered.map((c) => {
               const tel = [c.telefone_ddi, c.telefone_numero].filter(Boolean).join(" ");
               return (
                 <li key={c.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/20">
-                  <div className={cn(
-                    "grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white",
-                    c.principal
-                      ? "bg-gradient-to-br from-amber-500 to-amber-700"
-                      : "bg-gradient-to-br from-slate-700 to-slate-900",
-                  )}>
-                    {String(c.nome).split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
+                  <div
+                    className={cn(
+                      "grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white",
+                      c.principal
+                        ? "bg-gradient-to-br from-amber-500 to-amber-700"
+                        : "bg-gradient-to-br from-slate-700 to-slate-900",
+                    )}
+                  >
+                    {String(c.nome)
+                      .split(" ")
+                      .map((n: string) => n[0])
+                      .slice(0, 2)
+                      .join("")}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-[12.5px] font-semibold">{c.nome}</span>
-                      {c.principal && <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[10px]">Principal</Badge>}
+                      {c.principal && (
+                        <Badge
+                          variant="outline"
+                          className="border-amber-200 bg-amber-50 text-amber-700 text-[10px]"
+                        >
+                          Principal
+                        </Badge>
+                      )}
                     </div>
-                    <div className="truncate text-[11px] text-muted-foreground">{c.cargo ?? "—"}</div>
+                    <div className="truncate text-[11px] text-muted-foreground">
+                      {c.cargo ?? "—"}
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-1.5">
                     {tel && (
-                      <a href={`tel:${tel.replace(/\s+/g, "")}`} className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">
+                      <a
+                        href={`tel:${tel.replace(/\s+/g, "")}`}
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+                      >
                         <Phone className="h-3 w-3" /> {tel}
                       </a>
                     )}
                     {c.email && (
-                      <a href={`mailto:${c.email}`} className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">
+                      <a
+                        href={`mailto:${c.email}`}
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+                      >
                         <Mail className="h-3 w-3" /> {c.email}
                       </a>
                     )}
@@ -1355,7 +1833,9 @@ function DocumentosTab({ clienteId }: { clienteId: string }) {
   const [categoria, setCategoria] = useState<(typeof CLIENTE_DOC_CATEGORIAS)[number]>("outro");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [catFilter, setCatFilter] = useState<"todos" | (typeof CLIENTE_DOC_CATEGORIAS)[number]>("todos");
+  const [catFilter, setCatFilter] = useState<"todos" | (typeof CLIENTE_DOC_CATEGORIAS)[number]>(
+    "todos",
+  );
   const [query, setQuery] = useState("");
   const [confirmDoc, setConfirmDoc] = useState<{ id: string; nome: string } | null>(null);
 
@@ -1412,148 +1892,210 @@ function DocumentosTab({ clienteId }: { clienteId: string }) {
     .filter((d) => {
       if (catFilter !== "todos" && d.categoria !== catFilter) return false;
       if (!qstr) return true;
-      return String(d.nome_final ?? "").toLowerCase().includes(qstr)
-        || String(d.nome_original ?? "").toLowerCase().includes(qstr);
+      return (
+        String(d.nome_final ?? "")
+          .toLowerCase()
+          .includes(qstr) ||
+        String(d.nome_original ?? "")
+          .toLowerCase()
+          .includes(qstr)
+      );
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-        <MiniKpi label="Arquivos" value={String(docs.length)} sub={ultimo ? `último em ${fmtDate(ultimo)}` : "—"} icon={FileText} color="blue" />
-        <MiniKpi label="Tamanho total" value={formatBytes(totalSize)} sub="somatório no Drive" icon={Upload} color="violet" />
-        <MiniKpi label="Categorias" value={String(CLIENTE_DOC_CATEGORIAS.filter((c) => (catCounts[c] ?? 0) > 0).length)} sub={`de ${CLIENTE_DOC_CATEGORIAS.length} possíveis`} icon={Filter} color="emerald" />
-        <MiniKpi label="Em filtro" value={String(filtered.length)} sub={catFilter === "todos" ? "todas as categorias" : CLIENTE_DOC_CATEGORIA_LABEL[catFilter]} icon={Filter} color="amber" />
-      </div>
-
-    <SectionCard
-      title={`Documentos (${filtered.length}/${docs.length})`}
-      action={
-        <div className="flex items-center gap-2">
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar nome…"
-            className="h-8 w-44 text-[12px]"
-          />
-          <Select value={categoria} onValueChange={(v) => setCategoria(v as typeof categoria)}>
-            <SelectTrigger className="h-8 w-[180px] text-[12px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CLIENTE_DOC_CATEGORIAS.map((c) => (
-                <SelectItem key={c} value={c} className="text-[12.5px]">{CLIENTE_DOC_CATEGORIA_LABEL[c]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) uploadMut.mutate(f);
-            }}
-          />
-          <Button
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            <Upload className="h-3.5 w-3.5" />
-            {uploading ? "Enviando…" : "Enviar"}
-          </Button>
-        </div>
-      }
-    >
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-muted/20 px-5 py-2.5">
-        {(["todos", ...CLIENTE_DOC_CATEGORIAS] as const).map((c) => {
-          const active = catFilter === c;
-          const label = c === "todos" ? "Todas" : CLIENTE_DOC_CATEGORIA_LABEL[c];
-          return (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCatFilter(c)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
-                active
-                  ? "border-[var(--brand-blue,#1e40af)] bg-[var(--brand-blue,#1e40af)]/10 text-[var(--brand-blue,#1e40af)]"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {label}
-              <span className={cn("rounded px-1 text-[10px] tabular-nums", active ? "bg-[var(--brand-blue,#1e40af)]/15" : "bg-muted")}>
-                {catCounts[c] ?? 0}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-      {isLoading ? (
-        <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div>
-      ) : docs.length === 0 ? (
-        <EmptyState
+        <MiniKpi
+          label="Arquivos"
+          value={String(docs.length)}
+          sub={ultimo ? `último em ${fmtDate(ultimo)}` : "—"}
           icon={FileText}
-          title="Sem documentos"
-          hint="Selecione a categoria e clique em Enviar. Aceitos: PDF, JPG, PNG (≤25MB) e ZIP (≤50MB)."
+          color="blue"
         />
-      ) : filtered.length === 0 ? (
-        <EmptyState icon={Filter} title="Nenhum documento no filtro" hint="Ajuste a busca ou a categoria acima." />
-      ) : (
-        <ul className="divide-y divide-border">
-          {filtered.map((d) => (
-            <li key={d.id} className="flex items-center gap-3 px-5 py-2.5 text-[12.5px]">
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-600">
-                <FileText className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{d.nome_final}</div>
-                <div className="text-[10.5px] text-muted-foreground">
-                  {CLIENTE_DOC_CATEGORIA_LABEL[d.categoria] ?? d.categoria} · {formatBytes(d.size_bytes)} · {d.user_nome ?? "—"} · {fmtDate(d.created_at)}
-                </div>
-              </div>
-              {d.drive_view_url && (
-                <a
-                  href={d.drive_view_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  title="Abrir no Drive"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
-              <button
-                type="button"
-                onClick={() => setConfirmDoc({ id: d.id, nome: d.nome_final })}
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-rose-50 hover:text-rose-600"
-                title="Remover"
-                disabled={delMut.isPending}
-              >
-                {delMut.isPending && confirmDoc?.id === d.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </SectionCard>
+        <MiniKpi
+          label="Tamanho total"
+          value={formatBytes(totalSize)}
+          sub="somatório no Drive"
+          icon={Upload}
+          color="violet"
+        />
+        <MiniKpi
+          label="Categorias"
+          value={String(CLIENTE_DOC_CATEGORIAS.filter((c) => (catCounts[c] ?? 0) > 0).length)}
+          sub={`de ${CLIENTE_DOC_CATEGORIAS.length} possíveis`}
+          icon={Filter}
+          color="emerald"
+        />
+        <MiniKpi
+          label="Em filtro"
+          value={String(filtered.length)}
+          sub={
+            catFilter === "todos" ? "todas as categorias" : CLIENTE_DOC_CATEGORIA_LABEL[catFilter]
+          }
+          icon={Filter}
+          color="amber"
+        />
+      </div>
 
-      <AlertDialog open={!!confirmDoc} onOpenChange={(o) => { if (!o && !delMut.isPending) setConfirmDoc(null); }}>
+      <SectionCard
+        title={`Documentos (${filtered.length}/${docs.length})`}
+        action={
+          <div className="flex items-center gap-2">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar nome…"
+              className="h-8 w-44 text-[12px]"
+            />
+            <Select value={categoria} onValueChange={(v) => setCategoria(v as typeof categoria)}>
+              <SelectTrigger className="h-8 w-[180px] text-[12px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CLIENTE_DOC_CATEGORIAS.map((c) => (
+                  <SelectItem key={c} value={c} className="text-[12.5px]">
+                    {CLIENTE_DOC_CATEGORIA_LABEL[c]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadMut.mutate(f);
+              }}
+            />
+            <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+              <Upload className="h-3.5 w-3.5" />
+              {uploading ? "Enviando…" : "Enviar"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-muted/20 px-5 py-2.5">
+          {(["todos", ...CLIENTE_DOC_CATEGORIAS] as const).map((c) => {
+            const active = catFilter === c;
+            const label = c === "todos" ? "Todas" : CLIENTE_DOC_CATEGORIA_LABEL[c];
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCatFilter(c)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
+                  active
+                    ? "border-[var(--brand-blue,#1e40af)] bg-[var(--brand-blue,#1e40af)]/10 text-[var(--brand-blue,#1e40af)]"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+                <span
+                  className={cn(
+                    "rounded px-1 text-[10px] tabular-nums",
+                    active ? "bg-[var(--brand-blue,#1e40af)]/15" : "bg-muted",
+                  )}
+                >
+                  {catCounts[c] ?? 0}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {isLoading ? (
+          <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div>
+        ) : docs.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="Sem documentos"
+            hint="Selecione a categoria e clique em Enviar. Aceitos: PDF, JPG, PNG (≤25MB) e ZIP (≤50MB)."
+          />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={Filter}
+            title="Nenhum documento no filtro"
+            hint="Ajuste a busca ou a categoria acima."
+          />
+        ) : (
+          <ul className="divide-y divide-border">
+            {filtered.map((d) => (
+              <li key={d.id} className="flex items-center gap-3 px-5 py-2.5 text-[12.5px]">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-600">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{d.nome_final}</div>
+                  <div className="text-[10.5px] text-muted-foreground">
+                    {CLIENTE_DOC_CATEGORIA_LABEL[d.categoria] ?? d.categoria} ·{" "}
+                    {formatBytes(d.size_bytes)} · {d.user_nome ?? "—"} · {fmtDate(d.created_at)}
+                  </div>
+                </div>
+                {d.drive_view_url && (
+                  <a
+                    href={d.drive_view_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    title="Abrir no Drive"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setConfirmDoc({ id: d.id, nome: d.nome_final })}
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-rose-50 hover:text-rose-600"
+                  title="Remover"
+                  disabled={delMut.isPending}
+                >
+                  {delMut.isPending && confirmDoc?.id === d.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </SectionCard>
+
+      <AlertDialog
+        open={!!confirmDoc}
+        onOpenChange={(o) => {
+          if (!o && !delMut.isPending) setConfirmDoc(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remover documento</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja remover <span className="font-medium text-foreground">{confirmDoc?.nome}</span>? A ação é registrada na timeline e auditoria do cliente.
+              Tem certeza que deseja remover{" "}
+              <span className="font-medium text-foreground">{confirmDoc?.nome}</span>? A ação é
+              registrada na timeline e auditoria do cliente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={delMut.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); if (confirmDoc) delMut.mutate(confirmDoc.id); }}
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmDoc) delMut.mutate(confirmDoc.id);
+              }}
               disabled={delMut.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {delMut.isPending ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Removendo…</> : "Remover"}
+              {delMut.isPending ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Removendo…
+                </>
+              ) : (
+                "Remover"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1569,7 +2111,8 @@ function TimelineTab({ clienteId }: { clienteId: string }) {
   const [descricao, setDescricao] = useState("");
   const [filter, setFilter] = useState<TimelineFilter>("todos");
   const mut = useMutation({
-    mutationFn: () => addClienteInteracao({ data: { clienteId, tipo, descricao: descricao.trim() } }),
+    mutationFn: () =>
+      addClienteInteracao({ data: { clienteId, tipo, descricao: descricao.trim() } }),
     onSuccess: () => {
       setDescricao("");
       toast.success("Interação registrada");
@@ -1599,7 +2142,9 @@ function TimelineTab({ clienteId }: { clienteId: string }) {
           action={
             <div className="flex flex-wrap items-center gap-1">
               <Filter className="h-3 w-3 text-muted-foreground" />
-              {(["todos", "manuais", "oportunidades", "processos", "sistema"] as TimelineFilter[]).map((f) => (
+              {(
+                ["todos", "manuais", "oportunidades", "processos", "sistema"] as TimelineFilter[]
+              ).map((f) => (
                 <button
                   key={f}
                   type="button"
@@ -1617,26 +2162,46 @@ function TimelineTab({ clienteId }: { clienteId: string }) {
             </div>
           }
         >
-          {isLoading ? <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div> :
-            items.length === 0 ? <EmptyState icon={Inbox} title="Sem atividades" hint="Registre a primeira interação ao lado." /> :
-            filtered.length === 0 ? <EmptyState icon={Inbox} title="Nada neste filtro" hint="Troque o filtro acima para ver mais eventos." /> : (
-              <ol className="relative ml-5 border-l border-border py-4 pl-6 pr-5 space-y-5">
-                {filtered.map((t) => (
-                  <li key={t.id} className="relative">
-                    <span className="absolute -left-[33px] grid h-6 w-6 place-items-center rounded-full bg-blue-100 text-blue-700 ring-4 ring-white">
-                      <MessageSquare className="h-3 w-3" />
+          {isLoading ? (
+            <div className="p-5 text-[12px] text-muted-foreground">Carregando…</div>
+          ) : items.length === 0 ? (
+            <EmptyState
+              icon={Inbox}
+              title="Sem atividades"
+              hint="Registre a primeira interação ao lado."
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={Inbox}
+              title="Nada neste filtro"
+              hint="Troque o filtro acima para ver mais eventos."
+            />
+          ) : (
+            <ol className="relative ml-5 border-l border-border py-4 pl-6 pr-5 space-y-5">
+              {filtered.map((t) => (
+                <li key={t.id} className="relative">
+                  <span className="absolute -left-[33px] grid h-6 w-6 place-items-center rounded-full bg-blue-100 text-blue-700 ring-4 ring-white">
+                    <MessageSquare className="h-3 w-3" />
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[13px] font-semibold">{t.titulo}</span>
+                    <Badge variant="outline" className="text-[10px] capitalize">
+                      {t.tipo.replace("_", " ")}
+                    </Badge>
+                    <span className="ml-auto text-[11px] text-muted-foreground">
+                      {fmtDateTime(t.ts)}
                     </span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[13px] font-semibold">{t.titulo}</span>
-                      <Badge variant="outline" className="text-[10px] capitalize">{t.tipo.replace("_", " ")}</Badge>
-                      <span className="ml-auto text-[11px] text-muted-foreground">{fmtDateTime(t.ts)}</span>
-                    </div>
-                    {t.descricao && <p className="mt-0.5 text-[12px] text-muted-foreground">{t.descricao}</p>}
-                    {t.user_nome && <p className="mt-0.5 text-[10.5px] text-muted-foreground">por {t.user_nome}</p>}
-                  </li>
-                ))}
-              </ol>
-            )}
+                  </div>
+                  {t.descricao && (
+                    <p className="mt-0.5 text-[12px] text-muted-foreground">{t.descricao}</p>
+                  )}
+                  {t.user_nome && (
+                    <p className="mt-0.5 text-[10.5px] text-muted-foreground">por {t.user_nome}</p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
         </SectionCard>
       </div>
       <div className="col-span-12 lg:col-span-4">
@@ -1645,7 +2210,9 @@ function TimelineTab({ clienteId }: { clienteId: string }) {
             <div>
               <label className="text-[11px] font-medium text-muted-foreground">Tipo</label>
               <Select value={tipo} onValueChange={(v) => setTipo(v as typeof tipo)}>
-                <SelectTrigger className="mt-1 h-9 text-[12.5px]"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1 h-9 text-[12.5px]">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="nota">Nota</SelectItem>
                   <SelectItem value="ligacao">Ligação</SelectItem>
@@ -1679,7 +2246,15 @@ function TimelineTab({ clienteId }: { clienteId: string }) {
     </div>
   );
 }
-function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: any[]; codigo: string }) {
+function SociosTab({
+  clienteId,
+  socios,
+  codigo,
+}: {
+  clienteId: string;
+  socios: any[];
+  codigo: string;
+}) {
   const qc = useQueryClient();
   const [nome, setNome] = useState("");
   const [qualificacao, setQualificacao] = useState("");
@@ -1700,9 +2275,7 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
     if (n.length < 2) next.nome = "Informe o nome (mínimo 2 caracteres).";
     else if (n.length > 180) next.nome = "Máximo 180 caracteres.";
     else {
-      const dup = socios.find(
-        (s) => (s.nome ?? "").trim().toLowerCase() === n.toLowerCase(),
-      );
+      const dup = socios.find((s) => (s.nome ?? "").trim().toLowerCase() === n.toLowerCase());
       if (dup) next.nome = `Já existe um sócio "${dup.nome}" neste cliente.`;
     }
     const d = desde.trim();
@@ -1713,9 +2286,7 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
         const [y, m, day] = d.split("-").map(Number);
         const dt = new Date(Date.UTC(y, m - 1, day));
         const valid =
-          dt.getUTCFullYear() === y &&
-          dt.getUTCMonth() + 1 === m &&
-          dt.getUTCDate() === day;
+          dt.getUTCFullYear() === y && dt.getUTCMonth() + 1 === m && dt.getUTCDate() === day;
         if (!valid) next.desde = "Data inexistente.";
         else if (dt.getTime() > Date.now()) next.desde = "Data não pode ser futura.";
       }
@@ -1727,11 +2298,18 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
   const addMut = useMutation({
     mutationFn: () =>
       addClienteSocio({
-        data: { clienteId, nome: nome.trim(), qualificacao: qualificacao.trim() || null, desde: desde.trim() || null },
+        data: {
+          clienteId,
+          nome: nome.trim(),
+          qualificacao: qualificacao.trim() || null,
+          desde: desde.trim() || null,
+        },
       }),
     onSuccess: () => {
       toast.success(`Sócio "${nome.trim()}" adicionado com sucesso.`);
-      setNome(""); setQualificacao(""); setDesde("");
+      setNome("");
+      setQualificacao("");
+      setDesde("");
       setErrors({});
       invalidate();
     },
@@ -1756,9 +2334,10 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
 
   const f = filter.trim().toLowerCase();
   const filtered = f
-    ? socios.filter((s) =>
-        (s.nome ?? "").toLowerCase().includes(f) ||
-        (s.qualificacao ?? "").toLowerCase().includes(f),
+    ? socios.filter(
+        (s) =>
+          (s.nome ?? "").toLowerCase().includes(f) ||
+          (s.qualificacao ?? "").toLowerCase().includes(f),
       )
     : socios;
   const canAdd = nome.trim().length >= 2 && !addMut.isPending;
@@ -1784,7 +2363,11 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
           }
         >
           {socios.length === 0 ? (
-            <EmptyState icon={Users} title="Sem sócios cadastrados" hint="Use o formulário ao lado para adicionar o primeiro." />
+            <EmptyState
+              icon={Users}
+              title="Sem sócios cadastrados"
+              hint="Use o formulário ao lado para adicionar o primeiro."
+            />
           ) : filtered.length === 0 ? (
             <EmptyState icon={Users} title="Nenhum sócio bate com a busca" />
           ) : (
@@ -1792,12 +2375,17 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
               {filtered.map((s) => (
                 <li key={s.id} className="flex items-center gap-3 px-5 py-3">
                   <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-bold text-white">
-                    {(s.nome ?? "?").split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
+                    {(s.nome ?? "?")
+                      .split(" ")
+                      .map((n: string) => n[0])
+                      .slice(0, 2)
+                      .join("")}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[12.5px] font-semibold">{s.nome}</div>
                     <div className="truncate text-[11px] text-muted-foreground">
-                      {s.qualificacao ?? "—"}{s.desde ? ` · desde ${fmtDate(s.desde)}` : ""}
+                      {s.qualificacao ?? "—"}
+                      {s.desde ? ` · desde ${fmtDate(s.desde)}` : ""}
                     </div>
                   </div>
                   <button
@@ -1827,35 +2415,59 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
               <label className="text-[11px] font-medium text-muted-foreground">Nome *</label>
               <Input
                 value={nome}
-                onChange={(e) => { setNome(e.target.value); if (errors.nome) setErrors((p) => ({ ...p, nome: undefined })); }}
+                onChange={(e) => {
+                  setNome(e.target.value);
+                  if (errors.nome) setErrors((p) => ({ ...p, nome: undefined }));
+                }}
                 maxLength={180}
-                className={cn("mt-1 h-9 text-[12.5px]", errors.nome && "border-destructive focus-visible:ring-destructive")}
+                className={cn(
+                  "mt-1 h-9 text-[12.5px]",
+                  errors.nome && "border-destructive focus-visible:ring-destructive",
+                )}
                 placeholder="Nome completo"
                 aria-invalid={!!errors.nome}
                 aria-describedby={errors.nome ? "socio-nome-err" : undefined}
               />
               {errors.nome && (
-                <p id="socio-nome-err" className="mt-1 text-[11px] text-destructive">{errors.nome}</p>
+                <p id="socio-nome-err" className="mt-1 text-[11px] text-destructive">
+                  {errors.nome}
+                </p>
               )}
             </div>
             <div>
               <label className="text-[11px] font-medium text-muted-foreground">Qualificação</label>
-              <Input value={qualificacao} onChange={(e) => setQualificacao(e.target.value)} maxLength={120} className="mt-1 h-9 text-[12.5px]" placeholder="Ex.: Sócio-administrador" />
+              <Input
+                value={qualificacao}
+                onChange={(e) => setQualificacao(e.target.value)}
+                maxLength={120}
+                className="mt-1 h-9 text-[12.5px]"
+                placeholder="Ex.: Sócio-administrador"
+              />
             </div>
             <div>
-              <label className="text-[11px] font-medium text-muted-foreground">Desde (AAAA-MM-DD)</label>
+              <label className="text-[11px] font-medium text-muted-foreground">
+                Desde (AAAA-MM-DD)
+              </label>
               <Input
                 value={desde}
-                onChange={(e) => { setDesde(e.target.value); if (errors.desde) setErrors((p) => ({ ...p, desde: undefined })); }}
+                onChange={(e) => {
+                  setDesde(e.target.value);
+                  if (errors.desde) setErrors((p) => ({ ...p, desde: undefined }));
+                }}
                 maxLength={10}
-                className={cn("mt-1 h-9 text-[12.5px]", errors.desde && "border-destructive focus-visible:ring-destructive")}
+                className={cn(
+                  "mt-1 h-9 text-[12.5px]",
+                  errors.desde && "border-destructive focus-visible:ring-destructive",
+                )}
                 placeholder="2024-01-15"
                 inputMode="numeric"
                 aria-invalid={!!errors.desde}
                 aria-describedby={errors.desde ? "socio-desde-err" : undefined}
               />
               {errors.desde && (
-                <p id="socio-desde-err" className="mt-1 text-[11px] text-destructive">{errors.desde}</p>
+                <p id="socio-desde-err" className="mt-1 text-[11px] text-destructive">
+                  {errors.desde}
+                </p>
               )}
             </div>
             {errors.form && (
@@ -1865,7 +2477,11 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
               </div>
             )}
             <Button size="sm" disabled={!canAdd} onClick={handleSubmit}>
-              {addMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+              {addMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Plus className="h-3.5 w-3.5" />
+              )}
               {addMut.isPending ? "Adicionando…" : "Adicionar"}
             </Button>
           </div>
@@ -1874,13 +2490,17 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
 
       <AlertDialog
         open={!!confirmTarget}
-        onOpenChange={(o) => { if (!o && !delMut.isPending) setConfirmTarget(null); }}
+        onOpenChange={(o) => {
+          if (!o && !delMut.isPending) setConfirmTarget(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remover sócio?</AlertDialogTitle>
             <AlertDialogDescription>
-              Você está prestes a remover <strong>{confirmTarget?.nome}</strong> deste cliente. A ação será registrada na timeline e poderá ser auditada, mas o sócio não aparecerá mais na lista.
+              Você está prestes a remover <strong>{confirmTarget?.nome}</strong> deste cliente. A
+              ação será registrada na timeline e poderá ser auditada, mas o sócio não aparecerá mais
+              na lista.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1894,7 +2514,10 @@ function SociosTab({ clienteId, socios, codigo }: { clienteId: string; socios: a
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {delMut.isPending ? (
-                <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Removendo…</>
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Removendo…
+                </>
               ) : (
                 "Remover"
               )}

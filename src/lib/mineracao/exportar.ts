@@ -70,7 +70,12 @@ export async function exportarResultadosXlsx(
     ws.addRow({
       empresa: r["empresa"] ?? "",
       contraparte:
-        r["contraparte"] || parceiros.map((p) => p.nome).slice(0, 5).join(" · ") || "",
+        r["contraparte"] ||
+        parceiros
+          .map((p) => p.nome)
+          .slice(0, 5)
+          .join(" · ") ||
+        "",
       rubros: (r["rubros"] ?? []).join(", "),
       operacoes: ops,
       valor: usd(valor),
@@ -80,8 +85,8 @@ export async function exportarResultadosXlsx(
       pipeline: r["convertido_oportunidade_id"] ? "Convertido" : "",
     });
   }
-  ws.getColumn("valor").numFmt = '#,##0.00';
-  ws.getColumn("ticket").numFmt = '#,##0.00';
+  ws.getColumn("valor").numFmt = "#,##0.00";
+  ws.getColumn("ticket").numFmt = "#,##0.00";
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], {

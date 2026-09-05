@@ -142,9 +142,11 @@ function FormulariosRecebidosPage() {
 
   const statusMap = (kind: InboxKind): Record<string, InboxStatus> => {
     const rows =
-      kind === "contato" ? statusContato.data :
-      kind === "entrevista" ? statusEntrevista.data :
-      statusRfq.data;
+      kind === "contato"
+        ? statusContato.data
+        : kind === "entrevista"
+          ? statusEntrevista.data
+          : statusRfq.data;
     const m: Record<string, InboxStatus> = {};
     for (const r of rows ?? []) m[r.entity_id] = r.status;
     return m;
@@ -167,9 +169,7 @@ function FormulariosRecebidosPage() {
     () =>
       contatoAll
         .filter((c) => withinRange(c.created_at, dateFrom, dateTo) || (!dateFrom && !dateTo))
-        .filter((c) =>
-          matches(search, c.visitante_nome, c.visitante_email, c.assunto, c.codigo),
-        ),
+        .filter((c) => matches(search, c.visitante_nome, c.visitante_email, c.assunto, c.codigo)),
     [contatoAll, search, dateFrom, dateTo],
   );
 
@@ -181,7 +181,11 @@ function FormulariosRecebidosPage() {
   const entrevistaRows = useMemo(
     () =>
       entrevistaResp
-        .filter((e) => withinRange(e.respondida_em ?? e.created_at, dateFrom, dateTo) || (!dateFrom && !dateTo))
+        .filter(
+          (e) =>
+            withinRange(e.respondida_em ?? e.created_at, dateFrom, dateTo) ||
+            (!dateFrom && !dateTo),
+        )
         .filter((e) =>
           matches(search, e.lead_nome, e.lead_email, e.lead_empresa, e.codigo, e.segmento_nome),
         ),
@@ -257,7 +261,9 @@ function FormulariosRecebidosPage() {
           </div>
           <div className="grid grid-cols-2 gap-3 md:flex md:items-end">
             <div>
-              <Label htmlFor="form-inbox-from" className="text-xs">De</Label>
+              <Label htmlFor="form-inbox-from" className="text-xs">
+                De
+              </Label>
               <Input
                 id="form-inbox-from"
                 type="date"
@@ -267,7 +273,9 @@ function FormulariosRecebidosPage() {
               />
             </div>
             <div>
-              <Label htmlFor="form-inbox-to" className="text-xs">Até</Label>
+              <Label htmlFor="form-inbox-to" className="text-xs">
+                Até
+              </Label>
               <Input
                 id="form-inbox-to"
                 type="date"
@@ -281,7 +289,11 @@ function FormulariosRecebidosPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}
+              onClick={() => {
+                setSearch("");
+                setDateFrom("");
+                setDateTo("");
+              }}
             >
               <X className="mr-1 h-4 w-4" /> Limpar
             </Button>
@@ -299,7 +311,9 @@ function FormulariosRecebidosPage() {
         <TabsContent value="contato" className="mt-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Últimas mensagens do formulário de contato</CardTitle>
+              <CardTitle className="text-base">
+                Últimas mensagens do formulário de contato
+              </CardTitle>
               <Button asChild variant="outline" size="sm">
                 <Link to="/pos-vendas/chamados" search={{ origem: "contato_site" } as any}>
                   Ver todas <ArrowRight className="ml-1 h-4 w-4" />
@@ -311,7 +325,9 @@ function FormulariosRecebidosPage() {
                 <p className="text-sm text-[var(--text-secondary)]">Carregando…</p>
               ) : contatoRows.length === 0 ? (
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {hasFilter ? "Nenhum resultado para os filtros." : "Nenhuma mensagem recebida ainda."}
+                  {hasFilter
+                    ? "Nenhum resultado para os filtros."
+                    : "Nenhuma mensagem recebida ainda."}
                 </p>
               ) : (
                 <Table>
@@ -332,12 +348,20 @@ function FormulariosRecebidosPage() {
                         <TableCell className="font-mono text-xs">{c.codigo}</TableCell>
                         <TableCell>
                           <div className="font-medium">{c.visitante_nome ?? "—"}</div>
-                          <div className="text-xs text-[var(--text-secondary)]">{c.visitante_email ?? ""}</div>
+                          <div className="text-xs text-[var(--text-secondary)]">
+                            {c.visitante_email ?? ""}
+                          </div>
                         </TableCell>
                         <TableCell className="max-w-[280px] truncate">{c.assunto ?? "—"}</TableCell>
-                        <TableCell><ChamadoStatusBadge status={c.status} /></TableCell>
                         <TableCell>
-                          <StatusToggle kind="contato" id={c.id} status={contatoStatusMap[c.id] ?? "pendente"} />
+                          <ChamadoStatusBadge status={c.status} />
+                        </TableCell>
+                        <TableCell>
+                          <StatusToggle
+                            kind="contato"
+                            id={c.id}
+                            status={contatoStatusMap[c.id] ?? "pendente"}
+                          />
                         </TableCell>
                         <TableCell className="text-xs">{fmtDate(c.created_at)}</TableCell>
                         <TableCell>
@@ -371,7 +395,9 @@ function FormulariosRecebidosPage() {
                 <p className="text-sm text-[var(--text-secondary)]">Carregando…</p>
               ) : entrevistaRows.length === 0 ? (
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {hasFilter ? "Nenhum resultado para os filtros." : "Nenhuma entrevista respondida."}
+                  {hasFilter
+                    ? "Nenhum resultado para os filtros."
+                    : "Nenhuma entrevista respondida."}
                 </p>
               ) : (
                 <Table>
@@ -391,13 +417,21 @@ function FormulariosRecebidosPage() {
                         <TableCell className="font-mono text-xs">{e.codigo ?? "—"}</TableCell>
                         <TableCell>
                           <div className="font-medium">{e.lead_nome ?? e.lead_empresa ?? "—"}</div>
-                          <div className="text-xs text-[var(--text-secondary)]">{e.lead_email ?? ""}</div>
+                          <div className="text-xs text-[var(--text-secondary)]">
+                            {e.lead_email ?? ""}
+                          </div>
                         </TableCell>
                         <TableCell>{e.segmento_nome ?? "—"}</TableCell>
                         <TableCell>
-                          <StatusToggle kind="entrevista" id={e.id} status={entrevistaStatusMap[e.id] ?? "pendente"} />
+                          <StatusToggle
+                            kind="entrevista"
+                            id={e.id}
+                            status={entrevistaStatusMap[e.id] ?? "pendente"}
+                          />
                         </TableCell>
-                        <TableCell className="text-xs">{fmtDate(e.respondida_em ?? e.created_at)}</TableCell>
+                        <TableCell className="text-xs">
+                          {fmtDate(e.respondida_em ?? e.created_at)}
+                        </TableCell>
                         <TableCell>
                           <Button asChild size="sm" variant="ghost">
                             <Link to="/comercial/entrevistas/$id" params={{ id: e.id }}>
@@ -429,7 +463,9 @@ function FormulariosRecebidosPage() {
                 <p className="text-sm text-[var(--text-secondary)]">Carregando…</p>
               ) : rfqRows.length === 0 ? (
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {hasFilter ? "Nenhum resultado para os filtros." : "Nenhuma submissão de Checklist."}
+                  {hasFilter
+                    ? "Nenhum resultado para os filtros."
+                    : "Nenhuma submissão de Checklist."}
                 </p>
               ) : (
                 <Table>
@@ -448,11 +484,17 @@ function FormulariosRecebidosPage() {
                         <TableCell>{r.clientes?.razao_social ?? "—"}</TableCell>
                         <TableCell>
                           <div>{r.preenchido_por_nome ?? "—"}</div>
-                          <div className="text-xs text-[var(--text-secondary)]">{r.preenchido_por_email ?? ""}</div>
+                          <div className="text-xs text-[var(--text-secondary)]">
+                            {r.preenchido_por_email ?? ""}
+                          </div>
                         </TableCell>
                         <TableCell>{r.rfq_formulario_tipo?.nome_pt ?? "—"}</TableCell>
                         <TableCell>
-                          <StatusToggle kind="rfq" id={r.id} status={rfqStatusMap[r.id] ?? "pendente"} />
+                          <StatusToggle
+                            kind="rfq"
+                            id={r.id}
+                            status={rfqStatusMap[r.id] ?? "pendente"}
+                          />
                         </TableCell>
                         <TableCell className="text-xs">{fmtDate(r.criado_em)}</TableCell>
                       </TableRow>
@@ -468,15 +510,7 @@ function FormulariosRecebidosPage() {
   );
 }
 
-function StatusToggle({
-  kind,
-  id,
-  status,
-}: {
-  kind: InboxKind;
-  id: string;
-  status: InboxStatus;
-}) {
+function StatusToggle({ kind, id, status }: { kind: InboxKind; id: string; status: InboxStatus }) {
   const qc = useQueryClient();
   const setFn = useServerFn(setFormInboxStatus);
   const mut = useMutation({
@@ -529,11 +563,15 @@ function SummaryCard({
           {icon}
         </div>
         <div className="flex-1">
-          <div className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">{label}</div>
+          <div className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+            {label}
+          </div>
           <div className="text-2xl font-bold">
             {loading ? "…" : count}
             {filtered && !loading && (
-              <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ {total}</span>
+              <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">
+                / {total}
+              </span>
             )}
           </div>
           {!loading && (pendentes !== undefined || lidos !== undefined) && (

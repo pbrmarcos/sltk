@@ -17,8 +17,16 @@ export const listAlmoxCadastros = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const sb = context.supabase as any;
     const [un, loc] = await Promise.all([
-      sb.from("almox_unidades").select("codigo, descricao, casas_decimais").eq("ativo", true).order("codigo"),
-      sb.from("almox_locais").select("id, codigo, descricao, padrao, ativo").eq("ativo", true).order("codigo"),
+      sb
+        .from("almox_unidades")
+        .select("codigo, descricao, casas_decimais")
+        .eq("ativo", true)
+        .order("codigo"),
+      sb
+        .from("almox_locais")
+        .select("id, codigo, descricao, padrao, ativo")
+        .eq("ativo", true)
+        .order("codigo"),
     ]);
     if (un.error) throw new Error(un.error.message);
     if (loc.error) throw new Error(loc.error.message);
@@ -52,12 +60,16 @@ export const listAlmoxEstoque = createServerFn({ method: "POST" })
     if (data.somente_abaixo_minimo) q = q.eq("abaixo_minimo", true);
     if (data.somente_com_saldo) q = q.gt("total", 0);
     const from = (data.page - 1) * data.per_page;
-    const { data: rows, count, error } = await q
-      .order("codigo", { ascending: true })
-      .range(from, from + data.per_page - 1);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("codigo", { ascending: true }).range(from, from + data.per_page - 1);
     if (error) throw friendlyDbError(error);
 
-    const { data: kpi } = await sb.from("almox_saldo_item").select("total, valor_total, abaixo_minimo, ativo");
+    const { data: kpi } = await sb
+      .from("almox_saldo_item")
+      .select("total, valor_total, abaixo_minimo, ativo");
     const ativos = ((kpi ?? []) as any[]).filter((r) => r.ativo);
     return {
       rows: rows ?? [],
@@ -74,7 +86,9 @@ export const listAlmoxEstoque = createServerFn({ method: "POST" })
 export const buscarItensSemelhantes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({ descricao: z.string().min(2), part_number: z.string().optional().nullable() }).parse(i),
+    z
+      .object({ descricao: z.string().min(2), part_number: z.string().optional().nullable() })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
@@ -158,7 +172,11 @@ export const getAlmoxItem = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ id: uuid }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    const { data: item, error } = await sb.from("almox_itens").select("*").eq("id", data.id).maybeSingle();
+    const { data: item, error } = await sb
+      .from("almox_itens")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
     if (error) throw friendlyDbError(error);
     if (!item) throw new Error("Item não encontrado.");
 
@@ -175,14 +193,18 @@ export const getAlmoxItem = createServerFn({ method: "POST" })
         .limit(200),
       sb
         .from("almox_reservas")
-        .select("id, projeto_id, quantidade, quantidade_retirada, status, expira_em, observacao, created_at")
+        .select(
+          "id, projeto_id, quantidade, quantidade_retirada, status, expira_em, observacao, created_at",
+        )
         .eq("item_id", data.id)
         .order("created_at", { ascending: false }),
       sb.from("almox_locais").select("id, codigo, descricao").eq("ativo", true),
     ]);
 
     const locMap = new Map((locais.data ?? []).map((l: any) => [l.id, l.codigo]));
-    const autores = [...new Set(((movs.data ?? []) as any[]).map((m) => m.created_by).filter(Boolean))];
+    const autores = [
+      ...new Set(((movs.data ?? []) as any[]).map((m) => m.created_by).filter(Boolean)),
+    ];
     let nomes = new Map<string, string>();
     if (autores.length) {
       const { data: profs } = await sb.from("profiles").select("id, full_name").in("id", autores);
@@ -202,7 +224,9 @@ export const getAlmoxItem = createServerFn({ method: "POST" })
         .from("equipamento_projetos")
         .select("id, disciplina, revisao")
         .in("id", projIds);
-      projetos = new Map(((ps ?? []) as any[]).map((p) => [p.id, `${p.disciplina} rev ${p.revisao}`]));
+      projetos = new Map(
+        ((ps ?? []) as any[]).map((p) => [p.id, `${p.disciplina} rev ${p.revisao}`]),
+      );
     }
 
     return {
@@ -250,7 +274,8 @@ export const registrarMovimento = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     // saída e ajuste negativo entram com quantidade negativa (movimento é append-only)
-    const sinal = data.tipo === "saida_projeto" || (data.tipo === "ajuste" && data.negativo) ? -1 : 1;
+    const sinal =
+      data.tipo === "saida_projeto" || (data.tipo === "ajuste" && data.negativo) ? -1 : 1;
     if (data.tipo === "saida_projeto" && !data.projeto_id)
       throw new Error("Selecione o projeto que vai receber o material.");
     if (data.tipo === "ajuste" && !data.justificativa?.trim())
@@ -302,7 +327,9 @@ export const reservarEstoque = createServerFn({ method: "POST" })
 
 export const cancelarReserva = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ reserva_id: uuid, motivo: z.string().optional() }).parse(i))
+  .inputValidator((i: unknown) =>
+    z.object({ reserva_id: uuid, motivo: z.string().optional() }).parse(i),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { error } = await sb.rpc("almox_cancelar_reserva", {
@@ -332,8 +359,13 @@ export const listOcsParaReceber = createServerFn({ method: "GET" })
     const ids = ((ocs ?? []) as any[]).map((o) => o.id);
     let pend = new Map<string, number>();
     if (ids.length) {
-      const { data: r } = await sb.from("almox_recebimento_oc").select("*").in("ordem_compra_id", ids);
-      pend = new Map(((r ?? []) as any[]).map((x) => [x.ordem_compra_id, Number(x.quantidade_pendente || 0)]));
+      const { data: r } = await sb
+        .from("almox_recebimento_oc")
+        .select("*")
+        .in("ordem_compra_id", ids);
+      pend = new Map(
+        ((r ?? []) as any[]).map((x) => [x.ordem_compra_id, Number(x.quantidade_pendente || 0)]),
+      );
     }
     return ((ocs ?? []) as any[]).map((o) => ({ ...o, quantidade_pendente: pend.get(o.id) ?? 0 }));
   });
@@ -451,7 +483,10 @@ export const listProjetosAtivos = createServerFn({ method: "GET" })
     const eqIds = [...new Set(rows.map((r) => r.equipamento_id).filter(Boolean))];
     let eqs = new Map<string, string>();
     if (eqIds.length) {
-      const { data: e } = await sb.from("cliente_equipamentos").select("id, codigo, modelo").in("id", eqIds);
+      const { data: e } = await sb
+        .from("cliente_equipamentos")
+        .select("id, codigo, modelo")
+        .in("id", eqIds);
       eqs = new Map(((e ?? []) as any[]).map((x) => [x.id, x.codigo ?? x.modelo]));
     }
     return rows.map((r) => ({
@@ -483,7 +518,10 @@ export const getEstoqueDosInsumos = createServerFn({ method: "POST" })
 
     const itemIds = [...new Set(rows.map((r) => r.almox_item_id))];
     const [{ data: saldos }, { data: reservas }] = await Promise.all([
-      sb.from("almox_saldo_item").select("item_id, codigo, descricao, unidade_estoque, total, reservado, disponivel").in("item_id", itemIds),
+      sb
+        .from("almox_saldo_item")
+        .select("item_id, codigo, descricao, unidade_estoque, total, reservado, disponivel")
+        .in("item_id", itemIds),
       sb
         .from("almox_reservas")
         .select("id, item_id, quantidade, quantidade_retirada, status")
@@ -494,7 +532,7 @@ export const getEstoqueDosInsumos = createServerFn({ method: "POST" })
 
     const saldoMap = new Map(((saldos ?? []) as any[]).map((s) => [s.item_id, s]));
     const reservaMap = new Map<string, any>();
-    for (const r of ((reservas ?? []) as any[])) {
+    for (const r of (reservas ?? []) as any[]) {
       const cur = reservaMap.get(r.item_id);
       if (cur) cur.quantidade = Number(cur.quantidade) + Number(r.quantidade);
       else reservaMap.set(r.item_id, { ...r });
@@ -551,8 +589,16 @@ export const vincularInsumoAoItem = createServerFn({ method: "POST" })
     }
 
     const [{ data: linha }, { data: item }] = await Promise.all([
-      sb.from("projeto_insumos").select("id, unidade, descricao").eq("id", data.insumo_id).maybeSingle(),
-      sb.from("almox_itens").select("id, unidade_estoque, descricao").eq("id", data.item_id).maybeSingle(),
+      sb
+        .from("projeto_insumos")
+        .select("id, unidade, descricao")
+        .eq("id", data.insumo_id)
+        .maybeSingle(),
+      sb
+        .from("almox_itens")
+        .select("id, unidade_estoque, descricao")
+        .eq("id", data.item_id)
+        .maybeSingle(),
     ]);
     if (!linha) throw new Error("Linha de insumo não encontrada.");
     if (!item) throw new Error("Item do almoxarifado não encontrado.");
@@ -592,11 +638,14 @@ export const criarItemDeInsumo = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     const { data: linha } = await sb
       .from("projeto_insumos")
-      .select("id, descricao, unidade, part_number, fabricante_sugerido, categoria_slug, almox_item_id")
+      .select(
+        "id, descricao, unidade, part_number, fabricante_sugerido, categoria_slug, almox_item_id",
+      )
       .eq("id", data.insumo_id)
       .maybeSingle();
     if (!linha) throw new Error("Linha de insumo não encontrada.");
-    if (linha.almox_item_id) throw new Error("Esta linha já está vinculada a um item do almoxarifado.");
+    if (linha.almox_item_id)
+      throw new Error("Esta linha já está vinculada a um item do almoxarifado.");
 
     if (!data.confirmar_semelhante) {
       const { data: sim } = await sb
@@ -641,7 +690,10 @@ export const buscarItensCatalogo = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ q: z.string().optional() }).parse(i ?? {}))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    let q = sb.from("almox_saldo_item").select("item_id, codigo, descricao, unidade_estoque, disponivel").eq("ativo", true);
+    let q = sb
+      .from("almox_saldo_item")
+      .select("item_id, codigo, descricao, unidade_estoque, disponivel")
+      .eq("ativo", true);
     if (data.q?.trim()) {
       const t = `%${data.q.trim()}%`;
       q = q.or(`codigo.ilike.${t},descricao.ilike.${t}`);
@@ -669,7 +721,9 @@ export const listOcsPainel = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     let q = sb
       .from("ordens_compra")
-      .select("id, numero, status, fornecedor_razao_social, moeda, emissao_em, entrega_prevista, valor_total")
+      .select(
+        "id, numero, status, fornecedor_razao_social, moeda, emissao_em, entrega_prevista, valor_total",
+      )
       .is("deleted_at", null)
       .order("emissao_em", { ascending: false, nullsFirst: false })
       .limit(200);
@@ -684,7 +738,10 @@ export const listOcsPainel = createServerFn({ method: "POST" })
     const ids = ((ocs ?? []) as any[]).map((o) => o.id);
     let tot = new Map<string, any>();
     if (ids.length) {
-      const { data: r } = await sb.from("almox_recebimento_oc").select("*").in("ordem_compra_id", ids);
+      const { data: r } = await sb
+        .from("almox_recebimento_oc")
+        .select("*")
+        .in("ordem_compra_id", ids);
       tot = new Map(((r ?? []) as any[]).map((x) => [x.ordem_compra_id, x]));
     }
     const rows = ((ocs ?? []) as any[]).map((o) => {
@@ -719,7 +776,9 @@ export const getOcPainel = createServerFn({ method: "POST" })
     const [oc, itens, recv, locais] = await Promise.all([
       sb
         .from("ordens_compra")
-        .select("id, numero, status, fornecedor_razao_social, moeda, emissao_em, entrega_prevista, valor_total")
+        .select(
+          "id, numero, status, fornecedor_razao_social, moeda, emissao_em, entrega_prevista, valor_total",
+        )
         .eq("id", data.ordem_compra_id)
         .maybeSingle(),
       sb
@@ -753,7 +812,10 @@ export const getOcPainel = createServerFn({ method: "POST" })
     if (itemIds.length) {
       const [cat, sal] = await Promise.all([
         sb.from("almox_itens").select("id, codigo, descricao, unidade_estoque").in("id", itemIds),
-        sb.from("almox_saldo_item").select("item_id, total, reservado, disponivel, custo_medio").in("item_id", itemIds),
+        sb
+          .from("almox_saldo_item")
+          .select("item_id, total, reservado, disponivel, custo_medio")
+          .in("item_id", itemIds),
       ]);
       catalogo = new Map(((cat.data ?? []) as any[]).map((c) => [c.id, c]));
       saldos = new Map(((sal.data ?? []) as any[]).map((s) => [s.item_id, s]));

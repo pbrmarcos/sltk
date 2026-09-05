@@ -26,12 +26,23 @@ export function useUpdateStage() {
       fn({ data: vars }),
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey: ["oportunidades", "pipeline"] });
-      const snaps = qc.getQueriesData<OportunidadeLite[]>({ queryKey: ["oportunidades", "pipeline"] });
+      const snaps = qc.getQueriesData<OportunidadeLite[]>({
+        queryKey: ["oportunidades", "pipeline"],
+      });
       for (const [key, data] of snaps) {
         if (!data) continue;
         qc.setQueryData<OportunidadeLite[]>(
           key,
-          data.map((o) => (o.id === vars.id ? { ...o, pipeline_stage: vars.stage, lost_reason: vars.stage === "perdido" ? vars.lost_reason ?? o.lost_reason : null } : o)),
+          data.map((o) =>
+            o.id === vars.id
+              ? {
+                  ...o,
+                  pipeline_stage: vars.stage,
+                  lost_reason:
+                    vars.stage === "perdido" ? (vars.lost_reason ?? o.lost_reason) : null,
+                }
+              : o,
+          ),
         );
       }
       return { snaps };
@@ -50,7 +61,8 @@ export function useRestoreOportunidade() {
   const qc = useQueryClient();
   const fn = useServerFn(restoreOportunidade);
   return useMutation({
-    mutationFn: (vars: { id: string; stage?: Exclude<PipelineStage, "perdido"> }) => fn({ data: vars }),
+    mutationFn: (vars: { id: string; stage?: Exclude<PipelineStage, "perdido"> }) =>
+      fn({ data: vars }),
     onSuccess: () => {
       toast.success("Oportunidade restaurada");
       qc.invalidateQueries({ queryKey: ["oportunidades", "pipeline"] });

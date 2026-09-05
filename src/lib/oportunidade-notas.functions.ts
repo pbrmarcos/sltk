@@ -31,10 +31,12 @@ export const listOportunidadeNotas = createServerFn({ method: "POST" })
 export const addOportunidadeNota = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      oportunidade_id: z.string().uuid(),
-      texto: z.string().trim().min(1).max(4000),
-    }).parse(i),
+    z
+      .object({
+        oportunidade_id: z.string().uuid(),
+        texto: z.string().trim().min(1).max(4000),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "comercial");

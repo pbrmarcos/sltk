@@ -5,7 +5,11 @@ type Point = { month: string; valor: number; count: number };
 const fmtCompact = (n: number) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(n);
 const fmtBRL = (n: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 function monthLabel(m: string) {
   const [y, mm] = m.split("-");
@@ -26,8 +30,18 @@ export function RevenueTrendChart({ data }: { data: Point[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--bg-border)" vertical={false} />
-          <XAxis dataKey="mLabel" tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={fmtCompact} />
+          <XAxis
+            dataKey="mLabel"
+            tick={{ fill: "var(--text-muted)", fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fill: "var(--text-muted)", fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={fmtCompact}
+          />
           <Tooltip
             cursor={{ fill: "var(--bg-elevated)" }}
             contentStyle={{

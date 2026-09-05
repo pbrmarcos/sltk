@@ -33,7 +33,6 @@ function buildReadableSlug(clienteCodigo: string | null, tipoCodigo: string | nu
   return `${c ? c + "-" : ""}${t}-${randomToken(6)}`;
 }
 
-
 async function hasAny(sb: any, uid: string, roles: string[]): Promise<boolean> {
   for (const r of roles) {
     const { data } = await sb.rpc("has_role", { _user_id: uid, _role: r });
@@ -99,7 +98,9 @@ export const adminListRfqTipos = createServerFn({ method: "GET" })
     }
     const { data, error } = await sb
       .from("rfq_formulario_tipo")
-      .select("id, codigo, nome_pt, nome_es, nome_en, familia, descricao, campos_schema, ativo, updated_at")
+      .select(
+        "id, codigo, nome_pt, nome_es, nome_en, familia, descricao, campos_schema, ativo, updated_at",
+      )
       .order("nome_pt", { ascending: true });
     if (error) throw friendlyDbError(error);
     return (data ?? []) as Array<{
@@ -118,7 +119,15 @@ export const adminListRfqTipos = createServerFn({ method: "GET" })
 
 const campoSchemaZ = z.object({
   id: z.string().min(1).max(64),
-  tipo: z.enum(["text", "long_text", "numero", "boolean", "select", "multi_select", "anexo_multiplo"]),
+  tipo: z.enum([
+    "text",
+    "long_text",
+    "numero",
+    "boolean",
+    "select",
+    "multi_select",
+    "anexo_multiplo",
+  ]),
   label: z.object({ pt: z.string().min(1), es: z.string().optional(), en: z.string().optional() }),
   opcoes: z.array(z.string()).optional(),
   obrigatorio: z.boolean().optional(),
@@ -171,10 +180,7 @@ export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
     };
     if (data.id) {
-      const { error } = await sb
-        .from("rfq_formulario_tipo")
-        .update(payload)
-        .eq("id", data.id);
+      const { error } = await sb.from("rfq_formulario_tipo").update(payload).eq("id", data.id);
       if (error) throw friendlyDbError(error);
       return { ok: true as const, id: data.id };
     }
@@ -189,9 +195,7 @@ export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
 
 export const adminToggleRfqTipoAtivo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ id: z.string().uuid(), ativo: z.boolean() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), ativo: z.boolean() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     if (!(await hasAny(sb, context.userId, ["admin"]))) {
@@ -538,9 +542,7 @@ export const getRfqPublicoPorSlug = createServerFn({ method: "GET" })
  */
 export const sugerirTemplateParaOportunidade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ oportunidade_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ oportunidade_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: opp } = await sb
@@ -624,9 +626,7 @@ export const vincularSubmissaoOportunidade = createServerFn({ method: "POST" })
  */
 export const listOportunidadesDoCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ cliente_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ cliente_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: rows, error } = await sb

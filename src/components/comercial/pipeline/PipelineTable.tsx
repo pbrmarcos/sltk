@@ -17,7 +17,11 @@ const STAGE_TONE: Record<PipelineStage, string> = {
 
 function formatBRL(v: number | null): string {
   if (!v) return "—";
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(v);
 }
 
 function ageDays(date: string): number {
@@ -32,7 +36,11 @@ export function PipelineTable({
   onRowClick: (opp: OportunidadeLite) => void;
 }) {
   if (items.length === 0) {
-    return <div className="text-center text-sm text-muted-foreground py-12 border rounded-lg bg-muted/20">Nenhuma oportunidade.</div>;
+    return (
+      <div className="text-center text-sm text-muted-foreground py-12 border rounded-lg bg-muted/20">
+        Nenhuma oportunidade.
+      </div>
+    );
   }
   return (
     <>
@@ -55,26 +63,38 @@ export function PipelineTable({
             <tbody>
               {items.map((o) => {
                 const age = ageDays(o.stage_entered_at);
-                const ageTone = age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
+                const ageTone =
+                  age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
                 return (
                   <tr
                     key={o.id}
                     onClick={() => onRowClick(o)}
                     className="border-t hover:bg-muted/30 cursor-pointer"
                   >
-                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{o.codigo}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
+                      {o.codigo}
+                    </td>
                     <td className="px-3 py-2 font-medium">{o.titulo}</td>
                     <td className="px-3 py-2 text-muted-foreground truncate max-w-[200px]">
                       {o.cliente_nome || o.empresa_lead || o.nome_lead || "—"}
                     </td>
                     <td className="px-3 py-2">
-                      <Badge variant="outline" className={cn("text-[10px]", STAGE_TONE[o.pipeline_stage])}>
+                      <Badge
+                        variant="outline"
+                        className={cn("text-[10px]", STAGE_TONE[o.pipeline_stage])}
+                      >
                         {STAGE_LABEL[o.pipeline_stage]}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2 text-right font-semibold">{formatBRL(o.valor_estimado)}</td>
-                    <td className="px-3 py-2 text-right text-muted-foreground">{o.probabilidade}%</td>
-                    <td className="px-3 py-2 text-muted-foreground hidden lg:table-cell truncate max-w-[160px]">{o.responsavel_nome}</td>
+                    <td className="px-3 py-2 text-right font-semibold">
+                      {formatBRL(o.valor_estimado)}
+                    </td>
+                    <td className="px-3 py-2 text-right text-muted-foreground">
+                      {o.probabilidade}%
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground hidden lg:table-cell truncate max-w-[160px]">
+                      {o.responsavel_nome}
+                    </td>
                     <td className={cn("px-3 py-2 text-right", ageTone)}>{age}d</td>
                   </tr>
                 );
@@ -88,7 +108,8 @@ export function PipelineTable({
       <div className="md:hidden space-y-2">
         {items.map((o) => {
           const age = ageDays(o.stage_entered_at);
-          const ageTone = age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
+          const ageTone =
+            age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
           return (
             <button
               key={o.id}
@@ -101,7 +122,10 @@ export function PipelineTable({
                   <div className="text-[10px] font-mono text-muted-foreground">{o.codigo}</div>
                   <div className="font-medium text-sm leading-tight">{o.titulo}</div>
                 </div>
-                <Badge variant="outline" className={cn("text-[10px] shrink-0", STAGE_TONE[o.pipeline_stage])}>
+                <Badge
+                  variant="outline"
+                  className={cn("text-[10px] shrink-0", STAGE_TONE[o.pipeline_stage])}
+                >
                   {STAGE_LABEL[o.pipeline_stage]}
                 </Badge>
               </div>

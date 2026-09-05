@@ -77,7 +77,7 @@ export const listEmbarques = createServerFn({ method: "GET" })
       .select(
         `id, numero, projeto_id, transportadora_id, status, previsao_saida, data_saida, data_entrega, nf_saida, destino, observacoes, created_at, updated_at,
          projeto:equipamento_projetos!inner(id, revisao, cliente_id, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)),
-         transportadora:compras_transportadoras(id, nome)`
+         transportadora:compras_transportadoras(id, nome)`,
       )
       .order("created_at", { ascending: false })
       .limit(300);
@@ -104,7 +104,9 @@ export const listClientesComEmbarques = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await (context.supabase as any)
       .from("logistica_embarques")
-      .select("projeto:equipamento_projetos!inner(cliente:clientes!inner(id, nome_fantasia, razao_social))")
+      .select(
+        "projeto:equipamento_projetos!inner(cliente:clientes!inner(id, nome_fantasia, razao_social))",
+      )
       .limit(1000);
     if (error) throw friendlyDbError(error);
     const seen = new Map<string, { id: string; nome: string }>();
@@ -127,7 +129,7 @@ export const getEmbarque = createServerFn({ method: "GET" })
       .select(
         `*,
          projeto:equipamento_projetos(id, revisao, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)),
-         transportadora:compras_transportadoras(id, nome, cnpj, contato, telefone)`
+         transportadora:compras_transportadoras(id, nome, cnpj, contato, telefone)`,
       )
       .eq("id", data.id)
       .maybeSingle();
@@ -161,7 +163,7 @@ export const listProjetosDisponiveis = createServerFn({ method: "GET" })
     const { data, error } = await (context.supabase as any)
       .from("equipamento_projetos")
       .select(
-        "id, revisao, fase, status, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)"
+        "id, revisao, fase, status, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)",
       )
       .is("deleted_at", null)
       .order("updated_at", { ascending: false })
@@ -231,7 +233,13 @@ export const updateEmbarque = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "logistica");
     const patch: Record<string, unknown> = { updated_by: context.userId };
-    for (const k of ["transportadora_id", "previsao_saida", "nf_saida", "destino", "observacoes"] as const) {
+    for (const k of [
+      "transportadora_id",
+      "previsao_saida",
+      "nf_saida",
+      "destino",
+      "observacoes",
+    ] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
     const { error } = await (context.supabase as any)
@@ -256,7 +264,7 @@ export const setStatus = createServerFn({ method: "POST" })
         notas: z.string().trim().max(2000).optional().nullable(),
         anexo_ids: z.array(z.string().uuid()).optional().default([]),
       })
-      .parse(input)
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "logistica");
@@ -265,7 +273,7 @@ export const setStatus = createServerFn({ method: "POST" })
       const trimmed = (data.notas ?? "").trim();
       if (trimmed.length < 5) {
         throw new Error(
-          `Motivo obrigatório para marcar como "${data.status}" (mínimo 5 caracteres).`
+          `Motivo obrigatório para marcar como "${data.status}" (mínimo 5 caracteres).`,
         );
       }
     }
@@ -345,11 +353,12 @@ export const listStatusLog = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name, email")
         .in("id", ids);
-      for (const p of (profs ?? []) as any[]) profiles[p.id] = { full_name: p.full_name, email: p.email };
+      for (const p of (profs ?? []) as any[])
+        profiles[p.id] = { full_name: p.full_name, email: p.email };
     }
 
     const allAnexoIds = Array.from(
-      new Set(rowsArr.flatMap((r) => (Array.isArray(r.anexo_ids) ? r.anexo_ids : [])))
+      new Set(rowsArr.flatMap((r) => (Array.isArray(r.anexo_ids) ? r.anexo_ids : []))),
     );
     const anexosMap: Record<string, StatusLogAnexo> = {};
     if (allAnexoIds.length > 0) {
@@ -375,8 +384,8 @@ export const listStatusLog = createServerFn({ method: "GET" })
       notas: r.notas,
       changed_by: r.changed_by,
       changed_at: r.changed_at,
-      actor_nome: r.changed_by ? profiles[r.changed_by]?.full_name ?? null : null,
-      actor_email: r.changed_by ? profiles[r.changed_by]?.email ?? null : null,
+      actor_nome: r.changed_by ? (profiles[r.changed_by]?.full_name ?? null) : null,
+      actor_email: r.changed_by ? (profiles[r.changed_by]?.email ?? null) : null,
       anexos: ((r.anexo_ids ?? []) as string[])
         .map((id) => anexosMap[id])
         .filter(Boolean) as StatusLogAnexo[],
@@ -475,10 +484,14 @@ export const registrarAnexo = createServerFn({ method: "POST" })
 
 export const removerAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), storage_path: z.string() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid(), storage_path: z.string() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "logistica");
-    await (context.supabase as any).storage.from(LOGISTICA_ANEXOS_BUCKET).remove([data.storage_path]);
+    await (context.supabase as any).storage
+      .from(LOGISTICA_ANEXOS_BUCKET)
+      .remove([data.storage_path]);
     const { error } = await (context.supabase as any)
       .from("logistica_embarque_anexos")
       .delete()
@@ -490,7 +503,17 @@ export const removerAnexo = createServerFn({ method: "POST" })
 export const getAnexoSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ path: z.string().min(1), expiresIn: z.number().int().positive().max(60 * 60 * 24).optional() }).parse(input)
+    z
+      .object({
+        path: z.string().min(1),
+        expiresIn: z
+          .number()
+          .int()
+          .positive()
+          .max(60 * 60 * 24)
+          .optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { data: res, error } = await (context.supabase as any).storage
@@ -509,7 +532,7 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
         embarque_id: z.string().uuid(),
         anexo_ids: z.array(z.string().uuid()).optional().default([]),
       })
-      .parse(input)
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const supa = context.supabase as any;
@@ -521,7 +544,7 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
          projeto:equipamento_projetos(id, revisao,
            cliente:clientes(id, nome_fantasia, razao_social, cnpj),
            equipamento:cliente_equipamentos(id, apelido, modelo)),
-         transportadora:compras_transportadoras(id, nome, cnpj, contato, telefone)`
+         transportadora:compras_transportadoras(id, nome, cnpj, contato, telefone)`,
       )
       .eq("id", data.embarque_id)
       .maybeSingle();
@@ -541,12 +564,17 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
         .order("changed_at", { ascending: true }),
     ]);
 
-    const actorIds = Array.from(new Set(((logs ?? []) as any[]).map((l) => l.changed_by).filter(Boolean)));
+    const actorIds = Array.from(
+      new Set(((logs ?? []) as any[]).map((l) => l.changed_by).filter(Boolean)),
+    );
     let actorMap: Record<string, string> = {};
     if (actorIds.length > 0) {
-      const { data: profs } = await supa.from("profiles").select("id, full_name, email").in("id", actorIds);
+      const { data: profs } = await supa
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", actorIds);
       actorMap = Object.fromEntries(
-        ((profs ?? []) as any[]).map((p) => [p.id, p.full_name || p.email || "—"])
+        ((profs ?? []) as any[]).map((p) => [p.id, p.full_name || p.email || "—"]),
       );
     }
 
@@ -577,7 +605,12 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
       selectedAnexos = (rows ?? []) as any[];
     }
 
-    const anexosResolved: Array<{ categoria: string; nome_arquivo: string; mime_type: string | null; dataUrl: string | null }> = [];
+    const anexosResolved: Array<{
+      categoria: string;
+      nome_arquivo: string;
+      mime_type: string | null;
+      dataUrl: string | null;
+    }> = [];
     for (const a of selectedAnexos) {
       const isImage = (a.mime_type || "").startsWith("image/");
       if (!isImage) {
@@ -650,19 +683,23 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
         from_status: l.from_status,
         to_status: l.to_status,
         changed_at: l.changed_at,
-        actor_nome: l.changed_by ? actorMap[l.changed_by] ?? null : null,
+        actor_nome: l.changed_by ? (actorMap[l.changed_by] ?? null) : null,
       })),
       anexos: anexosResolved,
     };
 
-    const { data: me } = await supa.from("profiles").select("full_name, email").eq("id", context.userId).maybeSingle();
+    const { data: me } = await supa
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", context.userId)
+      .maybeSingle();
     const responsavel = (me as any)?.full_name || (me as any)?.email || "—";
 
     const { renderToBuffer } = await import("@react-pdf/renderer");
     const { RomaneioPdf } = await import("./docs/romaneio-pdf");
     const React = (await import("react")).default;
     const buffer = await renderToBuffer(
-      React.createElement(RomaneioPdf, { layout, payload, responsavel }) as any
+      React.createElement(RomaneioPdf, { layout, payload, responsavel }) as any,
     );
     return {
       filename: `romaneio-${payload.numero}.pdf`,
@@ -679,7 +716,7 @@ export const exportStatusLog = createServerFn({ method: "POST" })
         embarque_id: z.string().uuid(),
         format: z.enum(["csv", "pdf"]),
       })
-      .parse(input)
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const supa = context.supabase as any;
@@ -707,13 +744,12 @@ export const exportStatusLog = createServerFn({ method: "POST" })
         .from("profiles")
         .select("id, full_name, email")
         .in("id", actorIds);
-      for (const p of (profs ?? []) as any[])
-        actorMap[p.id] = p.full_name || p.email || "—";
+      for (const p of (profs ?? []) as any[]) actorMap[p.id] = p.full_name || p.email || "—";
     }
 
     // Anexos referenciados
     const anexoIds = Array.from(
-      new Set(rowsArr.flatMap((r) => (Array.isArray(r.anexo_ids) ? r.anexo_ids : [])))
+      new Set(rowsArr.flatMap((r) => (Array.isArray(r.anexo_ids) ? r.anexo_ids : []))),
     );
     const anexoMap: Record<string, string> = {};
     if (anexoIds.length > 0) {
@@ -737,14 +773,7 @@ export const exportStatusLog = createServerFn({ method: "POST" })
         const s = v == null ? "" : String(v);
         return `"${s.replace(/"/g, '""')}"`;
       };
-      const header = [
-        "data_hora",
-        "de",
-        "para",
-        "autor",
-        "motivo",
-        "anexos",
-      ].map(escape).join(";");
+      const header = ["data_hora", "de", "para", "autor", "motivo", "anexos"].map(escape).join(";");
       const lines = rowsArr.map((r) => {
         const anexos = ((r.anexo_ids ?? []) as string[])
           .map((id) => anexoMap[id])
@@ -754,10 +783,12 @@ export const exportStatusLog = createServerFn({ method: "POST" })
           fmtDate(r.changed_at),
           r.from_status ?? "",
           r.to_status,
-          r.changed_by ? actorMap[r.changed_by] ?? "" : "",
+          r.changed_by ? (actorMap[r.changed_by] ?? "") : "",
           r.notas ?? "",
           anexos,
-        ].map(escape).join(";");
+        ]
+          .map(escape)
+          .join(";");
       });
       const csv = "\uFEFF" + [header, ...lines].join("\n");
       const base64 = Buffer.from(csv, "utf8").toString("base64");
@@ -797,11 +828,15 @@ export const exportStatusLog = createServerFn({ method: "POST" })
       React.createElement(
         Page as any,
         { size: "A4", style: styles.page },
-        React.createElement(Text as any, { style: styles.title }, `Trilha de auditoria — ${numero}`),
+        React.createElement(
+          Text as any,
+          { style: styles.title },
+          `Trilha de auditoria — ${numero}`,
+        ),
         React.createElement(
           Text as any,
           { style: styles.subtitle },
-          `Gerado em ${new Date().toLocaleString("pt-BR")} · ${rowsArr.length} evento(s)`
+          `Gerado em ${new Date().toLocaleString("pt-BR")} · ${rowsArr.length} evento(s)`,
         ),
         React.createElement(
           View as any,
@@ -809,7 +844,7 @@ export const exportStatusLog = createServerFn({ method: "POST" })
           React.createElement(Text as any, { style: styles.cellDate }, "Data / hora"),
           React.createElement(Text as any, { style: styles.cellFlow }, "Transição"),
           React.createElement(Text as any, { style: styles.cellActor }, "Autor"),
-          React.createElement(Text as any, { style: styles.cellNotes }, "Motivo")
+          React.createElement(Text as any, { style: styles.cellNotes }, "Motivo"),
         ),
         ...rowsArr.map((r, i) => {
           const anexos = ((r.anexo_ids ?? []) as string[])
@@ -825,25 +860,25 @@ export const exportStatusLog = createServerFn({ method: "POST" })
               React.createElement(
                 Text as any,
                 { style: styles.cellFlow },
-                `${r.from_status ?? "—"} → ${r.to_status}`
+                `${r.from_status ?? "—"} → ${r.to_status}`,
               ),
               React.createElement(
                 Text as any,
                 { style: styles.cellActor },
-                r.changed_by ? actorMap[r.changed_by] ?? "—" : "—"
+                r.changed_by ? (actorMap[r.changed_by] ?? "—") : "—",
               ),
-              React.createElement(Text as any, { style: styles.cellNotes }, r.notas ?? "—")
+              React.createElement(Text as any, { style: styles.cellNotes }, r.notas ?? "—"),
             ),
             anexos.length > 0
               ? React.createElement(
                   Text as any,
                   { style: styles.anexos },
-                  `Anexos: ${anexos.join(", ")}`
+                  `Anexos: ${anexos.join(", ")}`,
                 )
-              : null
+              : null,
           );
-        })
-      )
+        }),
+      ),
     );
 
     const buffer = await renderToBuffer(el as any);

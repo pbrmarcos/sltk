@@ -4,11 +4,11 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-
 const CODIGO_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; // sem 0/O/1/I
 function genCodigo(len = 6): string {
   let s = "";
-  for (let i = 0; i < len; i++) s += CODIGO_ALPHABET[Math.floor(Math.random() * CODIGO_ALPHABET.length)];
+  for (let i = 0; i < len; i++)
+    s += CODIGO_ALPHABET[Math.floor(Math.random() * CODIGO_ALPHABET.length)];
   return s;
 }
 
@@ -30,7 +30,15 @@ export const listSegmentos = createServerFn({ method: "GET" })
       .eq("ativo", true)
       .order("nome_pt", { ascending: true });
     if (error) throw friendlyDbError(error);
-    return data as Array<{ id: string; slug: string; nome_pt: string; nome_es: string | null; nome_en: string | null; ordem: number; ativo: boolean }>;
+    return data as Array<{
+      id: string;
+      slug: string;
+      nome_pt: string;
+      nome_es: string | null;
+      nome_en: string | null;
+      ordem: number;
+      ativo: boolean;
+    }>;
   });
 
 // ---------- Entrevistas ----------
@@ -56,16 +64,22 @@ export type EntrevistaRow = {
   purge_at: string | null;
 };
 
-
 export const listEntrevistas = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ escopo: z.enum(["ativas", "lixeira"]).default("ativas") }).partial().parse(d ?? {}))
+  .inputValidator((d: unknown) =>
+    z
+      .object({ escopo: z.enum(["ativas", "lixeira"]).default("ativas") })
+      .partial()
+      .parse(d ?? {}),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const escopo = data?.escopo ?? "ativas";
     let q = sb
       .from("entrevistas")
-      .select("id, codigo, segmento_id, criado_por, lead_nome, lead_email, lead_empresa, idioma_default, status, respondida_em, created_at, deleted_at, deleted_by, deleted_reason, purge_at")
+      .select(
+        "id, codigo, segmento_id, criado_por, lead_nome, lead_email, lead_empresa, idioma_default, status, respondida_em, created_at, deleted_at, deleted_by, deleted_reason, purge_at",
+      )
       .order("created_at", { ascending: false })
       .limit(500);
     if (escopo === "lixeira") q = q.not("deleted_at", "is", null);
@@ -92,7 +106,6 @@ export const listEntrevistas = createServerFn({ method: "GET" })
     })) as EntrevistaRow[];
   });
 
-
 const criarSchema = z.object({
   segmento_id: z.string().uuid(),
   lead_nome: z.string().max(200).optional().nullable(),
@@ -115,7 +128,10 @@ export const criarEntrevista = createServerFn({ method: "POST" })
     for (let i = 0; i < 5; i++) {
       const c = genCodigo(6);
       const { data: dup } = await sb.from("entrevistas").select("id").eq("codigo", c).maybeSingle();
-      if (!dup) { codigo = c; break; }
+      if (!dup) {
+        codigo = c;
+        break;
+      }
     }
     if (!codigo) throw new Error("Não foi possível gerar um código único, tente novamente.");
     const { data: row, error } = await sb
@@ -136,8 +152,16 @@ export const criarEntrevista = createServerFn({ method: "POST" })
     // e-mail para o criador
     try {
       const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
-      const { data: seg } = await sb.from("entrevista_segmentos").select("nome_pt").eq("id", data.segmento_id).maybeSingle();
-      const { data: prof } = await sb.from("profiles").select("full_name, email").eq("id", context.userId).maybeSingle();
+      const { data: seg } = await sb
+        .from("entrevista_segmentos")
+        .select("nome_pt")
+        .eq("id", data.segmento_id)
+        .maybeSingle();
+      const { data: prof } = await sb
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", context.userId)
+        .maybeSingle();
       await safeDispatch({
         eventKey: "entrevista.criada",
         triggeredBy: context.userId,
@@ -152,7 +176,9 @@ export const criarEntrevista = createServerFn({ method: "POST" })
         },
         extraTo: prof?.email ? [prof.email] : [],
       });
-    } catch (e) { console.error("[entrevista.criada]", e); }
+    } catch (e) {
+      console.error("[entrevista.criada]", e);
+    }
 
     return { id: row.id as string, codigo };
   });
@@ -164,18 +190,32 @@ export const getEntrevista = createServerFn({ method: "GET" })
     const sb = context.supabase as any;
     const { data: e, error } = await sb
       .from("entrevistas")
-      .select("id, codigo, segmento_id, criado_por, lead_nome, lead_email, lead_empresa, idioma_default, status, respondida_em, expires_at, created_at, updated_at")
+      .select(
+        "id, codigo, segmento_id, criado_por, lead_nome, lead_email, lead_empresa, idioma_default, status, respondida_em, expires_at, created_at, updated_at",
+      )
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Entrevista não encontrada.");
     const [{ data: seg }, { data: prof }] = await Promise.all([
-      sb.from("entrevista_segmentos").select("id, slug, nome_pt").eq("id", e.segmento_id).maybeSingle(),
+      sb
+        .from("entrevista_segmentos")
+        .select("id, slug, nome_pt")
+        .eq("id", e.segmento_id)
+        .maybeSingle(),
       sb.from("profiles").select("id, full_name, email").eq("id", e.criado_por).maybeSingle(),
     ]);
 
     // Respostas se já respondida
-    let respostas: Array<{ pergunta_id: string; numero: number; enunciado: string; valor_text: string | null; valor_options: any; descricao_extra: string | null; opcoes: Array<{ label: string }>; }> = [];
+    let respostas: Array<{
+      pergunta_id: string;
+      numero: number;
+      enunciado: string;
+      valor_text: string | null;
+      valor_options: any;
+      descricao_extra: string | null;
+      opcoes: Array<{ label: string }>;
+    }> = [];
     if (e.status === "respondida") {
       const { data: resps } = await sb
         .from("entrevista_respostas")
@@ -190,15 +230,17 @@ export const getEntrevista = createServerFn({ method: "GET" })
         const pMap = new Map<string, { numero: number; enunciado_pt: string }>(
           (perg ?? []).map((p: any) => [p.id, { numero: p.numero, enunciado_pt: p.enunciado_pt }]),
         );
-        respostas = (resps ?? []).map((r: any) => ({
-          pergunta_id: r.pergunta_id,
-          numero: pMap.get(r.pergunta_id)?.numero ?? 0,
-          enunciado: pMap.get(r.pergunta_id)?.enunciado_pt ?? "",
-          valor_text: r.valor_text,
-          valor_options: r.valor_options,
-          descricao_extra: r.descricao_extra,
-          opcoes: [],
-        })).sort((a: { numero: number }, b: { numero: number }) => a.numero - b.numero);
+        respostas = (resps ?? [])
+          .map((r: any) => ({
+            pergunta_id: r.pergunta_id,
+            numero: pMap.get(r.pergunta_id)?.numero ?? 0,
+            enunciado: pMap.get(r.pergunta_id)?.enunciado_pt ?? "",
+            valor_text: r.valor_text,
+            valor_options: r.valor_options,
+            descricao_extra: r.descricao_extra,
+            opcoes: [],
+          }))
+          .sort((a: { numero: number }, b: { numero: number }) => a.numero - b.numero);
       }
     }
 
@@ -213,10 +255,16 @@ export const getEntrevista = createServerFn({ method: "GET" })
 
 export const enviarEntrevistaPorEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), email: z.string().email() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), email: z.string().email() }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    const { data: e } = await sb.from("entrevistas").select("id, codigo, segmento_id, lead_nome, criado_por").eq("id", data.id).maybeSingle();
+    const { data: e } = await sb
+      .from("entrevistas")
+      .select("id, codigo, segmento_id, lead_nome, criado_por")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!e) throw new Error("Entrevista não encontrada.");
     const [{ data: seg }, { data: prof }] = await Promise.all([
       sb.from("entrevista_segmentos").select("nome_pt").eq("id", e.segmento_id).maybeSingle(),
@@ -269,16 +317,25 @@ export const expirarEntrevista = createServerFn({ method: "POST" })
         vars: { codigo: e.codigo, segmento: seg?.nome_pt ?? "—" },
         extraTo: prof?.email ? [prof.email] : [],
       });
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
     return { ok: true };
   });
 
 // ---------- Lixeira / auditoria ----------
 
-async function logAudit(sb: any, row: {
-  entrevista_id: string; action: "trash" | "restore" | "purge"; actor_id: string;
-  actor_email?: string | null; reason?: string | null; meta?: any;
-}) {
+async function logAudit(
+  sb: any,
+  row: {
+    entrevista_id: string;
+    action: "trash" | "restore" | "purge";
+    actor_id: string;
+    actor_email?: string | null;
+    reason?: string | null;
+    meta?: any;
+  },
+) {
   try {
     await sb.from("entrevista_audit").insert({
       entrevista_id: row.entrevista_id,
@@ -288,7 +345,9 @@ async function logAudit(sb: any, row: {
       reason: row.reason ?? null,
       meta: row.meta ?? null,
     });
-  } catch (e) { console.error("[entrevista_audit]", e); }
+  } catch (e) {
+    console.error("[entrevista_audit]", e);
+  }
 }
 
 export const moverEntrevistaParaLixeira = createServerFn({ method: "POST" })
@@ -315,8 +374,19 @@ export const moverEntrevistaParaLixeira = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Sem permissão ou entrevista já está na lixeira.");
-    const { data: prof } = await sb.from("profiles").select("email").eq("id", context.userId).maybeSingle();
-    await logAudit(sb, { entrevista_id: e.id, action: "trash", actor_id: context.userId, actor_email: prof?.email ?? null, reason: data.motivo ?? null, meta: { purge_at: purge.toISOString() } });
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("email")
+      .eq("id", context.userId)
+      .maybeSingle();
+    await logAudit(sb, {
+      entrevista_id: e.id,
+      action: "trash",
+      actor_id: context.userId,
+      actor_email: prof?.email ?? null,
+      reason: data.motivo ?? null,
+      meta: { purge_at: purge.toISOString() },
+    });
     return { ok: true, codigo: e.codigo, purge_at: purge.toISOString() };
   });
 
@@ -327,15 +397,30 @@ export const restaurarEntrevista = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     const { data: e, error } = await sb
       .from("entrevistas")
-      .update({ deleted_at: null, deleted_by: null, deleted_reason: null, purge_at: null, updated_at: new Date().toISOString() })
+      .update({
+        deleted_at: null,
+        deleted_by: null,
+        deleted_reason: null,
+        purge_at: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", data.id)
       .not("deleted_at", "is", null)
       .select("id, codigo")
       .maybeSingle();
     if (error) throw friendlyDbError(error);
     if (!e) throw new Error("Sem permissão ou entrevista não está na lixeira.");
-    const { data: prof } = await sb.from("profiles").select("email").eq("id", context.userId).maybeSingle();
-    await logAudit(sb, { entrevista_id: e.id, action: "restore", actor_id: context.userId, actor_email: prof?.email ?? null });
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("email")
+      .eq("id", context.userId)
+      .maybeSingle();
+    await logAudit(sb, {
+      entrevista_id: e.id,
+      action: "restore",
+      actor_id: context.userId,
+      actor_email: prof?.email ?? null,
+    });
     return { ok: true, codigo: e.codigo };
   });
 
@@ -356,7 +441,11 @@ export const excluirEntrevistaDefinitivamente = createServerFn({ method: "POST" 
       .maybeSingle();
     if (!e0) throw new Error("Entrevista não encontrada.");
     if (!e0.deleted_at) throw new Error("Envie para a lixeira antes de excluir definitivamente.");
-    const { data: prof } = await sb.from("profiles").select("email").eq("id", context.userId).maybeSingle();
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("email")
+      .eq("id", context.userId)
+      .maybeSingle();
     // Registrar auditoria ANTES de apagar (audit tem FK on delete cascade — usar tabela persistente separada seria melhor,
     // então também gravamos snapshot em meta).
     await logAudit(sb, {
@@ -384,7 +473,12 @@ export const listEntrevistaAudit = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw friendlyDbError(error);
     return (rows ?? []) as Array<{
-      id: string; action: "trash" | "restore" | "purge" | "create" | "update";
-      actor_id: string | null; actor_email: string | null; reason: string | null; meta: any; created_at: string;
+      id: string;
+      action: "trash" | "restore" | "purge" | "create" | "update";
+      actor_id: string | null;
+      actor_email: string | null;
+      reason: string | null;
+      meta: any;
+      created_at: string;
     }>;
   });

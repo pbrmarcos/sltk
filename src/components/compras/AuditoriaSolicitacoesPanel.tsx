@@ -30,10 +30,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import {
-  listAtividadesSolicitacoes,
-  reverterAtividade,
-} from "@/lib/insumo-anexos.functions";
+import { listAtividadesSolicitacoes, reverterAtividade } from "@/lib/insumo-anexos.functions";
 
 type FilterKey = "todos" | "status_alterado" | "editado" | "arquivos" | "comentario" | "removidos";
 
@@ -41,15 +38,47 @@ const TIPOS: Record<
   string,
   { icon: React.ComponentType<{ className?: string }>; color: string; label: string }
 > = {
-  criado: { icon: Sparkles, color: "text-emerald-600 bg-emerald-50 border-emerald-200", label: "Criado" },
+  criado: {
+    icon: Sparkles,
+    color: "text-emerald-600 bg-emerald-50 border-emerald-200",
+    label: "Criado",
+  },
   editado: { icon: Pencil, color: "text-blue-600 bg-blue-50 border-blue-200", label: "Editado" },
-  status_alterado: { icon: RefreshCw, color: "text-amber-600 bg-amber-50 border-amber-200", label: "Status" },
-  anexo_adicionado: { icon: FilePlus2, color: "text-purple-600 bg-purple-50 border-purple-200", label: "Anexo" },
-  anexo_removido: { icon: FileMinus2, color: "text-red-600 bg-red-50 border-red-200", label: "Anexo removido" },
-  orcamento_recebido: { icon: DollarSign, color: "text-emerald-700 bg-emerald-50 border-emerald-200", label: "Orçamento" },
-  comentario: { icon: MessageCircle, color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]", label: "Comentário" },
-  insumo_removido: { icon: Trash2, color: "text-rose-700 bg-rose-50 border-rose-200", label: "Insumo removido" },
-  insumo_restaurado: { icon: RotateCcw, color: "text-emerald-700 bg-emerald-50 border-emerald-200", label: "Insumo restaurado" },
+  status_alterado: {
+    icon: RefreshCw,
+    color: "text-amber-600 bg-amber-50 border-amber-200",
+    label: "Status",
+  },
+  anexo_adicionado: {
+    icon: FilePlus2,
+    color: "text-purple-600 bg-purple-50 border-purple-200",
+    label: "Anexo",
+  },
+  anexo_removido: {
+    icon: FileMinus2,
+    color: "text-red-600 bg-red-50 border-red-200",
+    label: "Anexo removido",
+  },
+  orcamento_recebido: {
+    icon: DollarSign,
+    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    label: "Orçamento",
+  },
+  comentario: {
+    icon: MessageCircle,
+    color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
+    label: "Comentário",
+  },
+  insumo_removido: {
+    icon: Trash2,
+    color: "text-rose-700 bg-rose-50 border-rose-200",
+    label: "Insumo removido",
+  },
+  insumo_restaurado: {
+    icon: RotateCcw,
+    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    label: "Insumo restaurado",
+  },
 };
 
 const FIELD_LABEL: Record<string, string> = {
@@ -98,14 +127,17 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
     return rows.filter((r) => r.projeto_insumos?.projeto_id === projetoId);
   }, [q.data, projetoId]);
 
-  const counts = useMemo(() => ({
-    todos: rowsAll.length,
-    status_alterado: rowsAll.filter((r) => CLIENT_FILTERS.status_alterado(r.tipo)).length,
-    editado: rowsAll.filter((r) => CLIENT_FILTERS.editado(r.tipo)).length,
-    arquivos: rowsAll.filter((r) => CLIENT_FILTERS.arquivos(r.tipo)).length,
-    comentario: rowsAll.filter((r) => CLIENT_FILTERS.comentario(r.tipo)).length,
-    removidos: rowsAll.filter((r) => CLIENT_FILTERS.removidos(r.tipo)).length,
-  }), [rowsAll]);
+  const counts = useMemo(
+    () => ({
+      todos: rowsAll.length,
+      status_alterado: rowsAll.filter((r) => CLIENT_FILTERS.status_alterado(r.tipo)).length,
+      editado: rowsAll.filter((r) => CLIENT_FILTERS.editado(r.tipo)).length,
+      arquivos: rowsAll.filter((r) => CLIENT_FILTERS.arquivos(r.tipo)).length,
+      comentario: rowsAll.filter((r) => CLIENT_FILTERS.comentario(r.tipo)).length,
+      removidos: rowsAll.filter((r) => CLIENT_FILTERS.removidos(r.tipo)).length,
+    }),
+    [rowsAll],
+  );
 
   const rows = useMemo(
     () => rowsAll.filter((r) => CLIENT_FILTERS[filter](r.tipo)),
@@ -120,7 +152,6 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
     { key: "comentario", label: "Comentários" },
     { key: "removidos", label: "Excluídos" },
   ];
-
 
   async function confirmarReverter() {
     if (!revertTarget) return;
@@ -175,10 +206,14 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
               )}
             >
               {f.label}
-              <span className={cn(
-                "rounded-full px-1.5 text-[10px]",
-                filter === f.key ? "bg-[var(--bg-surface)]/20" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]",
-              )}>
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px]",
+                  filter === f.key
+                    ? "bg-[var(--bg-surface)]/20"
+                    : "bg-[var(--bg-elevated)] text-[var(--text-muted)]",
+                )}
+              >
                 {counts[f.key]}
               </span>
             </button>
@@ -198,7 +233,8 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
             {rows.map((r) => {
               const cfg = TIPOS[r.tipo] ?? {
                 icon: History,
-                color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
+                color:
+                  "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
                 label: r.tipo,
               };
               const Icon = cfg.icon;
@@ -248,7 +284,9 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
                         </Button>
                       )}
                     </div>
-                    <div className="text-[var(--text-primary)] mt-1 whitespace-pre-wrap">{r.descricao}</div>
+                    <div className="text-[var(--text-primary)] mt-1 whitespace-pre-wrap">
+                      {r.descricao}
+                    </div>
                     {(r.tipo === "editado" || r.tipo === "status_alterado") &&
                       r.meta &&
                       typeof r.meta === "object" && (
@@ -297,7 +335,8 @@ export function AuditoriaSolicitacoesPanel({ projetoId }: { projetoId?: string }
             <div className="rounded border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-2 text-xs text-[var(--text-secondary)]">
               <b>Ação:</b> {revertTarget?.descricao}
               <div className="text-[10px] text-[var(--text-muted)] mt-1">
-                {revertTarget?.actor_nome} · {revertTarget && new Date(revertTarget.criado_em).toLocaleString("pt-BR")}
+                {revertTarget?.actor_nome} ·{" "}
+                {revertTarget && new Date(revertTarget.criado_em).toLocaleString("pt-BR")}
               </div>
             </div>
             <div>

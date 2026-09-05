@@ -5,8 +5,7 @@ import type { EnrichedCliente } from "./types";
  * API pública sem chave.
  */
 export async function enrichSriEc(ruc: string): Promise<EnrichedCliente | null> {
-  const url =
-    `https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc?&ruc=${encodeURIComponent(ruc)}`;
+  const url = `https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc?&ruc=${encodeURIComponent(ruc)}`;
   const res = await fetch(url, { headers: { accept: "application/json" } });
   if (!res.ok) throw new Error(`SRI EC HTTP ${res.status}`);
   const arr = (await res.json()) as Array<{

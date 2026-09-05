@@ -94,8 +94,6 @@ function HelpNotFound() {
 
         <RecommendedArticles title="Baseado no que você consultou" />
 
-
-
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
           Ou navegue por categoria
         </h2>

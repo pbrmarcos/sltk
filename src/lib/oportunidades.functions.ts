@@ -88,27 +88,49 @@ export const listPipeline = createServerFn({ method: "POST" })
       .order("stage_entered_at", { ascending: false })
       .limit(500);
     if (data.responsavel) q = q.eq("responsavel_id", data.responsavel);
-    if (data.q) q = q.or(`titulo.ilike.%${data.q}%,empresa_lead.ilike.%${data.q}%,nome_lead.ilike.%${data.q}%`);
+    if (data.q)
+      q = q.or(
+        `titulo.ilike.%${data.q}%,empresa_lead.ilike.%${data.q}%,nome_lead.ilike.%${data.q}%`,
+      );
     const { data: rows, error } = await q;
     if (error) throw friendlyDbError(error);
     if (!rows || rows.length === 0) return [];
 
-    const clienteIds = Array.from(new Set(rows.map((r) => r.cliente_id).filter((v): v is string => !!v)));
-    const profileIds = Array.from(new Set(rows.flatMap((r) => {
-      const row = r as typeof r & { lost_by?: string | null; restored_by?: string | null };
-      return [row.responsavel_id, row.lost_by, row.restored_by].filter((v): v is string => !!v);
-    })));
+    const clienteIds = Array.from(
+      new Set(rows.map((r) => r.cliente_id).filter((v): v is string => !!v)),
+    );
+    const profileIds = Array.from(
+      new Set(
+        rows.flatMap((r) => {
+          const row = r as typeof r & { lost_by?: string | null; restored_by?: string | null };
+          return [row.responsavel_id, row.lost_by, row.restored_by].filter((v): v is string => !!v);
+        }),
+      ),
+    );
 
     const [{ data: clientes }, { data: profiles }] = await Promise.all([
       clienteIds.length > 0
-        ? context.supabase.from("clientes").select("id,razao_social,nome_fantasia").in("id", clienteIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; razao_social: string | null; nome_fantasia: string | null }> }),
+        ? context.supabase
+            .from("clientes")
+            .select("id,razao_social,nome_fantasia")
+            .in("id", clienteIds)
+        : Promise.resolve({
+            data: [] as Array<{
+              id: string;
+              razao_social: string | null;
+              nome_fantasia: string | null;
+            }>,
+          }),
       profileIds.length > 0
         ? context.supabase.from("profiles").select("id,full_name,email").in("id", profileIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; full_name: string | null; email: string | null }> }),
+        : Promise.resolve({
+            data: [] as Array<{ id: string; full_name: string | null; email: string | null }>,
+          }),
     ]);
 
-    const cliMap = new Map((clientes ?? []).map((c) => [c.id, c.nome_fantasia || c.razao_social || ""]));
+    const cliMap = new Map(
+      (clientes ?? []).map((c) => [c.id, c.nome_fantasia || c.razao_social || ""]),
+    );
     const proMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name || p.email || ""]));
 
     return rows.map((r) => {
@@ -121,35 +143,39 @@ export const listPipeline = createServerFn({ method: "POST" })
         lost_count?: number | null;
       };
       return {
-      id: r.id,
-      codigo: r.codigo ?? "",
-      titulo: r.titulo,
-      cliente_id: r.cliente_id,
-      cliente_nome: r.cliente_id ? cliMap.get(r.cliente_id) ?? null : null,
-      nome_lead: r.nome_lead,
-      empresa_lead: r.empresa_lead,
-      responsavel_id: r.responsavel_id,
-      responsavel_nome: proMap.get(r.responsavel_id) ?? "",
-      valor_estimado: r.valor_estimado === null ? null : Number(r.valor_estimado),
-      valor_estimado_usd: (row as { valor_estimado_usd?: number | null }).valor_estimado_usd === null || (row as { valor_estimado_usd?: number | null }).valor_estimado_usd === undefined ? null : Number((row as { valor_estimado_usd: number }).valor_estimado_usd),
-      probabilidade: r.probabilidade,
-      expected_close_date: r.expected_close_date,
-      lifecycle_stage: r.lifecycle_stage as LifecycleStage,
-      pipeline_stage: r.pipeline_stage as PipelineStage,
-      stage_entered_at: r.stage_entered_at,
-      lost_at: row.lost_at ?? null,
-      lost_by: row.lost_by ?? null,
-      lost_by_nome: row.lost_by ? proMap.get(row.lost_by) ?? null : null,
-      lost_reason: row.lost_reason ?? null,
-      restored_at: row.restored_at ?? null,
-      restored_by: row.restored_by ?? null,
-      restored_by_nome: row.restored_by ? proMap.get(row.restored_by) ?? null : null,
-      lost_count: row.lost_count ?? 0,
-      processo_id: r.processo_id,
-      created_at: r.created_at,
-      email: r.email ?? null,
-      telefone: r.telefone ?? null,
-      observacoes: r.observacoes ?? null,
+        id: r.id,
+        codigo: r.codigo ?? "",
+        titulo: r.titulo,
+        cliente_id: r.cliente_id,
+        cliente_nome: r.cliente_id ? (cliMap.get(r.cliente_id) ?? null) : null,
+        nome_lead: r.nome_lead,
+        empresa_lead: r.empresa_lead,
+        responsavel_id: r.responsavel_id,
+        responsavel_nome: proMap.get(r.responsavel_id) ?? "",
+        valor_estimado: r.valor_estimado === null ? null : Number(r.valor_estimado),
+        valor_estimado_usd:
+          (row as { valor_estimado_usd?: number | null }).valor_estimado_usd === null ||
+          (row as { valor_estimado_usd?: number | null }).valor_estimado_usd === undefined
+            ? null
+            : Number((row as { valor_estimado_usd: number }).valor_estimado_usd),
+        probabilidade: r.probabilidade,
+        expected_close_date: r.expected_close_date,
+        lifecycle_stage: r.lifecycle_stage as LifecycleStage,
+        pipeline_stage: r.pipeline_stage as PipelineStage,
+        stage_entered_at: r.stage_entered_at,
+        lost_at: row.lost_at ?? null,
+        lost_by: row.lost_by ?? null,
+        lost_by_nome: row.lost_by ? (proMap.get(row.lost_by) ?? null) : null,
+        lost_reason: row.lost_reason ?? null,
+        restored_at: row.restored_at ?? null,
+        restored_by: row.restored_by ?? null,
+        restored_by_nome: row.restored_by ? (proMap.get(row.restored_by) ?? null) : null,
+        lost_count: row.lost_count ?? 0,
+        processo_id: r.processo_id,
+        created_at: r.created_at,
+        email: r.email ?? null,
+        telefone: r.telefone ?? null,
+        observacoes: r.observacoes ?? null,
       };
     });
   });
@@ -157,11 +183,18 @@ export const listPipeline = createServerFn({ method: "POST" })
 export const updateStage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; stage: PipelineStage; lost_reason?: string }) =>
-    z.object({
-      id: z.string().uuid(),
-      stage: stageSchema,
-      lost_reason: z.string().trim().min(10, "Motivo da perda deve ter pelo menos 10 caracteres").max(500).optional(),
-    }).parse(data),
+    z
+      .object({
+        id: z.string().uuid(),
+        stage: stageSchema,
+        lost_reason: z
+          .string()
+          .trim()
+          .min(10, "Motivo da perda deve ter pelo menos 10 caracteres")
+          .max(500)
+          .optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "comercial");
@@ -173,10 +206,7 @@ export const updateStage = createServerFn({ method: "POST" })
     };
     if (data.stage === "perdido") patch.lost_reason = data.lost_reason ?? null;
     if (data.stage !== "perdido") patch.lost_reason = null;
-    const { error } = await context.supabase
-      .from("oportunidades")
-      .update(patch)
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("oportunidades").update(patch).eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -184,10 +214,12 @@ export const updateStage = createServerFn({ method: "POST" })
 export const restoreOportunidade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; stage?: Exclude<PipelineStage, "perdido"> }) =>
-    z.object({
-      id: z.string().uuid(),
-      stage: z.enum(RESTORE_PIPELINE_STAGES).optional(),
-    }).parse(data),
+    z
+      .object({
+        id: z.string().uuid(),
+        stage: z.enum(RESTORE_PIPELINE_STAGES).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "comercial");
@@ -202,7 +234,8 @@ export const restoreOportunidade = createServerFn({ method: "POST" })
         .limit(1)
         .maybeSingle();
       const previous = history?.from_pipeline as PipelineStage | undefined;
-      if (previous && previous !== "perdido") targetStage = previous as Exclude<PipelineStage, "perdido">;
+      if (previous && previous !== "perdido")
+        targetStage = previous as Exclude<PipelineStage, "perdido">;
     }
 
     const { error } = await context.supabase
@@ -226,34 +259,37 @@ export type OportunidadeDuplicada = {
 
 export const createOportunidade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    titulo: string;
-    empresa_lead?: string;
-    nome_lead?: string;
-    email?: string;
-    telefone?: string;
-    valor_estimado?: number;
-    valor_estimado_usd?: number;
-    probabilidade?: number;
-    cliente_id?: string;
-    /** Chave única por tentativa de criação — evita duplo submit / retry. */
-    idempotency_key?: string;
-    /** Usuário confirmou que quer criar mesmo havendo oportunidade parecida. */
-    confirmar_duplicata?: boolean;
-  }) =>
-    z.object({
-      titulo: z.string().min(2).max(200),
-      empresa_lead: z.string().max(200).optional(),
-      nome_lead: z.string().max(200).optional(),
-      email: z.string().max(200).optional().or(z.literal("")),
-      telefone: z.string().max(50).optional(),
-      valor_estimado: z.number().min(0).max(99999999).optional(),
-      valor_estimado_usd: z.number().min(0).max(99999999).optional(),
-      probabilidade: z.number().int().min(0).max(100).optional(),
-      cliente_id: z.string().uuid().optional(),
-      idempotency_key: z.string().min(8).max(64).optional(),
-      confirmar_duplicata: z.boolean().optional(),
-    }).parse(data),
+  .inputValidator(
+    (data: {
+      titulo: string;
+      empresa_lead?: string;
+      nome_lead?: string;
+      email?: string;
+      telefone?: string;
+      valor_estimado?: number;
+      valor_estimado_usd?: number;
+      probabilidade?: number;
+      cliente_id?: string;
+      /** Chave única por tentativa de criação — evita duplo submit / retry. */
+      idempotency_key?: string;
+      /** Usuário confirmou que quer criar mesmo havendo oportunidade parecida. */
+      confirmar_duplicata?: boolean;
+    }) =>
+      z
+        .object({
+          titulo: z.string().min(2).max(200),
+          empresa_lead: z.string().max(200).optional(),
+          nome_lead: z.string().max(200).optional(),
+          email: z.string().max(200).optional().or(z.literal("")),
+          telefone: z.string().max(50).optional(),
+          valor_estimado: z.number().min(0).max(99999999).optional(),
+          valor_estimado_usd: z.number().min(0).max(99999999).optional(),
+          probabilidade: z.number().int().min(0).max(100).optional(),
+          cliente_id: z.string().uuid().optional(),
+          idempotency_key: z.string().min(8).max(64).optional(),
+          confirmar_duplicata: z.boolean().optional(),
+        })
+        .parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "comercial");
@@ -266,7 +302,13 @@ export const createOportunidade = createServerFn({ method: "POST" })
         .select("id, codigo")
         .eq("idempotency_key", data.idempotency_key)
         .maybeSingle();
-      if (existente) return { ...(existente as { id: string; codigo: string }), reused: true as const, needsConfirm: false as const, duplicatas: [] as OportunidadeDuplicada[] };
+      if (existente)
+        return {
+          ...(existente as { id: string; codigo: string }),
+          reused: true as const,
+          needsConfirm: false as const,
+          duplicatas: [] as OportunidadeDuplicada[],
+        };
     }
 
     // ---- 2. Verificação de possível duplicata (últimas 24h) ----
@@ -302,7 +344,6 @@ export const createOportunidade = createServerFn({ method: "POST" })
           duplicatas,
         };
       }
-
     }
 
     // ---- 3. Inserção ----
@@ -332,42 +373,55 @@ export const createOportunidade = createServerFn({ method: "POST" })
           .select("id, codigo")
           .eq("idempotency_key", data.idempotency_key)
           .maybeSingle();
-        if (existente) return { ...(existente as { id: string; codigo: string }), reused: true as const, needsConfirm: false as const, duplicatas: [] as OportunidadeDuplicada[] };
+        if (existente)
+          return {
+            ...(existente as { id: string; codigo: string }),
+            reused: true as const,
+            needsConfirm: false as const,
+            duplicatas: [] as OportunidadeDuplicada[],
+          };
       }
       throw friendlyDbError(error);
     }
-    return { ...(row as { id: string; codigo: string }), reused: false as const, needsConfirm: false as const, duplicatas: [] as OportunidadeDuplicada[] };
+    return {
+      ...(row as { id: string; codigo: string }),
+      reused: false as const,
+      needsConfirm: false as const,
+      duplicatas: [] as OportunidadeDuplicada[],
+    };
   });
-
 
 export const updateOportunidade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    id: string;
-    titulo?: string;
-    empresa_lead?: string | null;
-    nome_lead?: string | null;
-    email?: string | null;
-    telefone?: string | null;
-    valor_estimado?: number | null;
-    valor_estimado_usd?: number | null;
-    probabilidade?: number;
-    expected_close_date?: string | null;
-    observacoes?: string | null;
-  }) =>
-    z.object({
-      id: z.string().uuid(),
-      titulo: z.string().min(2).max(200).optional(),
-      empresa_lead: z.string().max(200).nullable().optional(),
-      nome_lead: z.string().max(200).nullable().optional(),
-      email: z.string().max(200).nullable().optional().or(z.literal("")),
-      telefone: z.string().max(50).nullable().optional(),
-        valor_estimado: z.number().min(0).max(99999999).nullable().optional(),
-        valor_estimado_usd: z.number().min(0).max(99999999).nullable().optional(),
-      probabilidade: z.number().int().min(0).max(100).optional(),
-      expected_close_date: z.string().nullable().optional(),
-      observacoes: z.string().max(2000).nullable().optional(),
-    }).parse(data),
+  .inputValidator(
+    (data: {
+      id: string;
+      titulo?: string;
+      empresa_lead?: string | null;
+      nome_lead?: string | null;
+      email?: string | null;
+      telefone?: string | null;
+      valor_estimado?: number | null;
+      valor_estimado_usd?: number | null;
+      probabilidade?: number;
+      expected_close_date?: string | null;
+      observacoes?: string | null;
+    }) =>
+      z
+        .object({
+          id: z.string().uuid(),
+          titulo: z.string().min(2).max(200).optional(),
+          empresa_lead: z.string().max(200).nullable().optional(),
+          nome_lead: z.string().max(200).nullable().optional(),
+          email: z.string().max(200).nullable().optional().or(z.literal("")),
+          telefone: z.string().max(50).nullable().optional(),
+          valor_estimado: z.number().min(0).max(99999999).nullable().optional(),
+          valor_estimado_usd: z.number().min(0).max(99999999).nullable().optional(),
+          probabilidade: z.number().int().min(0).max(100).optional(),
+          expected_close_date: z.string().nullable().optional(),
+          observacoes: z.string().max(2000).nullable().optional(),
+        })
+        .parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "comercial");
@@ -389,10 +443,12 @@ export const updateOportunidade = createServerFn({ method: "POST" })
 export const convertToProcesso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; cliente_id?: string }) =>
-    z.object({
-      id: z.string().uuid(),
-      cliente_id: z.string().uuid().optional(),
-    }).parse(data),
+    z
+      .object({
+        id: z.string().uuid(),
+        cliente_id: z.string().uuid().optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "comercial");
@@ -469,8 +525,11 @@ export const getOportunidade = createServerFn({ method: "POST" })
     if (error || !opp) throw new Error("Oportunidade não encontrada");
 
     let cliente: {
-      razao_social: string | null; codigo: string | null; pais: string | null;
-      documento_fiscal_numero: string | null; moeda: string | null;
+      razao_social: string | null;
+      codigo: string | null;
+      pais: string | null;
+      documento_fiscal_numero: string | null;
+      moeda: string | null;
     } | null = null;
     if (opp.cliente_id) {
       const { data: cli } = await context.supabase

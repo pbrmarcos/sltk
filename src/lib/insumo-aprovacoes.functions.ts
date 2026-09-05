@@ -106,10 +106,13 @@ export const decidirAprovacaoOC = createServerFn({ method: "POST" })
         .eq("id", data.anexo_id)
         .maybeSingle();
       if (eA || !anexo) throw new Error(eA?.message ?? "Orçamento não encontrado");
-      if (anexo.insumo_id !== cur.insumo_id) throw new Error("Orçamento não pertence a este insumo.");
+      if (anexo.insumo_id !== cur.insumo_id)
+        throw new Error("Orçamento não pertence a este insumo.");
       if (anexo.kind !== "orcamento") throw new Error("O anexo selecionado não é um orçamento.");
       if (!anexo.fornecedor_id)
-        throw new Error("Este orçamento não tem fornecedor vinculado — edite o orçamento antes de aprovar.");
+        throw new Error(
+          "Este orçamento não tem fornecedor vinculado — edite o orçamento antes de aprovar.",
+        );
       fornecedor_id_sugerido = anexo.fornecedor_id;
     }
 

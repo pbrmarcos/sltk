@@ -96,9 +96,7 @@ export function FATTemplateEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>
-            Editor de template FAT {tpl ? `— v${tpl.versao}` : ""}
-          </DialogTitle>
+          <DialogTitle>Editor de template FAT {tpl ? `— v${tpl.versao}` : ""}</DialogTitle>
         </DialogHeader>
 
         {tplQ.isLoading || !tpl ? (

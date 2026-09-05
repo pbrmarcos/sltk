@@ -109,14 +109,19 @@ export function ClienteRfqTab({ clienteId }: Props) {
                     <Badge variant="outline" className="ml-1 text-[10px] uppercase">
                       {l.idioma}
                     </Badge>
-                    <Badge variant="outline" className={"text-[10px] " + (STATUS_BADGE[l.status] ?? "")}>
+                    <Badge
+                      variant="outline"
+                      className={"text-[10px] " + (STATUS_BADGE[l.status] ?? "")}
+                    >
                       {l.status}
                     </Badge>
                   </div>
                   <div className="mt-0.5 text-[11.5px] text-muted-foreground">
                     Emitido em {new Date(l.criado_em).toLocaleString("pt-BR")}
-                    {l.expira_em && ` · expira em ${new Date(l.expira_em).toLocaleDateString("pt-BR")}`}
-                    {l.preenchido_em && ` · preenchido em ${new Date(l.preenchido_em).toLocaleString("pt-BR")}`}
+                    {l.expira_em &&
+                      ` · expira em ${new Date(l.expira_em).toLocaleDateString("pt-BR")}`}
+                    {l.preenchido_em &&
+                      ` · preenchido em ${new Date(l.preenchido_em).toLocaleString("pt-BR")}`}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -132,11 +137,7 @@ export function ClienteRfqTab({ clienteId }: Props) {
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => arquivarMut.mutate(l.id)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => arquivarMut.mutate(l.id)}>
                         <Archive className="h-3.5 w-3.5" />
                       </Button>
                     </>
@@ -172,22 +173,20 @@ export function ClienteRfqTab({ clienteId }: Props) {
                   </div>
                   <div className="mt-0.5 text-[11.5px] text-muted-foreground">
                     {new Date(s.criado_em).toLocaleString("pt-BR")}
-                    {!s.lida_em && <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">NOVO</span>}
+                    {!s.lida_em && (
+                      <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                        NOVO
+                      </span>
+                    )}
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setVincularSubId(s.id)}
-                >
+                <Button size="sm" variant="outline" onClick={() => setVincularSubId(s.id)}>
                   Vincular a oportunidade
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() =>
-                    window.open(`/comercial/checklists?submissao=${s.id}`, "_blank")
-                  }
+                  onClick={() => window.open(`/comercial/checklists?submissao=${s.id}`, "_blank")}
                 >
                   Ver respostas
                 </Button>
@@ -430,8 +429,8 @@ function EmitirBody({
         {schemaQ.data && (
           <div className="rounded-md border border-dashed border-border bg-muted/30 p-3">
             <p className="mb-3 text-xs text-muted-foreground">
-              Este é o formulário que o destinatário verá em{" "}
-              <strong>{IDIOMA_LABEL[idioma]}</strong>.
+              Este é o formulário que o destinatário verá em <strong>{IDIOMA_LABEL[idioma]}</strong>
+              .
             </p>
             <RFQFormRenderer schema={schemaQ.data.campos_schema} idioma={idioma} preview />
           </div>
@@ -482,7 +481,8 @@ function VincularOportunidadeDialog({
         <DialogHeader>
           <DialogTitle>Vincular submissão a oportunidade</DialogTitle>
           <DialogDescription>
-            Ao vincular, o wizard de conversão passa a sugerir automaticamente o template de projeto correto para essa máquina.
+            Ao vincular, o wizard de conversão passa a sugerir automaticamente o template de projeto
+            correto para essa máquina.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -490,7 +490,9 @@ function VincularOportunidadeDialog({
             <Label>Oportunidade</Label>
             <Select value={oppId} onValueChange={setOppId}>
               <SelectTrigger>
-                <SelectValue placeholder={oppsQ.isLoading ? "Carregando…" : "Selecione uma oportunidade"} />
+                <SelectValue
+                  placeholder={oppsQ.isLoading ? "Carregando…" : "Selecione uma oportunidade"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {(oppsQ.data ?? []).map((o) => (
@@ -511,11 +513,10 @@ function VincularOportunidadeDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button
-            onClick={() => vincularMut.mutate()}
-            disabled={!oppId || vincularMut.isPending}
-          >
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={() => vincularMut.mutate()} disabled={!oppId || vincularMut.isPending}>
             {vincularMut.isPending ? "Vinculando…" : "Vincular"}
           </Button>
         </DialogFooter>

@@ -16,17 +16,28 @@ export const Route = createFileRoute("/_authenticated/comercial/entrevistas/$id/
 
 function fmtDate(s?: string | null) {
   if (!s) return "—";
-  try { return new Date(s).toLocaleString("pt-BR"); } catch { return "—"; }
+  try {
+    return new Date(s).toLocaleString("pt-BR");
+  } catch {
+    return "—";
+  }
 }
 
 function ImprimirEntrevistaPage() {
   const { id } = Route.useParams();
   const getFn = useServerFn(getEntrevista);
   const brand = useBrandSettings();
-  const q = useQuery({ queryKey: ["entrevistas", "imprimir", id], queryFn: () => getFn({ data: { id } }) });
+  const q = useQuery({
+    queryKey: ["entrevistas", "imprimir", id],
+    queryFn: () => getFn({ data: { id } }),
+  });
 
   if (q.isLoading || !q.data) {
-    return <div className="min-h-screen flex items-center justify-center bg-neutral-200 text-neutral-700">Carregando prévia…</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-200 text-neutral-700">
+        Carregando prévia…
+      </div>
+    );
   }
   const e: any = q.data;
   const respostas: any[] = e.respostas ?? [];
@@ -98,7 +109,13 @@ function ImprimirEntrevistaPage() {
           {/* HEADER */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-start gap-3 flex-1">
-              {logo && <img src={logo} alt="Logo" style={{ height: 56, width: "auto", objectFit: "contain" }} />}
+              {logo && (
+                <img
+                  src={logo}
+                  alt="Logo"
+                  style={{ height: 56, width: "auto", objectFit: "contain" }}
+                />
+              )}
               <div>
                 <h1>Entrevista Técnica</h1>
                 <div style={{ marginTop: 4 }}>
@@ -114,18 +131,45 @@ function ImprimirEntrevistaPage() {
             </div>
           </div>
 
-          <div className="bar" style={{ marginBottom: 8 }}>Entrevista nº {e.codigo}</div>
+          <div className="bar" style={{ marginBottom: 8 }}>
+            Entrevista nº {e.codigo}
+          </div>
 
-          <div className="bar-sub" style={{ marginBottom: 4 }}>Identificação</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px 16px", marginBottom: 12 }}>
-            <div><b>Código:</b> #{e.codigo}</div>
-            <div><b>Segmento:</b> {e.segmento?.nome_pt ?? "—"}</div>
-            <div><b>Lead:</b> {e.lead_nome ?? "—"}</div>
-            <div><b>Empresa:</b> {e.lead_empresa ?? "—"}</div>
-            <div><b>E-mail:</b> {e.lead_email ?? "—"}</div>
-            <div><b>Pilar (criador):</b> {e.criador?.full_name || e.criador?.email || "—"}</div>
-            <div><b>Criada em:</b> {fmtDate(e.created_at)}</div>
-            <div><b>Respondida em:</b> {fmtDate(e.respondida_em)}</div>
+          <div className="bar-sub" style={{ marginBottom: 4 }}>
+            Identificação
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "2px 16px",
+              marginBottom: 12,
+            }}
+          >
+            <div>
+              <b>Código:</b> #{e.codigo}
+            </div>
+            <div>
+              <b>Segmento:</b> {e.segmento?.nome_pt ?? "—"}
+            </div>
+            <div>
+              <b>Lead:</b> {e.lead_nome ?? "—"}
+            </div>
+            <div>
+              <b>Empresa:</b> {e.lead_empresa ?? "—"}
+            </div>
+            <div>
+              <b>E-mail:</b> {e.lead_email ?? "—"}
+            </div>
+            <div>
+              <b>Pilar (criador):</b> {e.criador?.full_name || e.criador?.email || "—"}
+            </div>
+            <div>
+              <b>Criada em:</b> {fmtDate(e.created_at)}
+            </div>
+            <div>
+              <b>Respondida em:</b> {fmtDate(e.respondida_em)}
+            </div>
           </div>
 
           <div className="accent">Respostas</div>
@@ -138,17 +182,37 @@ function ImprimirEntrevistaPage() {
               const hasAny = opts.length > 0 || hasText;
               return (
                 <div key={`${r.numero}-${r.pergunta_id}`} className="qblock">
-                  <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: 0.4, color: "#6B7280", marginBottom: 2 }}>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.4,
+                      color: "#6B7280",
+                      marginBottom: 2,
+                    }}
+                  >
                     Pergunta {r.numero}
                   </div>
                   <div style={{ fontWeight: "bold", marginBottom: 4 }}>{r.enunciado}</div>
                   {opts.map((o, i) => (
-                    <div key={i} style={{ paddingLeft: 12 }}>• {o}</div>
+                    <div key={i} style={{ paddingLeft: 12 }}>
+                      • {o}
+                    </div>
                   ))}
                   {hasText && <div style={{ marginTop: 4 }}>{r.valor_text}</div>}
-                  {!hasAny && <div style={{ fontStyle: "italic", color: "#6B7280" }}>— não respondida —</div>}
+                  {!hasAny && (
+                    <div style={{ fontStyle: "italic", color: "#6B7280" }}>— não respondida —</div>
+                  )}
                   {r.descricao_extra ? (
-                    <div style={{ marginTop: 6, paddingLeft: 8, borderLeft: "2px solid #0B3D91", fontSize: 10, color: "#374151" }}>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        paddingLeft: 8,
+                        borderLeft: "2px solid #0B3D91",
+                        fontSize: 10,
+                        color: "#374151",
+                      }}
+                    >
                       Observação: {r.descricao_extra}
                     </div>
                   ) : null}
@@ -157,7 +221,15 @@ function ImprimirEntrevistaPage() {
             })
           )}
 
-          <div style={{ textAlign: "center", fontSize: 10, marginTop: 24, borderTop: "1px solid #000", paddingTop: 4 }}>
+          <div
+            style={{
+              textAlign: "center",
+              fontSize: 10,
+              marginTop: 24,
+              borderTop: "1px solid #000",
+              paddingTop: 4,
+            }}
+          >
             {empresa} · {codigoDoc}
           </div>
         </div>

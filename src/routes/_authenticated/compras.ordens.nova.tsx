@@ -38,9 +38,7 @@ function NovaOcPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
   const insumoIdSearch = search.insumo_id ?? null;
-  const [origem, setOrigem] = useState<"manual" | "insumo">(
-    insumoIdSearch ? "insumo" : "manual",
-  );
+  const [origem, setOrigem] = useState<"manual" | "insumo">(insumoIdSearch ? "insumo" : "manual");
   const [fornecedorId, setFornecedorId] = useState<string>("");
   const [tipo, setTipo] = useState<"normal" | "terceiros">("normal");
   const [busca, setBusca] = useState("");
@@ -103,12 +101,16 @@ function NovaOcPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-xs text-muted-foreground rounded-md border bg-amber-50 border-amber-200 p-3">
-            A OC gerada a partir de um insumo só é emitida se houver <b>aprovação vigente</b> por
-            um engenheiro, gerente ou admin. Os PDFs (PT/ES/EN) são gerados automaticamente e
-            salvos na pasta do item no Google Drive.
+            A OC gerada a partir de um insumo só é emitida se houver <b>aprovação vigente</b> por um
+            engenheiro, gerente ou admin. Os PDFs (PT/ES/EN) são gerados automaticamente e salvos na
+            pasta do item no Google Drive.
           </div>
 
-          <RadioGroup value={origem} onValueChange={(v) => setOrigem(v as typeof origem)} className="grid grid-cols-1 gap-3">
+          <RadioGroup
+            value={origem}
+            onValueChange={(v) => setOrigem(v as typeof origem)}
+            className="grid grid-cols-1 gap-3"
+          >
             <Label
               htmlFor="orig-ins"
               className={
@@ -149,8 +151,8 @@ function NovaOcPage() {
               <div className="space-y-2 md:col-span-2 text-sm text-muted-foreground rounded-md border bg-muted/40 p-3">
                 <strong className="text-foreground">Insumo:</strong> {insumoIdSearch}
                 <div className="mt-1 text-xs">
-                  Se nenhum fornecedor for informado, o sistema usará o sugerido na aprovação ou
-                  o último Checklist respondido.
+                  Se nenhum fornecedor for informado, o sistema usará o sugerido na aprovação ou o
+                  último Checklist respondido.
                 </div>
               </div>
               <div className="space-y-2">

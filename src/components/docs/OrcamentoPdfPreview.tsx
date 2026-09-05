@@ -71,7 +71,12 @@ export function OrcamentoPdfPreview({ codigo, versao, idioma, payload, blocos, l
     };
   }, [codigo, versao, idioma, payload, blocos, layout]);
 
-  useEffect(() => () => { if (lastUrl.current) URL.revokeObjectURL(lastUrl.current); }, []);
+  useEffect(
+    () => () => {
+      if (lastUrl.current) URL.revokeObjectURL(lastUrl.current);
+    },
+    [],
+  );
 
   if (!layout) {
     return (
@@ -86,13 +91,19 @@ export function OrcamentoPdfPreview({ codigo, versao, idioma, payload, blocos, l
       <div className="flex items-center justify-between border-b border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 py-2 text-xs">
         <div className="flex items-center gap-2 text-[var(--text-muted)]">
           {busy ? (
-            <><Loader2 className="h-3 w-3 animate-spin" /> Renderizando…</>
+            <>
+              <Loader2 className="h-3 w-3 animate-spin" /> Renderizando…
+            </>
           ) : err ? (
             <span className="text-rose-600">Erro: {err}</span>
           ) : (
             <>
               <span className="font-mono">{codigo}</span> · v{versao} · {idioma.toUpperCase()}
-              {pages != null && <span className="ml-2">· {pages} página{pages === 1 ? "" : "s"}</span>}
+              {pages != null && (
+                <span className="ml-2">
+                  · {pages} página{pages === 1 ? "" : "s"}
+                </span>
+              )}
             </>
           )}
         </div>
@@ -102,7 +113,12 @@ export function OrcamentoPdfPreview({ codigo, versao, idioma, payload, blocos, l
           <object data={url} type="application/pdf" className="h-full w-full">
             <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-sm text-[var(--text-muted)]">
               <p>O navegador bloqueou a prévia incorporada do PDF.</p>
-              <a href={url} target="_blank" rel="noreferrer" className="text-[var(--accent)] underline">
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--accent)] underline"
+              >
                 Abrir prévia em nova aba
               </a>
             </div>

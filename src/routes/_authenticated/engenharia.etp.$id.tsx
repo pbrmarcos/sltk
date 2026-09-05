@@ -31,10 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  etpHistoricoQueryOptions,
-  etpQueryOptions,
-} from "@/lib/engenharia.queries";
+import { etpHistoricoQueryOptions, etpQueryOptions } from "@/lib/engenharia.queries";
 import {
   aprovarEtp,
   enviarEtpParaRevisao,
@@ -61,8 +58,7 @@ import { cn } from "@/lib/utils";
 import { EtpAnexosPanel } from "@/components/engenharia/EtpAnexosPanel";
 
 export const Route = createFileRoute("/_authenticated/engenharia/etp/$id")({
-  loader: ({ params, context }) =>
-    context.queryClient.ensureQueryData(etpQueryOptions(params.id)),
+  loader: ({ params, context }) => context.queryClient.ensureQueryData(etpQueryOptions(params.id)),
   component: EtpEditorPage,
   errorComponent: EtpEditorError,
   pendingComponent: () => (
@@ -297,7 +293,8 @@ function EtpEditorPage() {
             {savedAt && !dirty ? (
               <span className="text-[11px] text-emerald-600">
                 <CheckCircle2 className="mr-1 inline h-3 w-3" />
-                Salvo às {savedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                Salvo às{" "}
+                {savedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </span>
             ) : dirty ? (
               <span className="text-[11px] text-amber-600">
@@ -452,7 +449,6 @@ function EtpEditorPage() {
         </div>
       ) : null}
 
-
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
         {/* Editor */}
         <div className="space-y-4">
@@ -545,9 +541,8 @@ function EtpEditorPage() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-[var(--text-secondary)]">
-              O ETP voltará para <strong>Em revisão</strong> e ficará editável.
-              A reabertura, seu autor e a justificativa abaixo ficarão
-              registrados permanentemente no histórico.
+              O ETP voltará para <strong>Em revisão</strong> e ficará editável. A reabertura, seu
+              autor e a justificativa abaixo ficarão registrados permanentemente no histórico.
             </p>
             <label className="block space-y-1">
               <span className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
@@ -575,9 +570,7 @@ function EtpEditorPage() {
               Cancelar
             </Button>
             <Button
-              disabled={
-                reabrirMut.isPending || justificativa.trim().length < 10
-              }
+              disabled={reabrirMut.isPending || justificativa.trim().length < 10}
               onClick={() => reabrirMut.mutate()}
             >
               <RotateCcw className="mr-1.5 h-4 w-4" /> Reabrir e registrar
@@ -602,8 +595,8 @@ function EtpEditorPage() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-[var(--text-secondary)]">
-              O ETP ficará com status <strong>Rejeitado</strong> e congelado até ser
-              retomado. O motivo abaixo fica registrado no histórico.
+              O ETP ficará com status <strong>Rejeitado</strong> e congelado até ser retomado. O
+              motivo abaixo fica registrado no histórico.
             </p>
             <Textarea
               rows={4}
@@ -618,7 +611,11 @@ function EtpEditorPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejeitarOpen(false)} disabled={rejeitarMut.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setRejeitarOpen(false)}
+              disabled={rejeitarMut.isPending}
+            >
               Cancelar
             </Button>
             <Button
@@ -664,7 +661,11 @@ function EtpEditorPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRetomarOpen(false)} disabled={retomarMut.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setRetomarOpen(false)}
+              disabled={retomarMut.isPending}
+            >
               Cancelar
             </Button>
             <Button
@@ -719,9 +720,7 @@ function Field({
           {value.length.toLocaleString("pt-BR")} / {max.toLocaleString("pt-BR")}
         </span>
       </div>
-      {hint ? (
-        <p className="text-[11px] text-[var(--text-muted)]">{hint}</p>
-      ) : null}
+      {hint ? <p className="text-[11px] text-[var(--text-muted)]">{hint}</p> : null}
       <Textarea
         rows={5}
         disabled={readOnly}
@@ -795,9 +794,7 @@ function HistoricoPanel({ etpId }: { etpId: string }) {
       {isLoading ? (
         <p className="text-xs text-[var(--text-muted)]">Carregando histórico…</p>
       ) : historico.length === 0 ? (
-        <p className="text-xs text-[var(--text-muted)]">
-          Nenhuma alteração registrada ainda.
-        </p>
+        <p className="text-xs text-[var(--text-muted)]">Nenhuma alteração registrada ainda.</p>
       ) : (
         <ol className="relative space-y-3 border-l border-[var(--bg-border)] pl-4">
           {historico.map((h) => (
@@ -851,9 +848,7 @@ function HistoricoItem({
         {h.campo ? (
           <>
             {" · "}
-            <span className="text-[var(--text-muted)]">
-              {ETP_CAMPO_LABEL[h.campo] ?? h.campo}
-            </span>
+            <span className="text-[var(--text-muted)]">{ETP_CAMPO_LABEL[h.campo] ?? h.campo}</span>
           </>
         ) : null}
       </div>
@@ -864,12 +859,17 @@ function HistoricoItem({
         </p>
       ) : null}
 
-      {h.tipo === "alteracao" || h.tipo === "status" || h.tipo === "aprovacao" || h.tipo === "anexo" ? (
+      {h.tipo === "alteracao" ||
+      h.tipo === "status" ||
+      h.tipo === "aprovacao" ||
+      h.tipo === "anexo" ? (
         <div className="mt-1 space-y-1 text-[11px]">
           {h.valor_anterior ? (
             <div className="rounded-[var(--radius-md)] border border-rose-100 bg-rose-50/50 px-2 py-1 text-rose-800">
               <span className="mr-1 font-mono text-[10px] text-rose-500">−</span>
-              <span className="line-clamp-3 whitespace-pre-wrap break-words">{h.valor_anterior}</span>
+              <span className="line-clamp-3 whitespace-pre-wrap break-words">
+                {h.valor_anterior}
+              </span>
             </div>
           ) : null}
           {h.valor_novo ? (
@@ -879,7 +879,9 @@ function HistoricoItem({
             </div>
           ) : null}
           {h.mensagem ? (
-            <div className="text-[var(--text-muted)] whitespace-pre-wrap break-words">{h.mensagem}</div>
+            <div className="text-[var(--text-muted)] whitespace-pre-wrap break-words">
+              {h.mensagem}
+            </div>
           ) : null}
         </div>
       ) : null}

@@ -26,12 +26,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
   listEmailEvents,
@@ -45,11 +60,20 @@ import {
 import { runDiagnosticoLimitado } from "@/lib/system-diagnostics.functions";
 import { Eye } from "lucide-react";
 
-const APP_ROLES = ["admin","manager","engineer","production","purchasing","assembly","field","sales"] as const;
+const APP_ROLES = [
+  "admin",
+  "manager",
+  "engineer",
+  "production",
+  "purchasing",
+  "assembly",
+  "field",
+  "sales",
+] as const;
 type AppRole = (typeof APP_ROLES)[number];
 type Mode = "to" | "cc" | null;
 
-const searchSchema = z.object({ tab: z.enum(["eventos","logs"]).optional() });
+const searchSchema = z.object({ tab: z.enum(["eventos", "logs"]).optional() });
 
 export const Route = createFileRoute("/_authenticated/admin/emails")({
   validateSearch: searchSchema,
@@ -142,10 +166,17 @@ function ProviderStatusBanner() {
     return (
       <div className="mt-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
         <CheckCircle2 className="h-4 w-4" />
-        Provedor <strong>Resend</strong> conectado — envios reais por <strong>{SENDER_EMAIL}</strong>.
-        {calendarConfigured
-          ? <span className="ml-2 text-xs">+ Google Calendar disponível para eventos com agenda.</span>
-          : <span className="ml-2 text-xs text-emerald-700/80">(Google Calendar opcional — não configurado.)</span>}
+        Provedor <strong>Resend</strong> conectado — envios reais por{" "}
+        <strong>{SENDER_EMAIL}</strong>.
+        {calendarConfigured ? (
+          <span className="ml-2 text-xs">
+            + Google Calendar disponível para eventos com agenda.
+          </span>
+        ) : (
+          <span className="ml-2 text-xs text-emerald-700/80">
+            (Google Calendar opcional — não configurado.)
+          </span>
+        )}
       </div>
     );
   }
@@ -155,10 +186,10 @@ function ProviderStatusBanner() {
       <div>
         <div className="font-medium">Provedor Resend ainda não configurado</div>
         <p className="mt-1">
-          Enquanto <code>RESEND_API_KEY</code> não estiver ativa, os disparos são
-          registrados no log com status
-          <code> provider_not_configured</code> e nenhum e-mail sai de fato. Toda a
-          configuração de templates, matriz e toggles pode ser feita normalmente.
+          Enquanto <code>RESEND_API_KEY</code> não estiver ativa, os disparos são registrados no log
+          com status
+          <code> provider_not_configured</code> e nenhum e-mail sai de fato. Toda a configuração de
+          templates, matriz e toggles pode ser feita normalmente.
         </p>
       </div>
     </div>
@@ -197,7 +228,7 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
       arr.push(e);
       map.set(e.module, arr);
     }
-    return Array.from(map.entries()).sort(([a],[b]) => a.localeCompare(b));
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [data]);
 
   const recipientsByEvent = useMemo(() => {
@@ -211,7 +242,11 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
   }, [data]);
 
   if (isLoading) {
-    return <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando eventos…</div>;
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" /> Carregando eventos…
+      </div>
+    );
   }
 
   const openEvent = openKey
@@ -228,7 +263,9 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
           <CardHeader className="py-3">
             <CardTitle className="flex items-center gap-2 text-base capitalize">
               <Mail className="h-4 w-4" /> {mod}
-              <Badge variant="secondary" className="ml-2">{events.length}</Badge>
+              <Badge variant="secondary" className="ml-2">
+                {events.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -259,10 +296,14 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {toList.map((r) => (
-                              <Badge key={`to-${r}`} variant="default" className="text-[10px]">To: {r}</Badge>
+                              <Badge key={`to-${r}`} variant="default" className="text-[10px]">
+                                To: {r}
+                              </Badge>
                             ))}
                             {ccList.map((r) => (
-                              <Badge key={`cc-${r}`} variant="outline" className="text-[10px]">Cc: {r}</Badge>
+                              <Badge key={`cc-${r}`} variant="outline" className="text-[10px]">
+                                Cc: {r}
+                              </Badge>
                             ))}
                             {recs.length === 0 && (
                               <span className="text-xs text-muted-foreground">nenhum</span>
@@ -283,15 +324,18 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
                           {last ? (
                             <div className="flex flex-col">
                               <span className="text-xs">
-                                {new Date(last.at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                                {new Date(last.at).toLocaleString("pt-BR", {
+                                  dateStyle: "short",
+                                  timeStyle: "short",
+                                })}
                               </span>
                               <Badge
                                 variant={
                                   last.status === "sent" || last.status === "delivered"
                                     ? "default"
                                     : last.status === "provider_not_configured"
-                                    ? "secondary"
-                                    : "destructive"
+                                      ? "secondary"
+                                      : "destructive"
                                 }
                                 className="mt-0.5 w-fit text-[10px]"
                               >
@@ -303,7 +347,11 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
                           )}
                         </TableCell>
                         <TableCell>
-                          <ToggleCell eventKey={e.event_key} enabled={e.enabled} disabled={!canEdit} />
+                          <ToggleCell
+                            eventKey={e.event_key}
+                            enabled={e.enabled}
+                            disabled={!canEdit}
+                          />
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
@@ -343,19 +391,20 @@ function EventsTab({ canEdit }: { canEdit: boolean }) {
           onClose={() => setOpenKey(null)}
         />
       )}
-      {viewEvent && (
-        <QuickPreviewDialog
-          event={viewEvent}
-          onClose={() => setViewKey(null)}
-        />
-      )}
+      {viewEvent && <QuickPreviewDialog event={viewEvent} onClose={() => setViewKey(null)} />}
     </div>
   );
 }
 
 function ToggleCell({
-  eventKey, enabled, disabled,
-}: { eventKey: string; enabled: boolean; disabled: boolean }) {
+  eventKey,
+  enabled,
+  disabled,
+}: {
+  eventKey: string;
+  enabled: boolean;
+  disabled: boolean;
+}) {
   const qc = useQueryClient();
   const fn = useServerFn(toggleEmailEvent);
   const mut = useMutation({
@@ -376,7 +425,10 @@ function ToggleCell({
 }
 
 function EventEditorDialog({
-  event, recipients, canEdit, onClose,
+  event,
+  recipients,
+  canEdit,
+  onClose,
 }: {
   event: EventRow;
   recipients: RecipientRow[];
@@ -388,9 +440,7 @@ function EventEditorDialog({
   const [body, setBody] = useState(event.body_template);
   const [calendar, setCalendar] = useState(event.create_calendar_event);
   const [duration, setDuration] = useState(event.calendar_duration_min ?? 60);
-  const [requiredVars, setRequiredVars] = useState<string>(
-    (event.required_vars ?? []).join(", "),
-  );
+  const [requiredVars, setRequiredVars] = useState<string>((event.required_vars ?? []).join(", "));
   const [testRecipient, setTestRecipient] = useState<string>("");
 
   const initialMap = useMemo(() => {
@@ -406,9 +456,18 @@ function EventEditorDialog({
   const previewFn = useServerFn(previewEmailTemplate);
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [preview, setPreview] = useState<{ subject: string; html: string; warnings: string[]; unknown_vars: string[]; vars_used: string[] } | null>(null);
+  const [preview, setPreview] = useState<{
+    subject: string;
+    html: string;
+    warnings: string[];
+    unknown_vars: string[];
+    vars_used: string[];
+  } | null>(null);
   const previewMut = useMutation({
-    mutationFn: () => previewFn({ data: { subject_template: subject, body_template: body, event_key: event.event_key } }),
+    mutationFn: () =>
+      previewFn({
+        data: { subject_template: subject, body_template: body, event_key: event.event_key },
+      }),
     onSuccess: (res) => {
       setPreview(res);
       setPreviewOpen(true);
@@ -422,14 +481,17 @@ function EventEditorDialog({
     .filter((s) => /^[a-zA-Z0-9_]+$/.test(s));
 
   const saveTpl = useMutation({
-    mutationFn: () => tplFn({ data: {
-      event_key: event.event_key,
-      subject_template: subject,
-      body_template: body,
-      create_calendar_event: calendar,
-      calendar_duration_min: calendar ? duration : null,
-      required_vars: parsedRequired,
-    }}),
+    mutationFn: () =>
+      tplFn({
+        data: {
+          event_key: event.event_key,
+          subject_template: subject,
+          body_template: body,
+          create_calendar_event: calendar,
+          calendar_duration_min: calendar ? duration : null,
+          required_vars: parsedRequired,
+        },
+      }),
     onSuccess: () => {
       toast.success("Template salvo.");
       qc.invalidateQueries({ queryKey: ["email-events"] });
@@ -437,12 +499,15 @@ function EventEditorDialog({
     onError: (e: Error) => toast.error(e.message),
   });
   const saveRec = useMutation({
-    mutationFn: () => recFn({ data: {
-      event_key: event.event_key,
-      recipients: Array.from(modes.entries())
-        .filter(([, m]) => m !== null)
-        .map(([role, mode]) => ({ role, mode: mode as "to" | "cc" })),
-    }}),
+    mutationFn: () =>
+      recFn({
+        data: {
+          event_key: event.event_key,
+          recipients: Array.from(modes.entries())
+            .filter(([, m]) => m !== null)
+            .map(([role, mode]) => ({ role, mode: mode as "to" | "cc" })),
+        },
+      }),
     onSuccess: () => {
       toast.success("Destinatários salvos.");
       qc.invalidateQueries({ queryKey: ["email-events"] });
@@ -450,14 +515,16 @@ function EventEditorDialog({
     onError: (e: Error) => toast.error(e.message),
   });
   const testMut = useMutation({
-    mutationFn: () => testFn({ data: {
-      event_key: event.event_key,
-      recipient: testRecipient.trim() || null,
-    } }),
+    mutationFn: () =>
+      testFn({
+        data: {
+          event_key: event.event_key,
+          recipient: testRecipient.trim() || null,
+        },
+      }),
     onSuccess: (res) => toast.success(`Teste enviado para ${res.recipient}.`),
     onError: (e: Error) => toast.error(e.message),
   });
-
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -474,10 +541,16 @@ function EventEditorDialog({
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label>Assunto</Label>
-            <Input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={!canEdit} />
+            <Input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              disabled={!canEdit}
+            />
           </div>
           <div className="grid gap-2">
-            <Label>Corpo (HTML — variáveis <code>{"{{var}}"}</code>)</Label>
+            <Label>
+              Corpo (HTML — variáveis <code>{"{{var}}"}</code>)
+            </Label>
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
@@ -488,11 +561,7 @@ function EventEditorDialog({
           </div>
 
           <div className="flex items-center gap-4 rounded-md border p-3">
-            <Switch
-              checked={calendar}
-              onCheckedChange={setCalendar}
-              disabled={!canEdit}
-            />
+            <Switch checked={calendar} onCheckedChange={setCalendar} disabled={!canEdit} />
             <div className="flex-1">
               <div className="text-sm font-medium">Criar evento na agenda Google</div>
               <div className="text-xs text-muted-foreground">
@@ -520,12 +589,12 @@ function EventEditorDialog({
               className="font-mono text-xs"
             />
             <p className="text-xs text-muted-foreground">
-              Separadas por vírgula. Se qualquer uma estiver vazia no disparo, o envio é bloqueado e registrado no log com status <code>skipped_missing_required</code>.
+              Separadas por vírgula. Se qualquer uma estiver vazia no disparo, o envio é bloqueado e
+              registrado no log com status <code>skipped_missing_required</code>.
             </p>
           </div>
 
           <Separator />
-
 
           <div>
             <div className="mb-2 text-sm font-medium">Destinatários por papel</div>
@@ -624,7 +693,13 @@ function PreviewDialog({
   preview,
   onClose,
 }: {
-  preview: { subject: string; html: string; warnings: string[]; unknown_vars: string[]; vars_used: string[] };
+  preview: {
+    subject: string;
+    html: string;
+    warnings: string[];
+    unknown_vars: string[];
+    vars_used: string[];
+  };
   onClose: () => void;
 }) {
   return (
@@ -635,7 +710,8 @@ function PreviewDialog({
             <Eye className="h-4 w-4" /> Prévia do e-mail
           </DialogTitle>
           <p className="text-xs text-muted-foreground">
-            Renderizado com dados fictícios de exemplo. Assunto e corpo vão pelo mesmo layout do envio real.
+            Renderizado com dados fictícios de exemplo. Assunto e corpo vão pelo mesmo layout do
+            envio real.
           </p>
         </DialogHeader>
 
@@ -651,7 +727,9 @@ function PreviewDialog({
                 <AlertTriangle className="h-3.5 w-3.5" /> Avisos de validação
               </div>
               <ul className="list-disc space-y-0.5 pl-4">
-                {preview.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                {preview.warnings.map((w, i) => (
+                  <li key={i}>{w}</li>
+                ))}
               </ul>
             </div>
           )}
@@ -682,7 +760,9 @@ function PreviewDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>Fechar</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Fechar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -703,11 +783,14 @@ function QuickPreviewDialog({
   const previewFn = useServerFn(previewEmailTemplate);
   const { data, isLoading, error } = useQuery({
     queryKey: ["email-preview-quick", event.event_key, event.subject_template, event.body_template],
-    queryFn: () => previewFn({ data: {
-      subject_template: event.subject_template,
-      body_template: event.body_template,
-      event_key: event.event_key,
-    }}),
+    queryFn: () =>
+      previewFn({
+        data: {
+          subject_template: event.subject_template,
+          body_template: event.body_template,
+          event_key: event.event_key,
+        },
+      }),
     staleTime: 60_000,
   });
 
@@ -719,7 +802,8 @@ function QuickPreviewDialog({
             <Eye className="h-4 w-4" /> {event.label}
           </DialogTitle>
           <p className="text-xs text-muted-foreground">
-            Renderizado com dados de exemplo — mesmo layout usado no envio real (header com logo, rodapé e CTA).
+            Renderizado com dados de exemplo — mesmo layout usado no envio real (header com logo,
+            rodapé e CTA).
           </p>
         </DialogHeader>
 
@@ -736,7 +820,9 @@ function QuickPreviewDialog({
         {data && (
           <div className="grid gap-3">
             <div className="rounded-md border bg-muted/40 p-3 text-sm">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Assunto</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Assunto
+              </div>
               <div className="font-medium">{data.subject}</div>
             </div>
             {data.warnings.length > 0 && (
@@ -745,7 +831,9 @@ function QuickPreviewDialog({
                   <AlertTriangle className="h-3.5 w-3.5" /> Avisos
                 </div>
                 <ul className="list-disc space-y-0.5 pl-4">
-                  {data.warnings.map((w: string, i: number) => <li key={i}>{w}</li>)}
+                  {data.warnings.map((w: string, i: number) => (
+                    <li key={i}>{w}</li>
+                  ))}
                 </ul>
               </div>
             )}
@@ -761,7 +849,9 @@ function QuickPreviewDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>Fechar</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Fechar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -772,7 +862,9 @@ function LogsTab() {
   const [eventKey, setEventKey] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [viewLogKey, setViewLogKey] = useState<string | null>(null);
-  const [detailLog, setDetailLog] = useState<null | Awaited<ReturnType<typeof fn>>["rows"][number]>(null);
+  const [detailLog, setDetailLog] = useState<null | Awaited<ReturnType<typeof fn>>["rows"][number]>(
+    null,
+  );
 
   const fn = useServerFn(listEmailLogs);
   const eventsFn = useServerFn(listEmailEvents);
@@ -786,12 +878,14 @@ function LogsTab() {
   const { data, isLoading } = useQuery({
     queryKey: ["email-logs", eventKey, status],
     queryFn: () =>
-      fn({ data: {
-        event_key: eventKey || null,
-        status: status || null,
-        page: 1,
-        pageSize: 100,
-      }}),
+      fn({
+        data: {
+          event_key: eventKey || null,
+          status: status || null,
+          page: 1,
+          pageSize: 100,
+        },
+      }),
   });
 
   return (
@@ -808,21 +902,26 @@ function LogsTab() {
             className="w-64"
           />
           <Select value={status || "all"} onValueChange={(v) => setStatus(v === "all" ? "" : v)}>
-            <SelectTrigger className="w-56"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectTrigger className="w-56">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="sent">Enviado</SelectItem>
               <SelectItem value="failed">Falhou</SelectItem>
               <SelectItem value="skipped_disabled">Ignorado (desativado)</SelectItem>
               <SelectItem value="skipped_no_recipients">Ignorado (sem destinatários)</SelectItem>
-              <SelectItem value="skipped_missing_required">Ignorado (variáveis obrigatórias)</SelectItem>
+              <SelectItem value="skipped_missing_required">
+                Ignorado (variáveis obrigatórias)
+              </SelectItem>
               <SelectItem value="provider_not_configured">Provider não configurado</SelectItem>
-
             </SelectContent>
           </Select>
         </div>
         {isLoading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando…</div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
@@ -840,17 +939,25 @@ function LogsTab() {
               <TableBody>
                 {(data?.rows ?? []).map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell className="whitespace-nowrap text-xs">{new Date(r.created_at).toLocaleString("pt-BR")}</TableCell>
-                    <TableCell className="text-xs"><code>{r.event_key}</code></TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {new Date(r.created_at).toLocaleString("pt-BR")}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <code>{r.event_key}</code>
+                    </TableCell>
                     <TableCell className="text-xs">{r.triggered_by_kind}</TableCell>
                     <TableCell className="text-xs">
                       <div>{(r.to_addresses ?? []).join(", ")}</div>
                       {(r.cc_addresses ?? []).length > 0 && (
-                        <div className="text-muted-foreground">Cc: {(r.cc_addresses ?? []).join(", ")}</div>
+                        <div className="text-muted-foreground">
+                          Cc: {(r.cc_addresses ?? []).join(", ")}
+                        </div>
                       )}
                     </TableCell>
                     <TableCell className="max-w-[320px] truncate text-xs">{r.subject}</TableCell>
-                    <TableCell><StatusBadge status={r.status} /></TableCell>
+                    <TableCell>
+                      <StatusBadge status={r.status} />
+                    </TableCell>
                     <TableCell className="flex gap-1">
                       <Button
                         variant="ghost"
@@ -871,11 +978,14 @@ function LogsTab() {
                         </Button>
                       )}
                     </TableCell>
-
                   </TableRow>
                 ))}
                 {(!data || data.rows.length === 0) && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-sm text-muted-foreground">Nenhum registro.</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                      Nenhum registro.
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -885,9 +995,7 @@ function LogsTab() {
       {viewLogEvent && (
         <QuickPreviewDialog event={viewLogEvent} onClose={() => setViewLogKey(null)} />
       )}
-      {detailLog && (
-        <LogDetailDialog log={detailLog} onClose={() => setDetailLog(null)} />
-      )}
+      {detailLog && <LogDetailDialog log={detailLog} onClose={() => setDetailLog(null)} />}
     </Card>
   );
 }
@@ -945,7 +1053,9 @@ function LogDetailDialog({
           <div className="rounded-md border p-2 text-xs">
             <div className="mb-1 text-[10px] uppercase text-muted-foreground">Status</div>
             <StatusBadge status={log.status} />
-            {log.error && <div className="mt-2 rounded bg-red-50 p-2 text-red-800">{log.error}</div>}
+            {log.error && (
+              <div className="mt-2 rounded bg-red-50 p-2 text-red-800">{log.error}</div>
+            )}
           </div>
 
           {log.required_missing && log.required_missing.length > 0 && (
@@ -953,7 +1063,11 @@ function LogDetailDialog({
               <div className="mb-1 font-medium">Variáveis obrigatórias ausentes</div>
               <div className="flex flex-wrap gap-1">
                 {log.required_missing.map((v) => (
-                  <Badge key={v} variant="outline" className="border-amber-400 bg-amber-100 font-mono text-[10px]">
+                  <Badge
+                    key={v}
+                    variant="outline"
+                    className="border-amber-400 bg-amber-100 font-mono text-[10px]"
+                  >
                     {v}
                   </Badge>
                 ))}
@@ -962,7 +1076,9 @@ function LogDetailDialog({
           )}
 
           <div className="rounded-md border p-2">
-            <div className="mb-1 text-[10px] uppercase text-muted-foreground">Variáveis usadas ({varKeys.length})</div>
+            <div className="mb-1 text-[10px] uppercase text-muted-foreground">
+              Variáveis usadas ({varKeys.length})
+            </div>
             {varKeys.length === 0 ? (
               <div className="text-xs text-muted-foreground">Nenhuma variável registrada.</div>
             ) : (
@@ -983,15 +1099,25 @@ function LogDetailDialog({
 
           {log.template_snapshot && (
             <details className="rounded-md border p-2 text-xs">
-              <summary className="cursor-pointer font-medium">Snapshot do template no momento do envio</summary>
+              <summary className="cursor-pointer font-medium">
+                Snapshot do template no momento do envio
+              </summary>
               <div className="mt-2 space-y-2">
                 <div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Assunto (template)</div>
-                  <pre className="whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-[11px]">{log.template_snapshot.subject_template}</pre>
+                  <div className="text-[10px] uppercase text-muted-foreground">
+                    Assunto (template)
+                  </div>
+                  <pre className="whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-[11px]">
+                    {log.template_snapshot.subject_template}
+                  </pre>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Corpo (template)</div>
-                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-[11px]">{log.template_snapshot.body_template}</pre>
+                  <div className="text-[10px] uppercase text-muted-foreground">
+                    Corpo (template)
+                  </div>
+                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-[11px]">
+                    {log.template_snapshot.body_template}
+                  </pre>
                 </div>
               </div>
             </details>
@@ -999,18 +1125,31 @@ function LogDetailDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>Fechar</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Fechar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-
-
 function StatusBadge({ status }: { status: string }) {
-  if (status === "sent") return <Badge className="gap-1 bg-emerald-600"><CheckCircle2 className="h-3 w-3" /> enviado</Badge>;
-  if (status === "failed") return <Badge className="gap-1 bg-red-600"><XCircle className="h-3 w-3" /> falhou</Badge>;
-  return <Badge variant="outline" className="gap-1"><AlertTriangle className="h-3 w-3" /> {status}</Badge>;
+  if (status === "sent")
+    return (
+      <Badge className="gap-1 bg-emerald-600">
+        <CheckCircle2 className="h-3 w-3" /> enviado
+      </Badge>
+    );
+  if (status === "failed")
+    return (
+      <Badge className="gap-1 bg-red-600">
+        <XCircle className="h-3 w-3" /> falhou
+      </Badge>
+    );
+  return (
+    <Badge variant="outline" className="gap-1">
+      <AlertTriangle className="h-3 w-3" /> {status}
+    </Badge>
+  );
 }
-

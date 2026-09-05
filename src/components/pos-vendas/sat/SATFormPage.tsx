@@ -11,11 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Loader2, Save, FileText, ExternalLink } from "lucide-react";
 import { getSATTemplate, type SATTemplateDetalhe } from "@/lib/sat-templates.functions";
-import {
-  getSATRelatorio,
-  saveSATRelatorio,
-  listSATAnexos,
-} from "@/lib/sat-relatorios.functions";
+import { getSATRelatorio, saveSATRelatorio, listSATAnexos } from "@/lib/sat-relatorios.functions";
 import { SATAnexoUploader } from "./SATAnexoUploader";
 import { useFormDraft } from "@/hooks/use-form-draft";
 
@@ -60,13 +56,21 @@ export function SATFormPage({ id }: { id: string }) {
   const [dirty, setDirty] = useState(false);
 
   const serverDraft = useMemo(() => {
-    const row = relQ.data as {
-      dados?: Dados; observacoes?: string | null; periodo_de?: string | null;
-      periodo_ate?: string | null; local_endereco?: string | null;
-    } | undefined;
+    const row = relQ.data as
+      | {
+          dados?: Dados;
+          observacoes?: string | null;
+          periodo_de?: string | null;
+          periodo_ate?: string | null;
+          local_endereco?: string | null;
+        }
+      | undefined;
     return {
-      dados: row?.dados ?? {}, observacoes: row?.observacoes ?? "", periodoDe: row?.periodo_de ?? "",
-      periodoAte: row?.periodo_ate ?? "", local: row?.local_endereco ?? "",
+      dados: row?.dados ?? {},
+      observacoes: row?.observacoes ?? "",
+      periodoDe: row?.periodo_de ?? "",
+      periodoAte: row?.periodo_ate ?? "",
+      local: row?.local_endereco ?? "",
     };
   }, [relQ.data]);
   const { clearDraft } = useFormDraft({
@@ -75,8 +79,12 @@ export function SATFormPage({ id }: { id: string }) {
     initialValue: serverDraft,
     enabled: !!relQ.data,
     onRestore: (saved) => {
-      setDados(saved.dados); setObservacoes(saved.observacoes); setPeriodoDe(saved.periodoDe);
-      setPeriodoAte(saved.periodoAte); setLocal(saved.local); setDirty(true);
+      setDados(saved.dados);
+      setObservacoes(saved.observacoes);
+      setPeriodoDe(saved.periodoDe);
+      setPeriodoAte(saved.periodoAte);
+      setLocal(saved.local);
+      setDirty(true);
     },
   });
 
@@ -248,12 +256,14 @@ export function SATFormPage({ id }: { id: string }) {
                   {it.tipo === "sim_nao_comentario" && (
                     <div className="space-y-2">
                       <div className="flex gap-2">
-                        <label className={cn(
-                          "inline-flex items-center gap-2 text-[13px] font-medium px-3.5 h-9 rounded-[var(--radius-md)] border cursor-pointer transition-all",
-                          resp.sim_nao === "sim"
-                            ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)]"
-                            : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:border-[var(--text-muted)]/50"
-                        )}>
+                        <label
+                          className={cn(
+                            "inline-flex items-center gap-2 text-[13px] font-medium px-3.5 h-9 rounded-[var(--radius-md)] border cursor-pointer transition-all",
+                            resp.sim_nao === "sim"
+                              ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)]"
+                              : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:border-[var(--text-muted)]/50",
+                          )}
+                        >
                           <input
                             type="radio"
                             className="accent-[var(--primary)]"
@@ -263,12 +273,14 @@ export function SATFormPage({ id }: { id: string }) {
                           />
                           Sim
                         </label>
-                        <label className={cn(
-                          "inline-flex items-center gap-2 text-[13px] font-medium px-3.5 h-9 rounded-[var(--radius-md)] border cursor-pointer transition-all",
-                          resp.sim_nao === "nao"
-                            ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)]"
-                            : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:border-[var(--text-muted)]/50"
-                        )}>
+                        <label
+                          className={cn(
+                            "inline-flex items-center gap-2 text-[13px] font-medium px-3.5 h-9 rounded-[var(--radius-md)] border cursor-pointer transition-all",
+                            resp.sim_nao === "nao"
+                              ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--text-primary)]"
+                              : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:border-[var(--text-muted)]/50",
+                          )}
+                        >
                           <input
                             type="radio"
                             className="accent-[var(--primary)]"
@@ -368,10 +380,7 @@ export function SATFormPage({ id }: { id: string }) {
         <div className="text-[12px] text-[var(--text-muted)]">
           Fotos ou documentos que não pertencem a um item específico.
         </div>
-        <SATAnexoUploader
-          relatorioId={id}
-          anexos={anexosByItem.get("__geral__") ?? []}
-        />
+        <SATAnexoUploader relatorioId={id} anexos={anexosByItem.get("__geral__") ?? []} />
       </div>
 
       {/* Observações */}

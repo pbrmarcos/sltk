@@ -16,7 +16,10 @@ function fmtBRL(v: number, moeda = "BRL") {
   }
 }
 function fmtNum(v: number, d = 2) {
-  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d }).format(v || 0);
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  }).format(v || 0);
 }
 function fmtDate(s?: string | null) {
   if (!s) return "—";
@@ -26,7 +29,10 @@ function fmtDate(s?: string | null) {
 function ImprimirOcPage() {
   const { id } = Route.useParams();
   const getFn = useServerFn(getOrdemCompra);
-  const q = useQuery({ queryKey: ["ordens", "imprimir", id], queryFn: () => getFn({ data: { id } }) });
+  const q = useQuery({
+    queryKey: ["ordens", "imprimir", id],
+    queryFn: () => getFn({ data: { id } }),
+  });
 
   useEffect(() => {
     if (q.data) {
@@ -68,7 +74,8 @@ function ImprimirOcPage() {
                 CNPJ: {oc.comprador_cnpj ?? "—"} &nbsp; Insc. Estadual: {oc.comprador_ie ?? "—"}
               </div>
               <div>
-                Endereço: {oc.comprador_endereco ?? "—"} &nbsp; Cidade: {oc.comprador_cidade ?? "—"} &nbsp; UF: {oc.comprador_uf ?? "—"}
+                Endereço: {oc.comprador_endereco ?? "—"} &nbsp; Cidade: {oc.comprador_cidade ?? "—"}{" "}
+                &nbsp; UF: {oc.comprador_uf ?? "—"}
               </div>
               <div>
                 CEP: {oc.comprador_cep ?? "—"} &nbsp; Telefone: {oc.comprador_telefone ?? "—"}
@@ -79,14 +86,17 @@ function ImprimirOcPage() {
         <div className="text-right text-[11px] leading-tight">
           <div className="font-bold text-[13px]">{oc.comprador_razao_social ?? "—"}</div>
           <div>
-            Emissão: {fmtDate(oc.emissao_em)} &nbsp; Hora: {new Date(oc.created_at).toLocaleTimeString("pt-BR")}
+            Emissão: {fmtDate(oc.emissao_em)} &nbsp; Hora:{" "}
+            {new Date(oc.created_at).toLocaleTimeString("pt-BR")}
           </div>
           <div>Usuário: {oc.criado_por ? "SISTEMA" : "—"}</div>
         </div>
       </div>
 
       {/* ============ NUMERO ============ */}
-      <div className="bar text-[13px] mb-2">Pedido de Compra nº {oc.numero.replace(/^OC0*/, "") || oc.numero}</div>
+      <div className="bar text-[13px] mb-2">
+        Pedido de Compra nº {oc.numero.replace(/^OC0*/, "") || oc.numero}
+      </div>
 
       {/* ============ FORNECEDOR ============ */}
       <div className="bar-sub mb-1">Dados do Fornecedor</div>
@@ -99,7 +109,8 @@ function ImprimirOcPage() {
             <b>Endereço:</b> {oc.fornecedor_endereco ?? "—"}
           </div>
           <div>
-            <b>Fone:</b> {oc.fornecedor_telefone ?? "—"} &nbsp;&nbsp; <b>Insc. Estadual:</b> {oc.fornecedor_ie ?? "—"} &nbsp;&nbsp; <b>Contato:</b> {oc.fornecedor_contato ?? ""}
+            <b>Fone:</b> {oc.fornecedor_telefone ?? "—"} &nbsp;&nbsp; <b>Insc. Estadual:</b>{" "}
+            {oc.fornecedor_ie ?? "—"} &nbsp;&nbsp; <b>Contato:</b> {oc.fornecedor_contato ?? ""}
           </div>
           <div>
             <b>E-mail:</b> {oc.fornecedor_email ?? "—"}
@@ -167,7 +178,9 @@ function ImprimirOcPage() {
       <div className="grid grid-cols-[1fr_260px] gap-4">
         <div className="border border-black p-2">
           <div className="font-bold underline mb-2">Observações:</div>
-          <div className="whitespace-pre-wrap font-bold">** INFORMAR NUMERO DO PEDIDO NA NOTA FISCAL **</div>
+          <div className="whitespace-pre-wrap font-bold">
+            ** INFORMAR NUMERO DO PEDIDO NA NOTA FISCAL **
+          </div>
           <div className="whitespace-pre-wrap mt-2">{oc.observacoes ?? ""}</div>
         </div>
         <div className="space-y-1">

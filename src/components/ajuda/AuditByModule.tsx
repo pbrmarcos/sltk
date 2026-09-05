@@ -59,13 +59,11 @@ function ModuleCard({ module: m }: { module: ModuleAgg }) {
     m.errors > 0
       ? "border-[var(--danger)]/60"
       : m.warnings > 0
-      ? "border-[var(--warning)]/50"
-      : "border-[var(--bg-border)]";
+        ? "border-[var(--warning)]/50"
+        : "border-[var(--bg-border)]";
 
   return (
-    <section
-      className={`rounded-[var(--radius-lg)] border ${dangerAccent} bg-[var(--bg-surface)]`}
-    >
+    <section className={`rounded-[var(--radius-lg)] border ${dangerAccent} bg-[var(--bg-surface)]`}>
       <header className="flex items-center justify-between gap-3 border-b border-[var(--bg-border)] px-4 py-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -135,7 +133,9 @@ function Pill({ severity, count }: { severity: Severity; count: number }) {
 }
 
 function SeverityIcon({ severity }: { severity: Severity }) {
-  if (severity === "error") return <AlertCircle className="h-3.5 w-3.5 shrink-0 text-[var(--danger)]" />;
-  if (severity === "warn") return <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-[var(--warning)]" />;
+  if (severity === "error")
+    return <AlertCircle className="h-3.5 w-3.5 shrink-0 text-[var(--danger)]" />;
+  if (severity === "warn")
+    return <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-[var(--warning)]" />;
   return <Info className="h-3.5 w-3.5 shrink-0 text-[var(--info)]" />;
 }

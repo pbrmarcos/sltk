@@ -3,7 +3,9 @@ import type { DashboardData } from "@/lib/dashboard.functions";
 
 const fmtDate = (s: string) => {
   const d = new Date(s);
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", weekday: "short" }).replace(".", "");
+  return d
+    .toLocaleDateString("pt-BR", { day: "2-digit", month: "short", weekday: "short" })
+    .replace(".", "");
 };
 
 export function TarefasAgendaCard({ tasks }: { tasks: DashboardData["upcomingTasks"] }) {
@@ -26,14 +28,21 @@ export function TarefasAgendaCard({ tasks }: { tasks: DashboardData["upcomingTas
                   key={t.id}
                   className="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-elevated)]/40 p-2.5"
                 >
-                  <div className={`mt-1 h-2 w-2 shrink-0 rounded-full ${overdue ? "bg-red-400" : "bg-[var(--primary)]"}`} />
+                  <div
+                    className={`mt-1 h-2 w-2 shrink-0 rounded-full ${overdue ? "bg-red-400" : "bg-[var(--primary)]"}`}
+                  />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[12.5px] font-medium text-[var(--text-primary)]">{t.titulo}</div>
+                    <div className="truncate text-[12.5px] font-medium text-[var(--text-primary)]">
+                      {t.titulo}
+                    </div>
                     <div className="truncate text-[11px] text-[var(--text-muted)]">
-                      {t.processoCodigo ? `${t.processoCodigo} · ` : ""}{t.cliente ?? "—"}
+                      {t.processoCodigo ? `${t.processoCodigo} · ` : ""}
+                      {t.cliente ?? "—"}
                     </div>
                   </div>
-                  <span className={`shrink-0 text-[11px] tabular-nums ${overdue ? "text-red-400" : "text-[var(--text-secondary)]"}`}>
+                  <span
+                    className={`shrink-0 text-[11px] tabular-nums ${overdue ? "text-red-400" : "text-[var(--text-secondary)]"}`}
+                  >
                     {fmtDate(t.prazo)}
                   </span>
                 </li>

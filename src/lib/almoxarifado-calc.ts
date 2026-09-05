@@ -86,7 +86,7 @@ export function reservaBloqueia(r: ReservaCalc, agora: Date = new Date()): boole
     const exp = r.expiraEm instanceof Date ? r.expiraEm : new Date(r.expiraEm);
     if (exp.getTime() <= agora.getTime()) return false;
   }
-  return (r.quantidade - (r.quantidadeRetirada ?? 0)) > 0;
+  return r.quantidade - (r.quantidadeRetirada ?? 0) > 0;
 }
 
 export function totalReservado(reservas: ReservaCalc[], agora: Date = new Date()): number {
@@ -112,7 +112,11 @@ export function disponivelParaProjeto(
 }
 
 /** Saldo livre (nenhum projeto): total menos todas as reservas vigentes. */
-export function saldoLivre(saldoTotal: number, reservas: ReservaCalc[], agora: Date = new Date()): number {
+export function saldoLivre(
+  saldoTotal: number,
+  reservas: ReservaCalc[],
+  agora: Date = new Date(),
+): number {
   return saldoTotal - totalReservado(reservas, agora);
 }
 
@@ -133,7 +137,10 @@ export function unidadesEquivalentes(a?: string | null, b?: string | null): bool
  * Converte da unidade de estoque para a unidade da linha de insumo.
  * `fator` = quantas unidades de estoque cabem em 1 unidade do insumo.
  */
-export function converterParaUnidadeInsumo(qtdEstoque: number, fator: number | null | undefined): number {
+export function converterParaUnidadeInsumo(
+  qtdEstoque: number,
+  fator: number | null | undefined,
+): number {
   const f = fator && fator > 0 ? fator : 1;
   return qtdEstoque / f;
 }
@@ -152,7 +159,9 @@ export function faltaReceber(pedido: number, recebido: number): number {
 export type StatusRecebimento = "pendente" | "recebida_parcial" | "recebida";
 
 /** Status derivado da OC a partir do total pedido e recebido (estorno reverte). */
-export function statusRecebimentoOc(itens: { pedido: number; recebido: number }[]): StatusRecebimento {
+export function statusRecebimentoOc(
+  itens: { pedido: number; recebido: number }[],
+): StatusRecebimento {
   const recebidoTotal = itens.reduce((a, i) => a + i.recebido, 0);
   if (recebidoTotal <= 0) return "pendente";
   const completo = itens.every((i) => i.recebido >= i.pedido);

@@ -23,7 +23,12 @@ const MIME_LIMITS: Record<string, number> = {
 };
 
 function sanitizeFolderName(name: string) {
-  return name.replace(/[\\/:*?"<>|]/g, "-").slice(0, 120).trim() || "sem-nome";
+  return (
+    name
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .slice(0, 120)
+      .trim() || "sem-nome"
+  );
 }
 
 async function driveFindFolder(name: string, parentId: string): Promise<string | null> {
@@ -66,10 +71,7 @@ async function ensureSATFolder(opts: {
   const root = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || "root";
   let base: string;
   if (opts.clienteCodigo && opts.clienteNome) {
-    const cliente = await ensureFolder(
-      `${opts.clienteCodigo} - ${opts.clienteNome}`,
-      root,
-    );
+    const cliente = await ensureFolder(`${opts.clienteCodigo} - ${opts.clienteNome}`, root);
     if (opts.processoCodigo) {
       const proc = await ensureFolder(opts.processoCodigo, cliente);
       base = await ensureFolder("SAT", proc);
@@ -94,7 +96,11 @@ async function driveUploadMultipart(opts: {
   bytes: ArrayBuffer;
 }): Promise<{ id: string; webViewLink: string }> {
   const boundary = `lvbl_${crypto.randomUUID()}`;
-  const meta = JSON.stringify({ name: opts.name, parents: [opts.parentId], mimeType: opts.mimeType });
+  const meta = JSON.stringify({
+    name: opts.name,
+    parents: [opts.parentId],
+    mimeType: opts.mimeType,
+  });
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
@@ -183,7 +189,8 @@ export const listSATRelatorios = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    if (data.status) q = q.eq("status", data.status as "rascunho" | "preenchendo" | "assinado" | "arquivado");
+    if (data.status)
+      q = q.eq("status", data.status as "rascunho" | "preenchendo" | "assinado" | "arquivado");
     if (data.cliente_id) q = q.eq("cliente_id", data.cliente_id);
     if (data.q) q = q.ilike("codigo", `%${data.q}%`);
 
@@ -284,9 +291,7 @@ export const getSATRelatorio = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("sat_relatorio")
-      .select(
-        "*, clientes(id, codigo, razao_social), processos(id, codigo, titulo)",
-      )
+      .select("*, clientes(id, codigo, razao_social), processos(id, codigo, titulo)")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw friendlyDbError(error);
@@ -366,7 +371,9 @@ export const uploadSATAnexo = createServerFn({ method: "POST" })
 
     const { data: rel, error: rErr } = await context.supabase
       .from("sat_relatorio")
-      .select("id, codigo, cliente_id, processo_id, drive_folder_id, clientes(codigo, razao_social), processos(codigo)")
+      .select(
+        "id, codigo, cliente_id, processo_id, drive_folder_id, clientes(codigo, razao_social), processos(codigo)",
+      )
       .eq("id", data.relatorio_id)
       .maybeSingle();
     if (rErr) throw friendlyDbError(rErr);

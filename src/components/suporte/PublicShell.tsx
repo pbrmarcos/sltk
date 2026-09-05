@@ -154,8 +154,7 @@ const DICT: Record<Lang, SuporteDict> = {
       generic: "Falha ao processar solicitação.",
     },
     footer: {
-      tagline:
-        "Engenharia de packaging e automação industrial para linhas que não podem parar.",
+      tagline: "Engenharia de packaging e automação industrial para linhas que não podem parar.",
       rights: "Todos os direitos reservados.",
     },
     tabs: { new: "Abrir chamado", consult: "Consultar existente" },
@@ -232,8 +231,7 @@ const DICT: Record<Lang, SuporteDict> = {
       generic: "Request failed.",
     },
     footer: {
-      tagline:
-        "Packaging engineering and industrial automation for lines that cannot stop.",
+      tagline: "Packaging engineering and industrial automation for lines that cannot stop.",
       rights: "All rights reserved.",
     },
     tabs: { new: "Open ticket", consult: "Look up existing" },
@@ -426,7 +424,9 @@ function ShellFooter() {
                 {t.brand}
               </span>
             )}
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">{t.footer.tagline}</p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
+              {t.footer.tagline}
+            </p>
           </div>
 
           <div className="text-[13px] text-slate-400 space-y-2">
@@ -443,11 +443,12 @@ function ShellFooter() {
               <span>WhatsApp +55 (11) 99000-0000</span>
             </div>
           </div>
-
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-white/10 pt-6 text-[12px] text-slate-500 md:flex-row">
-          <span>© {year} Solutek Américas. {t.footer.rights}</span>
+          <span>
+            © {year} Solutek Américas. {t.footer.rights}
+          </span>
           <Link to="/" className="transition hover:text-white">
             solutek.com.br →
           </Link>

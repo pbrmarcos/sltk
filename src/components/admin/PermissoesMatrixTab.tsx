@@ -2,7 +2,17 @@ import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Save, RotateCcw, Search, ShieldCheck, AlertTriangle, History, ChevronDown, Wand2 } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  RotateCcw,
+  Search,
+  ShieldCheck,
+  AlertTriangle,
+  History,
+  ChevronDown,
+  Wand2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -200,9 +210,7 @@ export function PermissoesMatrixTab() {
         </Button>
         <Button
           size="sm"
-          disabled={
-            dirtyRoles.length === 0 || saveMut.isPending || blockingErrors.length > 0
-          }
+          disabled={dirtyRoles.length === 0 || saveMut.isPending || blockingErrors.length > 0}
           onClick={() => saveMut.mutate()}
           title={blockingErrors.length > 0 ? "Corrija os erros de validação" : undefined}
         >
@@ -263,9 +271,9 @@ export function PermissoesMatrixTab() {
       <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-[11.5px] text-blue-900">
         <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <div>
-          A role <strong>Admin</strong> tem acesso total a todos os módulos e não pode ser
-          editada. As demais roles podem ser configuradas livremente. Usuários com múltiplas
-          roles enxergam a união dos módulos habilitados.
+          A role <strong>Admin</strong> tem acesso total a todos os módulos e não pode ser editada.
+          As demais roles podem ser configuradas livremente. Usuários com múltiplas roles enxergam a
+          união dos módulos habilitados.
         </div>
       </div>
 
@@ -294,15 +302,10 @@ export function PermissoesMatrixTab() {
           </thead>
           <tbody>
             {filteredModules.map((mod, idx) => (
-              <tr
-                key={mod}
-                className={idx % 2 === 0 ? "" : "bg-[var(--bg-elevated)]/40"}
-              >
+              <tr key={mod} className={idx % 2 === 0 ? "" : "bg-[var(--bg-elevated)]/40"}>
                 <td className="border-b border-[var(--bg-border)] p-3">
                   <div className="font-medium capitalize">{mod.replace("_", " ")}</div>
-                  <div className="text-[10.5px] text-[var(--text-muted)]">
-                    {MODULE_LABEL[mod]}
-                  </div>
+                  <div className="text-[10.5px] text-[var(--text-muted)]">{MODULE_LABEL[mod]}</div>
                 </td>
                 {EDITABLE_ROLES.map((r) => {
                   const checked = local[r][mod];
@@ -318,9 +321,7 @@ export function PermissoesMatrixTab() {
                       }
                       title={
                         invalid
-                          ? cellViolations
-                              .map((v) => `${v.message}\n${v.hint}`)
-                              .join("\n\n")
+                          ? cellViolations.map((v) => `${v.message}\n${v.hint}`).join("\n\n")
                           : undefined
                       }
                     >
@@ -387,9 +388,7 @@ function AuditLogPanel({
             ({entries.length} {entries.length === 1 ? "evento" : "eventos"} — últimos 100)
           </span>
         </div>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <div className="border-t border-[var(--bg-border)]">
@@ -417,10 +416,7 @@ function AuditLogPanel({
               <tbody>
                 {entries.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="p-6 text-center text-[var(--text-muted)]"
-                    >
+                    <td colSpan={5} className="p-6 text-center text-[var(--text-muted)]">
                       Nenhum evento de permissão registrado ainda.
                     </td>
                   </tr>
@@ -436,9 +432,7 @@ function AuditLogPanel({
                         )}
                       </td>
                       <td className="p-2 font-mono text-[11px]">{e.role ?? "—"}</td>
-                      <td className="p-2">
-                        {e.module ? MODULE_LABEL[e.module] : "—"}
-                      </td>
+                      <td className="p-2">{e.module ? MODULE_LABEL[e.module] : "—"}</td>
                       <td className="p-2">
                         <ChangeCell entry={e} />
                       </td>

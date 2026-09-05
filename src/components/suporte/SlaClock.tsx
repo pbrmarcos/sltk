@@ -24,7 +24,8 @@ export function SlaClock({
   if (finalized !== null && finalized <= limit) {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-emerald-700">
-        <Clock className="h-3 w-3" /> {compact ? "OK" : (label ? `${label}: no prazo` : "SLA cumprido")}
+        <Clock className="h-3 w-3" />{" "}
+        {compact ? "OK" : label ? `${label}: no prazo` : "SLA cumprido"}
       </span>
     );
   }

@@ -44,4 +44,3 @@ export function extractTemplateVars(tpl: string): string[] {
   }
   return Array.from(set);
 }
-

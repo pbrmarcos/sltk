@@ -4,9 +4,7 @@
  * client is statically configured now, so there's nothing left to check —
  * kept as a no-op so callers don't need to change.
  */
-export type EnvCheckResult =
-  | { ok: true }
-  | { ok: false; missing: string[]; message: string };
+export type EnvCheckResult = { ok: true } | { ok: false; missing: string[]; message: string };
 
 export function checkClientEnv(): EnvCheckResult {
   return { ok: true };

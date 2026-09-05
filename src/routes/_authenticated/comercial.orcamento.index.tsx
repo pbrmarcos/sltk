@@ -95,7 +95,11 @@ function OrcamentosListPage() {
           </TableHeader>
           <TableBody>
             {list.isLoading ? (
-              <TableRow><TableCell colSpan={8} className="py-8 text-center text-[var(--text-muted)]">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={8} className="py-8 text-center text-[var(--text-muted)]">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             ) : list.error ? (
               <TableRow>
                 <TableCell colSpan={8}>
@@ -115,55 +119,85 @@ function OrcamentosListPage() {
             ) : (
               (list.data ?? []).map((d: any) => {
                 const STATUS_META: Record<string, { label: string; cls: string }> = {
-                  rascunho:    { label: "Rascunho",     cls: "bg-slate-100 text-slate-700 border-slate-200" },
-                  emitido:     { label: "Emitido",      cls: "bg-slate-100 text-slate-700 border-slate-200" },
-                  em_revisao:  { label: "Em revisão",   cls: "bg-amber-50 text-amber-800 border-amber-200" },
-                  aprovado:    { label: "Aprovado",     cls: "bg-emerald-50 text-emerald-800 border-emerald-200" },
-                  publicado:   { label: "Publicado",    cls: "bg-sky-50 text-sky-800 border-sky-200" },
-                  arquivado:   { label: "Arquivado",    cls: "bg-rose-50 text-rose-800 border-rose-200" },
+                  rascunho: {
+                    label: "Rascunho",
+                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                  },
+                  emitido: {
+                    label: "Emitido",
+                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                  },
+                  em_revisao: {
+                    label: "Em revisão",
+                    cls: "bg-amber-50 text-amber-800 border-amber-200",
+                  },
+                  aprovado: {
+                    label: "Aprovado",
+                    cls: "bg-emerald-50 text-emerald-800 border-emerald-200",
+                  },
+                  publicado: { label: "Publicado", cls: "bg-sky-50 text-sky-800 border-sky-200" },
+                  arquivado: {
+                    label: "Arquivado",
+                    cls: "bg-rose-50 text-rose-800 border-rose-200",
+                  },
                 };
                 const sm = STATUS_META[d.status] ?? { label: d.status, cls: "" };
                 return (
-                <TableRow key={d.id}>
-                  <TableCell className="font-mono text-xs">
-                    <Link to="/documentos/$id" params={{ id: d.id }} className="hover:underline">{d.codigo}</Link>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {d.cliente_codigo ? (
-                      <Link to="/clientes/$codigo" params={{ codigo: d.cliente_codigo }} className="hover:underline">
-                        {d.cliente_razao || d.cliente_codigo}
+                  <TableRow key={d.id}>
+                    <TableCell className="font-mono text-xs">
+                      <Link to="/documentos/$id" params={{ id: d.id }} className="hover:underline">
+                        {d.codigo}
                       </Link>
-                    ) : "—"}
-                  </TableCell>
-                  <TableCell className="text-sm">{d.titulo || "—"}</TableCell>
-                  <TableCell className="font-mono text-xs">v{d.versao}</TableCell>
-                  <TableCell className="text-xs">
-                    {(d.idiomas_gerados || []).map((l: string) => (
-                      <Badge key={l} variant="outline" className="mr-1 uppercase">{l}</Badge>
-                    ))}
-                  </TableCell>
-                  <TableCell><Badge variant="outline" className={sm.cls}>{sm.label}</Badge></TableCell>
-                  <TableCell className="text-xs text-[var(--text-muted)]">
-                    {new Date(d.created_at).toLocaleDateString("pt-BR")}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      {(["pt", "es", "en"] as const).map((l) => (
-                        <Button
-                          key={l}
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 px-2 text-xs uppercase"
-                          onClick={() => handleDownload(d.id, l)}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {d.cliente_codigo ? (
+                        <Link
+                          to="/clientes/$codigo"
+                          params={{ codigo: d.cliente_codigo }}
+                          className="hover:underline"
                         >
-                          <Download className="mr-1 h-3 w-3" />
+                          {d.cliente_razao || d.cliente_codigo}
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm">{d.titulo || "—"}</TableCell>
+                    <TableCell className="font-mono text-xs">v{d.versao}</TableCell>
+                    <TableCell className="text-xs">
+                      {(d.idiomas_gerados || []).map((l: string) => (
+                        <Badge key={l} variant="outline" className="mr-1 uppercase">
                           {l}
-                        </Button>
+                        </Badge>
                       ))}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );})
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={sm.cls}>
+                        {sm.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-[var(--text-muted)]">
+                      {new Date(d.created_at).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        {(["pt", "es", "en"] as const).map((l) => (
+                          <Button
+                            key={l}
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs uppercase"
+                            onClick={() => handleDownload(d.id, l)}
+                          >
+                            <Download className="mr-1 h-3 w-3" />
+                            {l}
+                          </Button>
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

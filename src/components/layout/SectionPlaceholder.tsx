@@ -10,10 +10,7 @@ export function SectionPlaceholder({
   breadcrumbs?: Crumb[];
   subtitle?: string;
 }) {
-  const crumbs: Crumb[] = breadcrumbs ?? [
-    { label: "Home", href: "/" },
-    { label: title },
-  ];
+  const crumbs: Crumb[] = breadcrumbs ?? [{ label: "Home", href: "/" }, { label: title }];
   return (
     <PageContainer>
       <PageHeader breadcrumbs={crumbs} title={title} subtitle={subtitle} />

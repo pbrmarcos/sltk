@@ -33,18 +33,28 @@ export const listEquipamentoBom = createServerFn({ method: "POST" })
       const ocItens: any[] = Array.isArray(r.ordem_compra_itens) ? r.ordem_compra_itens : [];
       const oc = ocItens
         .map((oi) => oi?.ordens_compra)
-        .find((o) => o && (o.status === "concluida" || o.status === "recebido" || o.status === "recebida"));
+        .find(
+          (o) =>
+            o && (o.status === "concluida" || o.status === "recebido" || o.status === "recebida"),
+        );
       return {
         ...r,
         custo_unitario_estimado: r.custo_estimado_unit ?? null,
         custo_total_estimado:
-          r.custo_estimado_unit == null ? null : Number(r.custo_estimado_unit) * Number(r.quantidade ?? 1),
+          r.custo_estimado_unit == null
+            ? null
+            : Number(r.custo_estimado_unit) * Number(r.quantidade ?? 1),
         ordem_compra: oc ? { id: oc.id, numero: oc.numero, status: oc.status } : null,
       };
     });
   });
 
-async function ensureProjetoForBom(sb: AnySb, equipamentoId: string, equipamentoDisciplina: Disciplina, userId: string) {
+async function ensureProjetoForBom(
+  sb: AnySb,
+  equipamentoId: string,
+  equipamentoDisciplina: Disciplina,
+  userId: string,
+) {
   const { data: eq, error: eqError } = await sb
     .from("cliente_equipamentos")
     .select("cliente_id")
@@ -96,7 +106,12 @@ export const createBomItem = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => createItemInput.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
-    const origem = await ensureProjetoForBom(sb, data.equipamento_id, data.equipamento_disciplina, context.userId);
+    const origem = await ensureProjetoForBom(
+      sb,
+      data.equipamento_id,
+      data.equipamento_disciplina,
+      context.userId,
+    );
     const { data: row, error } = await sb
       .from("projeto_insumos")
       .insert({
@@ -190,7 +205,10 @@ export const approveBomItem = createServerFn({ method: "POST" })
     await assertAdminOrManager(sb, context.userId).catch(() => {
       throw new Error("Apenas manager/admin pode aprovar insumos.");
     });
-    const { error } = await sb.from("projeto_insumos").update({ status: "aprovado" }).eq("id", data.id);
+    const { error } = await sb
+      .from("projeto_insumos")
+      .update({ status: "aprovado" })
+      .eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -225,7 +243,10 @@ export const getEquipamentoBomResumo = createServerFn({ method: "POST" })
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null);
     if (error) throw friendlyDbError(error);
-    const buckets: Record<string, { total: number; aprovados: number; pendentes: number; custo: number }> = {};
+    const buckets: Record<
+      string,
+      { total: number; aprovados: number; pendentes: number; custo: number }
+    > = {};
     let totalItens = 0;
     let custoTotal = 0;
     for (const r of rows ?? []) {
@@ -236,7 +257,13 @@ export const getEquipamentoBomResumo = createServerFn({ method: "POST" })
       const b = (buckets[key] ??= { total: 0, aprovados: 0, pendentes: 0, custo: 0 });
       b.total += 1;
       b.custo += isFinite(custo) ? custo : 0;
-      if (r.status === "aprovado" || r.status === "em_cotacao" || r.status === "cotado" || r.status === "em_compra" || r.status === "recebido") {
+      if (
+        r.status === "aprovado" ||
+        r.status === "em_cotacao" ||
+        r.status === "cotado" ||
+        r.status === "em_compra" ||
+        r.status === "recebido"
+      ) {
         b.aprovados += 1;
       } else if (r.status === "rascunho" || r.status === "pronto_aprovacao") {
         b.pendentes += 1;
@@ -249,16 +276,18 @@ export const getEquipamentoBomResumo = createServerFn({ method: "POST" })
 // Manager/admin only. Se etapas ainda não existirem, popula base + família.
 export const runSeedEquipamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ equipamento_id: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
     await assertAdminOrManager(sb, context.userId).catch(() => {
       throw new Error("Apenas manager/admin pode rodar o seed.");
     });
     // Primeiro tenta importar do template publicado (fallback interno chama seed_equipamento_disciplinas).
-    const { data: eqRow } = await sb.from("cliente_equipamentos").select("planejamento_template_slug").eq("id", data.equipamento_id).maybeSingle();
+    const { data: eqRow } = await sb
+      .from("cliente_equipamentos")
+      .select("planejamento_template_slug")
+      .eq("id", data.equipamento_id)
+      .maybeSingle();
     const { error } = await sb.rpc("import_etapas_do_template", {
       _eq_id: data.equipamento_id,
       _tipo_slug: eqRow?.planejamento_template_slug ?? null,

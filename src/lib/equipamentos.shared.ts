@@ -148,7 +148,9 @@ export const EQUIPAMENTO_DOC_AREA: Record<
   outro: "pos_venda",
 };
 
-export function garantiaStatus(dataFim: string | null | undefined): "ativa" | "expirando" | "expirada" | "sem" {
+export function garantiaStatus(
+  dataFim: string | null | undefined,
+): "ativa" | "expirando" | "expirada" | "sem" {
   if (!dataFim) return "sem";
   const fim = new Date(dataFim).getTime();
   const hoje = Date.now();

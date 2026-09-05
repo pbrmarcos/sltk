@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import type { DocumentoLayoutConfig } from "./types";
 import { CHROME_PAGE_STYLE, PdfHeader, PdfFooter } from "./pdf-chrome";
@@ -20,25 +19,64 @@ const styles = (accent: string) =>
     accentBar: { width: 48, height: 3, backgroundColor: accent, marginTop: 10, marginBottom: 14 },
     subtitle: { fontSize: 10, color: TOKENS.muted },
     section: {
-      fontSize: 11, fontFamily: TOKENS.fontBold, color: TOKENS.text,
-      marginTop: 14, marginBottom: 6, paddingBottom: 3,
-      borderBottomWidth: 0.6, borderBottomColor: accent, borderBottomStyle: "solid",
+      fontSize: 11,
+      fontFamily: TOKENS.fontBold,
+      color: TOKENS.text,
+      marginTop: 14,
+      marginBottom: 6,
+      paddingBottom: 3,
+      borderBottomWidth: 0.6,
+      borderBottomColor: accent,
+      borderBottomStyle: "solid",
     },
     keyGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 4 },
     keyCell: { width: "50%", marginBottom: 4, paddingRight: 8 },
-    keyLabel: { fontSize: 7.5, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
+    keyLabel: {
+      fontSize: 7.5,
+      color: TOKENS.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
     keyValue: { fontSize: 9.5, color: TOKENS.text },
-    table: { borderWidth: 0.5, borderColor: TOKENS.borderStrong, borderStyle: "solid", marginBottom: 6 },
-    tHeader: { flexDirection: "row", backgroundColor: accent, color: "#FFFFFF", fontSize: 8.5, fontFamily: TOKENS.fontBold },
-    tRow: { flexDirection: "row", borderTopWidth: 0.5, borderTopColor: TOKENS.border, borderTopStyle: "solid" },
+    table: {
+      borderWidth: 0.5,
+      borderColor: TOKENS.borderStrong,
+      borderStyle: "solid",
+      marginBottom: 6,
+    },
+    tHeader: {
+      flexDirection: "row",
+      backgroundColor: accent,
+      color: "#FFFFFF",
+      fontSize: 8.5,
+      fontFamily: TOKENS.fontBold,
+    },
+    tRow: {
+      flexDirection: "row",
+      borderTopWidth: 0.5,
+      borderTopColor: TOKENS.border,
+      borderTopStyle: "solid",
+    },
     tRowZebra: { backgroundColor: TOKENS.zebra },
     tCell: { padding: 4 },
     tRight: { textAlign: "right" },
     signatureRow: { flexDirection: "row", gap: 16, marginTop: 40 },
-    sigBox: { flex: 1, borderTopWidth: 0.6, borderTopColor: TOKENS.borderStrong, borderTopStyle: "solid", paddingTop: 4 },
+    sigBox: {
+      flex: 1,
+      borderTopWidth: 0.6,
+      borderTopColor: TOKENS.borderStrong,
+      borderTopStyle: "solid",
+      paddingTop: 4,
+    },
     sigLabel: { fontSize: 8, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
     smallMuted: { fontSize: 8.5, color: TOKENS.muted },
-    logRow: { flexDirection: "row", borderTopWidth: 0.4, borderTopColor: TOKENS.border, borderTopStyle: "solid", paddingVertical: 3 },
+    logRow: {
+      flexDirection: "row",
+      borderTopWidth: 0.4,
+      borderTopColor: TOKENS.border,
+      borderTopStyle: "solid",
+      paddingVertical: 3,
+    },
     logCellDate: { width: "24%", fontSize: 8.5 },
     logCellFrom: { width: "18%", fontSize: 8.5 },
     logCellTo: { width: "18%", fontSize: 8.5, fontFamily: TOKENS.fontBold },
@@ -67,7 +105,12 @@ export type RomaneioPayload = {
   cliente: { nome: string; documento?: string | null } | null;
   equipamento: { titulo: string } | null;
   projeto: { revisao: string | null } | null;
-  transportadora: { nome: string; cnpj?: string | null; contato?: string | null; telefone?: string | null } | null;
+  transportadora: {
+    nome: string;
+    cnpj?: string | null;
+    contato?: string | null;
+    telefone?: string | null;
+  } | null;
   previsao_saida: string | null;
   data_saida: string | null;
   data_entrega: string | null;
@@ -75,8 +118,13 @@ export type RomaneioPayload = {
   destino: string | null;
   observacoes: string | null;
   itens: Array<{
-    ordem: number; descricao: string; quantidade: number; unidade: string | null;
-    serial: string | null; peso_kg: number | null; volume_m3: number | null;
+    ordem: number;
+    descricao: string;
+    quantidade: number;
+    unidade: string | null;
+    serial: string | null;
+    peso_kg: number | null;
+    volume_m3: number | null;
   }>;
   statusLog: RomaneioStatusLog[];
   anexos: RomaneioAnexo[];
@@ -154,7 +202,9 @@ export function RomaneioPdf({
           </View>
           <View style={s.keyCell}>
             <Text style={s.keyLabel}>Projeto / Revisão</Text>
-            <Text style={s.keyValue}>{payload.projeto?.revisao ? `Rev. ${payload.projeto.revisao}` : "—"}</Text>
+            <Text style={s.keyValue}>
+              {payload.projeto?.revisao ? `Rev. ${payload.projeto.revisao}` : "—"}
+            </Text>
           </View>
           <View style={s.keyCell}>
             <Text style={s.keyLabel}>Destino</Text>
@@ -172,7 +222,11 @@ export function RomaneioPdf({
           <View style={s.keyCell}>
             <Text style={s.keyLabel}>CNPJ / Contato</Text>
             <Text style={s.keyValue}>
-              {[payload.transportadora?.cnpj, payload.transportadora?.contato, payload.transportadora?.telefone]
+              {[
+                payload.transportadora?.cnpj,
+                payload.transportadora?.contato,
+                payload.transportadora?.telefone,
+              ]
                 .filter(Boolean)
                 .join(" · ") || "—"}
             </Text>
@@ -225,9 +279,15 @@ export function RomaneioPdf({
               <Text style={[s.tCell, { width: "6%" }]}> </Text>
               <Text style={[s.tCell, { width: "44%", fontFamily: TOKENS.fontBold }]}>Totais</Text>
               <Text style={[s.tCell, { width: "14%" }]}> </Text>
-              <Text style={[s.tCell, { width: "10%", fontFamily: TOKENS.fontBold }, s.tRight]}>{totalQtd}</Text>
-              <Text style={[s.tCell, { width: "13%", fontFamily: TOKENS.fontBold }, s.tRight]}>{totalPeso.toFixed(2)}</Text>
-              <Text style={[s.tCell, { width: "13%", fontFamily: TOKENS.fontBold }, s.tRight]}>{totalVol.toFixed(3)}</Text>
+              <Text style={[s.tCell, { width: "10%", fontFamily: TOKENS.fontBold }, s.tRight]}>
+                {totalQtd}
+              </Text>
+              <Text style={[s.tCell, { width: "13%", fontFamily: TOKENS.fontBold }, s.tRight]}>
+                {totalPeso.toFixed(2)}
+              </Text>
+              <Text style={[s.tCell, { width: "13%", fontFamily: TOKENS.fontBold }, s.tRight]}>
+                {totalVol.toFixed(3)}
+              </Text>
             </View>
           </View>
         )}
@@ -247,7 +307,9 @@ export function RomaneioPdf({
               <Text style={[s.logCellDate, { fontFamily: TOKENS.fontBold }]}>Data / hora</Text>
               <Text style={[s.logCellFrom, { fontFamily: TOKENS.fontBold }]}>De</Text>
               <Text style={[s.logCellTo, { fontFamily: TOKENS.fontBold }]}>Para</Text>
-              <Text style={[s.logCellUser, { fontFamily: TOKENS.fontBold, color: TOKENS.text }]}>Responsável</Text>
+              <Text style={[s.logCellUser, { fontFamily: TOKENS.fontBold, color: TOKENS.text }]}>
+                Responsável
+              </Text>
             </View>
             {payload.statusLog.map((l, i) => (
               <View key={i} style={s.logRow} wrap={false}>
@@ -287,8 +349,22 @@ export function RomaneioPdf({
 
       {imgAnexos.map((a, i) => (
         <Page key={`anexo-${i}`} size="A4" style={s.page}>
-          <PdfHeader layout={layout} titulo="Romaneio — Anexo" codigo={payload.numero} versao="1" idioma="pt" dataFmt={dataFmt} />
-          <PdfFooter layout={layout} titulo={`Romaneio ${payload.numero}`} versao="1" responsavel={responsavel} idioma="pt" tag={payload.numero} />
+          <PdfHeader
+            layout={layout}
+            titulo="Romaneio — Anexo"
+            codigo={payload.numero}
+            versao="1"
+            idioma="pt"
+            dataFmt={dataFmt}
+          />
+          <PdfFooter
+            layout={layout}
+            titulo={`Romaneio ${payload.numero}`}
+            versao="1"
+            responsavel={responsavel}
+            idioma="pt"
+            tag={payload.numero}
+          />
           <Text style={s.anexoTitle}>
             [{a.categoria}] {a.nome_arquivo}
           </Text>

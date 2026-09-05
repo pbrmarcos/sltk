@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/rfq/status")({
           }
 
           const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+          const supabaseAdmin = await getCriticalClient();
 
           const { data: sub, error } = await (supabaseAdmin as any)
             .from("rfq_submissao")
@@ -46,7 +46,10 @@ export const Route = createFileRoute("/api/public/rfq/status")({
 
           if (error) throw error;
           if (!sub || sub.rfq_formulario_link?.slug !== parsed.data.slug) {
-            return Response.json({ ok: false, error: "Protocolo não encontrado." }, { status: 404 });
+            return Response.json(
+              { ok: false, error: "Protocolo não encontrado." },
+              { status: 404 },
+            );
           }
 
           const { count: anexosCount } = await (supabaseAdmin as any)

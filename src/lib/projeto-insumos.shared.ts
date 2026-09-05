@@ -45,7 +45,6 @@ export const INSUMO_STATUS_COLOR: Record<InsumoStatus, string> = {
   cancelado: "border-zinc-200 bg-zinc-50 text-zinc-500",
 };
 
-
 export const INSUMO_DISCIPLINAS = [
   "mecanico",
   "eletrico",

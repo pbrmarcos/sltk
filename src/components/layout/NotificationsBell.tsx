@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, CheckCheck } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,7 +26,6 @@ export function NotificationsBell({ collapsed = false }: { collapsed?: boolean }
     staleTime: 30_000,
     refetchInterval: session?.access_token ? 60_000 : false,
   });
-
 
   const naoLidas = data?.nao_lidas ?? 0;
   const rows = (data?.rows ?? []) as any[];
@@ -92,7 +87,9 @@ export function NotificationsBell({ collapsed = false }: { collapsed?: boolean }
             onClick={() => setOnlyUnread(false)}
             className={cn(
               "rounded px-2 py-0.5 text-[11px]",
-              !onlyUnread ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground",
+              !onlyUnread
+                ? "bg-background font-medium shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             Todas
@@ -102,7 +99,9 @@ export function NotificationsBell({ collapsed = false }: { collapsed?: boolean }
             onClick={() => setOnlyUnread(true)}
             className={cn(
               "rounded px-2 py-0.5 text-[11px]",
-              onlyUnread ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground",
+              onlyUnread
+                ? "bg-background font-medium shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             Não lidas

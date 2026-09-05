@@ -70,35 +70,55 @@ export function EntrevistasGeradasTab() {
             {rows.length === 0 && !query.isLoading ? (
               <tr>
                 <td colSpan={7} className="px-3 py-8 text-center text-zinc-500">
-                  Nenhum PDF de entrevista arquivado ainda. Use “Arquivar no Drive” no card da entrevista respondida.
+                  Nenhum PDF de entrevista arquivado ainda. Use “Arquivar no Drive” no card da
+                  entrevista respondida.
                 </td>
               </tr>
             ) : (
               rows.map((r) => (
                 <tr key={r.id} className="border-t border-[var(--bg-border)] hover:bg-zinc-50/60">
                   <td className="px-3 py-2 whitespace-nowrap text-zinc-700">
-                    {new Date(r.criado_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                    {new Date(r.criado_em).toLocaleString("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
                   </td>
                   <td className="px-3 py-2">
-                    <Badge variant="outline" className="font-mono text-[10px]">ENT-{r.codigo}</Badge>
+                    <Badge variant="outline" className="font-mono text-[10px]">
+                      ENT-{r.codigo}
+                    </Badge>
                   </td>
                   <td className="px-3 py-2 text-zinc-700">{r.segmento}</td>
                   <td className="px-3 py-2">
                     <div className="max-w-[240px]">
                       <div className="truncate text-zinc-800">{r.lead_nome || "—"}</div>
-                      {r.lead_empresa && <div className="truncate text-[11px] text-zinc-500">{r.lead_empresa}</div>}
+                      {r.lead_empresa && (
+                        <div className="truncate text-[11px] text-zinc-500">{r.lead_empresa}</div>
+                      )}
                     </div>
                   </td>
                   <td className="px-3 py-2 text-center">{IDIOMA_FLAG[r.idioma] ?? r.idioma}</td>
                   <td className="px-3 py-2 text-right">
                     {r.drive_view_url ? (
                       <div className="inline-flex items-center gap-0.5">
-                        <Button asChild size="sm" variant="ghost" className="h-7 px-1.5 text-emerald-700 hover:bg-emerald-50" title={r.file_name ?? undefined}>
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-1.5 text-emerald-700 hover:bg-emerald-50"
+                          title={r.file_name ?? undefined}
+                        >
                           <a href={r.drive_view_url} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-zinc-500 hover:bg-zinc-100" title="Copiar link" onClick={() => copy(r.drive_view_url!)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 text-zinc-500 hover:bg-zinc-100"
+                          title="Copiar link"
+                          onClick={() => copy(r.drive_view_url!)}
+                        >
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>

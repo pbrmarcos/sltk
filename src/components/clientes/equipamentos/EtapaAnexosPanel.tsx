@@ -150,7 +150,9 @@ export function EtapaAnexosPanel({ etapaId }: { etapaId: string }) {
               >
                 {a.nome_arquivo}
               </button>
-              <span className="text-[10px] text-muted-foreground">{humanSize(a.tamanho_bytes)}</span>
+              <span className="text-[10px] text-muted-foreground">
+                {humanSize(a.tamanho_bytes)}
+              </span>
               <button
                 type="button"
                 className="p-1 text-muted-foreground hover:text-foreground"

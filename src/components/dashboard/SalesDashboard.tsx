@@ -9,7 +9,11 @@ import { PipelineFunnel } from "./PipelineFunnel";
 import { getManagerDashboard } from "@/lib/dashboard.functions";
 
 const fmtBRL = (n: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(n);
 const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
 const fmtDate = (v: string | null) =>
   v ? new Date(v).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) : "sem data";
@@ -100,7 +104,10 @@ export function SalesDashboard({ userName }: { userName: string }) {
               titulo: t.titulo,
               meta: `${t.cliente ?? t.processoCodigo ?? "—"} · prazo ${fmtDate(t.prazo)}`,
               status: new Date(t.prazo).getTime() < Date.now() ? "ATRASADA" : "ABERTA",
-              tone: new Date(t.prazo).getTime() < Date.now() ? ("danger" as const) : ("neutral" as const),
+              tone:
+                new Date(t.prazo).getTime() < Date.now()
+                  ? ("danger" as const)
+                  : ("neutral" as const),
             }))}
             empty="Nenhuma tarefa em aberto."
           />

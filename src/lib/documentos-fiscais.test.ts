@@ -176,8 +176,25 @@ describe("regras gerais", () => {
   it("cobre os 19 países da tabela paises_config", () => {
     expect(Object.keys(VALIDADORES).sort()).toEqual(
       [
-        "AR", "BO", "BR", "CL", "CN", "CO", "CR", "EC", "GT", "HN",
-        "MX", "NI", "PA", "PE", "PY", "SV", "US", "UY", "VE",
+        "AR",
+        "BO",
+        "BR",
+        "CL",
+        "CN",
+        "CO",
+        "CR",
+        "EC",
+        "GT",
+        "HN",
+        "MX",
+        "NI",
+        "PA",
+        "PE",
+        "PY",
+        "SV",
+        "US",
+        "UY",
+        "VE",
       ].sort(),
     );
   });

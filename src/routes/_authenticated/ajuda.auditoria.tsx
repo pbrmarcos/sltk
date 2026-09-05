@@ -45,14 +45,20 @@ export const Route = createFileRoute("/_authenticated/ajuda/auditoria")({
   head: () => ({
     meta: [
       { title: "Auditoria da documentação — Ajuda" },
-      { name: "description", content: "Rotas órfãs, cross-links quebrados e outros achados da auditoria." },
+      {
+        name: "description",
+        content: "Rotas órfãs, cross-links quebrados e outros achados da auditoria.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: AuditoriaPage,
 });
 
-const SEVERITY_UI: Record<Severity, { label: string; icon: typeof AlertCircle; className: string; badge: string }> = {
+const SEVERITY_UI: Record<
+  Severity,
+  { label: string; icon: typeof AlertCircle; className: string; badge: string }
+> = {
   error: {
     label: "Erro",
     icon: AlertCircle,
@@ -74,7 +80,11 @@ const SEVERITY_UI: Record<Severity, { label: string; icon: typeof AlertCircle; c
 };
 
 function formatItem(item: Record<string, unknown>): { primary: string; secondary?: string } {
-  if (typeof item.route === "string" && typeof item.category === "string" && typeof item.slug === "string") {
+  if (
+    typeof item.route === "string" &&
+    typeof item.category === "string" &&
+    typeof item.slug === "string"
+  ) {
     return { primary: item.route, secondary: `${item.category}/${item.slug}` };
   }
   if (typeof item.route === "string") return { primary: item.route };
@@ -126,7 +136,10 @@ function AuditoriaPage() {
         {totalIssues === 0 && (
           <div className="mb-6 flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--success)]/40 bg-[var(--success)]/10 p-4 text-sm text-[var(--text-primary)]">
             <CheckCircle2 className="h-5 w-5 text-[var(--success)]" />
-            <span>Nenhum achado nesta execução. A documentação está 100% consistente com as rotas ativas.</span>
+            <span>
+              Nenhum achado nesta execução. A documentação está 100% consistente com as rotas
+              ativas.
+            </span>
           </div>
         )}
 
@@ -146,11 +159,7 @@ function AuditoriaPage() {
           </TabsContent>
 
           <TabsContent value="modules" className="mt-4">
-            {report.byModule ? (
-              <AuditByModule byModule={report.byModule} />
-            ) : (
-              <EmptyLegacy />
-            )}
+            {report.byModule ? <AuditByModule byModule={report.byModule} /> : <EmptyLegacy />}
           </TabsContent>
 
           <TabsContent value="stages" className="mt-4">
@@ -164,8 +173,12 @@ function AuditoriaPage() {
 
         <p className="mt-6 text-xs text-[var(--text-muted)]">
           Fonte: <code>src/content/docs/audit-report.json</code> — regenerado pelo script{" "}
-          <code>scripts/docs-audit.mjs</code>. Para acompanhar histórico, versione o arquivo no repositório
-          ou baixe a versão MD em <Link to="/ajuda" className="text-[var(--info)] underline">/mnt/documents/docs-audit.md</Link>.
+          <code>scripts/docs-audit.mjs</code>. Para acompanhar histórico, versione o arquivo no
+          repositório ou baixe a versão MD em{" "}
+          <Link to="/ajuda" className="text-[var(--info)] underline">
+            /mnt/documents/docs-audit.md
+          </Link>
+          .
         </p>
       </DocsShell>
     </PageContainer>
@@ -180,7 +193,6 @@ function EmptyLegacy() {
     </div>
   );
 }
-
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
@@ -202,7 +214,9 @@ function SummaryPill({ severity, count }: { severity: Severity; count: number })
     >
       <Icon className={`h-5 w-5 ${ui.className}`} />
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">{ui.label}</div>
+        <div className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+          {ui.label}
+        </div>
         <div className="text-lg font-semibold text-[var(--text-primary)]">{count}</div>
       </div>
     </div>
@@ -226,7 +240,8 @@ function SectionCard({ section }: { section: Section }) {
       </header>
       {section.items.length === 0 ? (
         <div className="px-4 py-3 text-sm text-[var(--text-muted)]">
-          <CheckCircle2 className="mr-1 inline h-4 w-4 text-[var(--success)]" /> Nenhum problema nesta categoria.
+          <CheckCircle2 className="mr-1 inline h-4 w-4 text-[var(--success)]" /> Nenhum problema
+          nesta categoria.
         </div>
       ) : (
         <ul className="divide-y divide-[var(--bg-border)]">
@@ -235,7 +250,9 @@ function SectionCard({ section }: { section: Section }) {
             return (
               <li key={`${section.id}-${i}`} className="px-4 py-2 text-sm">
                 <code className="text-[var(--text-primary)]">{primary}</code>
-                {secondary && <span className="ml-2 text-xs text-[var(--text-muted)]">— {secondary}</span>}
+                {secondary && (
+                  <span className="ml-2 text-xs text-[var(--text-muted)]">— {secondary}</span>
+                )}
               </li>
             );
           })}

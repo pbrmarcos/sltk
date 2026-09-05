@@ -31,9 +31,13 @@ function CorrigirOrcamentoPage() {
         subtitle="Reabre o wizard pré-preenchido e gera uma nova versão (major/minor/patch automático)"
       />
       {q.isLoading ? (
-        <div className="p-12 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></div>
+        <div className="p-12 text-center">
+          <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+        </div>
       ) : q.isError || !q.data ? (
-        <div className="p-12 text-center text-rose-600">Erro ao carregar orçamento para correção.</div>
+        <div className="p-12 text-center text-rose-600">
+          Erro ao carregar orçamento para correção.
+        </div>
       ) : (
         <OrcamentoWizard
           mode="corrigir"

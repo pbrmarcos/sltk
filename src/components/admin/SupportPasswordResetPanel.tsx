@@ -44,8 +44,7 @@ import {
 const PAGE_SIZE = 25;
 
 function generatePassword() {
-  const alphabet =
-    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%*";
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%*";
   const bytes = new Uint32Array(16);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
@@ -61,33 +60,26 @@ export function SupportPasswordResetPanel() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [resetTarget, setResetTarget] = useState<SupportUserRow | null>(null);
-  const [resetResult, setResetResult] = useState<
-    { row: SupportUserRow; password: string } | null
-  >(null);
-  const [recoveryTarget, setRecoveryTarget] = useState<SupportUserRow | null>(
+  const [resetResult, setResetResult] = useState<{ row: SupportUserRow; password: string } | null>(
     null,
   );
+  const [recoveryTarget, setRecoveryTarget] = useState<SupportUserRow | null>(null);
 
   const listFn = useServerFn(listSupportUsers);
   const resetFn = useServerFn(supportResetPassword);
   const recoveryFn = useServerFn(supportSendPasswordRecovery);
 
-  const queryKey = useMemo(
-    () => ["support-users", { search, page }],
-    [search, page],
-  );
+  const queryKey = useMemo(() => ["support-users", { search, page }], [search, page]);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey,
-    queryFn: () =>
-      listFn({ data: { search, page, pageSize: PAGE_SIZE } }),
+    queryFn: () => listFn({ data: { search, page, pageSize: PAGE_SIZE } }),
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["support-users"] });
 
   const resetMut = useMutation({
-    mutationFn: (vars: { id: string; password: string }) =>
-      resetFn({ data: vars }),
+    mutationFn: (vars: { id: string; password: string }) => resetFn({ data: vars }),
     onSuccess: (_res, vars) => {
       toast.success("Senha redefinida");
       if (resetTarget) setResetResult({ row: resetTarget, password: vars.password });
@@ -114,10 +106,9 @@ export function SupportPasswordResetPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-[12px] text-amber-800">
-        <strong>Política de suporte:</strong> você só vê e opera sobre usuários
-        com nível de acesso <em>inferior</em> ao seu. Reset de senha de outro
-        engenheiro, gestor ou administrador precisa ser feito por um
-        administrador na aba Usuários.
+        <strong>Política de suporte:</strong> você só vê e opera sobre usuários com nível de acesso{" "}
+        <em>inferior</em> ao seu. Reset de senha de outro engenheiro, gestor ou administrador
+        precisa ser feito por um administrador na aba Usuários.
       </div>
 
       <Toolbar>
@@ -139,11 +130,7 @@ export function SupportPasswordResetPanel() {
       </Toolbar>
 
       {isLoading ? (
-        <TableSkeleton
-          columns={5}
-          rows={6}
-          headers={["Nome", "Email", "Roles", "Status", ""]}
-        />
+        <TableSkeleton columns={5} rows={6} headers={["Nome", "Email", "Roles", "Status", ""]} />
       ) : error ? (
         <TableError
           title="Erro ao carregar usuários"
@@ -171,9 +158,7 @@ export function SupportPasswordResetPanel() {
               {rows.map((r) => (
                 <TableRow key={r.id} className={r.disabled ? "opacity-60" : undefined}>
                   <TableCell className="font-medium">{r.full_name ?? "—"}</TableCell>
-                  <TableCell className="text-[var(--text-secondary)]">
-                    {r.email ?? "—"}
-                  </TableCell>
+                  <TableCell className="text-[var(--text-secondary)]">{r.email ?? "—"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {r.roles.length === 0 ? (
@@ -273,8 +258,8 @@ export function SupportPasswordResetPanel() {
           <DialogHeader>
             <DialogTitle>Senha temporária gerada</DialogTitle>
             <DialogDescription>
-              Copie e entregue ao usuário por canal seguro. Peça troca no
-              primeiro login. Este valor não será mostrado novamente.
+              Copie e entregue ao usuário por canal seguro. Peça troca no primeiro login. Este valor
+              não será mostrado novamente.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded bg-muted p-3 font-mono text-sm break-all">
@@ -309,15 +294,12 @@ export function SupportPasswordResetPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Enviar link de recuperação?</AlertDialogTitle>
             <AlertDialogDescription>
-              Um email será enviado para{" "}
-              <strong>{recoveryTarget?.email}</strong> com um link para redefinir
-              a senha. O link expira conforme a política do Supabase Auth.
+              Um email será enviado para <strong>{recoveryTarget?.email}</strong> com um link para
+              redefinir a senha. O link expira conforme a política do Supabase Auth.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={recoveryMut.isPending}>
-              Cancelar
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={recoveryMut.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               disabled={recoveryMut.isPending}
               onClick={() => {
@@ -361,8 +343,7 @@ function ResetPasswordDialog({
           <DialogTitle>Redefinir senha</DialogTitle>
           <DialogDescription>
             Gere ou digite uma senha temporária para{" "}
-            <strong>{target?.full_name ?? target?.email}</strong>. Mínimo 12
-            caracteres.
+            <strong>{target?.full_name ?? target?.email}</strong>. Mínimo 12 caracteres.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -373,11 +354,7 @@ function ResetPasswordDialog({
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 12 caracteres"
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPassword(generatePassword())}
-            >
+            <Button type="button" variant="outline" onClick={() => setPassword(generatePassword())}>
               Gerar
             </Button>
           </div>

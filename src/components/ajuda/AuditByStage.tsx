@@ -43,7 +43,12 @@ export function AuditByStage({ byStage, supportStage }: { byStage: Stage[]; supp
 
 function StageCard({ stage: s, wide = false }: { stage: Stage; wide?: boolean }) {
   const goodCoverage = s.coverage >= 80;
-  const barColor = s.coverage >= 90 ? "bg-[var(--success)]" : s.coverage >= 60 ? "bg-[var(--warning)]" : "bg-[var(--danger)]";
+  const barColor =
+    s.coverage >= 90
+      ? "bg-[var(--success)]"
+      : s.coverage >= 60
+        ? "bg-[var(--warning)]"
+        : "bg-[var(--danger)]";
 
   return (
     <div

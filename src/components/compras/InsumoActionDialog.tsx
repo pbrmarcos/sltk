@@ -57,10 +57,7 @@ import {
 } from "@/lib/projeto-insumos.shared";
 import type { InsumoRow } from "@/lib/projeto-insumos.functions";
 import { upsertInsumo, setInsumoStatus } from "@/lib/projeto-insumos.functions";
-import {
-  gerarDocumentoRfqInsumo,
-  listInsumoDocumentos,
-} from "@/lib/compras-rfq-docs.functions";
+import { gerarDocumentoRfqInsumo, listInsumoDocumentos } from "@/lib/compras-rfq-docs.functions";
 import { InsumoAnexosPanel } from "./InsumoAnexosPanel";
 import { InsumoHistoricoPanel } from "./InsumoHistoricoPanel";
 import { InsumoOverviewPanel } from "./InsumoOverviewPanel";
@@ -111,11 +108,22 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
   const [mensagens, setMensagens] = useState<Record<Idioma, string>>({ pt: "", es: "", en: "" });
   const [saving, setSaving] = useState(false);
   const [gerandoDoc, setGerandoDoc] = useState(false);
-  const [idiomasGerar, setIdiomasGerar] = useState<Record<Idioma, boolean>>({ pt: true, es: true, en: true });
+  const [idiomasGerar, setIdiomasGerar] = useState<Record<Idioma, boolean>>({
+    pt: true,
+    es: true,
+    en: true,
+  });
   const [notaCompras, setNotaCompras] = useState<string>("");
   const [tab, setTab] = useState<string>("detalhes");
 
-  const [ultimosDocs, setUltimosDocs] = useState<Array<{ idioma: Idioma; drive_view_url: string | null; file_name: string | null; error?: string }>>([]);
+  const [ultimosDocs, setUltimosDocs] = useState<
+    Array<{
+      idioma: Idioma;
+      drive_view_url: string | null;
+      file_name: string | null;
+      error?: string;
+    }>
+  >([]);
   const [folderUrl, setFolderUrl] = useState<string | null>(null);
 
   const docsHistory = useQuery({
@@ -140,24 +148,53 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
   }, [insumo]);
 
   const initialDraft = {
-    descricao: insumo?.descricao ?? "", quantidade: Number(insumo?.quantidade ?? 1), unidade: insumo?.unidade ?? "UN",
-    fabricante: insumo?.fabricante_sugerido ?? "", partNumber: insumo?.part_number ?? "",
-    codigoInterno: insumo?.codigo_interno ?? "", leadTime: insumo?.lead_time_desejado_dias?.toString() ?? "",
-    necessidadeEm: insumo?.necessidade_em ?? "", especificacao: insumo?.especificacao_tecnica ?? "",
-    observacoes: insumo?.observacoes ?? "", criticidade: (insumo?.criticidade as InsumoCriticidade | undefined) ?? "media",
+    descricao: insumo?.descricao ?? "",
+    quantidade: Number(insumo?.quantidade ?? 1),
+    unidade: insumo?.unidade ?? "UN",
+    fabricante: insumo?.fabricante_sugerido ?? "",
+    partNumber: insumo?.part_number ?? "",
+    codigoInterno: insumo?.codigo_interno ?? "",
+    leadTime: insumo?.lead_time_desejado_dias?.toString() ?? "",
+    necessidadeEm: insumo?.necessidade_em ?? "",
+    especificacao: insumo?.especificacao_tecnica ?? "",
+    observacoes: insumo?.observacoes ?? "",
+    criticidade: (insumo?.criticidade as InsumoCriticidade | undefined) ?? "media",
     tab: "detalhes",
   };
-  const currentDraft = { descricao, quantidade, unidade, fabricante, partNumber, codigoInterno, leadTime, necessidadeEm: necessidadeEm?.toISOString().slice(0, 10) ?? "", especificacao, observacoes, criticidade, tab };
+  const currentDraft = {
+    descricao,
+    quantidade,
+    unidade,
+    fabricante,
+    partNumber,
+    codigoInterno,
+    leadTime,
+    necessidadeEm: necessidadeEm?.toISOString().slice(0, 10) ?? "",
+    especificacao,
+    observacoes,
+    criticidade,
+    tab,
+  };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `insumo:editar:${insumo?.id ?? "fechado"}`,
     value: currentDraft,
     initialValue: initialDraft,
     enabled: !!insumo,
     onRestore: (saved) => {
-      setDescricao(saved.descricao); setQuantidade(saved.quantidade); setUnidade(saved.unidade);
-      setFabricante(saved.fabricante); setPartNumber(saved.partNumber); setCodigoInterno(saved.codigoInterno);
-      setLeadTime(saved.leadTime); setNecessidadeEm(saved.necessidadeEm ? new Date(`${saved.necessidadeEm}T12:00:00`) : undefined);
-      setEspecificacao(saved.especificacao); setObservacoes(saved.observacoes); setCriticidade(saved.criticidade); setTab(saved.tab);
+      setDescricao(saved.descricao);
+      setQuantidade(saved.quantidade);
+      setUnidade(saved.unidade);
+      setFabricante(saved.fabricante);
+      setPartNumber(saved.partNumber);
+      setCodigoInterno(saved.codigoInterno);
+      setLeadTime(saved.leadTime);
+      setNecessidadeEm(
+        saved.necessidadeEm ? new Date(`${saved.necessidadeEm}T12:00:00`) : undefined,
+      );
+      setEspecificacao(saved.especificacao);
+      setObservacoes(saved.observacoes);
+      setCriticidade(saved.criticidade);
+      setTab(saved.tab);
     },
   });
 
@@ -171,8 +208,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
     if (!insumo) return { pt: "", es: "", en: "" };
     const dataFmt = (locale: string) =>
       necessidadeEm ? necessidadeEm.toLocaleDateString(locale) : "—";
-    const especBlock = (lbl: string) =>
-      especificacao ? `\n\n${lbl}:\n${especificacao}` : "";
+    const especBlock = (lbl: string) => (especificacao ? `\n\n${lbl}:\n${especificacao}` : "");
 
     return {
       pt: [
@@ -192,7 +228,9 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
         "Aguardamos sua proposta com preço, prazo de entrega, condições de pagamento e Incoterm.",
         "",
         "Atenciosamente,",
-      ].filter(Boolean).join("\n"),
+      ]
+        .filter(Boolean)
+        .join("\n"),
       es: [
         "Estimados, buenas tardes.",
         "",
@@ -210,7 +248,9 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
         "Aguardamos su propuesta con precio, plazo de entrega, condiciones de pago e Incoterm.",
         "",
         "Atentamente,",
-      ].filter(Boolean).join("\n"),
+      ]
+        .filter(Boolean)
+        .join("\n"),
       en: [
         "Dear Sirs, good afternoon.",
         "",
@@ -228,9 +268,22 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
         "We look forward to your proposal with price, delivery time, payment terms and Incoterm.",
         "",
         "Best regards,",
-      ].filter(Boolean).join("\n"),
+      ]
+        .filter(Boolean)
+        .join("\n"),
     };
-  }, [insumo, descricao, fabricante, partNumber, codigoInterno, quantidade, unidade, leadTime, necessidadeEm, especificacao]);
+  }, [
+    insumo,
+    descricao,
+    fabricante,
+    partNumber,
+    codigoInterno,
+    quantidade,
+    unidade,
+    leadTime,
+    necessidadeEm,
+    especificacao,
+  ]);
 
   useEffect(() => {
     setMensagens(mensagensPadrao);
@@ -240,13 +293,16 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
     if (!insumo) return;
     const errs: string[] = [];
     if (descricao.trim().length < 3) errs.push("Descrição deve ter ao menos 3 caracteres.");
-    if (!Number.isFinite(quantidade) || quantidade <= 0) errs.push("Quantidade deve ser maior que zero.");
+    if (!Number.isFinite(quantidade) || quantidade <= 0)
+      errs.push("Quantidade deve ser maior que zero.");
     if (!unidade) errs.push("Selecione a unidade.");
     if (leadTime && (!Number.isFinite(Number(leadTime)) || Number(leadTime) < 0)) {
       errs.push("Lead time deve ser um número não negativo.");
     }
     if (errs.length) {
-      toast.error(errs[0], { description: errs.length > 1 ? errs.slice(1).join(" • ") : undefined });
+      toast.error(errs[0], {
+        description: errs.length > 1 ? errs.slice(1).join(" • ") : undefined,
+      });
       return;
     }
     setSaving(true);
@@ -255,7 +311,12 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
         data: {
           id: insumo.id,
           projeto_id: insumo.projeto_id,
-          disciplina: insumo.disciplina as "mecanico" | "eletrico" | "automacao" | "montagem" | "outro",
+          disciplina: insumo.disciplina as
+            | "mecanico"
+            | "eletrico"
+            | "automacao"
+            | "montagem"
+            | "outro",
           descricao: descricao.trim(),
           especificacao_tecnica: especificacao || null,
           codigo_interno: codigoInterno || null,
@@ -284,7 +345,6 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
       setSaving(false);
     }
   }
-
 
   async function copiar(texto: string, label: string) {
     try {
@@ -323,7 +383,9 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
       if (res.drive_ok && gerados.length > 0) {
         toast.success(`PDF gerado em ${gerados.length} idioma(s).`);
       } else if (gerados.length === 0) {
-        toast.warning("Documento gerado localmente. Conecte o Google Drive para salvar automaticamente.");
+        toast.warning(
+          "Documento gerado localmente. Conecte o Google Drive para salvar automaticamente.",
+        );
       } else {
         toast.warning("Documento gerado, mas alguns idiomas falharam ao subir no Drive.");
       }
@@ -365,7 +427,6 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
     }
   }
 
-
   return (
     <Dialog open={!!insumo} onOpenChange={(o) => !o && requestClose()}>
       <DialogContent className="max-w-6xl max-h-[92vh] overflow-hidden p-0">
@@ -375,15 +436,27 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
               <DialogHeader>
                 <div className="flex flex-wrap items-center gap-2">
                   <DialogTitle className="text-xl">{descricao || "—"}</DialogTitle>
-                  <Badge variant="outline" className={cn("font-normal", INSUMO_CRITICIDADE_COLOR[criticidade])}>
+                  <Badge
+                    variant="outline"
+                    className={cn("font-normal", INSUMO_CRITICIDADE_COLOR[criticidade])}
+                  >
                     {INSUMO_CRITICIDADE_LABEL[criticidade]}
                   </Badge>
-                  <Badge variant="outline" className={cn("font-normal", INSUMO_STATUS_COLOR[insumo.status as InsumoStatus])}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "font-normal",
+                      INSUMO_STATUS_COLOR[insumo.status as InsumoStatus],
+                    )}
+                  >
                     {INSUMO_STATUS_LABEL[insumo.status as InsumoStatus]}
                   </Badge>
                 </div>
                 <DialogDescription>
-                  {insumo.clientes?.codigo ?? "—"} · {insumo.equipamento_projetos?.cliente_equipamentos?.codigo ?? "—"}{" · Rev. "}{insumo.equipamento_projetos?.revisao ?? "—"}
+                  {insumo.clientes?.codigo ?? "—"} ·{" "}
+                  {insumo.equipamento_projetos?.cliente_equipamentos?.codigo ?? "—"}
+                  {" · Rev. "}
+                  {insumo.equipamento_projetos?.revisao ?? "—"}
                 </DialogDescription>
               </DialogHeader>
             </div>
@@ -410,7 +483,9 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                   variant="outline"
                   className="h-7 text-xs border-fuchsia-300 text-fuchsia-700 hover:bg-fuchsia-50"
                   disabled={saving}
-                  onClick={() => avancarStatus("pronto_aprovacao", "Cotações prontas para revisão.")}
+                  onClick={() =>
+                    avancarStatus("pronto_aprovacao", "Cotações prontas para revisão.")
+                  }
                 >
                   Marcar como pronto p/ aprovação
                 </Button>
@@ -421,7 +496,9 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                   variant="outline"
                   className="h-7 text-xs border-blue-300 text-blue-700 hover:bg-blue-50"
                   disabled={saving}
-                  onClick={() => avancarStatus("cotado", "Cotações aprovadas por manager/engenharia.")}
+                  onClick={() =>
+                    avancarStatus("cotado", "Cotações aprovadas por manager/engenharia.")
+                  }
                 >
                   Aprovar cotação
                 </Button>
@@ -451,18 +528,29 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
 
             <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col min-h-0">
               <div className="border-b bg-[var(--bg-elevated)] px-6 shrink-0">
-
                 <TabsList className="h-10 bg-transparent p-0 gap-1">
-                  <TabsTrigger value="detalhes" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger
+                    value="detalhes"
+                    className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5"
+                  >
                     <FileText className="h-3.5 w-3.5" /> Detalhes
                   </TabsTrigger>
-                  <TabsTrigger value="acoes" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger
+                    value="acoes"
+                    className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5"
+                  >
                     <Wrench className="h-3.5 w-3.5" /> Ações do Compras
                   </TabsTrigger>
-                  <TabsTrigger value="anexos" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger
+                    value="anexos"
+                    className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5"
+                  >
                     <Paperclip className="h-3.5 w-3.5" /> Anexos & Orçamentos
                   </TabsTrigger>
-                  <TabsTrigger value="historico" className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5">
+                  <TabsTrigger
+                    value="historico"
+                    className="data-[state=active]:bg-[var(--bg-surface)] data-[state=active]:shadow-sm h-9 px-3 text-xs gap-1.5"
+                  >
                     <History className="h-3.5 w-3.5" /> Histórico
                   </TabsTrigger>
                 </TabsList>
@@ -476,33 +564,57 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                     onGoToAcoes={() => setTab("acoes")}
                   />
 
-                  <details className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] group" open={insumo.status === "rascunho"}>
+                  <details
+                    className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] group"
+                    open={insumo.status === "rascunho"}
+                  >
                     <summary className="cursor-pointer select-none px-3 py-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-[var(--text-secondary)] font-medium hover:bg-[var(--bg-elevated)]">
                       <span className="flex items-center gap-2">
                         <FileText className="h-3 w-3 text-[var(--text-muted)]" />
                         Dados do insumo
                       </span>
-                      <span className="text-[10px] text-[var(--text-muted)] group-open:hidden">clique para editar</span>
-                      <span className="text-[10px] text-[var(--text-muted)] hidden group-open:inline">clique para recolher</span>
+                      <span className="text-[10px] text-[var(--text-muted)] group-open:hidden">
+                        clique para editar
+                      </span>
+                      <span className="text-[10px] text-[var(--text-muted)] hidden group-open:inline">
+                        clique para recolher
+                      </span>
                     </summary>
                     <div className="px-3 pb-3 pt-1 space-y-2">
                       <div>
                         <Label className="text-[11px]">Descrição</Label>
-                        <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-8 text-xs" />
+                        <Input
+                          value={descricao}
+                          onChange={(e) => setDescricao(e.target.value)}
+                          className="h-8 text-xs"
+                        />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div className="grid grid-cols-3 gap-2">
                           <div className="col-span-2">
                             <Label className="text-[11px]">Quantidade</Label>
-                            <Input type="number" min={0} step="any" value={quantidade} onChange={(e) => setQuantidade(Number(e.target.value))} className="h-8 text-xs" />
+                            <Input
+                              type="number"
+                              min={0}
+                              step="any"
+                              value={quantidade}
+                              onChange={(e) => setQuantidade(Number(e.target.value))}
+                              className="h-8 text-xs"
+                            />
                           </div>
                           <div>
                             <Label className="text-[11px]">Unidade</Label>
                             <Select value={unidade} onValueChange={setUnidade}>
-                              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
                               <SelectContent>
-                                {INSUMO_UNIDADES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                {INSUMO_UNIDADES.map((u) => (
+                                  <SelectItem key={u} value={u}>
+                                    {u}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </div>
@@ -511,22 +623,40 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <Label className="text-[11px]">Fabricante</Label>
-                            <Input value={fabricante} onChange={(e) => setFabricante(e.target.value)} className="h-8 text-xs" />
+                            <Input
+                              value={fabricante}
+                              onChange={(e) => setFabricante(e.target.value)}
+                              className="h-8 text-xs"
+                            />
                           </div>
                           <div>
                             <Label className="text-[11px]">Part Number</Label>
-                            <Input value={partNumber} onChange={(e) => setPartNumber(e.target.value)} className="h-8 text-xs" />
+                            <Input
+                              value={partNumber}
+                              onChange={(e) => setPartNumber(e.target.value)}
+                              className="h-8 text-xs"
+                            />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <Label className="text-[11px]">Código interno</Label>
-                            <Input value={codigoInterno} onChange={(e) => setCodigoInterno(e.target.value)} className="h-8 text-xs" />
+                            <Input
+                              value={codigoInterno}
+                              onChange={(e) => setCodigoInterno(e.target.value)}
+                              className="h-8 text-xs"
+                            />
                           </div>
                           <div>
                             <Label className="text-[11px]">Lead time (dias)</Label>
-                            <Input type="number" min={0} value={leadTime} onChange={(e) => setLeadTime(e.target.value)} className="h-8 text-xs" />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={leadTime}
+                              onChange={(e) => setLeadTime(e.target.value)}
+                              className="h-8 text-xs"
+                            />
                           </div>
                         </div>
 
@@ -535,22 +665,45 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                             <Label className="text-[11px]">Necessidade em</Label>
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-8 text-xs px-2", !necessidadeEm && "text-muted-foreground")}>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal h-8 text-xs px-2",
+                                    !necessidadeEm && "text-muted-foreground",
+                                  )}
+                                >
                                   <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                                  {necessidadeEm ? format(necessidadeEm, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                                  {necessidadeEm
+                                    ? format(necessidadeEm, "dd/MM/yyyy", { locale: ptBR })
+                                    : "Selecionar"}
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={necessidadeEm} onSelect={setNecessidadeEm} initialFocus className={cn("p-3 pointer-events-auto")} />
+                                <Calendar
+                                  mode="single"
+                                  selected={necessidadeEm}
+                                  onSelect={setNecessidadeEm}
+                                  initialFocus
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
                               </PopoverContent>
                             </Popover>
                           </div>
                           <div>
                             <Label className="text-[11px]">Criticidade</Label>
-                            <Select value={criticidade} onValueChange={(v) => setCriticidade(v as InsumoCriticidade)}>
-                              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <Select
+                              value={criticidade}
+                              onValueChange={(v) => setCriticidade(v as InsumoCriticidade)}
+                            >
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
                               <SelectContent>
-                                {INSUMO_CRITICIDADE.map((c) => <SelectItem key={c} value={c}>{INSUMO_CRITICIDADE_LABEL[c]}</SelectItem>)}
+                                {INSUMO_CRITICIDADE.map((c) => (
+                                  <SelectItem key={c} value={c}>
+                                    {INSUMO_CRITICIDADE_LABEL[c]}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </div>
@@ -559,14 +712,29 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
 
                       <div>
                         <Label className="text-[11px]">Especificação técnica</Label>
-                        <Textarea rows={2} value={especificacao} onChange={(e) => setEspecificacao(e.target.value)} className="text-xs min-h-[54px]" />
+                        <Textarea
+                          rows={2}
+                          value={especificacao}
+                          onChange={(e) => setEspecificacao(e.target.value)}
+                          className="text-xs min-h-[54px]"
+                        />
                       </div>
                       <div>
                         <Label className="text-[11px]">Observações</Label>
-                        <Textarea rows={1} value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="text-xs min-h-[40px]" />
+                        <Textarea
+                          rows={1}
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          className="text-xs min-h-[40px]"
+                        />
                       </div>
 
-                      <Button variant="outline" className="w-full h-8 text-xs" onClick={handleSave} disabled={saving}>
+                      <Button
+                        variant="outline"
+                        className="w-full h-8 text-xs"
+                        onClick={handleSave}
+                        disabled={saving}
+                      >
                         <Save className="mr-1.5 h-3.5 w-3.5" />
                         Salvar alterações
                       </Button>
@@ -581,7 +749,11 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                         <MessageSquare className="h-3.5 w-3.5" />
                         Mensagem para fornecedor
                       </Label>
-                      <button type="button" className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline underline-offset-2" onClick={() => setMensagens(mensagensPadrao)}>
+                      <button
+                        type="button"
+                        className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline underline-offset-2"
+                        onClick={() => setMensagens(mensagensPadrao)}
+                      >
                         Restaurar padrão
                       </button>
                     </div>
@@ -596,16 +768,37 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                       </TabsList>
                       {IDIOMAS.map((l) => (
                         <TabsContent key={l} value={l} className="mt-2">
-                          <Textarea rows={8} className="font-mono text-xs bg-[var(--bg-surface)]" value={mensagens[l]} onChange={(e) => setMensagens((prev) => ({ ...prev, [l]: e.target.value }))} />
+                          <Textarea
+                            rows={8}
+                            className="font-mono text-xs bg-[var(--bg-surface)]"
+                            value={mensagens[l]}
+                            onChange={(e) =>
+                              setMensagens((prev) => ({ ...prev, [l]: e.target.value }))
+                            }
+                          />
                         </TabsContent>
                       ))}
                     </Tabs>
                     <div className="flex flex-wrap gap-2">
-                      <Button size="sm" variant="outline" onClick={() => copiar(descricao, "Descrição")}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => copiar(descricao, "Descrição")}
+                      >
                         <Copy className="mr-1.5 h-3.5 w-3.5" /> Copiar descrição
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => copiar(mensagens[mensagemLang], `Mensagem (${IDIOMA_LABEL[mensagemLang]})`)}>
-                        <Copy className="mr-1.5 h-3.5 w-3.5" /> Copiar mensagem ({IDIOMA_FLAG[mensagemLang]})
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          copiar(
+                            mensagens[mensagemLang],
+                            `Mensagem (${IDIOMA_LABEL[mensagemLang]})`,
+                          )
+                        }
+                      >
+                        <Copy className="mr-1.5 h-3.5 w-3.5" /> Copiar mensagem (
+                        {IDIOMA_FLAG[mensagemLang]})
                       </Button>
                     </div>
                   </div>
@@ -620,17 +813,37 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                       </Label>
                       {insumo?.id ? (
                         <Badge variant="outline" className="font-mono text-[10px] tracking-wider">
-                          TAG: {itemTag(insumo.id, (insumo as { created_at?: string | null }).created_at)}
+                          TAG:{" "}
+                          {itemTag(
+                            insumo.id,
+                            (insumo as { created_at?: string | null }).created_at,
+                          )}
                         </Badge>
                       ) : null}
                     </div>
                     <p className="text-[11px] text-[var(--text-muted)] leading-snug">
-                      PDF em modo paisagem. O documento é externo: <strong>não</strong> inclui dados do cliente ou do projeto — apenas a TAG interna do item.
+                      PDF em modo paisagem. O documento é externo: <strong>não</strong> inclui dados
+                      do cliente ou do projeto — apenas a TAG interna do item.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {IDIOMAS.map((l) => (
-                        <label key={l} className={cn("flex items-center gap-1.5 text-xs px-2 py-1 rounded border cursor-pointer", idiomasGerar[l] ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)]")}>
-                          <input type="checkbox" className="h-3 w-3" checked={idiomasGerar[l]} onChange={(e) => setIdiomasGerar((prev) => ({ ...prev, [l]: e.target.checked }))} />
+                        <label
+                          key={l}
+                          className={cn(
+                            "flex items-center gap-1.5 text-xs px-2 py-1 rounded border cursor-pointer",
+                            idiomasGerar[l]
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                              : "border-[var(--bg-border)] bg-[var(--bg-surface)] text-[var(--text-muted)]",
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-3 w-3"
+                            checked={idiomasGerar[l]}
+                            onChange={(e) =>
+                              setIdiomasGerar((prev) => ({ ...prev, [l]: e.target.checked }))
+                            }
+                          />
                           <span>{IDIOMA_FLAG[l]}</span>
                           <span>{IDIOMA_LABEL[l]}</span>
                         </label>
@@ -655,9 +868,17 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                       />
                     </div>
 
-
-                    <Button variant="outline" className="w-full justify-start" onClick={gerarDocumento} disabled={gerandoDoc || saving}>
-                      {gerandoDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={gerarDocumento}
+                      disabled={gerandoDoc || saving}
+                    >
+                      {gerandoDoc ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Printer className="mr-2 h-4 w-4" />
+                      )}
                       Gerar e salvar no Drive
                       <FileDown className="ml-auto h-4 w-4 opacity-60" />
                     </Button>
@@ -669,7 +890,12 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                             <FileDown className="h-3.5 w-3.5" /> PDFs gerados
                           </span>
                           {folderUrl && (
-                            <a href={folderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
+                            <a
+                              href={folderUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] text-emerald-700 hover:underline"
+                            >
                               <ExternalLink className="h-3 w-3" /> Pasta do Drive
                             </a>
                           )}
@@ -679,21 +905,41 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                             <div key={i}>
                               {d.drive_view_url ? (
                                 <div className="flex items-center gap-1">
-                                  <Button asChild size="sm" variant="outline" className="flex-1 justify-start bg-[var(--bg-surface)] border-emerald-300 text-emerald-800 hover:bg-emerald-100">
-                                    <a href={d.drive_view_url} target="_blank" rel="noopener noreferrer" title={d.file_name ?? undefined}>
+                                  <Button
+                                    asChild
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex-1 justify-start bg-[var(--bg-surface)] border-emerald-300 text-emerald-800 hover:bg-emerald-100"
+                                  >
+                                    <a
+                                      href={d.drive_view_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title={d.file_name ?? undefined}
+                                    >
                                       <span className="mr-1.5">{IDIOMA_FLAG[d.idioma]}</span>
-                                      <span className="truncate flex-1 text-left">Abrir PDF ({IDIOMA_LABEL[d.idioma]})</span>
+                                      <span className="truncate flex-1 text-left">
+                                        Abrir PDF ({IDIOMA_LABEL[d.idioma]})
+                                      </span>
                                       <ExternalLink className="ml-1 h-3 w-3 opacity-70" />
                                     </a>
                                   </Button>
-                                  <Button size="sm" variant="ghost" className="h-8 w-8 shrink-0 p-0 text-emerald-700 hover:bg-emerald-100" title={`Copiar link do PDF (${IDIOMA_LABEL[d.idioma]})`} onClick={async () => {
-                                    try {
-                                      await navigator.clipboard.writeText(d.drive_view_url!);
-                                      toast.success(`Link do PDF em ${IDIOMA_LABEL[d.idioma]} copiado.`);
-                                    } catch {
-                                      toast.error("Não foi possível copiar. Copie manualmente.");
-                                    }
-                                  }}>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 w-8 shrink-0 p-0 text-emerald-700 hover:bg-emerald-100"
+                                    title={`Copiar link do PDF (${IDIOMA_LABEL[d.idioma]})`}
+                                    onClick={async () => {
+                                      try {
+                                        await navigator.clipboard.writeText(d.drive_view_url!);
+                                        toast.success(
+                                          `Link do PDF em ${IDIOMA_LABEL[d.idioma]} copiado.`,
+                                        );
+                                      } catch {
+                                        toast.error("Não foi possível copiar. Copie manualmente.");
+                                      }
+                                    }}
+                                  >
                                     <Copy className="h-3.5 w-3.5" />
                                   </Button>
                                 </div>
@@ -716,10 +962,18 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                         </summary>
                         <div className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                           {docsHistory.data.map((d) => (
-                            <a key={d.id} href={d.drive_view_url ?? "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] hover:text-blue-600">
+                            <a
+                              key={d.id}
+                              href={d.drive_view_url ?? "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] hover:text-blue-600"
+                            >
                               <span>{IDIOMA_FLAG[d.idioma as Idioma]}</span>
                               <span className="truncate flex-1">{d.file_name ?? "—"}</span>
-                              <span className="text-[var(--text-muted)]">{new Date(d.criado_em).toLocaleDateString("pt-BR")}</span>
+                              <span className="text-[var(--text-muted)]">
+                                {new Date(d.criado_em).toLocaleDateString("pt-BR")}
+                              </span>
                             </a>
                           ))}
                         </div>
@@ -727,7 +981,6 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                     )}
                   </div>
                 </TabsContent>
-
 
                 <TabsContent value="anexos" className="mt-0">
                   <InsumoAnexosPanel insumoId={insumo.id} />

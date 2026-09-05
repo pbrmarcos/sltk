@@ -24,9 +24,7 @@ test.describe("Admin fase 1 — layout e guard", () => {
     const ctx = await browser.newContext({ storageState: S_NOROLE });
     const page = await ctx.newPage();
     await page.goto("/admin");
-    await expect(
-      page.getByText(/você não tem permissão para acessar esta área/i),
-    ).toBeVisible();
+    await expect(page.getByText(/você não tem permissão para acessar esta área/i)).toBeVisible();
     await ctx.close();
   });
 
@@ -68,9 +66,7 @@ test.describe("Admin fase 1 — layout e guard", () => {
     const page = await ctx.newPage();
     await page.goto("/admin");
     await page.reload();
-    const flag = await page.evaluate(() =>
-      window.sessionStorage.getItem("sltk_admin_logged"),
-    );
+    const flag = await page.evaluate(() => window.sessionStorage.getItem("sltk_admin_logged"));
     expect(flag).toBe("1");
     await ctx.close();
   });

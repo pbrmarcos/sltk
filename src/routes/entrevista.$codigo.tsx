@@ -7,17 +7,34 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Check, ChevronLeft, ChevronRight, Loader2, ShieldCheck, UserRound,
-  ClipboardCheck, RotateCcw, Mail, MessageCircle, BadgeCheck, Info,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  ShieldCheck,
+  UserRound,
+  ClipboardCheck,
+  RotateCcw,
+  Mail,
+  MessageCircle,
+  BadgeCheck,
+  Info,
 } from "lucide-react";
 import {
-  I18N, COUNTRIES, flagEmoji, pickText, detectYesNo, groupContactMatrix,
-  maskWhatsapp, isValidWhatsapp, isValidEmail, type Idioma,
+  I18N,
+  COUNTRIES,
+  flagEmoji,
+  pickText,
+  detectYesNo,
+  groupContactMatrix,
+  maskWhatsapp,
+  isValidWhatsapp,
+  isValidEmail,
+  type Idioma,
 } from "@/lib/entrevistas-shared";
 import fallbackLogoAsset from "@/assets/brand-logo-dark.svg.asset.json";
 
 const FALLBACK_LOGO_URL: string = assetUrl(fallbackLogoAsset.url);
-
 
 export const Route = createFileRoute("/entrevista/$codigo")({
   component: PublicInterviewPage,
@@ -26,7 +43,10 @@ export const Route = createFileRoute("/entrevista/$codigo")({
       { title: "Entrevista Técnica — SLTK Americas" },
       { name: "description", content: "Responda a entrevista técnica para orientar seu projeto." },
       { property: "og:title", content: "Entrevista Técnica — SLTK Americas" },
-      { property: "og:description", content: "Responda a entrevista técnica para orientar seu projeto." },
+      {
+        property: "og:description",
+        content: "Responda a entrevista técnica para orientar seu projeto.",
+      },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex,nofollow" },
       { name: "theme-color", content: "#0b1a3a" },
@@ -35,11 +55,22 @@ export const Route = createFileRoute("/entrevista/$codigo")({
 });
 
 type Pergunta = {
-  id: string; numero: number; ordem: number;
+  id: string;
+  numero: number;
+  ordem: number;
   formato: "text" | "textarea" | "single_choice" | "multi_choice" | "number" | "country";
-  enunciado_pt: string; enunciado_es: string | null; enunciado_en: string | null;
+  enunciado_pt: string;
+  enunciado_es: string | null;
+  enunciado_en: string | null;
   obrigatoria: boolean;
-  opcoes: Array<{ id: string; ordem: number; label_pt: string; label_es: string | null; label_en: string | null; tem_descricao: boolean }>;
+  opcoes: Array<{
+    id: string;
+    ordem: number;
+    label_pt: string;
+    label_es: string | null;
+    label_en: string | null;
+    tem_descricao: boolean;
+  }>;
 };
 
 type Brand = { logo: string | null; logo_collapsed?: string | null; nome: string };
@@ -47,45 +78,75 @@ type Brand = { logo: string | null; logo_collapsed?: string | null; nome: string
 type LoadState =
   | { status: "loading" }
   | { status: "not_found" | "expired" | "respondida" | "error"; detail?: string }
-  | { status: "ok"; segmento: { nome_pt: string; nome_es: string | null; nome_en: string | null };
-      idioma_default: Idioma; codigo: string; lead_nome: string | null; perguntas: Pergunta[]; brand: Brand };
+  | {
+      status: "ok";
+      segmento: { nome_pt: string; nome_es: string | null; nome_en: string | null };
+      idioma_default: Idioma;
+      codigo: string;
+      lead_nome: string | null;
+      perguntas: Pergunta[];
+      brand: Brand;
+    };
 
 type Resposta = { valor_text?: string; valor_options?: string[]; descricao_extra?: string };
 type ContatoState = { nome: string; email: string; whatsapp: string; cargo: string };
 
-const CONTACT_I18N: Record<Idioma, {
-  step_title: string; step_subtitle: string;
-  nome: string; nome_ph: string;
-  cargo: string; cargo_ph: string;
-  email: string; email_ph: string;
-  whatsapp: string; whatsapp_ph: string;
-  required_hint: string;
-}> = {
+const CONTACT_I18N: Record<
+  Idioma,
+  {
+    step_title: string;
+    step_subtitle: string;
+    nome: string;
+    nome_ph: string;
+    cargo: string;
+    cargo_ph: string;
+    email: string;
+    email_ph: string;
+    whatsapp: string;
+    whatsapp_ph: string;
+    required_hint: string;
+  }
+> = {
   pt: {
     step_title: "Dados de contato — Gerente de Produção",
-    step_subtitle: "Quem é o responsável pela produção? Este contato será usado exclusivamente para dar sequência ao seu projeto.",
-    nome: "Nome completo", nome_ph: "Ex.: João da Silva",
-    cargo: "Cargo / Função", cargo_ph: "Gerente de Produção",
-    email: "E-mail profissional", email_ph: "nome@empresa.com",
-    whatsapp: "WhatsApp (com DDI)", whatsapp_ph: "+55 (11) 90000-0000",
+    step_subtitle:
+      "Quem é o responsável pela produção? Este contato será usado exclusivamente para dar sequência ao seu projeto.",
+    nome: "Nome completo",
+    nome_ph: "Ex.: João da Silva",
+    cargo: "Cargo / Função",
+    cargo_ph: "Gerente de Produção",
+    email: "E-mail profissional",
+    email_ph: "nome@empresa.com",
+    whatsapp: "WhatsApp (com DDI)",
+    whatsapp_ph: "+55 (11) 90000-0000",
     required_hint: "Nome, e-mail e WhatsApp são obrigatórios.",
   },
   es: {
     step_title: "Datos de contacto — Gerente de Producción",
-    step_subtitle: "¿Quién es el responsable de producción? Este contacto se usará únicamente para dar seguimiento al proyecto.",
-    nome: "Nombre completo", nome_ph: "Ej.: Juan Pérez",
-    cargo: "Cargo / Función", cargo_ph: "Gerente de Producción",
-    email: "Correo profesional", email_ph: "nombre@empresa.com",
-    whatsapp: "WhatsApp (con código de país)", whatsapp_ph: "+54 (11) 90000-0000",
+    step_subtitle:
+      "¿Quién es el responsable de producción? Este contacto se usará únicamente para dar seguimiento al proyecto.",
+    nome: "Nombre completo",
+    nome_ph: "Ej.: Juan Pérez",
+    cargo: "Cargo / Función",
+    cargo_ph: "Gerente de Producción",
+    email: "Correo profesional",
+    email_ph: "nombre@empresa.com",
+    whatsapp: "WhatsApp (con código de país)",
+    whatsapp_ph: "+54 (11) 90000-0000",
     required_hint: "Nombre, correo y WhatsApp son obligatorios.",
   },
   en: {
     step_title: "Contact information — Production Manager",
-    step_subtitle: "Who is the production manager? This contact will be used only to follow up on your project.",
-    nome: "Full name", nome_ph: "e.g. John Smith",
-    cargo: "Role / Position", cargo_ph: "Production Manager",
-    email: "Work e-mail", email_ph: "name@company.com",
-    whatsapp: "WhatsApp (with country code)", whatsapp_ph: "+1 (555) 000-0000",
+    step_subtitle:
+      "Who is the production manager? This contact will be used only to follow up on your project.",
+    nome: "Full name",
+    nome_ph: "e.g. John Smith",
+    cargo: "Role / Position",
+    cargo_ph: "Production Manager",
+    email: "Work e-mail",
+    email_ph: "name@company.com",
+    whatsapp: "WhatsApp (with country code)",
+    whatsapp_ph: "+1 (555) 000-0000",
     required_hint: "Name, e-mail and WhatsApp are required.",
   },
 };
@@ -100,11 +161,16 @@ function PublicInterviewPage() {
   const [lang, setLang] = useState<Idioma>(() => {
     if (typeof window === "undefined") return "pt";
     const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
-    return (saved === "pt" || saved === "es" || saved === "en") ? saved : "pt";
+    return saved === "pt" || saved === "es" || saved === "en" ? saved : "pt";
   });
   const [step, setStep] = useState(0);
   const [respostas, setRespostas] = useState<Record<string, Resposta>>({});
-  const [contato, setContato] = useState<ContatoState>({ nome: "", email: "", whatsapp: "", cargo: "Gerente de Produção" });
+  const [contato, setContato] = useState<ContatoState>({
+    nome: "",
+    email: "",
+    whatsapp: "",
+    cargo: "Gerente de Produção",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -140,20 +206,36 @@ function PublicInterviewPage() {
 
     const load = async (tries = 0): Promise<void> => {
       try {
-        const r = await fetch(`/api/public/entrevista/get?codigo=${encodeURIComponent(codigo)}&_=${Date.now()}`, {
-          headers: { accept: "application/json" },
-          cache: "no-store",
-        });
+        const r = await fetch(
+          `/api/public/entrevista/get?codigo=${encodeURIComponent(codigo)}&_=${Date.now()}`,
+          {
+            headers: { accept: "application/json" },
+            cache: "no-store",
+          },
+        );
         const raw = await r.text();
         let j: any = null;
-        try { j = JSON.parse(raw); } catch { /* non-JSON response (proxy/HTML) */ }
+        try {
+          j = JSON.parse(raw);
+        } catch {
+          /* non-JSON response (proxy/HTML) */
+        }
         if (cancelled) return;
 
         if (!r.ok || !j?.ok) {
           const err = String(j?.error ?? (j ? "" : `http_${r.status}`));
-          if (r.status === 404 || err === "not_found") { setDataReady({ status: "not_found" }); return; }
-          if (err === "respondida") { setDataReady({ status: "respondida" }); return; }
-          if (err === "expired" || err === "expirada") { setDataReady({ status: "expired" }); return; }
+          if (r.status === 404 || err === "not_found") {
+            setDataReady({ status: "not_found" });
+            return;
+          }
+          if (err === "respondida") {
+            setDataReady({ status: "respondida" });
+            return;
+          }
+          if (err === "expired" || err === "expirada") {
+            setDataReady({ status: "expired" });
+            return;
+          }
           if (tries < 2) {
             await new Promise((res) => setTimeout(res, 800 * (tries + 1)));
             if (!cancelled) await load(tries + 1);
@@ -184,9 +266,10 @@ function PublicInterviewPage() {
     };
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [codigo]);
-
 
   // Autosave (load once when data ready)
   useEffect(() => {
@@ -201,26 +284,37 @@ function PublicInterviewPage() {
         if (typeof draft.step === "number") setStep(Math.min(draft.step, state.perguntas.length));
         setResumed(true);
       }
-    } catch { /* noop */ }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    } catch {
+      /* noop */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.status]);
 
   // Autosave (save on change)
   useEffect(() => {
     if (state.status !== "ok") return;
     const payload = JSON.stringify({ respostas, contato, step, savedAt: Date.now() });
-    try { window.localStorage.setItem(STORAGE_PREFIX + codigo, payload); } catch { /* noop */ }
+    try {
+      window.localStorage.setItem(STORAGE_PREFIX + codigo, payload);
+    } catch {
+      /* noop */
+    }
   }, [respostas, contato, step, codigo, state.status]);
 
   // Persist language choice
   useEffect(() => {
-    try { window.localStorage.setItem(LANG_STORAGE_KEY, lang); } catch { /* noop */ }
+    try {
+      window.localStorage.setItem(LANG_STORAGE_KEY, lang);
+    } catch {
+      /* noop */
+    }
   }, [lang]);
 
   // Warn before unload if there are unsent answers
   useEffect(() => {
     if (done || state.status !== "ok") return;
-    const hasData = Object.keys(respostas).length > 0 || contato.nome || contato.email || contato.whatsapp;
+    const hasData =
+      Object.keys(respostas).length > 0 || contato.nome || contato.email || contato.whatsapp;
     if (!hasData) return;
     const t = I18N[lang];
     const handler = (e: BeforeUnloadEvent) => {
@@ -242,7 +336,9 @@ function PublicInterviewPage() {
   const emailValid = !contato.email || isValidEmail(contato.email);
   const whatsValid = !contato.whatsapp || isValidWhatsapp(contato.whatsapp);
   const contactComplete =
-    contato.nome.trim().length > 1 && isValidEmail(contato.email) && isValidWhatsapp(contato.whatsapp);
+    contato.nome.trim().length > 1 &&
+    isValidEmail(contato.email) &&
+    isValidWhatsapp(contato.whatsapp);
 
   const canAdvance = useMemo(() => {
     if (isContactStep) return contactComplete;
@@ -250,7 +346,11 @@ function PublicInterviewPage() {
     if (!current.obrigatoria) return true;
     const r = respostas[current.id];
     if (!r) return false;
-    if (current.formato === "multi_choice" || current.formato === "single_choice" || current.formato === "country") {
+    if (
+      current.formato === "multi_choice" ||
+      current.formato === "single_choice" ||
+      current.formato === "country"
+    ) {
       return (r.valor_options?.length ?? 0) > 0;
     }
     return !!r.valor_text?.trim();
@@ -262,7 +362,8 @@ function PublicInterviewPage() {
 
   async function submit() {
     if (state.status !== "ok") return;
-    setSubmitting(true); setError(null);
+    setSubmitting(true);
+    setError(null);
     // Build ID→PT label map so stored answers stay canonical regardless of UI language.
     const optLabelPt = new Map<string, string>();
     const optIsCountry = new Set<string>(); // pergunta ids whose format is 'country'
@@ -310,7 +411,11 @@ function PublicInterviewPage() {
         const j = await res.json();
         if (j.ok) {
           setDone(true);
-          try { window.localStorage.removeItem(STORAGE_PREFIX + codigo); } catch { /* noop */ }
+          try {
+            window.localStorage.removeItem(STORAGE_PREFIX + codigo);
+          } catch {
+            /* noop */
+          }
           setSubmitting(false);
           return;
         }
@@ -327,13 +432,21 @@ function PublicInterviewPage() {
     }
   }
 
-  const splashBrand: Brand =
-    (dataReady?.status === "ok" ? dataReady.brand : null) ??
-    (state.status === "ok" ? state.brand : null) ??
-    { logo: FALLBACK_LOGO_URL, logo_collapsed: FALLBACK_LOGO_URL, nome: "SLTK Americas" };
+  const splashBrand: Brand = (dataReady?.status === "ok" ? dataReady.brand : null) ??
+    (state.status === "ok" ? state.brand : null) ?? {
+      logo: FALLBACK_LOGO_URL,
+      logo_collapsed: FALLBACK_LOGO_URL,
+      nome: "SLTK Americas",
+    };
 
   if (state.status === "loading" || !revealed) {
-    return <SplashScreen progress={Math.round(progress)} brand={splashBrand} playingOut={state.status !== "loading"} />;
+    return (
+      <SplashScreen
+        progress={Math.round(progress)}
+        brand={splashBrand}
+        playingOut={state.status !== "loading"}
+      />
+    );
   }
   if (state.status !== "ok") {
     const msg =
@@ -356,26 +469,41 @@ function PublicInterviewPage() {
                 {lang === "en" ? "Try again" : lang === "es" ? "Reintentar" : "Tentar novamente"}
               </Button>
               <div className="text-[11px] opacity-60">
-                {codigo}{state.detail ? ` · ${state.detail}` : ""}
+                {codigo}
+                {state.detail ? ` · ${state.detail}` : ""}
               </div>
             </>
           )}
         </div>
-
       </Shell>
     );
   }
   if (done) {
     return (
-      <Shell lang={lang} onLang={(l) => { setLang(l); setLangSetByUser(true); }} title={pickText(state.segmento.nome_pt, state.segmento.nome_es, state.segmento.nome_en, lang)} brand={state.brand}>
-        <Card className="max-w-lg mx-auto"><CardContent className="p-8 text-center space-y-4">
-          <div className="mx-auto w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
-            <Check className="w-8 h-8 text-emerald-700" />
-          </div>
-          <h2 className="text-xl font-semibold">{t.success_title}</h2>
-          <p className="text-muted-foreground">{t.success_body}</p>
-          <div className="text-xs text-muted-foreground">#{state.codigo}</div>
-        </CardContent></Card>
+      <Shell
+        lang={lang}
+        onLang={(l) => {
+          setLang(l);
+          setLangSetByUser(true);
+        }}
+        title={pickText(
+          state.segmento.nome_pt,
+          state.segmento.nome_es,
+          state.segmento.nome_en,
+          lang,
+        )}
+        brand={state.brand}
+      >
+        <Card className="max-w-lg mx-auto">
+          <CardContent className="p-8 text-center space-y-4">
+            <div className="mx-auto w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+              <Check className="w-8 h-8 text-emerald-700" />
+            </div>
+            <h2 className="text-xl font-semibold">{t.success_title}</h2>
+            <p className="text-muted-foreground">{t.success_body}</p>
+            <div className="text-xs text-muted-foreground">#{state.codigo}</div>
+          </CardContent>
+        </Card>
       </Shell>
     );
   }
@@ -383,30 +511,49 @@ function PublicInterviewPage() {
   const pct = total > 0 ? Math.round(((step + 1) / total) * 100) : 0;
   const stepLabel = isContactStep
     ? t.contact_step_label
-    : `${lang === "pt" ? "Pergunta" : lang === "en" ? "Question" : "Pregunta"} ${(current?.numero ?? step + 1)}`;
+    : `${lang === "pt" ? "Pergunta" : lang === "en" ? "Question" : "Pregunta"} ${current?.numero ?? step + 1}`;
 
   function clearDraft() {
-    try { window.localStorage.removeItem(STORAGE_PREFIX + codigo); } catch { /* noop */ }
-    setRespostas({}); setContato({ nome: "", email: "", whatsapp: "", cargo: "Gerente de Produção" });
-    setStep(0); setResumed(false); setReviewMode(false);
+    try {
+      window.localStorage.removeItem(STORAGE_PREFIX + codigo);
+    } catch {
+      /* noop */
+    }
+    setRespostas({});
+    setContato({ nome: "", email: "", whatsapp: "", cargo: "Gerente de Produção" });
+    setStep(0);
+    setResumed(false);
+    setReviewMode(false);
   }
 
   return (
-    <Shell lang={lang} onLang={(l) => { setLang(l); setLangSetByUser(true); }} title={pickText(state.segmento.nome_pt, state.segmento.nome_es, state.segmento.nome_en, lang)} brand={state.brand}>
+    <Shell
+      lang={lang}
+      onLang={(l) => {
+        setLang(l);
+        setLangSetByUser(true);
+      }}
+      title={pickText(state.segmento.nome_pt, state.segmento.nome_es, state.segmento.nome_en, lang)}
+      brand={state.brand}
+    >
       <div className="max-w-2xl mx-auto entrevista-reveal pb-24 sm:pb-6" key={lang}>
-
         {resumed && !reviewMode && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
-            <div className="flex items-center gap-2"><Info className="h-4 w-4" /> {t.resume_notice}</div>
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4" /> {t.resume_notice}
+            </div>
             <button className="text-xs underline hover:no-underline" onClick={clearDraft}>
-              <RotateCcw className="inline h-3 w-3 mr-1" />{t.resume_clear}
+              <RotateCcw className="inline h-3 w-3 mr-1" />
+              {t.resume_clear}
             </button>
           </div>
         )}
 
         <div className="mb-4" aria-live="polite">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>{stepLabel} · {step + 1} {t.progress} {total}</span>
+            <span>
+              {stepLabel} · {step + 1} {t.progress} {total}
+            </span>
             <span>{pct}%</span>
           </div>
           <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -420,7 +567,10 @@ function PublicInterviewPage() {
             perguntas={perguntas}
             respostas={respostas}
             contato={contato}
-            onEdit={(idx) => { setReviewMode(false); setStep(idx); }}
+            onEdit={(idx) => {
+              setReviewMode(false);
+              setStep(idx);
+            }}
           />
         ) : (
           <Card>
@@ -430,14 +580,28 @@ function PublicInterviewPage() {
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">
                       {stepLabel}
-                      {current.obrigatoria && <span className="text-destructive ml-2" aria-label={t.required}>*</span>}
+                      {current.obrigatoria && (
+                        <span className="text-destructive ml-2" aria-label={t.required}>
+                          *
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-lg font-semibold leading-snug">
-                      {pickText(current.enunciado_pt, current.enunciado_es, current.enunciado_en, lang)}
+                      {pickText(
+                        current.enunciado_pt,
+                        current.enunciado_es,
+                        current.enunciado_en,
+                        lang,
+                      )}
                     </h3>
                   </div>
 
-                  <QuestionField p={current} lang={lang} value={respostas[current.id]} onChange={(patch) => setResp(current.id, patch)} />
+                  <QuestionField
+                    p={current}
+                    lang={lang}
+                    value={respostas[current.id]}
+                    onChange={(patch) => setResp(current.id, patch)}
+                  />
                 </>
               )}
 
@@ -451,7 +615,11 @@ function PublicInterviewPage() {
                 />
               )}
 
-              {error && <div className="text-xs text-destructive" role="alert">{error}</div>}
+              {error && (
+                <div className="text-xs text-destructive" role="alert">
+                  {error}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -463,23 +631,45 @@ function PublicInterviewPage() {
             size="lg"
             className="min-w-32 h-11"
             disabled={step === 0 && !reviewMode}
-            onClick={() => reviewMode ? setReviewMode(false) : setStep((s) => Math.max(0, s - 1))}
+            onClick={() => (reviewMode ? setReviewMode(false) : setStep((s) => Math.max(0, s - 1)))}
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> {t.back}
           </Button>
 
           {reviewMode ? (
-            <Button size="lg" className="min-w-40 h-11" disabled={!contactComplete || submitting} onClick={submit}>
-              {submitting
-                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{attempt > 0 ? t.retrying : t.sending}</>
-                : <>{t.submit} <Check className="h-4 w-4 ml-1" /></>}
+            <Button
+              size="lg"
+              className="min-w-40 h-11"
+              disabled={!contactComplete || submitting}
+              onClick={submit}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {attempt > 0 ? t.retrying : t.sending}
+                </>
+              ) : (
+                <>
+                  {t.submit} <Check className="h-4 w-4 ml-1" />
+                </>
+              )}
             </Button>
           ) : step < total - 1 ? (
-            <Button size="lg" className="min-w-32 h-11" disabled={!canAdvance} onClick={() => setStep((s) => Math.min(total - 1, s + 1))}>
+            <Button
+              size="lg"
+              className="min-w-32 h-11"
+              disabled={!canAdvance}
+              onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
+            >
               {t.next} <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           ) : (
-            <Button size="lg" className="min-w-40 h-11" disabled={!canAdvance} onClick={() => setReviewMode(true)}>
+            <Button
+              size="lg"
+              className="min-w-40 h-11"
+              disabled={!canAdvance}
+              onClick={() => setReviewMode(true)}
+            >
               <ClipboardCheck className="h-4 w-4 mr-1" /> {t.review_title}
             </Button>
           )}
@@ -497,7 +687,13 @@ function PublicInterviewPage() {
   );
 }
 
-function ReviewStep({ lang, perguntas, respostas, contato, onEdit }: {
+function ReviewStep({
+  lang,
+  perguntas,
+  respostas,
+  contato,
+  onEdit,
+}: {
   lang: Idioma;
   perguntas: Pergunta[];
   respostas: Record<string, Resposta>;
@@ -522,13 +718,17 @@ function ReviewStep({ lang, perguntas, respostas, contato, onEdit }: {
             const r = respostas[p.id];
             // Build id→label map (in current language) for this question's options.
             const idToLabel = new Map<string, string>();
-            for (const o of p.opcoes) idToLabel.set(o.id, pickText(o.label_pt, o.label_es, o.label_en, lang));
+            for (const o of p.opcoes)
+              idToLabel.set(o.id, pickText(o.label_pt, o.label_es, o.label_en, lang));
             let answer = "";
             if (r) {
               let matrixText = "";
               if (r.descricao_extra && r.descricao_extra.trim().startsWith("{")) {
                 try {
-                  const obj = JSON.parse(r.descricao_extra) as Record<string, { nome?: string; email?: string; whatsapp?: string }>;
+                  const obj = JSON.parse(r.descricao_extra) as Record<
+                    string,
+                    { nome?: string; email?: string; whatsapp?: string }
+                  >;
                   matrixText = Object.entries(obj)
                     .filter(([, v]) => v && (v.nome || v.email || v.whatsapp))
                     .map(([roleId, v]) => {
@@ -536,25 +736,33 @@ function ReviewStep({ lang, perguntas, respostas, contato, onEdit }: {
                       return `${roleLabel}: ${[v.nome, v.email, v.whatsapp].filter(Boolean).join(" · ")}`;
                     })
                     .join(" | ");
-                } catch { /* fallthrough */ }
+                } catch {
+                  /* fallthrough */
+                }
               }
               let optsText = "";
               if (r.valor_options && r.valor_options.length) {
                 if (p.formato === "country") {
-                  optsText = r.valor_options.map((iso) => {
-                    const c = COUNTRIES.find((x) => x.iso2 === iso);
-                    if (!c) return iso;
-                    return `${flagEmoji(c.iso2)} ${lang === "pt" ? c.pt : lang === "es" ? c.es : c.en}`;
-                  }).join(", ");
+                  optsText = r.valor_options
+                    .map((iso) => {
+                      const c = COUNTRIES.find((x) => x.iso2 === iso);
+                      if (!c) return iso;
+                      return `${flagEmoji(c.iso2)} ${lang === "pt" ? c.pt : lang === "es" ? c.es : c.en}`;
+                    })
+                    .join(", ");
                 } else {
                   optsText = r.valor_options.map((id) => idToLabel.get(id) ?? id).join(", ");
                 }
               }
-              answer = matrixText || [
-                optsText,
-                r.valor_text,
-                r.descricao_extra && !matrixText && `— ${r.descricao_extra}`,
-              ].filter(Boolean).join("  ");
+              answer =
+                matrixText ||
+                [
+                  optsText,
+                  r.valor_text,
+                  r.descricao_extra && !matrixText && `— ${r.descricao_extra}`,
+                ]
+                  .filter(Boolean)
+                  .join("  ");
             }
 
             return (
@@ -564,11 +772,16 @@ function ReviewStep({ lang, perguntas, respostas, contato, onEdit }: {
                   <div className="text-sm font-medium truncate">
                     {pickText(p.enunciado_pt, p.enunciado_es, p.enunciado_en, lang)}
                   </div>
-                  <div className={`text-sm mt-0.5 ${answer ? "text-slate-700" : "text-muted-foreground italic"}`}>
+                  <div
+                    className={`text-sm mt-0.5 ${answer ? "text-slate-700" : "text-muted-foreground italic"}`}
+                  >
                     {answer || t.no_answer}
                   </div>
                 </div>
-                <button className="text-xs text-primary hover:underline shrink-0" onClick={() => onEdit(idx)}>
+                <button
+                  className="text-xs text-primary hover:underline shrink-0"
+                  onClick={() => onEdit(idx)}
+                >
                   {t.edit}
                 </button>
               </li>
@@ -580,10 +793,15 @@ function ReviewStep({ lang, perguntas, respostas, contato, onEdit }: {
               <div className="text-sm mt-0.5">
                 <span className="font-medium">{contato.nome || "—"}</span>
                 <span className="text-muted-foreground"> · {contato.cargo || ct.cargo_ph}</span>
-                <div className="text-slate-700">{contato.email} · {contato.whatsapp}</div>
+                <div className="text-slate-700">
+                  {contato.email} · {contato.whatsapp}
+                </div>
               </div>
             </div>
-            <button className="text-xs text-primary hover:underline shrink-0" onClick={() => onEdit(perguntas.length)}>
+            <button
+              className="text-xs text-primary hover:underline shrink-0"
+              onClick={() => onEdit(perguntas.length)}
+            >
               {t.edit}
             </button>
           </li>
@@ -593,9 +811,18 @@ function ReviewStep({ lang, perguntas, respostas, contato, onEdit }: {
   );
 }
 
-function ContactStep({ lang, value, onChange, emailValid, whatsValid }: {
-  lang: Idioma; value: ContatoState; onChange: (v: ContatoState) => void;
-  emailValid: boolean; whatsValid: boolean;
+function ContactStep({
+  lang,
+  value,
+  onChange,
+  emailValid,
+  whatsValid,
+}: {
+  lang: Idioma;
+  value: ContatoState;
+  onChange: (v: ContatoState) => void;
+  emailValid: boolean;
+  whatsValid: boolean;
 }) {
   const ct = CONTACT_I18N[lang];
   const t = I18N[lang];
@@ -618,16 +845,30 @@ function ContactStep({ lang, value, onChange, emailValid, whatsValid }: {
           </label>
           <div className="relative">
             <BadgeCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input id="c_nome" className="pl-9" autoFocus value={value.nome}
+            <Input
+              id="c_nome"
+              className="pl-9"
+              autoFocus
+              value={value.nome}
               onChange={(e) => onChange({ ...value, nome: e.target.value })}
-              placeholder={ct.nome_ph} maxLength={200} autoComplete="name" />
+              placeholder={ct.nome_ph}
+              maxLength={200}
+              autoComplete="name"
+            />
           </div>
         </div>
         <div>
-          <label htmlFor="c_cargo" className="text-xs font-medium text-muted-foreground">{ct.cargo}</label>
-          <Input id="c_cargo" value={value.cargo}
+          <label htmlFor="c_cargo" className="text-xs font-medium text-muted-foreground">
+            {ct.cargo}
+          </label>
+          <Input
+            id="c_cargo"
+            value={value.cargo}
             onChange={(e) => onChange({ ...value, cargo: e.target.value })}
-            placeholder={ct.cargo_ph} maxLength={120} autoComplete="organization-title" />
+            placeholder={ct.cargo_ph}
+            maxLength={120}
+            autoComplete="organization-title"
+          />
         </div>
         <div>
           <label htmlFor="c_wpp" className="text-xs font-medium text-muted-foreground">
@@ -635,10 +876,16 @@ function ContactStep({ lang, value, onChange, emailValid, whatsValid }: {
           </label>
           <div className="relative">
             <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input id="c_wpp" className={`pl-9 ${!whatsValid ? "border-destructive" : ""}`}
+            <Input
+              id="c_wpp"
+              className={`pl-9 ${!whatsValid ? "border-destructive" : ""}`}
               value={value.whatsapp}
               onChange={(e) => onChange({ ...value, whatsapp: maskWhatsapp(e.target.value) })}
-              placeholder={ct.whatsapp_ph} inputMode="tel" autoComplete="tel" maxLength={30} />
+              placeholder={ct.whatsapp_ph}
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={30}
+            />
           </div>
           {!whatsValid && <div className="text-xs text-destructive mt-1">{t.invalid_whatsapp}</div>}
         </div>
@@ -648,10 +895,17 @@ function ContactStep({ lang, value, onChange, emailValid, whatsValid }: {
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input id="c_email" type="email" className={`pl-9 ${!emailValid ? "border-destructive" : ""}`}
+            <Input
+              id="c_email"
+              type="email"
+              className={`pl-9 ${!emailValid ? "border-destructive" : ""}`}
               value={value.email}
               onChange={(e) => onChange({ ...value, email: e.target.value })}
-              placeholder={ct.email_ph} inputMode="email" autoComplete="email" maxLength={200} />
+              placeholder={ct.email_ph}
+              inputMode="email"
+              autoComplete="email"
+              maxLength={200}
+            />
           </div>
           {!emailValid && <div className="text-xs text-destructive mt-1">{t.invalid_email}</div>}
         </div>
@@ -660,8 +914,14 @@ function ContactStep({ lang, value, onChange, emailValid, whatsValid }: {
   );
 }
 
-function QuestionField({ p, lang, value, onChange }: {
-  p: Pergunta; lang: Idioma;
+function QuestionField({
+  p,
+  lang,
+  value,
+  onChange,
+}: {
+  p: Pergunta;
+  lang: Idioma;
   value: Resposta | undefined;
   onChange: (patch: Partial<Resposta>) => void;
 }) {
@@ -678,7 +938,9 @@ function QuestionField({ p, lang, value, onChange }: {
           maxLength={MAX_TEXT}
           onChange={(e) => onChange({ valor_text: e.target.value })}
         />
-        <div className="text-[11px] text-muted-foreground text-right mt-1">{textLen}/{MAX_TEXT}</div>
+        <div className="text-[11px] text-muted-foreground text-right mt-1">
+          {textLen}/{MAX_TEXT}
+        </div>
       </div>
     );
   }
@@ -696,7 +958,11 @@ function QuestionField({ p, lang, value, onChange }: {
   if (p.formato === "country") {
     const sel = value?.valor_options?.[0] ?? "";
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2" role="radiogroup" aria-label={t.select_country}>
+      <div
+        className="grid grid-cols-2 md:grid-cols-3 gap-2"
+        role="radiogroup"
+        aria-label={t.select_country}
+      >
         {COUNTRIES.map((c) => {
           const on = sel === c.iso2;
           return (
@@ -708,7 +974,9 @@ function QuestionField({ p, lang, value, onChange }: {
               onClick={() => onChange({ valor_options: [c.iso2] })}
               className={`min-h-11 flex items-center gap-2 border rounded-md px-3 py-2 text-left text-sm hover:border-primary/50 transition ${on ? "border-primary bg-primary/5" : ""}`}
             >
-              <span className="text-lg" aria-hidden>{flagEmoji(c.iso2)}</span>
+              <span className="text-lg" aria-hidden>
+                {flagEmoji(c.iso2)}
+              </span>
               <span>{lang === "pt" ? c.pt : lang === "es" ? c.es : c.en}</span>
             </button>
           );
@@ -724,44 +992,92 @@ function QuestionField({ p, lang, value, onChange }: {
   const matrix = isMulti ? groupContactMatrix(p.opcoes) : null;
   if (matrix) {
     let store: Record<string, { nome?: string; email?: string; whatsapp?: string }> = {};
-    try { store = value?.descricao_extra ? JSON.parse(value.descricao_extra) : {}; } catch { store = {}; }
-    const update = (roleId: string, patch: Partial<{ nome: string; email: string; whatsapp: string }>) => {
+    try {
+      store = value?.descricao_extra ? JSON.parse(value.descricao_extra) : {};
+    } catch {
+      store = {};
+    }
+    const update = (
+      roleId: string,
+      patch: Partial<{ nome: string; email: string; whatsapp: string }>,
+    ) => {
       const next = { ...store, [roleId]: { ...(store[roleId] ?? {}), ...patch } };
       const selectedIds = Object.entries(next)
-        .filter(([, v]) => (v?.nome || v?.email || v?.whatsapp))
+        .filter(([, v]) => v?.nome || v?.email || v?.whatsapp)
         .map(([k]) => k);
       onChange({ valor_options: selectedIds, descricao_extra: JSON.stringify(next) });
     };
-    const colName = matrix.find(g => g.nome)?.nome;
-    const colEmail = matrix.find(g => g.email)?.email;
-    const colWhats = matrix.find(g => g.whatsapp)?.whatsapp;
+    const colName = matrix.find((g) => g.nome)?.nome;
+    const colEmail = matrix.find((g) => g.email)?.email;
+    const colWhats = matrix.find((g) => g.whatsapp)?.whatsapp;
     return (
       <div className="space-y-2">
-        <div className="hidden md:grid gap-2 px-3 text-xs font-medium text-muted-foreground"
-             style={{ gridTemplateColumns: `1.2fr 1.4fr 1.6fr 1.2fr` }}>
+        <div
+          className="hidden md:grid gap-2 px-3 text-xs font-medium text-muted-foreground"
+          style={{ gridTemplateColumns: `1.2fr 1.4fr 1.6fr 1.2fr` }}
+        >
           <div>{t.contact_step_label}</div>
-          <div>{colName ? pickText(colName.label_pt, colName.label_es, colName.label_en, lang).replace(/:$/, "") : "—"}</div>
-          <div>{colEmail ? pickText(colEmail.label_pt, colEmail.label_es, colEmail.label_en, lang).replace(/:$/, "") : "—"}</div>
-          <div>{colWhats ? pickText(colWhats.label_pt, colWhats.label_es, colWhats.label_en, lang).replace(/:$/, "") : "—"}</div>
+          <div>
+            {colName
+              ? pickText(colName.label_pt, colName.label_es, colName.label_en, lang).replace(
+                  /:$/,
+                  "",
+                )
+              : "—"}
+          </div>
+          <div>
+            {colEmail
+              ? pickText(colEmail.label_pt, colEmail.label_es, colEmail.label_en, lang).replace(
+                  /:$/,
+                  "",
+                )
+              : "—"}
+          </div>
+          <div>
+            {colWhats
+              ? pickText(colWhats.label_pt, colWhats.label_es, colWhats.label_en, lang).replace(
+                  /:$/,
+                  "",
+                )
+              : "—"}
+          </div>
         </div>
         <div className="space-y-2">
           {matrix.map((g) => {
             const roleLabel = pickText(g.role.label_pt, g.role.label_es, g.role.label_en, lang);
             const rec = store[g.role.id] ?? {};
             return (
-              <div key={g.role.id}
-                   className="border rounded-md p-3 grid gap-2 md:items-center bg-white"
-                   style={{ gridTemplateColumns: `1.2fr 1.4fr 1.6fr 1.2fr` }}>
+              <div
+                key={g.role.id}
+                className="border rounded-md p-3 grid gap-2 md:items-center bg-white"
+                style={{ gridTemplateColumns: `1.2fr 1.4fr 1.6fr 1.2fr` }}
+              >
                 <div className="text-sm font-medium">{roleLabel}</div>
-                <Input placeholder={colName ? pickText(colName.label_pt, colName.label_es, colName.label_en, lang) : ""}
-                       value={rec.nome ?? ""} maxLength={200}
-                       onChange={(e) => update(g.role.id, { nome: e.target.value })} />
-                <Input type="email" placeholder="nome@empresa.com"
-                       value={rec.email ?? ""} maxLength={200} inputMode="email"
-                       onChange={(e) => update(g.role.id, { email: e.target.value })} />
-                <Input placeholder="+55 (11) 90000-0000"
-                       value={rec.whatsapp ?? ""} maxLength={30} inputMode="tel"
-                       onChange={(e) => update(g.role.id, { whatsapp: maskWhatsapp(e.target.value) })} />
+                <Input
+                  placeholder={
+                    colName
+                      ? pickText(colName.label_pt, colName.label_es, colName.label_en, lang)
+                      : ""
+                  }
+                  value={rec.nome ?? ""}
+                  maxLength={200}
+                  onChange={(e) => update(g.role.id, { nome: e.target.value })}
+                />
+                <Input
+                  type="email"
+                  placeholder="nome@empresa.com"
+                  value={rec.email ?? ""}
+                  maxLength={200}
+                  inputMode="email"
+                  onChange={(e) => update(g.role.id, { email: e.target.value })}
+                />
+                <Input
+                  placeholder="+55 (11) 90000-0000"
+                  value={rec.whatsapp ?? ""}
+                  maxLength={30}
+                  inputMode="tel"
+                  onChange={(e) => update(g.role.id, { whatsapp: maskWhatsapp(e.target.value) })}
+                />
               </div>
             );
           })}
@@ -776,21 +1092,30 @@ function QuestionField({ p, lang, value, onChange }: {
   const selected = new Set(value?.valor_options ?? []);
   const selectedOpts = p.opcoes.filter((o) => selected.has(o.id));
   const optHasDesc = selectedOpts.some((o) => o.tem_descricao);
-  const selectedTriggersYesNo = selectedOpts.some((o) =>
-    detectYesNo(o.label_pt) !== null || detectYesNo(o.label_es || "") !== null || detectYesNo(o.label_en || "") !== null
+  const selectedTriggersYesNo = selectedOpts.some(
+    (o) =>
+      detectYesNo(o.label_pt) !== null ||
+      detectYesNo(o.label_es || "") !== null ||
+      detectYesNo(o.label_en || "") !== null,
   );
   const showDesc = optHasDesc || selectedTriggersYesNo;
   // Smart describe label: if a single triggering option ends with ":" use it verbatim.
   const trigger = selectedOpts.find((o) => o.tem_descricao) ?? selectedOpts[0];
-  const triggerLabel = trigger ? pickText(trigger.label_pt, trigger.label_es, trigger.label_en, lang) : "";
-  const describeHeader = triggerLabel && /[:：]\s*$/.test(triggerLabel)
-    ? triggerLabel.replace(/[:：]\s*$/, "")
-    : `${t.describe}${triggerLabel ? ` — ${triggerLabel}` : ""}`;
+  const triggerLabel = trigger
+    ? pickText(trigger.label_pt, trigger.label_es, trigger.label_en, lang)
+    : "";
+  const describeHeader =
+    triggerLabel && /[:：]\s*$/.test(triggerLabel)
+      ? triggerLabel.replace(/[:：]\s*$/, "")
+      : `${t.describe}${triggerLabel ? ` — ${triggerLabel}` : ""}`;
   const descLen = (value?.descricao_extra ?? "").length;
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role={isMulti ? "group" : "radiogroup"}>
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+        role={isMulti ? "group" : "radiogroup"}
+      >
         {p.opcoes.map((o) => {
           const label = pickText(o.label_pt, o.label_es, o.label_en, lang);
           const on = selected.has(o.id);
@@ -811,7 +1136,10 @@ function QuestionField({ p, lang, value, onChange }: {
               }}
               className={`min-h-11 flex items-start gap-2 border rounded-md p-3 text-left text-sm transition hover:border-primary/50 ${on ? "border-primary bg-primary/5" : ""}`}
             >
-              <span aria-hidden className={`mt-0.5 w-4 h-4 rounded ${isMulti ? "" : "rounded-full"} border flex items-center justify-center ${on ? "bg-primary border-primary text-primary-foreground" : "border-slate-300"}`}>
+              <span
+                aria-hidden
+                className={`mt-0.5 w-4 h-4 rounded ${isMulti ? "" : "rounded-full"} border flex items-center justify-center ${on ? "bg-primary border-primary text-primary-foreground" : "border-slate-300"}`}
+              >
                 {on && <Check className="w-3 h-3" />}
               </span>
               <span>{label}</span>
@@ -821,7 +1149,9 @@ function QuestionField({ p, lang, value, onChange }: {
       </div>
       {showDesc && (
         <div>
-          <label className="text-xs font-medium text-muted-foreground block mb-1">{describeHeader}</label>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">
+            {describeHeader}
+          </label>
           <Textarea
             rows={3}
             placeholder={t.describe}
@@ -836,23 +1166,40 @@ function QuestionField({ p, lang, value, onChange }: {
   );
 }
 
-
-function Shell({ children, lang, onLang, title, brand }: { children: React.ReactNode; lang?: Idioma; onLang?: (l: Idioma) => void; title?: string; brand?: Brand }) {
+function Shell({
+  children,
+  lang,
+  onLang,
+  title,
+  brand,
+}: {
+  children: React.ReactNode;
+  lang?: Idioma;
+  onLang?: (l: Idioma) => void;
+  title?: string;
+  brand?: Brand;
+}) {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-[#0b1a3a] text-white sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
           <div className="min-w-0 flex items-center gap-3">
             {brand?.logo ? (
-              <img src={brand.logo} alt={brand?.nome ?? "SLTK Americas"} className="h-8 w-auto object-contain shrink-0" />
+              <img
+                src={brand.logo}
+                alt={brand?.nome ?? "SLTK Americas"}
+                className="h-8 w-auto object-contain shrink-0"
+              />
             ) : (
-              <div className="text-xs uppercase tracking-widest text-white/60">{brand?.nome ?? "SLTK Americas"}</div>
+              <div className="text-xs uppercase tracking-widest text-white/60">
+                {brand?.nome ?? "SLTK Americas"}
+              </div>
             )}
             {title && <div className="font-semibold truncate">{title}</div>}
           </div>
           {onLang && (
             <div className="flex items-center gap-1 bg-white/10 rounded-md p-0.5 text-sm">
-              {(["pt","es","en"] as const).map((l) => (
+              {(["pt", "es", "en"] as const).map((l) => (
                 <button
                   key={l}
                   onClick={() => onLang(l)}
@@ -860,7 +1207,8 @@ function Shell({ children, lang, onLang, title, brand }: { children: React.React
                   className={`px-2 py-1 rounded transition ${lang === l ? "bg-white text-[#0b1a3a] font-medium" : "text-white/80 hover:text-white"}`}
                   title={l === "pt" ? "Português" : l === "es" ? "Español" : "English"}
                 >
-                  <span aria-hidden>{l === "pt" ? "🇧🇷" : l === "es" ? "🇪🇸" : "🇺🇸"}</span> {l.toUpperCase()}
+                  <span aria-hidden>{l === "pt" ? "🇧🇷" : l === "es" ? "🇪🇸" : "🇺🇸"}</span>{" "}
+                  {l.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -872,18 +1220,32 @@ function Shell({ children, lang, onLang, title, brand }: { children: React.React
   );
 }
 
-function SplashScreen({ progress, brand, playingOut }: { progress: number; brand: Brand | null; playingOut: boolean }) {
+function SplashScreen({
+  progress,
+  brand,
+  playingOut,
+}: {
+  progress: number;
+  brand: Brand | null;
+  playingOut: boolean;
+}) {
   return (
     <div
       className={`fixed inset-0 z-50 overflow-hidden bg-[#0b1a3a] text-white flex items-center justify-center transition-opacity duration-500 ${playingOut ? "entrevista-splash-out" : ""}`}
       aria-busy={!playingOut}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-60"
-        style={{ background: "radial-gradient(60% 50% at 50% 40%, rgba(59,130,246,0.25), transparent 70%)" }} />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          background: "radial-gradient(60% 50% at 50% 40%, rgba(59,130,246,0.25), transparent 70%)",
+        }}
+      />
 
       <div className="relative flex flex-col items-center gap-8 px-6 w-full max-w-md">
         <div className="flex flex-col items-center gap-4">
-          <div className="text-2xl sm:text-3xl font-bold tracking-widest">{brand?.nome ?? "SLTK AMERICAS"}</div>
+          <div className="text-2xl sm:text-3xl font-bold tracking-widest">
+            {brand?.nome ?? "SLTK AMERICAS"}
+          </div>
         </div>
 
         <div className="w-full space-y-2">

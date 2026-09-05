@@ -17,8 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
-
-type GroqStatus = { conectado: boolean; detalhe: string; latencia_ms?: number; chave_mascarada: string | null };
+type GroqStatus = {
+  conectado: boolean;
+  detalhe: string;
+  latencia_ms?: number;
+  chave_mascarada: string | null;
+};
 
 export function GroqConfigCard() {
   const qc = useQueryClient();
@@ -46,7 +50,6 @@ export function GroqConfigCard() {
     staleTime: 15_000,
   });
 
-
   const test = useMutation({
     mutationFn: testGroq,
     onSuccess: (d) => {
@@ -67,9 +70,7 @@ export function GroqConfigCard() {
             <Sparkles className="h-5 w-5 text-[var(--primary)]" />
           </div>
           <div>
-            <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
-              Groq
-            </h3>
+            <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">Groq</h3>
             <p className="text-[12.5px] text-[var(--text-muted)]">
               OCR de cartões/folders + enriquecimento web para cadastro de fornecedores.
             </p>
@@ -122,8 +123,14 @@ export function GroqConfigCard() {
         <div className="rounded-md border border-dashed border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 text-[12px] text-[var(--text-muted)]">
           <p className="mb-1 font-medium text-[var(--text-secondary)]">Modelos em uso</p>
           <ul className="ml-4 list-disc space-y-0.5">
-            <li><code className="font-mono">modelo de visão detectado automaticamente</code> — extração estruturada das imagens (usa o melhor modelo disponível na sua chave).</li>
-            <li><code className="font-mono">modelo de texto detectado automaticamente</code> — sumarização do enriquecimento web (resultados do Firecrawl).</li>
+            <li>
+              <code className="font-mono">modelo de visão detectado automaticamente</code> —
+              extração estruturada das imagens (usa o melhor modelo disponível na sua chave).
+            </li>
+            <li>
+              <code className="font-mono">modelo de texto detectado automaticamente</code> —
+              sumarização do enriquecimento web (resultados do Firecrawl).
+            </li>
           </ul>
         </div>
 
@@ -194,7 +201,9 @@ export function GroqConfigCard() {
                       ) : null}
                     </div>
                     {r.message ? (
-                      <p className="mt-0.5 line-clamp-2 text-[var(--text-secondary)]">{r.message}</p>
+                      <p className="mt-0.5 line-clamp-2 text-[var(--text-secondary)]">
+                        {r.message}
+                      </p>
                     ) : null}
                     {r.user_email ? (
                       <p className="text-[10.5px] text-[var(--text-muted)]">{r.user_email}</p>
@@ -211,7 +220,6 @@ export function GroqConfigCard() {
           )}
         </div>
       </div>
-
     </div>
   );
 }

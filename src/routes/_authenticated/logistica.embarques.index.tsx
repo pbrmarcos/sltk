@@ -9,7 +9,13 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   listEmbarques,
   listTransportadoras,
@@ -21,10 +27,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/logistica/embarques/")({
   head: () => ({
-    meta: [
-      { title: "Logística & Embarque — Solutek Hub" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Logística & Embarque — Solutek Hub" }, { name: "robots", content: "noindex" }],
   }),
   component: EmbarquesIndex,
 });
@@ -52,7 +55,11 @@ function EmbarquesIndex() {
 
   const listFn = useServerFn(listEmbarques);
   const embarques = useQuery({
-    queryKey: ["logistica", "embarques", { q, status, clienteId, transportadoraId, dateFrom, dateTo }],
+    queryKey: [
+      "logistica",
+      "embarques",
+      { q, status, clienteId, transportadoraId, dateFrom, dateTo },
+    ],
     queryFn: () =>
       listFn({
         data: {
@@ -80,12 +87,7 @@ function EmbarquesIndex() {
 
   const hasFilters = useMemo(
     () =>
-      q ||
-      status !== ALL ||
-      clienteId !== ALL ||
-      transportadoraId !== ALL ||
-      dateFrom ||
-      dateTo,
+      q || status !== ALL || clienteId !== ALL || transportadoraId !== ALL || dateFrom || dateTo,
     [q, status, clienteId, transportadoraId, dateFrom, dateTo],
   );
 
@@ -205,7 +207,9 @@ function EmbarquesIndex() {
         <div className="rounded-lg border border-dashed border-[var(--bg-border)] bg-[var(--bg-surface)] p-10 text-center">
           <Truck className="mx-auto mb-3 h-10 w-10 text-[var(--text-muted)] opacity-40" />
           <p className="text-sm text-[var(--text-muted)]">
-            {hasFilters ? "Nenhum embarque encontrado para os filtros aplicados." : "Nenhum embarque cadastrado."}
+            {hasFilters
+              ? "Nenhum embarque encontrado para os filtros aplicados."
+              : "Nenhum embarque cadastrado."}
             {canCreate && !hasFilters && (
               <>
                 {" "}
@@ -257,10 +261,15 @@ function EmbarquesIndex() {
                     </td>
                     <td className="px-3 py-2">{e.transportadora?.nome || "—"}</td>
                     <td className="px-3 py-2 text-xs">
-                      {e.previsao_saida ? new Date(e.previsao_saida).toLocaleDateString("pt-BR") : "—"}
+                      {e.previsao_saida
+                        ? new Date(e.previsao_saida).toLocaleDateString("pt-BR")
+                        : "—"}
                     </td>
                     <td className="px-3 py-2">
-                      <Badge variant="outline" className={`text-[10px] uppercase ${STATUS_TONE[e.status as LogisticaStatus]}`}>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] uppercase ${STATUS_TONE[e.status as LogisticaStatus]}`}
+                      >
                         {e.status}
                       </Badge>
                     </td>

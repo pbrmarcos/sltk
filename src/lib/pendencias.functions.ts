@@ -43,12 +43,17 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       countHead(sb, "ordens_compra", (q) => q.eq("status", "rascunho")),
       countHead(sb, "cotacoes", (q) => q.eq("status", "aberta")),
       countHead(sb, "chamados", (q) => q.not("status", "in", "(resolvido,arquivado)")),
-      countHead(sb, "chamados", (q) => q.eq("ultima_mensagem_por", "visitante").not("status", "in", "(resolvido,arquivado)")),
-      countHead(sb, "chamados", (q) => q.eq("origem", "contato_site").not("status", "in", "(resolvido,arquivado)")),
       countHead(sb, "chamados", (q) =>
-        q.is("first_response_at", null)
-         .lt("sla_resposta_at", new Date().toISOString())
-         .not("status", "in", "(resolvido,arquivado)")
+        q.eq("ultima_mensagem_por", "visitante").not("status", "in", "(resolvido,arquivado)"),
+      ),
+      countHead(sb, "chamados", (q) =>
+        q.eq("origem", "contato_site").not("status", "in", "(resolvido,arquivado)"),
+      ),
+      countHead(sb, "chamados", (q) =>
+        q
+          .is("first_response_at", null)
+          .lt("sla_resposta_at", new Date().toISOString())
+          .not("status", "in", "(resolvido,arquivado)"),
       ),
       countHead(sb, "fat_relatorios", (q) => q.eq("status", "rascunho")),
       countHead(sb, "sat_relatorio", (q) => q.eq("status", "rascunho")),

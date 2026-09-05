@@ -7,8 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { bulkImport } from "@/lib/importar.functions";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle2 } from "lucide-react";
@@ -86,9 +99,16 @@ function ImportarWizardPage() {
   const [entity, setEntity] = useState<Entity>("clientes");
   const [csvText, setCsvText] = useState("");
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<null | { inserted: number; skipped: number; errors: string[] }>(null);
+  const [result, setResult] = useState<null | {
+    inserted: number;
+    skipped: number;
+    errors: string[];
+  }>(null);
 
-  const parsed = useMemo(() => (csvText ? parseCSV(csvText) : { headers: [], rows: [] }), [csvText]);
+  const parsed = useMemo(
+    () => (csvText ? parseCSV(csvText) : { headers: [], rows: [] }),
+    [csvText],
+  );
   const [mapping, setMapping] = useState<Record<string, string>>({});
 
   const fields = FIELDS[entity];
@@ -96,7 +116,9 @@ function ImportarWizardPage() {
   function autoMap(headers: string[]) {
     const map: Record<string, string> = {};
     for (const f of fields) {
-      const found = headers.find((h) => h.toLowerCase().replace(/[^a-z]/g, "") === f.key.replace(/_/g, ""));
+      const found = headers.find(
+        (h) => h.toLowerCase().replace(/[^a-z]/g, "") === f.key.replace(/_/g, ""),
+      );
       if (found) map[f.key] = found;
     }
     setMapping(map);
@@ -119,7 +141,7 @@ function ImportarWizardPage() {
         }
       }
     }
-    setStep((s) => (Math.min(4, s + 1) as Step));
+    setStep((s) => Math.min(4, s + 1) as Step);
   }
 
   const previewRows = useMemo(() => {
@@ -130,7 +152,7 @@ function ImportarWizardPage() {
         const header = mapping[f.key];
         if (!header) continue;
         const idx = parsed.headers.indexOf(header);
-        obj[f.key] = idx >= 0 ? row[idx] ?? "" : "";
+        obj[f.key] = idx >= 0 ? (row[idx] ?? "") : "";
       }
       return obj;
     });
@@ -139,19 +161,23 @@ function ImportarWizardPage() {
   async function handleImport() {
     setBusy(true);
     try {
-      const rows = parsed.rows.map((row) => {
-        const obj: Record<string, string> = {};
-        for (const f of fields) {
-          const header = mapping[f.key];
-          if (!header) continue;
-          const idx = parsed.headers.indexOf(header);
-          obj[f.key] = idx >= 0 ? row[idx] ?? "" : "";
-        }
-        return obj;
-      }).filter((r) => (r.razao_social ?? "").trim().length > 0);
+      const rows = parsed.rows
+        .map((row) => {
+          const obj: Record<string, string> = {};
+          for (const f of fields) {
+            const header = mapping[f.key];
+            if (!header) continue;
+            const idx = parsed.headers.indexOf(header);
+            obj[f.key] = idx >= 0 ? (row[idx] ?? "") : "";
+          }
+          return obj;
+        })
+        .filter((r) => (r.razao_social ?? "").trim().length > 0);
       const res = await importFn({ data: { entity, rows } });
       setResult(res);
-      toast.success(`Importação concluída: ${res.inserted} inseridos, ${res.skipped} ignorados, ${res.errors.length} erros.`);
+      toast.success(
+        `Importação concluída: ${res.inserted} inseridos, ${res.skipped} ignorados, ${res.errors.length} erros.`,
+      );
     } catch (e: any) {
       toast.error(e?.message ?? "Falha na importação");
     } finally {
@@ -171,7 +197,8 @@ function ImportarWizardPage() {
 
   return (
     <PageContainer>
-      <PageHeader breadcrumbs={[{ label: "Importar" }]} 
+      <PageHeader
+        breadcrumbs={[{ label: "Importar" }]}
         title="Wizard de importação"
         subtitle="Importe clientes ou fornecedores em lote via CSV."
       />
@@ -189,8 +216,8 @@ function ImportarWizardPage() {
                   (done
                     ? "bg-emerald-500 text-white"
                     : active
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground")
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground")
                 }
               >
                 {done ? "✓" : s}
@@ -331,7 +358,9 @@ function ImportarWizardPage() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => navigate({ to: entity === "clientes" ? "/clientes" : "/fornecedores" })}
+                    onClick={() =>
+                      navigate({ to: entity === "clientes" ? "/clientes" : "/fornecedores" })
+                    }
                   >
                     Ir para {entity}
                   </Button>
@@ -388,7 +417,7 @@ function ImportarWizardPage() {
       <div className="mt-6 flex items-center justify-between">
         <Button
           variant="outline"
-          onClick={() => setStep((s) => (Math.max(1, s - 1) as Step))}
+          onClick={() => setStep((s) => Math.max(1, s - 1) as Step)}
           disabled={step === 1 || busy || !!result}
         >
           <ArrowLeft className="h-4 w-4 mr-1" /> Voltar

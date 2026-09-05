@@ -24,10 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Archive, Trophy, FileText, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  pipelineQueryOptions,
-  useUpdateStage,
-} from "@/lib/oportunidades.queries";
+import { pipelineQueryOptions, useUpdateStage } from "@/lib/oportunidades.queries";
 import {
   PIPELINE_STAGES,
   STAGE_LABEL,
@@ -43,7 +40,10 @@ import { CLIENTE_LIFECYCLE_LABEL } from "@/lib/clientes.shared";
 import { RestoredOportunidadeBadge } from "./RestoredOportunidadeBadge";
 import { ConvertWizardDialog } from "./ConvertWizardDialog";
 import { NewOportunidadeDialog } from "./NewOportunidadeDialog";
-import { ProcessoComercialGuia, StageHintButton } from "@/components/comercial/ProcessoComercialGuia";
+import {
+  ProcessoComercialGuia,
+  StageHintButton,
+} from "@/components/comercial/ProcessoComercialGuia";
 import { STAGE_GUIA, avisoMover } from "@/lib/comercial/guia";
 import { toast } from "sonner";
 
@@ -129,7 +129,10 @@ function OportunidadeCard({
           variant="outline"
           className="w-full h-7 text-xs"
           onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => { e.stopPropagation(); onWin(opp); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onWin(opp);
+          }}
         >
           <Trophy className="w-3 h-3 mr-1" /> Marcar ganho
         </Button>
@@ -154,11 +157,12 @@ function OportunidadeCard({
           >
             <FileText className="w-3 h-3 mr-1" /> Gerar orçamento
           </Link>
-
         </Button>
       )}
       {opp.processo_id && (
-        <Badge variant="secondary" className="text-[10px]">Processo criado</Badge>
+        <Badge variant="secondary" className="text-[10px]">
+          Processo criado
+        </Badge>
       )}
     </Card>
   );
@@ -195,7 +199,9 @@ function StageColumn({
             <h3 className="font-semibold text-sm truncate">{STAGE_LABEL[stage]}</h3>
             <StageHintButton stage={stage} />
           </div>
-          <Badge variant="secondary" className="text-xs">{items.length}</Badge>
+          <Badge variant="secondary" className="text-xs">
+            {items.length}
+          </Badge>
         </div>
         <div className="text-xs text-muted-foreground mt-1">{formatBRL(totalValor)}</div>
       </div>
@@ -204,8 +210,8 @@ function StageColumn({
           stage === "novo" ? (
             <div className="text-center text-xs text-muted-foreground p-4 space-y-2">
               <p>
-                Oportunidades nascem de um suspect: crie manualmente, converta um lead da
-                Mineração ou receba pelo formulário público do site.
+                Oportunidades nascem de um suspect: crie manualmente, converta um lead da Mineração
+                ou receba pelo formulário público do site.
               </p>
               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onNew}>
                 <Plus className="w-3 h-3 mr-1" /> Nova oportunidade
@@ -224,8 +230,6 @@ function StageColumn({
     </div>
   );
 }
-
-
 
 export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }) {
   const { data } = useSuspenseQuery(pipelineQueryOptions());
@@ -253,7 +257,7 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
     else window.localStorage.removeItem("solutek:pipeline:new-open");
   }, [newOpen]);
 
-  const editing = editingId ? data.find((item) => item.id === editingId) ?? null : null;
+  const editing = editingId ? (data.find((item) => item.id === editingId) ?? null) : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -263,21 +267,34 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
   const grouped = useMemo(() => {
     const map = new Map<PipelineStage, OportunidadeLite[]>();
     for (const s of ACTIVE_PIPELINE_STAGES) map.set(s, []);
-    for (const o of data.filter((item) => item.pipeline_stage !== "perdido")) map.get(o.pipeline_stage)?.push(o);
+    for (const o of data.filter((item) => item.pipeline_stage !== "perdido"))
+      map.get(o.pipeline_stage)?.push(o);
     return map;
   }, [data]);
 
   const activeItems = useMemo(() => data.filter((o) => o.pipeline_stage !== "perdido"), [data]);
 
   const lostItems = useMemo(
-    () => data.filter((o) => o.pipeline_stage === "perdido").sort((a, b) => new Date(b.lost_at ?? b.stage_entered_at).getTime() - new Date(a.lost_at ?? a.stage_entered_at).getTime()),
+    () =>
+      data
+        .filter((o) => o.pipeline_stage === "perdido")
+        .sort(
+          (a, b) =>
+            new Date(b.lost_at ?? b.stage_entered_at).getTime() -
+            new Date(a.lost_at ?? a.stage_entered_at).getTime(),
+        ),
     [data],
   );
 
   const kpis = useMemo(() => {
-    const active = data.filter((o) => o.pipeline_stage !== "ganho" && o.pipeline_stage !== "perdido");
+    const active = data.filter(
+      (o) => o.pipeline_stage !== "ganho" && o.pipeline_stage !== "perdido",
+    );
     const total = active.reduce((s, o) => s + (o.valor_estimado ?? 0), 0);
-    const weighted = active.reduce((s, o) => s + ((o.valor_estimado ?? 0) * o.probabilidade) / 100, 0);
+    const weighted = active.reduce(
+      (s, o) => s + ((o.valor_estimado ?? 0) * o.probabilidade) / 100,
+      0,
+    );
     const won = data.filter((o) => o.pipeline_stage === "ganho").length;
     const lost = lostItems.length;
     const winRate = won + lost === 0 ? 0 : Math.round((won / (won + lost)) * 100);
@@ -332,7 +349,9 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {(["suspect", "prospect", "cliente"] as const).map((lc) => {
-            const count = activeItems.filter((o) => LIFECYCLE_OF_STAGE[o.pipeline_stage] === lc).length;
+            const count = activeItems.filter(
+              (o) => LIFECYCLE_OF_STAGE[o.pipeline_stage] === lc,
+            ).length;
             return (
               <Badge key={lc} variant="outline" className={LIFECYCLE_TONE[lc]}>
                 {CLIENTE_LIFECYCLE_LABEL[lc]}: {count}
@@ -356,11 +375,11 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
             className="h-8 px-3"
             onClick={() => setScope("perdidas")}
           >
-            <Archive className="h-4 w-4 mr-1" /> Perdidas <span className="ml-2 text-muted-foreground">{lostItems.length}</span>
+            <Archive className="h-4 w-4 mr-1" /> Perdidas{" "}
+            <span className="ml-2 text-muted-foreground">{lostItems.length}</span>
           </Button>
         </div>
       </div>
-
 
       <div className="flex-1 min-h-0">
         {scope === "perdidas" ? (
@@ -404,7 +423,9 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
             maxLength={500}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLostDialog(null)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setLostDialog(null)}>
+              Cancelar
+            </Button>
             <Button
               onClick={() => {
                 if (!lostDialog || !lostReason.trim()) return;
@@ -424,12 +445,19 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
       <ConvertWizardDialog
         source={winDialog}
         open={!!winDialog}
-        onOpenChange={(o) => { if (!o) setWinDialog(null); }}
+        onOpenChange={(o) => {
+          if (!o) setWinDialog(null);
+        }}
       />
 
       <NewOportunidadeDialog open={newOpen} onOpenChange={setNewOpen} />
 
-      <EditOportunidadeDialog opp={editing} onOpenChange={(o) => { if (!o) setEditingId(null); }} />
+      <EditOportunidadeDialog
+        opp={editing}
+        onOpenChange={(o) => {
+          if (!o) setEditingId(null);
+        }}
+      />
     </div>
   );
 }

@@ -8,7 +8,12 @@ type AnySb = any;
 export const listMinhasNotificacoes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({ apenas_nao_lidas: z.boolean().optional().default(false), limit: z.number().int().min(1).max(50).optional().default(20) }).parse(i ?? {}),
+    z
+      .object({
+        apenas_nao_lidas: z.boolean().optional().default(false),
+        limit: z.number().int().min(1).max(50).optional().default(20),
+      })
+      .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;

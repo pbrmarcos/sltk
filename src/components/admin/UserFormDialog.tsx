@@ -67,14 +67,22 @@ export function UserFormDialog({
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [roles, setRoles] = useState<AppRole[]>([]);
-  const initialDraft = { fullName: initial?.full_name ?? "", email: initial?.email ?? "", roles: initial?.roles ?? [] };
+  const initialDraft = {
+    fullName: initial?.full_name ?? "",
+    email: initial?.email ?? "",
+    roles: initial?.roles ?? [],
+  };
   const currentDraft = { fullName, email, roles };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `usuario:${mode}:${initial?.id ?? "novo"}`,
     value: currentDraft,
     initialValue: initialDraft,
     enabled: open && !generatedPassword,
-    onRestore: (saved) => { setFullName(saved.fullName); setEmail(saved.email); setRoles(saved.roles); },
+    onRestore: (saved) => {
+      setFullName(saved.fullName);
+      setEmail(saved.email);
+      setRoles(saved.roles);
+    },
   });
 
   useEffect(() => {
@@ -109,7 +117,13 @@ export function UserFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) requestClose(); else onOpenChange(true); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) requestClose();
+        else onOpenChange(true);
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Novo usuário" : "Editar usuário"}</DialogTitle>

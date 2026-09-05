@@ -235,7 +235,12 @@ function validarEC(doc: string): ResultadoDocumento {
     return erro(doc, "checksum", "formato", "RUC inválido: use apenas dígitos.");
   }
   if (doc.length !== 13) {
-    return erro(doc, "checksum", "tamanho", tamanhoMsg("O RUC do Equador", "13 dígitos", doc.length));
+    return erro(
+      doc,
+      "checksum",
+      "tamanho",
+      tamanhoMsg("O RUC do Equador", "13 dígitos", doc.length),
+    );
   }
   const provincia = Number(doc.slice(0, 2));
   if (!((provincia >= 1 && provincia <= 24) || provincia === 30)) {
@@ -387,10 +392,16 @@ export const VALIDADORES: Record<string, Validador> = {
   EC: validarEC,
   PE: validarPE,
   BO: (d) => apenasFormato(d, "NIT", /^[0-9]{7,12}$/, "são esperados de 7 a 12 dígitos"),
-  CN: (d) => apenasFormato(d, "USCC", /^[A-Z0-9]{18}$/, "são esperados 18 caracteres alfanuméricos"),
-  CR: (d) =>
-    apenasFormato(d, "Cédula Jurídica", /^[0-9]{10}$/, "são esperados 10 dígitos"),
-  GT: (d) => apenasFormato(d, "NIT", /^[0-9]{6,8}[0-9K]$/, "são esperados de 7 a 9 caracteres terminados em dígito ou K"),
+  CN: (d) =>
+    apenasFormato(d, "USCC", /^[A-Z0-9]{18}$/, "são esperados 18 caracteres alfanuméricos"),
+  CR: (d) => apenasFormato(d, "Cédula Jurídica", /^[0-9]{10}$/, "são esperados 10 dígitos"),
+  GT: (d) =>
+    apenasFormato(
+      d,
+      "NIT",
+      /^[0-9]{6,8}[0-9K]$/,
+      "são esperados de 7 a 9 caracteres terminados em dígito ou K",
+    ),
   HN: (d) => apenasFormato(d, "RTN", /^[0-9]{14}$/, "são esperados 14 dígitos"),
   MX: (d) =>
     apenasFormato(
@@ -400,13 +411,19 @@ export const VALIDADORES: Record<string, Validador> = {
       "são esperadas 3 letras (pessoa moral) ou 4 (pessoa física), data AAMMDD e 3 caracteres de homoclave",
     ),
   NI: (d) => apenasFormato(d, "RUC", /^[A-Z0-9]{14}$/, "são esperados 14 caracteres alfanuméricos"),
-  PA: (d) => apenasFormato(d, "RUC", /^[0-9A-Z]{5,20}$/, "são esperados de 5 a 20 caracteres alfanuméricos"),
+  PA: (d) =>
+    apenasFormato(d, "RUC", /^[0-9A-Z]{5,20}$/, "são esperados de 5 a 20 caracteres alfanuméricos"),
   PY: (d) => apenasFormato(d, "RUC", /^[0-9]{6,9}$/, "são esperados de 6 a 9 dígitos"),
   SV: (d) => apenasFormato(d, "NIT", /^[0-9]{14}$/, "são esperados 14 dígitos"),
   US: (d) => apenasFormato(d, "EIN", /^[0-9]{9}$/, "são esperados 9 dígitos"),
   UY: (d) => apenasFormato(d, "RUT", /^[0-9]{12}$/, "são esperados 12 dígitos"),
   VE: (d) =>
-    apenasFormato(d, "RIF", /^[JGVEP][0-9]{9}$/, "é esperada uma letra (J, G, V, E ou P) seguida de 9 dígitos"),
+    apenasFormato(
+      d,
+      "RIF",
+      /^[JGVEP][0-9]{9}$/,
+      "é esperada uma letra (J, G, V, E ou P) seguida de 9 dígitos",
+    ),
 };
 
 /** Países cuja validação inclui dígito verificador. */
@@ -427,12 +444,7 @@ export function validarDocumentoFiscal(pais: string, raw: string): ResultadoDocu
   if (!validador) {
     // País sem validador implementado: só formato mínimo, nunca bloqueia.
     if (doc.length < 4) {
-      return erro(
-        doc,
-        "nenhum",
-        "tamanho",
-        `${nome} muito curto: informe ao menos 4 caracteres.`,
-      );
+      return erro(doc, "nenhum", "tamanho", `${nome} muito curto: informe ao menos 4 caracteres.`);
     }
     return ok(doc, "nenhum");
   }

@@ -100,8 +100,9 @@ function rawErrorText(error: unknown): string | null {
     code?: string | number;
     errors?: unknown;
   };
-  const partes = [e.message, e.exceptionMessage, e.description, e.detail, e.name]
-    .filter((t): t is string => typeof t === "string" && t.trim() !== "");
+  const partes = [e.message, e.exceptionMessage, e.description, e.detail, e.name].filter(
+    (t): t is string => typeof t === "string" && t.trim() !== "",
+  );
   if (partes.length) return partes.join(" — ");
   if (Array.isArray(e.errors) && e.errors.length) {
     return e.errors.map((x) => (typeof x === "string" ? x : JSON.stringify(x))).join("; ");
@@ -137,45 +138,60 @@ function pentaErrorMessage(error: unknown, status?: number): string | null {
     if (/fora do intervalo|per[ií]odo|rango de fecha|date range/i.test(texto)) {
       return (
         "O período consultado está fora da vigência desta base. " +
-        "Ajuste as datas de início e fim para o intervalo disponível da base." + detalhe
+        "Ajuste as datas de início e fim para o intervalo disponível da base." +
+        detalhe
       );
     }
     if (/limit|quota|exceed|excedid|cota/i.test(texto)) {
       return (
         "Limite do contrato com o provedor atingido (consultas, bases, NCMs ou empresas). " +
-        "Clique em “Atualizar” nos indicadores para ver o consumo real do plano." + detalhe
+        "Clique em “Atualizar” nos indicadores para ver o consumo real do plano." +
+        detalhe
       );
     }
     if (/maintenance|manuten/i.test(texto)) {
-      return "Esta base está em manutenção no provedor. Tente outra base ou repita mais tarde." + detalhe;
+      return (
+        "Esta base está em manutenção no provedor. Tente outra base ou repita mais tarde." + detalhe
+      );
     }
     if (/not\s*found|inexist|no data|sem dados/i.test(texto)) {
-      return "O provedor não encontrou dados para esses filtros. Revise base, período e NCM." + detalhe;
+      return (
+        "O provedor não encontrou dados para esses filtros. Revise base, período e NCM." + detalhe
+      );
     }
     if (/permission|not allowed|unauthorized|forbidden|acesso/i.test(texto)) {
       return (
         "O contrato atual não dá acesso a esta base ou a estes campos. " +
-        "Escolha outra base ou fale com a administração." + detalhe
+        "Escolha outra base ou fale com a administração." +
+        detalhe
       );
     }
     if (/invalid|inválid|required|obrigat|format/i.test(texto)) {
-      return "O provedor recusou os parâmetros da busca. Confira base, período (início/fim) e o código NCM." + detalhe;
+      return (
+        "O provedor recusou os parâmetros da busca. Confira base, período (início/fim) e o código NCM." +
+        detalhe
+      );
     }
     if (/timeout|time out|tempo/i.test(texto)) {
-      return "O provedor demorou demais para responder. Reduza o período e tente novamente." + detalhe;
+      return (
+        "O provedor demorou demais para responder. Reduza o período e tente novamente." + detalhe
+      );
     }
   }
 
   if (status === 429) {
-    return "Muitas consultas em sequência ao provedor. Aguarde alguns segundos e tente de novo." + detalhe;
+    return (
+      "Muitas consultas em sequência ao provedor. Aguarde alguns segundos e tente de novo." +
+      detalhe
+    );
   }
   if (status && status >= 500) {
-    return "O serviço do provedor está instável no momento. Tente novamente em alguns minutos." + detalhe;
+    return (
+      "O serviço do provedor está instável no momento. Tente novamente em alguns minutos." + detalhe
+    );
   }
   return texto;
 }
-
-
 
 export class PentaError extends Error {
   readonly status: number;
@@ -186,10 +202,7 @@ export class PentaError extends Error {
   }
 }
 
-const tokenCache = new Map<
-  string,
-  { token: string; refreshToken?: string; expiresAt: number }
->();
+const tokenCache = new Map<string, { token: string; refreshToken?: string; expiresAt: number }>();
 let lastCallAt = 0;
 
 /**
@@ -213,7 +226,12 @@ function enqueue<T>(delayMs: number, task: () => Promise<T>): Promise<T> {
 async function pentaFetch<T>(
   creds: PentaCredentials,
   path: string,
-  init: { method?: "GET" | "POST"; body?: unknown; token?: string; query?: Record<string, string | undefined> },
+  init: {
+    method?: "GET" | "POST";
+    body?: unknown;
+    token?: string;
+    query?: Record<string, string | undefined>;
+  },
   retried = false,
 ): Promise<T> {
   const url = new URL(`${creds.baseUrl.replace(/\/+$/, "")}${path}`);
@@ -237,7 +255,10 @@ async function pentaFetch<T>(
       }),
     );
   } catch {
-    throw new PentaError("Não foi possível falar com o provedor de mineração (sem resposta da rede). Verifique o endereço do serviço em Administração › Mineração ou tente novamente em instantes.", 503);
+    throw new PentaError(
+      "Não foi possível falar com o provedor de mineração (sem resposta da rede). Verifique o endereço do serviço em Administração › Mineração ou tente novamente em instantes.",
+      503,
+    );
   }
 
   if (res.status === 401 || res.status === 403) {
@@ -246,32 +267,35 @@ async function pentaFetch<T>(
       const token = await pentaRefreshOrLogin(creds);
       return pentaFetch<T>(creds, path, { ...init, token }, true);
     }
-    throw new PentaError("O provedor recusou as credenciais da mineração (sessão expirada ou usuário/senha inválidos). Peça à administração para revisar e testar a conexão.", 401);
+    throw new PentaError(
+      "O provedor recusou as credenciais da mineração (sessão expirada ou usuário/senha inválidos). Peça à administração para revisar e testar a conexão.",
+      401,
+    );
   }
-
 
   type Envelope = { success?: boolean; error?: unknown; data?: T };
   let json: Envelope | null;
   try {
     json = (await res.json()) as Envelope;
   } catch {
-    throw new PentaError(`O provedor devolveu uma resposta em formato inesperado (código ${res.status}). Tente novamente em alguns minutos.`, 502);
+    throw new PentaError(
+      `O provedor devolveu uma resposta em formato inesperado (código ${res.status}). Tente novamente em alguns minutos.`,
+      502,
+    );
   }
   if (!res.ok || !json || json.success !== true) {
-    console.warn(`[penta] recusa ${res.status} ${path}: ${JSON.stringify(json?.error)?.slice(0, 500)}`);
+    console.warn(
+      `[penta] recusa ${res.status} ${path}: ${JSON.stringify(json?.error)?.slice(0, 500)}`,
+    );
     throw new PentaError(
       pentaErrorMessage(json?.error, res.status) ||
         `O provedor recusou a consulta (código ${res.status}). Revise base, período e NCM e tente novamente.`,
       502,
     );
-
   }
 
   return json.data as T;
 }
-
-
-
 
 /** Login tolerante ao formato de resposta (accessToken pode vir na raiz). */
 export async function pentaLoginRaw(creds: PentaCredentials): Promise<string> {
@@ -298,17 +322,18 @@ export async function pentaLoginRaw(creds: PentaCredentials): Promise<string> {
       }),
     );
   } catch {
-    throw new PentaError("Não foi possível falar com o provedor de mineração (sem resposta da rede). Verifique o endereço do serviço em Administração › Mineração ou tente novamente em instantes.", 503);
+    throw new PentaError(
+      "Não foi possível falar com o provedor de mineração (sem resposta da rede). Verifique o endereço do serviço em Administração › Mineração ou tente novamente em instantes.",
+      503,
+    );
   }
-  const json = (await res.json().catch(() => null)) as
-    | {
-        success?: boolean;
-        error?: unknown;
-        accessToken?: string;
-        refreshToken?: string;
-        data?: { accessToken?: string; refreshToken?: string };
-      }
-    | null;
+  const json = (await res.json().catch(() => null)) as {
+    success?: boolean;
+    error?: unknown;
+    accessToken?: string;
+    refreshToken?: string;
+    data?: { accessToken?: string; refreshToken?: string };
+  } | null;
   if (!res.ok || !json || json.success === false) {
     throw new PentaError(
       pentaErrorMessage(json?.error, res.status) ||
@@ -348,14 +373,12 @@ async function pentaRefreshOrLogin(creds: PentaCredentials): Promise<string> {
           body: JSON.stringify({ refreshToken: cached.refreshToken }),
         }),
       );
-      const json = (await res.json().catch(() => null)) as
-        | {
-            success?: boolean;
-            accessToken?: string;
-            refreshToken?: string;
-            data?: { accessToken?: string; refreshToken?: string };
-          }
-        | null;
+      const json = (await res.json().catch(() => null)) as {
+        success?: boolean;
+        accessToken?: string;
+        refreshToken?: string;
+        data?: { accessToken?: string; refreshToken?: string };
+      } | null;
       const token = json?.accessToken ?? json?.data?.accessToken;
       if (res.ok && json?.success !== false && token) {
         const refreshToken = json?.refreshToken ?? json?.data?.refreshToken ?? cached.refreshToken;
@@ -372,7 +395,6 @@ async function pentaRefreshOrLogin(creds: PentaCredentials): Promise<string> {
   }
   return pentaLoginRaw(creds);
 }
-
 
 export async function pentaCountries(creds: PentaCredentials) {
   const token = await pentaLoginRaw(creds);

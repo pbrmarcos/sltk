@@ -76,13 +76,8 @@ function NovaCotacaoPage() {
   // Se veio da BOM, carrega os insumos pelos IDs (independente do status).
   // Caso contrário, usa a lista de aprovados padrão.
   const insumosQ = useQuery({
-    queryKey: fromBom
-      ? ["cotacoes", "insumos-bom", preIds]
-      : ["cotacoes", "insumos-aprovados"],
-    queryFn: () =>
-      fromBom
-        ? insumosByIdsFn({ data: { ids: preIds } })
-        : insumosFn(),
+    queryKey: fromBom ? ["cotacoes", "insumos-bom", preIds] : ["cotacoes", "insumos-aprovados"],
+    queryFn: () => (fromBom ? insumosByIdsFn({ data: { ids: preIds } }) : insumosFn()),
   });
 
   useEffect(() => {
@@ -215,7 +210,9 @@ function NovaCotacaoPage() {
         {step === 1 && (
           <div className="space-y-3">
             <h3 className="text-base font-semibold">
-              {fromBom ? "1. Itens da B.O.M. pré-selecionados" : "1. Selecione os insumos aprovados"}
+              {fromBom
+                ? "1. Itens da B.O.M. pré-selecionados"
+                : "1. Selecione os insumos aprovados"}
             </h3>
             <p className="text-sm text-[var(--text-muted)]">
               {insumoSel.size} item(ns) selecionado(s) de {insumosQ.data?.length ?? 0}
@@ -284,7 +281,9 @@ function NovaCotacaoPage() {
                           <td className="p-2">
                             <div className="font-medium">{it.descricao}</div>
                             {it.part_number && (
-                              <div className="text-xs text-[var(--text-muted)]">PN: {it.part_number}</div>
+                              <div className="text-xs text-[var(--text-muted)]">
+                                PN: {it.part_number}
+                              </div>
                             )}
                           </td>
                           <td className="p-2 text-xs text-[var(--text-secondary)]">
@@ -295,7 +294,10 @@ function NovaCotacaoPage() {
                           </td>
                           <td className="p-2">
                             {(it.criticidade === "alta" || it.criticidade === "critica") && (
-                              <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700">
+                              <Badge
+                                variant="outline"
+                                className="border-rose-200 bg-rose-50 text-rose-700"
+                              >
                                 {it.criticidade}
                               </Badge>
                             )}
@@ -368,7 +370,11 @@ function NovaCotacaoPage() {
               </div>
               <div className="md:col-span-2">
                 <Label>Descrição</Label>
-                <Textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} rows={2} />
+                <Textarea
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  rows={2}
+                />
               </div>
               <div className="md:col-span-2">
                 <Label>Observações</Label>

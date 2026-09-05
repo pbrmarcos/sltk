@@ -80,21 +80,31 @@ function EtapasPage() {
     if (!busca.trim()) return true;
     const t = busca.trim().toLowerCase();
     return (
-      String(e.codigo ?? "").toLowerCase().includes(t) ||
-      String(e.modelo ?? "").toLowerCase().includes(t) ||
-      String(e.clientes?.razao_social ?? "").toLowerCase().includes(t)
+      String(e.codigo ?? "")
+        .toLowerCase()
+        .includes(t) ||
+      String(e.modelo ?? "")
+        .toLowerCase()
+        .includes(t) ||
+      String(e.clientes?.razao_social ?? "")
+        .toLowerCase()
+        .includes(t)
     );
   });
 
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Engenharia" }, { label: "Planejamento" }, { label: "Gantt / Etapas" }]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Engenharia" },
+          { label: "Planejamento" },
+          { label: "Gantt / Etapas" },
+        ]}
         title="Planejamento"
         subtitle="Plano de etapas por equipamento, com H/H estimada mecânica e elétrica."
       />
       <PlanejamentoTabs />
-
 
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_220px]">
         <Input
@@ -103,11 +113,14 @@ function EtapasPage() {
           onChange={(e) => setBusca(e.target.value)}
         />
         <Select value={equipamentoId} onValueChange={setEquipamentoId}>
-          <SelectTrigger className="h-10"><SelectValue placeholder="Selecione um equipamento…" /></SelectTrigger>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Selecione um equipamento…" />
+          </SelectTrigger>
           <SelectContent className="max-h-96">
             {eqpsFiltered.map((e: any) => (
               <SelectItem key={e.id} value={e.id}>
-                {e.codigo} · {e.modelo} {e.clientes?.razao_social ? `— ${e.clientes.razao_social}` : ""}
+                {e.codigo} · {e.modelo}{" "}
+                {e.clientes?.razao_social ? `— ${e.clientes.razao_social}` : ""}
               </SelectItem>
             ))}
             {eqpsFiltered.length === 0 && (
@@ -118,21 +131,30 @@ function EtapasPage() {
         <Select
           value={search.fase ?? "__all__"}
           onValueChange={(v) =>
-            navigate({ search: (prev: any) => ({ ...prev, fase: v === "__all__" ? undefined : v }) })
+            navigate({
+              search: (prev: any) => ({ ...prev, fase: v === "__all__" ? undefined : v }),
+            })
           }
         >
-          <SelectTrigger className="h-10"><SelectValue placeholder="Fase" /></SelectTrigger>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Fase" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">Todas as fases</SelectItem>
             {ETAPA_FASES.map((f) => (
-              <SelectItem key={f} value={f}>{ETAPA_FASE_LABEL[f]}</SelectItem>
+              <SelectItem key={f} value={f}>
+                {ETAPA_FASE_LABEL[f]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
       {equipamentoId ? (
-        <EtapasEditor equipamentoId={equipamentoId} faseFilter={search.fase as EtapaFase | undefined} />
+        <EtapasEditor
+          equipamentoId={equipamentoId}
+          faseFilter={search.fase as EtapaFase | undefined}
+        />
       ) : (
         <DemoGanttPanel faseFilter={search.fase as EtapaFase | undefined} />
       )}
@@ -208,7 +230,12 @@ function EtapasEditor({
         if (r.ordem < 0) errs.push(`Etapa "${r.nome}": ordem inválida`);
         if (r.data_inicio_prev && r.data_fim_prev && r.data_inicio_prev > r.data_fim_prev)
           errs.push(`Etapa "${r.nome}": início posterior ao fim`);
-        if (r.hh_mecanica_estimada < 0 || r.hh_eletrica_estimada < 0 || r.hh_mecanica_real < 0 || r.hh_eletrica_real < 0)
+        if (
+          r.hh_mecanica_estimada < 0 ||
+          r.hh_eletrica_estimada < 0 ||
+          r.hh_mecanica_real < 0 ||
+          r.hh_eletrica_real < 0
+        )
           errs.push(`Etapa "${r.nome}": horas negativas`);
         const year = new Date(r.data_inicio_prev ?? r.data_fim_prev ?? Date.now()).getFullYear();
         if (year < 2000 || year > new Date().getFullYear() + 10)
@@ -286,19 +313,23 @@ function EtapasEditor({
         <Kpi label="Etapas" value={totals.total} />
         <Kpi label="Concluídas" value={totals.concluidas} />
         <Kpi label="Atrasadas" value={totals.atrasadas} accent="text-rose-700" />
-        <Kpi label="H/H mec (est/real)" value={`${totals.hhMec.toFixed(1)} / ${totals.hhMecReal.toFixed(1)}`} />
-        <Kpi label="H/H elet (est/real)" value={`${totals.hhElet.toFixed(1)} / ${totals.hhEletReal.toFixed(1)}`} />
+        <Kpi
+          label="H/H mec (est/real)"
+          value={`${totals.hhMec.toFixed(1)} / ${totals.hhMecReal.toFixed(1)}`}
+        />
+        <Kpi
+          label="H/H elet (est/real)"
+          value={`${totals.hhElet.toFixed(1)} / ${totals.hhEletReal.toFixed(1)}`}
+        />
       </div>
 
       {filteredRows.length > 0 && (
         <GanttView
           rows={filteredRows}
-          onChange={(id, patch) =>
-            {
-              setRows((rs) => rs.map((r) => (id && r.id === id ? { ...r, ...patch } : r)));
-              setDirty(true);
-            }
-          }
+          onChange={(id, patch) => {
+            setRows((rs) => rs.map((r) => (id && r.id === id ? { ...r, ...patch } : r)));
+            setDirty(true);
+          }}
         />
       )}
 
@@ -311,10 +342,18 @@ function EtapasEditor({
               <th className="p-2 text-left">Fase</th>
               <th className="p-2 text-left">Início prev.</th>
               <th className="p-2 text-left">Fim prev.</th>
-              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">Mec est.</th>
-              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">Mec real</th>
-              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">Elet est.</th>
-              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">Elet real</th>
+              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">
+                Mec est.
+              </th>
+              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">
+                Mec real
+              </th>
+              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">
+                Elet est.
+              </th>
+              <th className="p-1.5 text-right text-[10.5px] font-medium uppercase tracking-wide">
+                Elet real
+              </th>
               <th className="p-2 text-right">%</th>
               <th className="p-2 text-left">Status</th>
               <th className="p-2"></th>
@@ -324,115 +363,135 @@ function EtapasEditor({
             {(faseFilter ? rows.filter((r) => r.fase === faseFilter) : rows).map((r) => {
               const i = rows.indexOf(r);
               return (
-              <tr key={r.id ?? `new-${i}`} className="border-t border-[var(--bg-border)]">
-                <td className="p-1">
-                  <Input
-                    type="number"
-                    className="h-8 w-14"
-                    value={r.ordem}
-                    onChange={(e) => update(i, { ordem: Number(e.target.value) })}
-                  />
-                </td>
-                <td className="p-1">
-                  <Input className="h-8" value={r.nome} onChange={(e) => update(i, { nome: e.target.value })} />
-                </td>
-                <td className="p-1">
-                  <Select value={r.fase} onValueChange={(v) => update(i, { fase: v as EtapaFase })}>
-                    <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {ETAPA_FASES.map((f) => (
-                        <SelectItem key={f} value={f}>{ETAPA_FASE_LABEL[f]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="p-1">
-                  <Input
-                    type="date"
-                    className="h-8 w-36"
-                    value={r.data_inicio_prev ?? ""}
-                    onChange={(e) => update(i, { data_inicio_prev: e.target.value || null })}
-                  />
-                </td>
-                <td className="p-1">
-                  <Input
-                    type="date"
-                    className="h-8 w-36"
-                    value={r.data_fim_prev ?? ""}
-                    onChange={(e) => update(i, { data_fim_prev: e.target.value || null })}
-                  />
-                </td>
-                <td className="p-1 text-right">
-                  <Input
-                    type="number"
-                    step="0.5"
-                    className="h-8 w-16 text-right text-[11.5px] tabular-nums"
-                    value={r.hh_mecanica_estimada}
-                    onChange={(e) => update(i, { hh_mecanica_estimada: Number(e.target.value) })}
-                  />
-                </td>
-                <td className="p-1 text-right">
-                  <Input
-                    type="number"
-                    step="0.5"
-                    className={cn(
-                      "h-8 w-16 text-right text-[11.5px] tabular-nums",
-                      hhRealClass(r.hh_mecanica_real, r.hh_mecanica_estimada),
-                    )}
-                    value={r.hh_mecanica_real}
-                    onChange={(e) => update(i, { hh_mecanica_real: Number(e.target.value) })}
-                  />
-                </td>
-                <td className="p-1 text-right">
-                  <Input
-                    type="number"
-                    step="0.5"
-                    className="h-8 w-16 text-right text-[11.5px] tabular-nums"
-                    value={r.hh_eletrica_estimada}
-                    onChange={(e) => update(i, { hh_eletrica_estimada: Number(e.target.value) })}
-                  />
-                </td>
-                <td className="p-1 text-right">
-                  <Input
-                    type="number"
-                    step="0.5"
-                    className={cn(
-                      "h-8 w-16 text-right text-[11.5px] tabular-nums",
-                      hhRealClass(r.hh_eletrica_real, r.hh_eletrica_estimada),
-                    )}
-                    value={r.hh_eletrica_real}
-                    onChange={(e) => update(i, { hh_eletrica_real: Number(e.target.value) })}
-                  />
-                </td>
-                <td className="p-1 text-right">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    className="h-8 w-16 text-right"
-                    value={r.progresso}
-                    onChange={(e) => update(i, { progresso: Math.max(0, Math.min(100, Number(e.target.value))) })}
-                  />
-                </td>
-                <td className="p-1">
-                  <Select value={r.status} onValueChange={(v) => update(i, { status: v as EtapaStatus })}>
-                    <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {ETAPA_STATUS.map((s) => (
-                        <SelectItem key={s} value={s}>{ETAPA_STATUS_LABEL[s]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="p-1">
-                  <button
-                    onClick={() => remove(i)}
-                    className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-rose-700"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </td>
-              </tr>
+                <tr key={r.id ?? `new-${i}`} className="border-t border-[var(--bg-border)]">
+                  <td className="p-1">
+                    <Input
+                      type="number"
+                      className="h-8 w-14"
+                      value={r.ordem}
+                      onChange={(e) => update(i, { ordem: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td className="p-1">
+                    <Input
+                      className="h-8"
+                      value={r.nome}
+                      onChange={(e) => update(i, { nome: e.target.value })}
+                    />
+                  </td>
+                  <td className="p-1">
+                    <Select
+                      value={r.fase}
+                      onValueChange={(v) => update(i, { fase: v as EtapaFase })}
+                    >
+                      <SelectTrigger className="h-8 w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ETAPA_FASES.map((f) => (
+                          <SelectItem key={f} value={f}>
+                            {ETAPA_FASE_LABEL[f]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="p-1">
+                    <Input
+                      type="date"
+                      className="h-8 w-36"
+                      value={r.data_inicio_prev ?? ""}
+                      onChange={(e) => update(i, { data_inicio_prev: e.target.value || null })}
+                    />
+                  </td>
+                  <td className="p-1">
+                    <Input
+                      type="date"
+                      className="h-8 w-36"
+                      value={r.data_fim_prev ?? ""}
+                      onChange={(e) => update(i, { data_fim_prev: e.target.value || null })}
+                    />
+                  </td>
+                  <td className="p-1 text-right">
+                    <Input
+                      type="number"
+                      step="0.5"
+                      className="h-8 w-16 text-right text-[11.5px] tabular-nums"
+                      value={r.hh_mecanica_estimada}
+                      onChange={(e) => update(i, { hh_mecanica_estimada: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td className="p-1 text-right">
+                    <Input
+                      type="number"
+                      step="0.5"
+                      className={cn(
+                        "h-8 w-16 text-right text-[11.5px] tabular-nums",
+                        hhRealClass(r.hh_mecanica_real, r.hh_mecanica_estimada),
+                      )}
+                      value={r.hh_mecanica_real}
+                      onChange={(e) => update(i, { hh_mecanica_real: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td className="p-1 text-right">
+                    <Input
+                      type="number"
+                      step="0.5"
+                      className="h-8 w-16 text-right text-[11.5px] tabular-nums"
+                      value={r.hh_eletrica_estimada}
+                      onChange={(e) => update(i, { hh_eletrica_estimada: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td className="p-1 text-right">
+                    <Input
+                      type="number"
+                      step="0.5"
+                      className={cn(
+                        "h-8 w-16 text-right text-[11.5px] tabular-nums",
+                        hhRealClass(r.hh_eletrica_real, r.hh_eletrica_estimada),
+                      )}
+                      value={r.hh_eletrica_real}
+                      onChange={(e) => update(i, { hh_eletrica_real: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td className="p-1 text-right">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      className="h-8 w-16 text-right"
+                      value={r.progresso}
+                      onChange={(e) =>
+                        update(i, { progresso: Math.max(0, Math.min(100, Number(e.target.value))) })
+                      }
+                    />
+                  </td>
+                  <td className="p-1">
+                    <Select
+                      value={r.status}
+                      onValueChange={(v) => update(i, { status: v as EtapaStatus })}
+                    >
+                      <SelectTrigger className="h-8 w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ETAPA_STATUS.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {ETAPA_STATUS_LABEL[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="p-1">
+                    <button
+                      onClick={() => remove(i)}
+                      className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-rose-700"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </td>
+                </tr>
               );
             })}
           </tbody>
@@ -534,7 +593,9 @@ function GanttView({
       const start = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getTime();
       const end = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1).getTime();
       months.push({
-        label: cursor.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }).replace(".", ""),
+        label: cursor
+          .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
+          .replace(".", ""),
         left: ((start - min) / span) * 100,
         width: ((Math.min(end, max) - start) / span) * 100,
       });
@@ -575,7 +636,9 @@ function GanttView({
         const ne = new Date(startEnd + snapped).toISOString().slice(0, 10);
         onChange!(row.id, { data_inicio_prev: ns, data_fim_prev: ne });
       } else {
-        const ne = new Date(Math.max(startStart + dayMs, startEnd + snapped)).toISOString().slice(0, 10);
+        const ne = new Date(Math.max(startStart + dayMs, startEnd + snapped))
+          .toISOString()
+          .slice(0, 10);
         onChange!(row.id, { data_fim_prev: ne });
       }
     }
@@ -658,7 +721,9 @@ function GanttView({
                   style={{ width: LEFT_COL, height: ROW_H }}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", STATUS_DOT[r.status])} />
+                    <span
+                      className={cn("h-1.5 w-1.5 shrink-0 rounded-full", STATUS_DOT[r.status])}
+                    />
                     <span className="truncate text-[12px] font-medium text-[var(--gantt-text)]">
                       {r.ordem + 1}. {r.nome}
                     </span>
@@ -711,7 +776,8 @@ function GanttView({
 
       {!readOnly && (
         <p className="border-t border-[var(--gantt-grid)] bg-[var(--gantt-header-bg)] px-4 py-1.5 text-[10px] text-[var(--gantt-text-muted)]">
-          Arraste a barra para mover a etapa; arraste a borda direita para alterar o fim. Lembre-se de clicar em "Salvar plano".
+          Arraste a barra para mover a etapa; arraste a borda direita para alterar o fim. Lembre-se
+          de clicar em "Salvar plano".
         </p>
       )}
     </div>
@@ -789,19 +855,162 @@ function buildDemoEtapas(): EtapaRow[] {
     x.setDate(x.getDate() + days);
     return x.toISOString().slice(0, 10);
   }
-  const seq: Array<{ nome: string; fase: EtapaFase; offset: number; dur: number; prog: number; status: EtapaStatus; hhM: number; hhE: number; hhMr: number; hhEr: number }> = [
-    { nome: "Levantamento de requisitos",   fase: "engenharia",   offset: 0,   dur: 7,  prog: 100, status: "concluida",    hhM: 24,  hhE: 16,  hhMr: 26,  hhEr: 18 },
-    { nome: "Detalhamento mecânico",        fase: "engenharia",   offset: 6,   dur: 18, prog: 100, status: "concluida",    hhM: 120, hhE: 0,   hhMr: 132, hhEr: 0 },
-    { nome: "Detalhamento elétrico",        fase: "engenharia",   offset: 10,  dur: 18, prog: 100, status: "concluida",    hhM: 0,   hhE: 96,  hhMr: 0,   hhEr: 104 },
-    { nome: "Compra de componentes",        fase: "compras",      offset: 22,  dur: 25, prog: 80,  status: "em_andamento", hhM: 8,   hhE: 8,   hhMr: 8,   hhEr: 6 },
-    { nome: "Compra de painel elétrico",    fase: "compras",      offset: 26,  dur: 22, prog: 60,  status: "em_andamento", hhM: 0,   hhE: 12,  hhMr: 0,   hhEr: 8 },
-    { nome: "Fabricação da estrutura",      fase: "fabricacao",   offset: 38,  dur: 22, prog: 45,  status: "em_andamento", hhM: 220, hhE: 0,   hhMr: 110, hhEr: 0 },
-    { nome: "Fabricação de transportadores",fase: "fabricacao",   offset: 44,  dur: 24, prog: 30,  status: "atrasada",     hhM: 180, hhE: 0,   hhMr: 70,  hhEr: 0 },
-    { nome: "Montagem mecânica",            fase: "montagem",     offset: 62,  dur: 18, prog: 10,  status: "em_andamento", hhM: 240, hhE: 0,   hhMr: 24,  hhEr: 0 },
-    { nome: "Montagem elétrica",            fase: "montagem",     offset: 70,  dur: 16, prog: 0,   status: "pendente",     hhM: 0,   hhE: 180, hhMr: 0,   hhEr: 0 },
-    { nome: "Testes funcionais",            fase: "qualidade",    offset: 84,  dur: 10, prog: 0,   status: "pendente",     hhM: 32,  hhE: 32,  hhMr: 0,   hhEr: 0 },
-    { nome: "FAT — Aprovação do cliente",   fase: "qualidade",    offset: 92,  dur: 5,  prog: 0,   status: "pendente",     hhM: 16,  hhE: 16,  hhMr: 0,   hhEr: 0 },
-    { nome: "Embalagem e expedição",        fase: "expedicao",    offset: 96,  dur: 7,  prog: 0,   status: "pendente",     hhM: 24,  hhE: 0,   hhMr: 0,   hhEr: 0 },
+  const seq: Array<{
+    nome: string;
+    fase: EtapaFase;
+    offset: number;
+    dur: number;
+    prog: number;
+    status: EtapaStatus;
+    hhM: number;
+    hhE: number;
+    hhMr: number;
+    hhEr: number;
+  }> = [
+    {
+      nome: "Levantamento de requisitos",
+      fase: "engenharia",
+      offset: 0,
+      dur: 7,
+      prog: 100,
+      status: "concluida",
+      hhM: 24,
+      hhE: 16,
+      hhMr: 26,
+      hhEr: 18,
+    },
+    {
+      nome: "Detalhamento mecânico",
+      fase: "engenharia",
+      offset: 6,
+      dur: 18,
+      prog: 100,
+      status: "concluida",
+      hhM: 120,
+      hhE: 0,
+      hhMr: 132,
+      hhEr: 0,
+    },
+    {
+      nome: "Detalhamento elétrico",
+      fase: "engenharia",
+      offset: 10,
+      dur: 18,
+      prog: 100,
+      status: "concluida",
+      hhM: 0,
+      hhE: 96,
+      hhMr: 0,
+      hhEr: 104,
+    },
+    {
+      nome: "Compra de componentes",
+      fase: "compras",
+      offset: 22,
+      dur: 25,
+      prog: 80,
+      status: "em_andamento",
+      hhM: 8,
+      hhE: 8,
+      hhMr: 8,
+      hhEr: 6,
+    },
+    {
+      nome: "Compra de painel elétrico",
+      fase: "compras",
+      offset: 26,
+      dur: 22,
+      prog: 60,
+      status: "em_andamento",
+      hhM: 0,
+      hhE: 12,
+      hhMr: 0,
+      hhEr: 8,
+    },
+    {
+      nome: "Fabricação da estrutura",
+      fase: "fabricacao",
+      offset: 38,
+      dur: 22,
+      prog: 45,
+      status: "em_andamento",
+      hhM: 220,
+      hhE: 0,
+      hhMr: 110,
+      hhEr: 0,
+    },
+    {
+      nome: "Fabricação de transportadores",
+      fase: "fabricacao",
+      offset: 44,
+      dur: 24,
+      prog: 30,
+      status: "atrasada",
+      hhM: 180,
+      hhE: 0,
+      hhMr: 70,
+      hhEr: 0,
+    },
+    {
+      nome: "Montagem mecânica",
+      fase: "montagem",
+      offset: 62,
+      dur: 18,
+      prog: 10,
+      status: "em_andamento",
+      hhM: 240,
+      hhE: 0,
+      hhMr: 24,
+      hhEr: 0,
+    },
+    {
+      nome: "Montagem elétrica",
+      fase: "montagem",
+      offset: 70,
+      dur: 16,
+      prog: 0,
+      status: "pendente",
+      hhM: 0,
+      hhE: 180,
+      hhMr: 0,
+      hhEr: 0,
+    },
+    {
+      nome: "Testes funcionais",
+      fase: "qualidade",
+      offset: 84,
+      dur: 10,
+      prog: 0,
+      status: "pendente",
+      hhM: 32,
+      hhE: 32,
+      hhMr: 0,
+      hhEr: 0,
+    },
+    {
+      nome: "FAT — Aprovação do cliente",
+      fase: "qualidade",
+      offset: 92,
+      dur: 5,
+      prog: 0,
+      status: "pendente",
+      hhM: 16,
+      hhE: 16,
+      hhMr: 0,
+      hhEr: 0,
+    },
+    {
+      nome: "Embalagem e expedição",
+      fase: "expedicao",
+      offset: 96,
+      dur: 7,
+      prog: 0,
+      status: "pendente",
+      hhM: 24,
+      hhE: 0,
+      hhMr: 0,
+      hhEr: 0,
+    },
   ];
   return seq.map((s, i) => ({
     id: `demo-${i}`,
@@ -852,8 +1061,14 @@ function DemoGanttPanel({ faseFilter }: { faseFilter?: EtapaFase }) {
         <Kpi label="Etapas" value={totals.total} />
         <Kpi label="Concluídas" value={totals.concluidas} />
         <Kpi label="Atrasadas" value={totals.atrasadas} accent="text-rose-700" />
-        <Kpi label="H/H mec (est/real)" value={`${totals.hhMec.toFixed(0)} / ${totals.hhMecReal.toFixed(0)}`} />
-        <Kpi label="H/H elet (est/real)" value={`${totals.hhElet.toFixed(0)} / ${totals.hhEletReal.toFixed(0)}`} />
+        <Kpi
+          label="H/H mec (est/real)"
+          value={`${totals.hhMec.toFixed(0)} / ${totals.hhMecReal.toFixed(0)}`}
+        />
+        <Kpi
+          label="H/H elet (est/real)"
+          value={`${totals.hhElet.toFixed(0)} / ${totals.hhEletReal.toFixed(0)}`}
+        />
       </div>
       <GanttView rows={filtered} readOnly />
     </div>

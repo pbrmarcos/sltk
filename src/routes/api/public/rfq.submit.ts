@@ -48,7 +48,10 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
             .maybeSingle();
           if (eLink) throw eLink;
           if (!link) {
-            return Response.json({ ok: false, error: "Formulário não encontrado." }, { status: 404 });
+            return Response.json(
+              { ok: false, error: "Formulário não encontrado." },
+              { status: 404 },
+            );
           }
           if (link.status !== "aberto") {
             return Response.json({ ok: false, error: "Formulário indisponível." }, { status: 410 });
@@ -128,7 +131,9 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
                 link: appUrl("/admin/formularios-recebidos"),
               },
             });
-          } catch { /* noop */ }
+          } catch {
+            /* noop */
+          }
 
           return Response.json(
             { ok: true, submissao_id: submissaoId },
@@ -144,7 +149,6 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
           return Response.json({ ok: false, error: msg }, { status: 500 });
         }
       },
-
     },
   },
 });

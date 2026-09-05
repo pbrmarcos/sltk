@@ -15,13 +15,19 @@ export const Route = createFileRoute("/checklist/$slug")({
   head: () => ({
     meta: [
       { title: "Check-list técnico — Solutek" },
-      { name: "description", content: "Preencha o check-list técnico para dimensionamento do equipamento." },
+      {
+        name: "description",
+        content: "Preencha o check-list técnico para dimensionamento do equipamento.",
+      },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
 });
 
-const HEADER: Record<Idioma, { kicker: string; subtitulo: string; expira: string; seguro: string }> = {
+const HEADER: Record<
+  Idioma,
+  { kicker: string; subtitulo: string; expira: string; seguro: string }
+> = {
   pt: {
     kicker: "Check-list técnico",
     subtitulo: "Preencha para dimensionarmos sua solução. Leva cerca de 5 minutos.",
@@ -100,7 +106,9 @@ function PublicRfqPage() {
   // Se houver campos de anexo, cria submissão-rascunho já ao carregar.
   const temAnexo = useMemo(() => {
     if (!q.data || !q.data.ok) return false;
-    return q.data.tipo.campos_schema.secoes.some((s) => s.campos.some((c) => c.tipo === "anexo_multiplo"));
+    return q.data.tipo.campos_schema.secoes.some((s) =>
+      s.campos.some((c) => c.tipo === "anexo_multiplo"),
+    );
   }, [q.data]);
 
   useEffect(() => {
@@ -162,7 +170,11 @@ function PublicRfqPage() {
   const idioma = data.link.idioma;
   const h = HEADER[idioma];
   const nome = pickLabel(
-    { pt: data.tipo.nome_pt, es: data.tipo.nome_es || undefined, en: data.tipo.nome_en || undefined },
+    {
+      pt: data.tipo.nome_pt,
+      es: data.tipo.nome_es || undefined,
+      en: data.tipo.nome_en || undefined,
+    },
     idioma,
   );
   const dias = diasAte(data.link.expira_em);
@@ -183,13 +195,18 @@ function PublicRfqPage() {
     );
   }
 
-  const submitLabel = idioma === "pt" ? "Enviar formulário" : idioma === "es" ? "Enviar formulario" : "Submit form";
+  const submitLabel =
+    idioma === "pt" ? "Enviar formulário" : idioma === "es" ? "Enviar formulario" : "Submit form";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background">
       <header className="border-b border-border bg-card/70 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-start gap-4 px-4 py-6">
-          <img src={assetUrl(solutekLogo.url)} alt="Solutek" className="h-10 w-10 shrink-0 rounded-md" />
+          <img
+            src={assetUrl(solutekLogo.url)}
+            alt="Solutek"
+            className="h-10 w-10 shrink-0 rounded-md"
+          />
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold uppercase tracking-wider text-primary">
               {h.kicker} · Solutek
@@ -203,7 +220,8 @@ function PublicRfqPage() {
               {dias !== null && (
                 <span className="inline-flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {h.expira} {dias} {idioma === "en" ? "day(s)" : idioma === "es" ? "día(s)" : "dia(s)"}
+                  {h.expira} {dias}{" "}
+                  {idioma === "en" ? "day(s)" : idioma === "es" ? "día(s)" : "dia(s)"}
                 </span>
               )}
               <span className="inline-flex items-center gap-1">

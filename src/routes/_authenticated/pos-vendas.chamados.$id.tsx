@@ -46,7 +46,13 @@ export const Route = createFileRoute("/_authenticated/pos-vendas/chamados/$id")(
 });
 
 type Prioridade = "baixa" | "media" | "alta" | "critica";
-type Status = "aberto" | "em_analise" | "aguardando_cliente" | "resolvido" | "reaberto" | "arquivado";
+type Status =
+  | "aberto"
+  | "em_analise"
+  | "aguardando_cliente"
+  | "resolvido"
+  | "reaberto"
+  | "arquivado";
 
 function ChamadoDetalhePage() {
   const { id } = useParams({ from: "/_authenticated/pos-vendas/chamados/$id" });
@@ -77,8 +83,16 @@ function ChamadoDetalhePage() {
   const [comentario, setComentario] = useState("");
   const [enviandoComentario, setEnviandoComentario] = useState(false);
 
-  const [priDialog, setPriDialog] = useState<{ open: boolean; value: Prioridade; motivo: string }>({ open: false, value: "media", motivo: "" });
-  const [reDialog, setReDialog] = useState<{ open: boolean; value: string; motivo: string }>({ open: false, value: "__none__", motivo: "" });
+  const [priDialog, setPriDialog] = useState<{ open: boolean; value: Prioridade; motivo: string }>({
+    open: false,
+    value: "media",
+    motivo: "",
+  });
+  const [reDialog, setReDialog] = useState<{ open: boolean; value: string; motivo: string }>({
+    open: false,
+    value: "__none__",
+    motivo: "",
+  });
 
   async function enviar() {
     if (!texto.trim()) return;
@@ -122,7 +136,13 @@ function ChamadoDetalhePage() {
 
   async function confirmarPrioridade() {
     try {
-      await prioridadeFn({ data: { chamado_id: id, prioridade: priDialog.value, motivo: priDialog.motivo.trim() || null } });
+      await prioridadeFn({
+        data: {
+          chamado_id: id,
+          prioridade: priDialog.value,
+          motivo: priDialog.motivo.trim() || null,
+        },
+      });
       setPriDialog((d) => ({ ...d, open: false, motivo: "" }));
       await qc.invalidateQueries({ queryKey: ["chamado", id] });
       toast.success("Prioridade atualizada.");
@@ -158,8 +178,18 @@ function ChamadoDetalhePage() {
     }
   }
 
-  if (q.isLoading) return <PageContainer><div className="p-6 text-muted-foreground">Carregando…</div></PageContainer>;
-  if (q.error || !q.data) return <PageContainer><div className="p-6 text-rose-700">Erro ao carregar chamado.</div></PageContainer>;
+  if (q.isLoading)
+    return (
+      <PageContainer>
+        <div className="p-6 text-muted-foreground">Carregando…</div>
+      </PageContainer>
+    );
+  if (q.error || !q.data)
+    return (
+      <PageContainer>
+        <div className="p-6 text-rose-700">Erro ao carregar chamado.</div>
+      </PageContainer>
+    );
 
   const { chamado, mensagens, eventos, equipamento } = q.data as {
     chamado: {
@@ -197,7 +227,9 @@ function ChamadoDetalhePage() {
     <PageContainer>
       <PageHeader
         title={chamado.codigo}
-        subtitle={chamado.assunto ?? (isContato ? "Mensagem do site institucional" : "Chamado de suporte")}
+        subtitle={
+          chamado.assunto ?? (isContato ? "Mensagem do site institucional" : "Chamado de suporte")
+        }
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Pós-venda" },
@@ -210,7 +242,11 @@ function ChamadoDetalhePage() {
         <ChamadoOrigemBadge origem={chamado.origem} />
         <ChamadoStatusBadge status={chamado.status} />
         <ChamadoPrioridadeBadge prioridade={chamado.prioridade} />
-        <SlaClock slaAt={chamado.sla_resposta_at} finalizedAt={chamado.first_response_at} label="Resposta" />
+        <SlaClock
+          slaAt={chamado.sla_resposta_at}
+          finalizedAt={chamado.first_response_at}
+          label="Resposta"
+        />
         <SlaClock slaAt={chamado.sla_resolucao_at} label="Resolução" />
         {!jaResolvido ? (
           <Button
@@ -238,7 +274,9 @@ function ChamadoDetalhePage() {
                 <ChamadoChat mensagens={mensagensPublicas} viewpoint="internal" />
 
                 {chamado.status === "arquivado" ? (
-                  <div className="mt-3 text-sm text-muted-foreground italic">Chamado arquivado — sem interações.</div>
+                  <div className="mt-3 text-sm text-muted-foreground italic">
+                    Chamado arquivado — sem interações.
+                  </div>
                 ) : (
                   <div className="mt-3 space-y-2">
                     <Textarea
@@ -246,7 +284,11 @@ function ChamadoDetalhePage() {
                       onChange={(e) => setTexto(e.target.value)}
                       rows={3}
                       maxLength={4000}
-                      placeholder={isContato ? "Registre a resposta ao remetente…" : "Escreva a resposta ao cliente…"}
+                      placeholder={
+                        isContato
+                          ? "Registre a resposta ao remetente…"
+                          : "Escreva a resposta ao cliente…"
+                      }
                     />
                     <div className="flex justify-end">
                       <Button onClick={enviar} disabled={enviando || !texto.trim()}>
@@ -264,7 +306,9 @@ function ChamadoDetalhePage() {
               <TabsContent value="internos" className="pt-3 space-y-3">
                 <div className="rounded border bg-amber-50/40 p-3 max-h-[50vh] overflow-y-auto space-y-2">
                   {mensagens.filter((m) => m.interno).length === 0 ? (
-                    <div className="text-sm text-muted-foreground italic">Sem comentários internos.</div>
+                    <div className="text-sm text-muted-foreground italic">
+                      Sem comentários internos.
+                    </div>
                   ) : (
                     mensagens
                       .filter((m) => m.interno)
@@ -286,7 +330,11 @@ function ChamadoDetalhePage() {
                   placeholder="Anotação visível apenas para a equipe interna…"
                 />
                 <div className="flex justify-end">
-                  <Button onClick={enviarComentario} disabled={enviandoComentario || !comentario.trim()} variant="secondary">
+                  <Button
+                    onClick={enviarComentario}
+                    disabled={enviandoComentario || !comentario.trim()}
+                    variant="secondary"
+                  >
                     {enviandoComentario ? "Salvando…" : "Adicionar comentário"}
                   </Button>
                 </div>
@@ -299,7 +347,9 @@ function ChamadoDetalhePage() {
           <div className="rounded-lg border bg-card p-4 space-y-3">
             <div className="text-xs uppercase text-muted-foreground">Status</div>
             <Select value={chamado.status} onValueChange={(v) => mudarStatus(v as Status)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="aberto">Aberto</SelectItem>
                 <SelectItem value="em_analise">Em análise</SelectItem>
@@ -316,16 +366,29 @@ function ChamadoDetalhePage() {
                 <ChamadoPrioridadeBadge prioridade={chamado.prioridade} />
                 <Dialog
                   open={priDialog.open}
-                  onOpenChange={(o) => setPriDialog({ open: o, value: chamado.prioridade, motivo: "" })}
+                  onOpenChange={(o) =>
+                    setPriDialog({ open: o, value: chamado.prioridade, motivo: "" })
+                  }
                 >
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">Alterar</Button>
+                    <Button size="sm" variant="outline">
+                      Alterar
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader><DialogTitle>Alterar prioridade</DialogTitle></DialogHeader>
+                    <DialogHeader>
+                      <DialogTitle>Alterar prioridade</DialogTitle>
+                    </DialogHeader>
                     <div className="space-y-3">
-                      <Select value={priDialog.value} onValueChange={(v) => setPriDialog((d) => ({ ...d, value: v as Prioridade }))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                      <Select
+                        value={priDialog.value}
+                        onValueChange={(v) =>
+                          setPriDialog((d) => ({ ...d, value: v as Prioridade }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="critica">Crítica (1h / 4h)</SelectItem>
                           <SelectItem value="alta">Alta (4h / 24h)</SelectItem>
@@ -342,7 +405,12 @@ function ChamadoDetalhePage() {
                       />
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setPriDialog((d) => ({ ...d, open: false }))}>Cancelar</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setPriDialog((d) => ({ ...d, open: false }))}
+                      >
+                        Cancelar
+                      </Button>
                       <Button onClick={confirmarPrioridade}>Confirmar</Button>
                     </DialogFooter>
                   </DialogContent>
@@ -352,24 +420,41 @@ function ChamadoDetalhePage() {
 
             <div className="pt-2 border-t">
               <div className="text-xs uppercase text-muted-foreground mb-1">Atendente</div>
-              <div className="text-sm mb-2">{chamado.atendente_nome ?? <span className="text-muted-foreground">— não atribuído —</span>}</div>
+              <div className="text-sm mb-2">
+                {chamado.atendente_nome ?? (
+                  <span className="text-muted-foreground">— não atribuído —</span>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Dialog
                   open={reDialog.open}
-                  onOpenChange={(o) => setReDialog({ open: o, value: chamado.atendente_id ?? "__none__", motivo: "" })}
+                  onOpenChange={(o) =>
+                    setReDialog({ open: o, value: chamado.atendente_id ?? "__none__", motivo: "" })
+                  }
                 >
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">Reatribuir</Button>
+                    <Button size="sm" variant="outline">
+                      Reatribuir
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader><DialogTitle>Reatribuir chamado</DialogTitle></DialogHeader>
+                    <DialogHeader>
+                      <DialogTitle>Reatribuir chamado</DialogTitle>
+                    </DialogHeader>
                     <div className="space-y-3">
-                      <Select value={reDialog.value} onValueChange={(v) => setReDialog((d) => ({ ...d, value: v }))}>
-                        <SelectTrigger><SelectValue placeholder="— não atribuído —" /></SelectTrigger>
+                      <Select
+                        value={reDialog.value}
+                        onValueChange={(v) => setReDialog((d) => ({ ...d, value: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="— não atribuído —" />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="__none__">— não atribuído —</SelectItem>
                           {atendentes.map((a: { id: string; nome: string }) => (
-                            <SelectItem key={a.id} value={a.id}>{a.nome}</SelectItem>
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.nome}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -382,13 +467,20 @@ function ChamadoDetalhePage() {
                       />
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setReDialog((d) => ({ ...d, open: false }))}>Cancelar</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setReDialog((d) => ({ ...d, open: false }))}
+                      >
+                        Cancelar
+                      </Button>
                       <Button onClick={confirmarReatribuicao}>Confirmar</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
                 {!chamado.atendente_id ? (
-                  <Button size="sm" variant="secondary" onClick={assumir}>Assumir</Button>
+                  <Button size="sm" variant="secondary" onClick={assumir}>
+                    Assumir
+                  </Button>
                 ) : null}
               </div>
             </div>
@@ -396,9 +488,13 @@ function ChamadoDetalhePage() {
 
           <div className="rounded-lg border bg-card p-4 space-y-2 text-sm">
             <div className="text-xs uppercase text-muted-foreground">Visitante</div>
-            <div><strong>{chamado.visitante_nome}</strong></div>
+            <div>
+              <strong>{chamado.visitante_nome}</strong>
+            </div>
             <div className="text-muted-foreground">{chamado.visitante_email}</div>
-            {chamado.visitante_telefone ? <div className="text-muted-foreground">{chamado.visitante_telefone}</div> : null}
+            {chamado.visitante_telefone ? (
+              <div className="text-muted-foreground">{chamado.visitante_telefone}</div>
+            ) : null}
 
             {isContato ? (
               <div className="pt-2 border-t text-xs text-muted-foreground italic">
@@ -406,11 +502,17 @@ function ChamadoDetalhePage() {
               </div>
             ) : (
               <>
-                <div className="pt-2 border-t text-xs uppercase text-muted-foreground">Equipamento</div>
-                <div>nº série: <span className="font-mono">{chamado.numero_serie ?? "—"}</span></div>
+                <div className="pt-2 border-t text-xs uppercase text-muted-foreground">
+                  Equipamento
+                </div>
+                <div>
+                  nº série: <span className="font-mono">{chamado.numero_serie ?? "—"}</span>
+                </div>
                 {equipamento ? (
                   <div className="text-sm">
-                    <div>{equipamento.modelo} — {equipamento.fabricante}</div>
+                    <div>
+                      {equipamento.modelo} — {equipamento.fabricante}
+                    </div>
                     {equipamento.clientes ? (
                       <Link
                         to="/clientes/$codigo"

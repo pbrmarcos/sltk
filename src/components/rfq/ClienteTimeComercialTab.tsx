@@ -150,8 +150,7 @@ export function ClienteTimeComercialTab({ clienteId }: { clienteId: string }) {
                   revogado
                 </Badge>
                 <div className="min-w-0 flex-1 text-[12.5px]">
-                  {l.sales_nome} — revogado em{" "}
-                  {new Date(l.revogado_em).toLocaleDateString("pt-BR")}
+                  {l.sales_nome} — revogado em {new Date(l.revogado_em).toLocaleDateString("pt-BR")}
                 </div>
               </li>
             ))}

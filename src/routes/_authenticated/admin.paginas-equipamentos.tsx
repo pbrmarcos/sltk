@@ -42,7 +42,11 @@ import {
   adminDeleteBloco,
   adminReordenarBlocos,
 } from "@/lib/equipamento-pagina.functions";
-import { BLOCO_LABEL, type BlocoTipo, type EquipamentoBloco } from "@/lib/equipamento-pagina.shared";
+import {
+  BLOCO_LABEL,
+  type BlocoTipo,
+  type EquipamentoBloco,
+} from "@/lib/equipamento-pagina.shared";
 
 export const Route = createFileRoute("/_authenticated/admin/paginas-equipamentos")({
   component: Page,
@@ -79,7 +83,10 @@ function Inner() {
     const rows = listQ.data ?? [];
     if (!t) return rows;
     return rows.filter(
-      (r: any) => r.nome_pt.toLowerCase().includes(t) || r.slug.toLowerCase().includes(t) || (r.familia ?? "").toLowerCase().includes(t),
+      (r: any) =>
+        r.nome_pt.toLowerCase().includes(t) ||
+        r.slug.toLowerCase().includes(t) ||
+        (r.familia ?? "").toLowerCase().includes(t),
     );
   }, [busca, listQ.data]);
 
@@ -104,9 +111,13 @@ function Inner() {
             </div>
           </div>
           <div className="max-h-[70vh] overflow-y-auto">
-            {listQ.isLoading && <p className="p-6 text-center text-sm text-muted-foreground">Carregando…</p>}
+            {listQ.isLoading && (
+              <p className="p-6 text-center text-sm text-muted-foreground">Carregando…</p>
+            )}
             {!listQ.isLoading && filtradas.length === 0 && (
-              <p className="p-6 text-center text-sm text-muted-foreground">Nenhum equipamento encontrado.</p>
+              <p className="p-6 text-center text-sm text-muted-foreground">
+                Nenhum equipamento encontrado.
+              </p>
             )}
             <ul className="divide-y divide-border">
               {filtradas.map((r: any) => (
@@ -140,7 +151,11 @@ function Inner() {
               Selecione um equipamento à esquerda para editar sua página.
             </div>
           ) : (
-            <Editor key={selecionada} paginaId={selecionada} onSaved={() => qc.invalidateQueries({ queryKey: ["admin-paginas-equipamentos"] })} />
+            <Editor
+              key={selecionada}
+              paginaId={selecionada}
+              onSaved={() => qc.invalidateQueries({ queryKey: ["admin-paginas-equipamentos"] })}
+            />
           )}
         </main>
       </div>
@@ -158,7 +173,8 @@ function Editor({ paginaId, onSaved }: { paginaId: string; onSaved: () => void }
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-pagina", paginaId] });
 
   const publicar = useMutation({
-    mutationFn: (publicado: boolean) => adminUpdatePagina({ data: { pagina_id: paginaId, publicado } }),
+    mutationFn: (publicado: boolean) =>
+      adminUpdatePagina({ data: { pagina_id: paginaId, publicado } }),
     onSuccess: () => {
       toast.success("Página atualizada.");
       invalidate();
@@ -178,7 +194,8 @@ function Editor({ paginaId, onSaved }: { paginaId: string; onSaved: () => void }
   });
 
   const addBloco = useMutation({
-    mutationFn: (tipo: BlocoTipo) => adminAddBloco({ data: { pagina_id: paginaId, tipo_bloco: tipo } }),
+    mutationFn: (tipo: BlocoTipo) =>
+      adminAddBloco({ data: { pagina_id: paginaId, tipo_bloco: tipo } }),
     onSuccess: () => {
       toast.success("Bloco adicionado.");
       invalidate();
@@ -186,7 +203,12 @@ function Editor({ paginaId, onSaved }: { paginaId: string; onSaved: () => void }
     onError: (e: any) => toast.error(e.message),
   });
 
-  if (q.isLoading) return <div className="rounded-lg border border-border bg-card p-8 text-center text-sm">Carregando…</div>;
+  if (q.isLoading)
+    return (
+      <div className="rounded-lg border border-border bg-card p-8 text-center text-sm">
+        Carregando…
+      </div>
+    );
   if (!q.data) return null;
   const { pagina, blocos } = q.data;
 
@@ -199,13 +221,16 @@ function Editor({ paginaId, onSaved }: { paginaId: string; onSaved: () => void }
           <div>
             <h2 className="text-lg font-semibold">{pagina.nome_pt}</h2>
             <div className="mt-0.5 text-xs text-muted-foreground">
-              slug: <code className="rounded bg-muted px-1.5 py-0.5">{pagina.slug}</code> · código: {pagina.codigo}
+              slug: <code className="rounded bg-muted px-1.5 py-0.5">{pagina.slug}</code> · código:{" "}
+              {pagina.codigo}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Switch checked={pagina.publicado} onCheckedChange={(v) => publicar.mutate(!!v)} />
-              <span className="text-sm font-medium">{pagina.publicado ? "Publicada" : "Rascunho"}</span>
+              <span className="text-sm font-medium">
+                {pagina.publicado ? "Publicada" : "Rascunho"}
+              </span>
             </div>
             <Button variant="outline" asChild>
               <a href={slugPublico} target="_blank" rel="noreferrer">
@@ -225,7 +250,8 @@ function Editor({ paginaId, onSaved }: { paginaId: string; onSaved: () => void }
         <TabsContent value="blocos" className="mt-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Reorganize com as setas, alterne visibilidade com o olho, edite o conteúdo direto no cartão.
+              Reorganize com as setas, alterne visibilidade com o olho, edite o conteúdo direto no
+              cartão.
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -355,7 +381,11 @@ function BlocoCard({
             }}
             title={bloco.visivel ? "Ocultar" : "Mostrar"}
           >
-            {bloco.visivel ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+            {bloco.visivel ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-muted-foreground" />
+            )}
           </Button>
           <Button
             size="icon"
@@ -378,7 +408,9 @@ function BlocoCard({
       {expanded && (
         <div className="border-t border-border bg-muted/20 p-4">
           <p className="mb-2 text-xs text-muted-foreground">
-            Edite o JSON do bloco (chaves <code>*_pt</code>, <code>*_es</code>, <code>*_en</code> por idioma; <code>itens</code>/<code>imagens</code>/<code>bullets_pt</code> como listas).
+            Edite o JSON do bloco (chaves <code>*_pt</code>, <code>*_es</code>, <code>*_en</code>{" "}
+            por idioma; <code>itens</code>/<code>imagens</code>/<code>bullets_pt</code> como
+            listas).
           </p>
           <Textarea
             className="font-mono text-xs"

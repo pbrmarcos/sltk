@@ -46,7 +46,12 @@ function NovoFatPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Qualidade" }, { label: "FAT", href: "/qualidade/fat" }, { label: "Novo" }]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Qualidade" },
+          { label: "FAT", href: "/qualidade/fat" },
+          { label: "Novo" },
+        ]}
         title="Novo FAT"
         subtitle="Selecione o processo de origem para iniciar o relatório"
         actions={
@@ -61,13 +66,21 @@ function NovoFatPage() {
         }
       />
       <div className="mb-4">
-        <Input placeholder="Buscar processo por código ou título…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input
+          placeholder="Buscar processo por código ou título…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
       </div>
       <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]">
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">Carregando processos…</div>
+          <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+            Carregando processos…
+          </div>
         ) : !filtered.length ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">Nenhum processo encontrado.</div>
+          <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+            Nenhum processo encontrado.
+          </div>
         ) : (
           <ul className="divide-y divide-[var(--bg-border)]">
             {filtered.map((p: any) => (

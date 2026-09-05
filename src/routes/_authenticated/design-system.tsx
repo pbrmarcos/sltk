@@ -66,10 +66,7 @@ function SwatchGrid({ items }: { items: Swatch[] }) {
           <div className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
             {s.hex.toUpperCase()}
           </div>
-          <code
-            className="mt-1 block text-[10px]"
-            style={{ color: "var(--color-text-muted)" }}
-          >
+          <code className="mt-1 block text-[10px]" style={{ color: "var(--color-text-muted)" }}>
             {s.varName}
           </code>
         </div>
@@ -102,11 +99,21 @@ function DesignSystemPage() {
         subtitle="Fundação visual — tokens, paleta e tipografia."
       />
       <div className="space-y-10">
-        <Section title="Superfícies"><SwatchGrid items={surfaces} /></Section>
-        <Section title="Texto"><SwatchGrid items={texts} /></Section>
-        <Section title="Accent"><SwatchGrid items={accents} /></Section>
-        <Section title="Status"><SwatchGrid items={statuses} /></Section>
-        <Section title="Probabilidade comercial"><SwatchGrid items={probs} /></Section>
+        <Section title="Superfícies">
+          <SwatchGrid items={surfaces} />
+        </Section>
+        <Section title="Texto">
+          <SwatchGrid items={texts} />
+        </Section>
+        <Section title="Accent">
+          <SwatchGrid items={accents} />
+        </Section>
+        <Section title="Status">
+          <SwatchGrid items={statuses} />
+        </Section>
+        <Section title="Probabilidade comercial">
+          <SwatchGrid items={probs} />
+        </Section>
 
         <Section title="Badges / Tags">
           <div
@@ -121,9 +128,10 @@ function DesignSystemPage() {
               <StatusBadge tone="neutral">DEFAULT</StatusBadge>
             </div>
             <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-              Fundo tonalizado + texto escuro do mesmo matiz garante contraste ≥ 4.5:1 (WCAG AA) sobre
-              superfícies claras. Tokens: <code>--badge-{`{tone}`}-bg / -fg / -border</code>. Use{" "}
-              <code>{`<StatusBadge tone="…" />`}</code> de <code>@/components/ui/status-badge</code>.
+              Fundo tonalizado + texto escuro do mesmo matiz garante contraste ≥ 4.5:1 (WCAG AA)
+              sobre superfícies claras. Tokens: <code>--badge-{`{tone}`}-bg / -fg / -border</code>.
+              Use <code>{`<StatusBadge tone="…" />`}</code> de{" "}
+              <code>@/components/ui/status-badge</code>.
             </p>
           </div>
         </Section>
@@ -134,7 +142,10 @@ function DesignSystemPage() {
             style={{ background: "var(--color-bg-surface)", borderColor: "var(--color-bg-border)" }}
           >
             <div>
-              <div className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
+              <div
+                className="mb-2 text-xs font-medium uppercase tracking-wider"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Variantes
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -148,7 +159,10 @@ function DesignSystemPage() {
             </div>
 
             <div>
-              <div className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
+              <div
+                className="mb-2 text-xs font-medium uppercase tracking-wider"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Tamanhos
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -162,7 +176,10 @@ function DesignSystemPage() {
             </div>
 
             <div>
-              <div className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
+              <div
+                className="mb-2 text-xs font-medium uppercase tracking-wider"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Com ícone
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -182,7 +199,10 @@ function DesignSystemPage() {
             </div>
 
             <div>
-              <div className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
+              <div
+                className="mb-2 text-xs font-medium uppercase tracking-wider"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Estados
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -209,7 +229,9 @@ function DesignSystemPage() {
           >
             <p className="text-4xl font-bold">Aa — Display 36/Bold</p>
             <p className="text-2xl font-semibold">Aa — Heading 24/Semibold</p>
-            <p className="text-base">Aa — Body 16/Regular — O sistema centraliza vendas, engenharia, produção e qualidade.</p>
+            <p className="text-base">
+              Aa — Body 16/Regular — O sistema centraliza vendas, engenharia, produção e qualidade.
+            </p>
             <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
               Aa — Caption 14 — texto secundário para metadados e legendas.
             </p>
@@ -231,10 +253,18 @@ function DesignSystemPage() {
               <div key={name} className="text-center">
                 <div
                   className="h-20 w-20 border"
-                  style={{ background: "var(--color-bg-elevated)", borderRadius: token, borderColor: "var(--color-bg-border)" }}
+                  style={{
+                    background: "var(--color-bg-elevated)",
+                    borderRadius: token,
+                    borderColor: "var(--color-bg-border)",
+                  }}
                 />
-                <div className="mt-2 text-xs" style={{ color: "var(--color-text-primary)" }}>{name}</div>
-                <div className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>{val}</div>
+                <div className="mt-2 text-xs" style={{ color: "var(--color-text-primary)" }}>
+                  {name}
+                </div>
+                <div className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>
+                  {val}
+                </div>
               </div>
             ))}
           </div>
@@ -253,7 +283,9 @@ function DesignSystemPage() {
                 style={{ background: "var(--color-bg-surface)", boxShadow: val }}
               >
                 <div className="text-sm font-medium">{name}</div>
-                <div className="text-xs" style={{ color: "var(--color-text-muted)" }}>{val}</div>
+                <div className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  {val}
+                </div>
               </div>
             ))}
           </div>

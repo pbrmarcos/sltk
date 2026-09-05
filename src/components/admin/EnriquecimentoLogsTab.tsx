@@ -38,8 +38,8 @@ export function EnriquecimentoLogsTab() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-[var(--text-muted)]">
-          Histórico das últimas 200 consultas de enriquecimento (busca fiscal).
-          Acesso restrito a administradores e gerentes.
+          Histórico das últimas 200 consultas de enriquecimento (busca fiscal). Acesso restrito a
+          administradores e gerentes.
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={pais} onValueChange={setPais}>
@@ -155,9 +155,7 @@ export function EnriquecimentoLogsTab() {
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
-                      {r.user_email ?? "—"}
-                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.user_email ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

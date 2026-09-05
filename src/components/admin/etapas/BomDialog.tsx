@@ -2,12 +2,24 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Save } from "lucide-react";
 import {
   upsertEtapaTemplateBomItem,
@@ -43,21 +55,45 @@ export function BomDialog({
   const [link, setLink] = useState<string>(item.link ?? "");
   const [observacoes, setObservacoes] = useState<string>(item.observacoes ?? "");
   const initialDraft = {
-    descricao: item.descricao ?? "", quantidade: item.quantidade ?? 1, unidade: item.unidade ?? "un",
-    criticidade: item.criticidade ?? "media", disciplinaProjeto: item.disciplina_projeto ?? item.disciplinaProjeto ?? "mecanico",
-    equipamentoDisciplina: item.equipamento_disciplina ?? item.equipamentoDisciplina ?? "engenharia",
-    partNumber: item.part_number ?? "", fabricante: item.fabricante ?? "", link: item.link ?? "", observacoes: item.observacoes ?? "",
+    descricao: item.descricao ?? "",
+    quantidade: item.quantidade ?? 1,
+    unidade: item.unidade ?? "un",
+    criticidade: item.criticidade ?? "media",
+    disciplinaProjeto: item.disciplina_projeto ?? item.disciplinaProjeto ?? "mecanico",
+    equipamentoDisciplina:
+      item.equipamento_disciplina ?? item.equipamentoDisciplina ?? "engenharia",
+    partNumber: item.part_number ?? "",
+    fabricante: item.fabricante ?? "",
+    link: item.link ?? "",
+    observacoes: item.observacoes ?? "",
   };
-  const currentDraft = { descricao, quantidade, unidade, criticidade, disciplinaProjeto, equipamentoDisciplina, partNumber, fabricante, link, observacoes };
+  const currentDraft = {
+    descricao,
+    quantidade,
+    unidade,
+    criticidade,
+    disciplinaProjeto,
+    equipamentoDisciplina,
+    partNumber,
+    fabricante,
+    link,
+    observacoes,
+  };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `template-bom:${templateId}:${item.id ?? "novo"}`,
     value: currentDraft,
     initialValue: initialDraft,
     onRestore: (saved) => {
-      setDescricao(saved.descricao); setQuantidade(saved.quantidade); setUnidade(saved.unidade);
-      setCriticidade(saved.criticidade); setDisciplinaProjeto(saved.disciplinaProjeto);
-      setEquipamentoDisciplina(saved.equipamentoDisciplina); setPartNumber(saved.partNumber);
-      setFabricante(saved.fabricante); setLink(saved.link); setObservacoes(saved.observacoes);
+      setDescricao(saved.descricao);
+      setQuantidade(saved.quantidade);
+      setUnidade(saved.unidade);
+      setCriticidade(saved.criticidade);
+      setDisciplinaProjeto(saved.disciplinaProjeto);
+      setEquipamentoDisciplina(saved.equipamentoDisciplina);
+      setPartNumber(saved.partNumber);
+      setFabricante(saved.fabricante);
+      setLink(saved.link);
+      setObservacoes(saved.observacoes);
     },
   });
 
@@ -80,12 +116,19 @@ export function BomDialog({
           observacoes: observacoes || null,
         },
       }),
-    onSuccess: () => { clearDraft(); toast.success("Salvo."); onSaved(); },
+    onSuccess: () => {
+      clearDraft();
+      toast.success("Salvo.");
+      onSaved();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Erro."),
   });
 
   function tryClose() {
-    if (confirmDiscard(isDirty)) { clearDraft(); onClose(); }
+    if (confirmDiscard(isDirty)) {
+      clearDraft();
+      onClose();
+    }
   }
 
   return (
@@ -113,13 +156,19 @@ export function BomDialog({
               </div>
               <div className="col-span-2">
                 <Label>Link/URL de referência</Label>
-                <Input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://…" />
+                <Input
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                  placeholder="https://…"
+                />
               </div>
             </div>
           </section>
 
           <section className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase text-muted-foreground">Quantidades e classificação</h3>
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+              Quantidades e classificação
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Quantidade</Label>
@@ -137,16 +186,24 @@ export function BomDialog({
               <div>
                 <Label>Disciplina Projeto</Label>
                 <Select value={disciplinaProjeto} onValueChange={setDisciplinaProjeto}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {DISCIPLINAS_PROJETO.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                    {DISCIPLINAS_PROJETO.map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Aba EQP</Label>
                 <Select value={equipamentoDisciplina} onValueChange={setEquipamentoDisciplina}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="planejamento">Planejamento</SelectItem>
                     <SelectItem value="engenharia">Engenharia</SelectItem>
@@ -158,9 +215,15 @@ export function BomDialog({
               <div className="col-span-2">
                 <Label>Criticidade</Label>
                 <Select value={criticidade} onValueChange={setCriticidade}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {PRIORIDADES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    {PRIORIDADES.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -179,7 +242,9 @@ export function BomDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={tryClose}>Cancelar</Button>
+          <Button variant="ghost" onClick={tryClose}>
+            Cancelar
+          </Button>
           <Button onClick={() => mut.mutate()} disabled={!descricao || mut.isPending}>
             <Save className="mr-1 h-4 w-4" /> Salvar
           </Button>

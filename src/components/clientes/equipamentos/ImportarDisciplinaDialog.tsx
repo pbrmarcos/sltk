@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, Upload, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
 import ExcelJS from "exceljs";
@@ -161,7 +167,8 @@ export function ImportarDisciplinaDialog({
         <DialogHeader>
           <DialogTitle>Importar Excel — {disciplina}</DialogTitle>
           <DialogDescription>
-            Baixe o template pré-preenchido, edite no Excel e envie de volta. Disponível apenas durante o planejamento.
+            Baixe o template pré-preenchido, edite no Excel e envie de volta. Disponível apenas
+            durante o planejamento.
           </DialogDescription>
         </DialogHeader>
 
@@ -174,7 +181,9 @@ export function ImportarDisciplinaDialog({
             >
               <Download className="h-6 w-6 text-primary" />
               <span className="font-medium">Baixar template</span>
-              <span className="text-[11px] text-muted-foreground">Etapas atuais com códigos curtos</span>
+              <span className="text-[11px] text-muted-foreground">
+                Etapas atuais com códigos curtos
+              </span>
             </button>
             <label className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-6 text-sm hover:bg-muted cursor-pointer">
               <Upload className="h-6 w-6 text-primary" />
@@ -198,13 +207,17 @@ export function ImportarDisciplinaDialog({
             <div className="flex items-center gap-2 text-sm">
               <FileSpreadsheet className="h-4 w-4" />
               <span className="font-medium">{fileName}</span>
-              <span className="text-muted-foreground">
-                {rows.length} linhas lidas
-              </span>
+              <span className="text-muted-foreground">{rows.length} linhas lidas</span>
             </div>
             <div className="grid gap-2 text-[12px] md:grid-cols-3">
               <DiffBlock title="Novas" color="emerald" items={diff.added} labelKey="titulo" />
-              <DiffBlock title="Atualizadas" color="amber" items={diff.updated} labelKey="codigo" extraKey="changed" />
+              <DiffBlock
+                title="Atualizadas"
+                color="amber"
+                items={diff.updated}
+                labelKey="codigo"
+                extraKey="changed"
+              />
               <DiffBlock title="Removidas" color="rose" items={diff.removed} labelKey="titulo" />
             </div>
             <div className="flex justify-end gap-2 pt-2">

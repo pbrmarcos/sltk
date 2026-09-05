@@ -12,9 +12,12 @@ type NovoOrcamentoSearch = {
 
 export const Route = createFileRoute("/_authenticated/comercial/orcamento/novo")({
   validateSearch: (search: Record<string, unknown>): NovoOrcamentoSearch => ({
-    oportunidade: typeof search["oportunidade"] === "string" ? (search["oportunidade"] as string) : undefined,
+    oportunidade:
+      typeof search["oportunidade"] === "string" ? (search["oportunidade"] as string) : undefined,
     oportunidadeCodigo:
-      typeof search["oportunidadeCodigo"] === "string" ? (search["oportunidadeCodigo"] as string) : undefined,
+      typeof search["oportunidadeCodigo"] === "string"
+        ? (search["oportunidadeCodigo"] as string)
+        : undefined,
     cliente: typeof search["cliente"] === "string" ? (search["cliente"] as string) : undefined,
     titulo: typeof search["titulo"] === "string" ? (search["titulo"] as string) : undefined,
   }),
@@ -43,7 +46,9 @@ function NovoOrcamentoPage() {
         mode="novo"
         initialTitulo={titulo}
         prefillClienteId={cliente ?? null}
-        prefillOportunidade={oportunidade ? { id: oportunidade, codigo: oportunidadeCodigo ?? null } : null}
+        prefillOportunidade={
+          oportunidade ? { id: oportunidade, codigo: oportunidadeCodigo ?? null } : null
+        }
       />
     </PageContainer>
   );

@@ -26,7 +26,9 @@ const MIME_LIMITS: Record<string, number> = {
 };
 
 async function ensureInsumoFolder(opts: {
-  cliente_codigo: string; projeto_codigo: string; tag: string;
+  cliente_codigo: string;
+  projeto_codigo: string;
+  tag: string;
 }): Promise<{ id: string; url: string }> {
   const { ensurePath, getFolderUrl } = await import("@/lib/docs/drive.server");
   const id = await ensurePath([
@@ -40,35 +42,64 @@ async function ensureInsumoFolder(opts: {
 }
 
 async function driveUploadMultipart(opts: {
-  parentId: string; name: string; mimeType: string; bytes: ArrayBuffer;
+  parentId: string;
+  name: string;
+  mimeType: string;
+  bytes: ArrayBuffer;
 }): Promise<{ id: string; webViewLink: string }> {
   const boundary = `lvbl_${crypto.randomUUID()}`;
-  const meta = JSON.stringify({ name: opts.name, parents: [opts.parentId], mimeType: opts.mimeType });
+  const meta = JSON.stringify({
+    name: opts.name,
+    parents: [opts.parentId],
+    mimeType: opts.mimeType,
+  });
   const enc = new TextEncoder();
-  const head = enc.encode(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`);
+  const head = enc.encode(
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
+  );
   const tail = enc.encode(`\r\n--${boundary}--`);
   const body = new Uint8Array(head.byteLength + opts.bytes.byteLength + tail.byteLength);
   body.set(head, 0);
   body.set(new Uint8Array(opts.bytes), head.byteLength);
   body.set(tail, head.byteLength + opts.bytes.byteLength);
   const { baseUrl, headers } = await driveAuth();
-  const r = await fetch(`${baseUrl}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`, {
-    method: "POST",
-    headers: { ...headers, "Content-Type": `multipart/related; boundary=${boundary}` },
-    body,
-  });
+  const r = await fetch(
+    `${baseUrl}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`,
+    {
+      method: "POST",
+      headers: { ...headers, "Content-Type": `multipart/related; boundary=${boundary}` },
+      body,
+    },
+  );
   if (!r.ok) throw new Error(`Drive upload ${r.status}: ${await r.text()}`);
-  return await r.json() as { id: string; webViewLink: string };
+  return (await r.json()) as { id: string; webViewLink: string };
 }
 
 async function actorNome(sb: any, userId: string): Promise<string> {
-  const { data } = await sb.from("profiles").select("full_name, email").eq("id", userId).maybeSingle();
+  const { data } = await sb
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", userId)
+    .maybeSingle();
   return data?.full_name ?? data?.email ?? "Sistema";
 }
 
-async function logAtividade(sb: any, insumoId: string, actorId: string, actor: string, tipo: string, descricao: string, meta?: Record<string, unknown>) {
+async function logAtividade(
+  sb: any,
+  insumoId: string,
+  actorId: string,
+  actor: string,
+  tipo: string,
+  descricao: string,
+  meta?: Record<string, unknown>,
+) {
   await sb.from("insumo_atividades").insert({
-    insumo_id: insumoId, tipo, descricao, meta: meta ?? null, actor_id: actorId, actor_nome: actor,
+    insumo_id: insumoId,
+    tipo,
+    descricao,
+    meta: meta ?? null,
+    actor_id: actorId,
+    actor_nome: actor,
   } as never);
 }
 
@@ -100,12 +131,15 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) throw new Error(`Tipo não permitido (${data.mime_type}).`);
-    if (data.size_bytes > limit) throw new Error(`Arquivo excede o limite (${(limit/1048576)|0}MB).`);
+    if (data.size_bytes > limit)
+      throw new Error(`Arquivo excede o limite (${(limit / 1048576) | 0}MB).`);
 
     // Contexto (cliente/projeto/insumo) para pastas
     const { data: ins, error: iErr } = await sb
       .from("projeto_insumos")
-      .select("id, descricao, codigo_interno, created_at, equipamento_projetos:projeto_id(revisao, cliente_equipamentos:equipamento_id(codigo, clientes:cliente_id(codigo, razao_social)))")
+      .select(
+        "id, descricao, codigo_interno, created_at, equipamento_projetos:projeto_id(revisao, cliente_equipamentos:equipamento_id(codigo, clientes:cliente_id(codigo, razao_social)))",
+      )
       .eq("id", data.insumo_id)
       .maybeSingle();
     if (iErr || !ins) throw new Error("Insumo não encontrado.");
@@ -130,7 +164,8 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
         driveFolderUrl = folder.url;
         const bytes = Uint8Array.from(atob(data.data_base64), (c) => c.charCodeAt(0)).buffer;
         const ext = data.filename.includes(".") ? "." + data.filename.split(".").pop() : "";
-        const prefix = data.kind === "orcamento" ? "orcamento" : data.kind === "tecnico" ? "tecnico" : "anexo";
+        const prefix =
+          data.kind === "orcamento" ? "orcamento" : data.kind === "tecnico" ? "tecnico" : "anexo";
         // Versão por tipo/anexo: incrementa dentro da pasta do item (mesma pasta versionada da RFQ)
         const { count: nPrev } = await sb
           .from("insumo_anexos")
@@ -140,11 +175,19 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
           .is("deleted_at", null);
         const versao = (nPrev ?? 0) + 1;
         const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-        const safe = data.filename.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60);
+        const safe = data.filename
+          .replace(/\.[^.]+$/, "")
+          .replace(/[^a-zA-Z0-9._-]/g, "_")
+          .slice(0, 60);
         // Padrão único de nomenclatura (alinhado ao PDF de RFQ):
         //   {prefix}_{TAG}_v{N}_{stamp}_{original}.ext
         const finalName = `${prefix}_${tag}_v${versao}_${stamp}_${safe}${ext}`;
-        const up = await driveUploadMultipart({ parentId: folder.id, name: finalName, mimeType: data.mime_type, bytes });
+        const up = await driveUploadMultipart({
+          parentId: folder.id,
+          name: finalName,
+          mimeType: data.mime_type,
+          bytes,
+        });
         driveFileId = up.id;
         driveViewUrl = up.webViewLink;
       } catch (e) {
@@ -192,7 +235,13 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
       data.kind === "orcamento"
         ? `Orçamento recebido: ${data.filename}${data.valor ? ` (${data.moeda ?? "BRL"} ${data.valor})` : ""}`
         : `Anexo: ${data.filename}`,
-      { anexo_id: (row as any).id, kind: data.kind, valor: data.valor, moeda: data.moeda, fornecedor_id: data.fornecedor_id },
+      {
+        anexo_id: (row as any).id,
+        kind: data.kind,
+        valor: data.valor,
+        moeda: data.moeda,
+        fornecedor_id: data.fornecedor_id,
+      },
     );
 
     return { id: (row as any).id, drive_view_url: driveViewUrl, drive_folder_url: driveFolderUrl };
@@ -207,7 +256,9 @@ export const listInsumoAnexos = createServerFn({ method: "GET" })
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
       .from("insumo_anexos")
-      .select("id, kind, file_name, mime_type, size_bytes, drive_file_id, drive_view_url, drive_folder_url, valor, moeda, condicao_pagamento, lead_time_dias, incoterm, validade_ate, observacoes, fornecedor_id, uploaded_by_nome, criado_em, fornecedores:fornecedor_id(nome, nome_fantasia, codigo)")
+      .select(
+        "id, kind, file_name, mime_type, size_bytes, drive_file_id, drive_view_url, drive_folder_url, valor, moeda, condicao_pagamento, lead_time_dias, incoterm, validade_ate, observacoes, fornecedor_id, uploaded_by_nome, criado_em, fornecedores:fornecedor_id(nome, nome_fantasia, codigo)",
+      )
       .eq("insumo_id", data.insumo_id)
       .is("deleted_at", null)
       .order("criado_em", { ascending: false });
@@ -263,7 +314,15 @@ export const removeInsumoAnexo = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
     const nome = await actorNome(sb, context.userId);
-    await logAtividade(sb, (cur as any).insumo_id, context.userId, nome, "anexo_removido", `Removeu ${(cur as any).file_name}`, { anexo_id: data.id, kind: (cur as any).kind });
+    await logAtividade(
+      sb,
+      (cur as any).insumo_id,
+      context.userId,
+      nome,
+      "anexo_removido",
+      `Removeu ${(cur as any).file_name}`,
+      { anexo_id: data.id, kind: (cur as any).kind },
+    );
     return { ok: true };
   });
 
@@ -271,7 +330,14 @@ export const removeInsumoAnexo = createServerFn({ method: "POST" })
 
 export const listInsumoAtividades = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ insumo_id: z.string().uuid(), limit: z.number().int().min(1).max(500).optional().default(200) }).parse(i))
+  .inputValidator((i: unknown) =>
+    z
+      .object({
+        insumo_id: z.string().uuid(),
+        limit: z.number().int().min(1).max(500).optional().default(200),
+      })
+      .parse(i),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
@@ -288,7 +354,9 @@ export const listInsumoAtividades = createServerFn({ method: "GET" })
 
 export const addInsumoComentario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ insumo_id: z.string().uuid(), texto: z.string().min(1).max(2000) }).parse(i))
+  .inputValidator((i: unknown) =>
+    z.object({ insumo_id: z.string().uuid(), texto: z.string().min(1).max(2000) }).parse(i),
+  )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
@@ -300,25 +368,51 @@ export const addInsumoComentario = createServerFn({ method: "POST" })
 /* ============ Auditoria (timeline global) ============ */
 
 const REVERTABLE_FIELDS = new Set([
-  "descricao", "quantidade", "unidade", "fabricante_sugerido", "part_number",
-  "codigo_interno", "criticidade", "lead_time_desejado_dias", "necessidade_em",
-  "observacoes", "especificacao_tecnica",
+  "descricao",
+  "quantidade",
+  "unidade",
+  "fabricante_sugerido",
+  "part_number",
+  "codigo_interno",
+  "criticidade",
+  "lead_time_desejado_dias",
+  "necessidade_em",
+  "observacoes",
+  "especificacao_tecnica",
 ]);
 
 export const listAtividadesSolicitacoes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      limit: z.number().int().min(1).max(500).optional().default(200),
-      tipo: z.enum(["todos", "editado", "status_alterado", "anexo_adicionado", "anexo_removido", "orcamento_recebido", "comentario", "criado", "insumo_removido", "insumo_restaurado"]).optional().default("todos"),
-      actor_q: z.string().max(120).optional().default(""),
-    }).parse(i),
+    z
+      .object({
+        limit: z.number().int().min(1).max(500).optional().default(200),
+        tipo: z
+          .enum([
+            "todos",
+            "editado",
+            "status_alterado",
+            "anexo_adicionado",
+            "anexo_removido",
+            "orcamento_recebido",
+            "comentario",
+            "criado",
+            "insumo_removido",
+            "insumo_restaurado",
+          ])
+          .optional()
+          .default("todos"),
+        actor_q: z.string().max(120).optional().default(""),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     let query = sb
       .from("insumo_atividades")
-      .select("id, insumo_id, tipo, descricao, meta, actor_id, actor_nome, criado_em, projeto_insumos:insumo_id(id, descricao, codigo_interno, projeto_id, equipamento_projetos:projeto_id(revisao, cliente_equipamentos:equipamento_id(codigo, clientes:cliente_id(codigo, razao_social))))")
+      .select(
+        "id, insumo_id, tipo, descricao, meta, actor_id, actor_nome, criado_em, projeto_insumos:insumo_id(id, descricao, codigo_interno, projeto_id, equipamento_projetos:projeto_id(revisao, cliente_equipamentos:equipamento_id(codigo, clientes:cliente_id(codigo, razao_social))))",
+      )
       .order("criado_em", { ascending: false })
       .limit(data.limit);
     if (data.tipo && data.tipo !== "todos") query = query.eq("tipo", data.tipo);
@@ -328,7 +422,9 @@ export const listAtividadesSolicitacoes = createServerFn({ method: "GET" })
     return (rows ?? []).map((r: any) => ({
       ...r,
       revertable:
-        (r.tipo === "editado" && r.meta && typeof r.meta === "object" &&
+        (r.tipo === "editado" &&
+          r.meta &&
+          typeof r.meta === "object" &&
           Object.keys(r.meta).some((k) => REVERTABLE_FIELDS.has(k))) ||
         r.tipo === "anexo_removido" ||
         r.tipo === "status_alterado" ||
@@ -339,10 +435,12 @@ export const listAtividadesSolicitacoes = createServerFn({ method: "GET" })
 export const reverterAtividade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      atividade_id: z.string().uuid(),
-      justificativa: z.string().min(3).max(500),
-    }).parse(i),
+    z
+      .object({
+        atividade_id: z.string().uuid(),
+        justificativa: z.string().min(3).max(500),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "compras");
@@ -363,21 +461,40 @@ export const reverterAtividade = createServerFn({ method: "POST" })
         if (Array.isArray(v)) patch[k] = (v as unknown[])[0];
       }
       if (Object.keys(patch).length === 0) throw new Error("Nenhum campo revertível.");
-      const { error } = await sb.from("projeto_insumos").update({ ...patch, updated_by: context.userId }).eq("id", at.insumo_id);
+      const { error } = await sb
+        .from("projeto_insumos")
+        .update({ ...patch, updated_by: context.userId })
+        .eq("id", at.insumo_id);
       if (error) throw friendlyDbError(error);
-      await logAtividade(sb, at.insumo_id, context.userId, nome, "editado",
+      await logAtividade(
+        sb,
+        at.insumo_id,
+        context.userId,
+        nome,
+        "editado",
         `Reversão de alteração anterior. Motivo: ${data.justificativa}`,
-        { reverted_from: at.id, patch });
+        { reverted_from: at.id, patch },
+      );
       return { ok: true, kind: "editado" };
     }
 
     if (at.tipo === "anexo_removido") {
       const anexoId = (at.meta as any)?.anexo_id;
       if (!anexoId) throw new Error("Anexo não localizado no evento.");
-      const { error } = await sb.from("insumo_anexos").update({ deleted_at: null } as never).eq("id", anexoId);
+      const { error } = await sb
+        .from("insumo_anexos")
+        .update({ deleted_at: null } as never)
+        .eq("id", anexoId);
       if (error) throw friendlyDbError(error);
-      await logAtividade(sb, at.insumo_id, context.userId, nome, "anexo_adicionado",
-        `Anexo restaurado. Motivo: ${data.justificativa}`, { reverted_from: at.id, anexo_id: anexoId });
+      await logAtividade(
+        sb,
+        at.insumo_id,
+        context.userId,
+        nome,
+        "anexo_adicionado",
+        `Anexo restaurado. Motivo: ${data.justificativa}`,
+        { reverted_from: at.id, anexo_id: anexoId },
+      );
       return { ok: true, kind: "anexo_restaurado" };
     }
 
@@ -388,10 +505,20 @@ export const reverterAtividade = createServerFn({ method: "POST" })
         (typeof meta.de === "string" ? meta.de : null) ??
         (Array.isArray(meta.status) ? (meta.status as unknown[])[0] : null);
       if (!prev || typeof prev !== "string") throw new Error("Status anterior indisponível.");
-      const { error } = await sb.from("projeto_insumos").update({ status: prev, updated_by: context.userId }).eq("id", at.insumo_id);
+      const { error } = await sb
+        .from("projeto_insumos")
+        .update({ status: prev, updated_by: context.userId })
+        .eq("id", at.insumo_id);
       if (error) throw friendlyDbError(error);
-      await logAtividade(sb, at.insumo_id, context.userId, nome, "status_alterado",
-        `Reversão de status. Motivo: ${data.justificativa}`, { reverted_from: at.id, de: (meta.para as string) ?? null, para: prev });
+      await logAtividade(
+        sb,
+        at.insumo_id,
+        context.userId,
+        nome,
+        "status_alterado",
+        `Reversão de status. Motivo: ${data.justificativa}`,
+        { reverted_from: at.id, de: (meta.para as string) ?? null, para: prev },
+      );
       return { ok: true, kind: "status" };
     }
 
@@ -401,9 +528,15 @@ export const reverterAtividade = createServerFn({ method: "POST" })
         .update({ deleted_at: null, updated_by: context.userId })
         .eq("id", at.insumo_id);
       if (error) throw friendlyDbError(error);
-      await logAtividade(sb, at.insumo_id, context.userId, nome, "insumo_restaurado",
+      await logAtividade(
+        sb,
+        at.insumo_id,
+        context.userId,
+        nome,
+        "insumo_restaurado",
         `Insumo restaurado. Motivo: ${data.justificativa}`,
-        { reverted_from: at.id, justificativa: data.justificativa });
+        { reverted_from: at.id, justificativa: data.justificativa },
+      );
       return { ok: true, kind: "insumo_restaurado" };
     }
 

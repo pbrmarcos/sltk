@@ -48,7 +48,6 @@ export const CLIENTE_LIFECYCLE_COLOR: Record<ClienteLifecycle, string> = {
   inativo: "bg-zinc-100 text-zinc-600",
 };
 
-
 /** Idiomas suportados */
 export const CLIENTE_IDIOMAS = ["pt", "es", "en"] as const;
 export type ClienteIdioma = (typeof CLIENTE_IDIOMAS)[number];
@@ -118,7 +117,6 @@ export function nomeFantasiaLabel(pais?: string | null): string {
   return "Nombre comercial";
 }
 
-
 /* ============ Schemas Zod compartilhados ============ */
 
 export const contatoInputSchema = z.object({
@@ -165,12 +163,21 @@ export const clienteInputSchema = z.object({
   key_account: z.boolean().default(false),
   observacoes: z.string().trim().max(2000).optional().nullable(),
   site: z.string().trim().max(255).optional().nullable(),
-  email_corporativo: z.string().trim().max(255).email().optional().nullable()
+  email_corporativo: z
+    .string()
+    .trim()
+    .max(255)
+    .email()
+    .optional()
+    .nullable()
     .or(z.literal("").transform(() => null)),
   telefone_corporativo_ddi: z.string().trim().max(6).optional().nullable(),
   telefone_corporativo_numero: z.string().trim().max(40).optional().nullable(),
   ramal: z.string().trim().max(20).optional().nullable(),
-  matriz_filial: z.enum(MATRIZ_FILIAL).optional().nullable()
+  matriz_filial: z
+    .enum(MATRIZ_FILIAL)
+    .optional()
+    .nullable()
     .or(z.literal("").transform(() => null)),
   endereco_logradouro: z.string().trim().max(255).optional().nullable(),
   endereco_numero: z.string().trim().max(40).optional().nullable(),
@@ -182,7 +189,10 @@ export const clienteInputSchema = z.object({
   latitude: z.number().min(-90).max(90).optional().nullable(),
   longitude: z.number().min(-180).max(180).optional().nullable(),
   // Fiscal BR (opcional)
-  regime_tributario: z.enum(REGIMES_TRIBUTARIOS).optional().nullable()
+  regime_tributario: z
+    .enum(REGIMES_TRIBUTARIOS)
+    .optional()
+    .nullable()
     .or(z.literal("").transform(() => null)),
   cnae_principal: z.string().trim().max(255).optional().nullable(),
   cnaes_secundarios: z.array(z.string().trim().max(255)).optional().nullable(),

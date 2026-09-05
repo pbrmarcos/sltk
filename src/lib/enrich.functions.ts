@@ -27,12 +27,21 @@ function sanitizeResult(r: EnrichedCliente | null): EnrichedCliente | null {
     if (v == null) return true;
     if (typeof v !== "string") return false;
     const t = v.trim().toLowerCase();
-    if (t === "" || t === "null" || t === "undefined" || t === "n/a" || t === "na" || t === "-") return true;
+    if (t === "" || t === "null" || t === "undefined" || t === "n/a" || t === "na" || t === "-")
+      return true;
     // Firecrawl às vezes devolve marcadores tipo "/** campo not found **/"
     if (t.includes("not found") || /^\/\*.*\*\/$/.test(t)) return true;
     // Variantes wrapadas em slashes: "/null/", "/undefined/", "/n\a/"
     const inner = t.replace(/^\/+|\/+$/g, "").trim();
-    if (inner === "null" || inner === "undefined" || inner === "n/a" || inner === "na" || inner === "-" || inner === "") return true;
+    if (
+      inner === "null" ||
+      inner === "undefined" ||
+      inner === "n/a" ||
+      inner === "na" ||
+      inner === "-" ||
+      inner === ""
+    )
+      return true;
     return false;
   };
   const clean: Record<string, unknown> = {};
@@ -111,7 +120,6 @@ async function writeLog(params: {
   }
 }
 
-
 export const enrichDocumento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => input.parse(raw))
@@ -135,17 +143,17 @@ export const enrichDocumento = createServerFn({ method: "POST" })
       return failAndLog(check.mensagem ?? "Documento fiscal inválido.");
     }
 
-
     const providers = PROVIDERS_BY_PAIS[pais];
     if (!providers || providers.length === 0) {
-      return failAndLog("Autocompletar ainda não disponível para este país — preencha manualmente.");
+      return failAndLog(
+        "Autocompletar ainda não disponível para este país — preencha manualmente.",
+      );
     }
 
     // Cache e configuração: usa service role quando disponível; caso contrário
     // segue com o client do usuário (RLS). Nunca bloqueia a consulta.
-    const supabaseAdmin =
-      ((await auxClient()) ?? (context.supabase as unknown as { from: (t: string) => any })) as any;
-
+    const supabaseAdmin = ((await auxClient()) ??
+      (context.supabase as unknown as { from: (t: string) => any })) as any;
 
     // Cache: 7 dias por (pais, documento). Retorna o primeiro válido.
     {
@@ -163,9 +171,12 @@ export const enrichDocumento = createServerFn({ method: "POST" })
       if (cached?.payload) {
         const payload = cached.payload as EnrichedCliente;
         // Ignora cache "vazio" (provedor que retornou apenas _source).
-        const hasData =
-          !!(payload?.razao_social || payload?.nome_fantasia ||
-             payload?.endereco_logradouro || payload?.cnae_principal);
+        const hasData = !!(
+          payload?.razao_social ||
+          payload?.nome_fantasia ||
+          payload?.endereco_logradouro ||
+          payload?.cnae_principal
+        );
         if (!hasData) {
           // Apaga entrada inútil para não bloquear novas tentativas.
           await supabaseAdmin
@@ -175,16 +186,16 @@ export const enrichDocumento = createServerFn({ method: "POST" })
             .eq("documento", doc)
             .eq("provider", cached.provider);
         } else {
-        await writeLog({
-          userId: uid,
-          pais,
-          documento: doc,
-          provider: cached.provider,
-          success: true,
-          cached: true,
-          source: payload?._source ?? cached.provider,
-        });
-        return { ok: true as const, data: cached.payload as EnrichedCliente, cached: true };
+          await writeLog({
+            userId: uid,
+            pais,
+            documento: doc,
+            provider: cached.provider,
+            success: true,
+            cached: true,
+            source: payload?._source ?? cached.provider,
+          });
+          return { ok: true as const, data: cached.payload as EnrichedCliente, cached: true };
         }
       }
     }
@@ -208,15 +219,19 @@ export const enrichDocumento = createServerFn({ method: "POST" })
       const cfg = ativos.get(provider);
       if (!semConfig && (!cfg?.ativo || !cfg?.disponivel)) continue;
 
-
       try {
         console.log(`[enrich] running provider=${provider} pais=${pais} doc=${doc}`);
         const raw = await runProvider(provider, doc);
         const result = sanitizeResult(raw);
-        console.log(`[enrich] provider=${provider} rawKeys=${raw ? Object.keys(raw).join(",") : "null"} cleanKeys=${result ? Object.keys(result).join(",") : "null"}`);
-        const hasData =
-          !!(result?.razao_social || result?.nome_fantasia ||
-             result?.endereco_logradouro || result?.cnae_principal);
+        console.log(
+          `[enrich] provider=${provider} rawKeys=${raw ? Object.keys(raw).join(",") : "null"} cleanKeys=${result ? Object.keys(result).join(",") : "null"}`,
+        );
+        const hasData = !!(
+          result?.razao_social ||
+          result?.nome_fantasia ||
+          result?.endereco_logradouro ||
+          result?.cnae_principal
+        );
         if (result && hasData) {
           // Grava no cache de forma best-effort.
           await supabaseAdmin.from("enrich_cache").upsert(
@@ -267,7 +282,7 @@ export const enrichDocumento = createServerFn({ method: "POST" })
     }
     return failAndLog(
       "Nenhum provedor de autocompletar está ativo para este país. " +
-      "Habilite em Configurações > Integrações.",
+        "Habilite em Configurações > Integrações.",
     );
   });
 

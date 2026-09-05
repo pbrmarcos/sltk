@@ -20,8 +20,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { TableEmpty } from "@/components/data/TableStates";
 import { ArrowDownToLine, ArrowUpFromLine, BookmarkPlus, Scale } from "lucide-react";
 import {
@@ -37,7 +50,10 @@ export const Route = createFileRoute("/_authenticated/compras/almoxarifado/$id")
   head: () => ({
     meta: [
       { title: "Item do almoxarifado — Solutek Hub" },
-      { name: "description", content: "Saldo por local, movimentos e reservas do item de estoque." },
+      {
+        name: "description",
+        content: "Saldo por local, movimentos e reservas do item de estoque.",
+      },
       { property: "og:title", content: "Item do almoxarifado — Solutek Hub" },
       { property: "og:description", content: "Saldo, movimentos e reservas do item." },
       { property: "og:type", content: "website" },
@@ -49,7 +65,8 @@ export const Route = createFileRoute("/_authenticated/compras/almoxarifado/$id")
 });
 
 const fmtQtd = (v: unknown) => Number(v ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 3 });
-const fmtBRL = (v: unknown) => Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const fmtBRL = (v: unknown) =>
+  Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const fmtData = (s?: string | null) => (s ? new Date(s).toLocaleString("pt-BR") : "—");
 
 const TIPO_LABEL: Record<string, string> = {
@@ -71,8 +88,15 @@ function ItemPage() {
   const reservarFn = useServerFn(reservarEstoque);
   const cancelarFn = useServerFn(cancelarReserva);
 
-  const { data, isLoading } = useQuery({ queryKey: ["almox-item", id], queryFn: () => getFn({ data: { id } }) });
-  const { data: cad } = useQuery({ queryKey: ["almox-cadastros"], queryFn: () => cadFn(), staleTime: 300_000 });
+  const { data, isLoading } = useQuery({
+    queryKey: ["almox-item", id],
+    queryFn: () => getFn({ data: { id } }),
+  });
+  const { data: cad } = useQuery({
+    queryKey: ["almox-cadastros"],
+    queryFn: () => cadFn(),
+    staleTime: 300_000,
+  });
   const { data: projetos = [] } = useQuery({
     queryKey: ["almox-projetos"],
     queryFn: () => projFn(),
@@ -80,7 +104,10 @@ function ItemPage() {
   });
 
   const localPadrao = useMemo(
-    () => ((cad?.locais ?? []) as any[]).find((l) => l.padrao)?.id ?? ((cad?.locais ?? []) as any[])[0]?.id ?? "",
+    () =>
+      ((cad?.locais ?? []) as any[]).find((l) => l.padrao)?.id ??
+      ((cad?.locais ?? []) as any[])[0]?.id ??
+      "",
     [cad],
   );
 
@@ -118,7 +145,12 @@ function ItemPage() {
       if (!(qtd > 0)) throw new Error("Informe uma quantidade maior que zero.");
       if (dlg === "reserva") {
         return reservarFn({
-          data: { item_id: id, projeto_id: f.projeto_id, quantidade: qtd, observacao: f.observacao || null },
+          data: {
+            item_id: id,
+            projeto_id: f.projeto_id,
+            quantidade: qtd,
+            observacao: f.observacao || null,
+          },
         });
       }
       return movFn({
@@ -144,7 +176,8 @@ function ItemPage() {
   });
 
   const cancelar = useMutation({
-    mutationFn: (reserva_id: string) => cancelarFn({ data: { reserva_id, motivo: "Cancelada na tela do item" } }),
+    mutationFn: (reserva_id: string) =>
+      cancelarFn({ data: { reserva_id, motivo: "Cancelada na tela do item" } }),
     onSuccess: () => {
       toast.success("Reserva cancelada.");
       invalidar();
@@ -165,7 +198,11 @@ function ItemPage() {
           { label: item?.codigo ?? "Item" },
         ]}
         title={item?.descricao ?? (isLoading ? "Carregando…" : "Item")}
-        subtitle={item ? `${item.codigo} · ${item.unidade_estoque}${item.part_number ? ` · PN ${item.part_number}` : ""}` : undefined}
+        subtitle={
+          item
+            ? `${item.codigo} · ${item.unidade_estoque}${item.part_number ? ` · PN ${item.part_number}` : ""}`
+            : undefined
+        }
         actions={
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => abrir("entrada")}>
@@ -217,7 +254,9 @@ function ItemPage() {
                 <TableBody>
                   {((data?.movimentos ?? []) as any[]).map((m) => (
                     <TableRow key={m.id}>
-                      <TableCell className="whitespace-nowrap text-xs">{fmtData(m.created_at)}</TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {fmtData(m.created_at)}
+                      </TableCell>
                       <TableCell>{TIPO_LABEL[m.tipo] ?? m.tipo}</TableCell>
                       <TableCell className="font-mono text-xs">{m.local_codigo}</TableCell>
                       <TableCell
@@ -354,7 +393,10 @@ function ItemPage() {
             {dlg !== "reserva" && (
               <div>
                 <Label>Local</Label>
-                <Select value={f.local_id} onValueChange={(v) => setF((s) => ({ ...s, local_id: v }))}>
+                <Select
+                  value={f.local_id}
+                  onValueChange={(v) => setF((s) => ({ ...s, local_id: v }))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o local" />
                   </SelectTrigger>
@@ -371,7 +413,10 @@ function ItemPage() {
             {(dlg === "saida" || dlg === "reserva") && (
               <div>
                 <Label>Projeto *</Label>
-                <Select value={f.projeto_id} onValueChange={(v) => setF((s) => ({ ...s, projeto_id: v }))}>
+                <Select
+                  value={f.projeto_id}
+                  onValueChange={(v) => setF((s) => ({ ...s, projeto_id: v }))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o projeto" />
                   </SelectTrigger>

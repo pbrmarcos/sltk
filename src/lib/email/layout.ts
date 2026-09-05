@@ -115,11 +115,14 @@ export function wrapEmailHtml(opts: EmailLayoutOptions): string {
 export function blocoDados(pares: Array<[string, string | number | null | undefined]>): string {
   const rows = pares
     .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "")
-    .map(([k, v]) => `
+    .map(
+      ([k, v]) => `
       <tr>
         <td style="padding:6px 12px 6px 0;font-size:12px;color:#64748b;white-space:nowrap;vertical-align:top;width:32%;">${escapeText(k)}</td>
         <td style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:500;vertical-align:top;">${escapeText(String(v))}</td>
-      </tr>`).join("");
+      </tr>`,
+    )
+    .join("");
   if (!rows) return "";
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
     style="margin:8px 0 4px 0;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;">
@@ -142,16 +145,24 @@ export function blocoMotivo(titulo: string, texto: string): string {
 
 /** Lista de bullets simples (próximos passos, itens de checklist). */
 export function blocoBullets(titulo: string | null, itens: string[]): string {
-  const lis = itens.filter((s) => s && s.trim()).map((s) => `<li style="margin:2px 0;">${escapeText(s)}</li>`).join("");
+  const lis = itens
+    .filter((s) => s && s.trim())
+    .map((s) => `<li style="margin:2px 0;">${escapeText(s)}</li>`)
+    .join("");
   if (!lis) return "";
-  const head = titulo ? `<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:4px;">${escapeText(titulo)}</div>` : "";
+  const head = titulo
+    ? `<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:4px;">${escapeText(titulo)}</div>`
+    : "";
   return `<div style="margin:8px 0;">${head}<ul style="margin:0;padding-left:18px;font-size:14px;color:#0f172a;">${lis}</ul></div>`;
 }
 
 function escapeText(s: string): string {
   return String(s ?? "")
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 function escapeAttr(s: string): string {
   return escapeText(s);

@@ -30,7 +30,11 @@ export function ArticleFooter({
               ? "bg-[var(--bg-elevated)] text-[var(--text-primary)]"
               : "bg-[var(--warning-bg,var(--bg-elevated))] text-[var(--warning,var(--text-muted))]"
           }`}
-          title={isCurrent ? "Revisado na versão atual do app" : `Revisado em v${version}; app atual é v${APP_VERSION}`}
+          title={
+            isCurrent
+              ? "Revisado na versão atual do app"
+              : `Revisado em v${version}; app atual é v${APP_VERSION}`
+          }
         >
           <Tag className="h-3 w-3" /> v{version}
         </span>
@@ -67,4 +71,3 @@ export function ArticleFooter({
     </div>
   );
 }
-

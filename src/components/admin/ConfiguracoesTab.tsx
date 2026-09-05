@@ -8,11 +8,7 @@ import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  BRAND_QUERY_KEY,
-  useBrandSettings,
-  type BrandSettings,
-} from "@/hooks/use-brand-settings";
+import { BRAND_QUERY_KEY, useBrandSettings, type BrandSettings } from "@/hooks/use-brand-settings";
 import { applyBrand } from "@/lib/brand-apply";
 import { logAudit, diffEntries } from "@/lib/audit";
 import { SeoFieldsCard } from "@/components/admin/SeoFieldsCard";
@@ -30,33 +26,27 @@ const FAV_TYPES = ["image/x-icon", "image/vnd.microsoft.icon", "image/png"];
 
 const schema = z.object({
   system_name: z.string().trim().min(1, "Obrigatório").max(60),
-  primary_color: z
-    .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Use formato #RRGGBB"),
+  primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Use formato #RRGGBB"),
   default_theme: z.enum(["light", "dark", "system"]),
-  support_email: z
-    .string()
-    .trim()
-    .email("Email inválido")
-    .max(255)
-    .optional()
-    .or(z.literal("")),
+  support_email: z.string().trim().email("Email inválido").max(255).optional().or(z.literal("")),
   footer_text: z.string().trim().max(200).optional().or(z.literal("")),
   meta_title: z.string().trim().max(60).optional().or(z.literal("")),
   meta_description: z.string().trim().max(160).optional().or(z.literal("")),
   allow_indexing: z.boolean(),
-  canonical_base_url: z
-    .string()
-    .trim()
-    .url("URL inválida")
-    .max(255)
-    .optional()
-    .or(z.literal("")),
+  canonical_base_url: z.string().trim().url("URL inválida").max(255).optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-function fromSettings(s: BrandSettings | null, defaults: { system_name: string; primary_color: string; default_theme: "light" | "dark" | "system"; allow_indexing: boolean }): FormValues {
+function fromSettings(
+  s: BrandSettings | null,
+  defaults: {
+    system_name: string;
+    primary_color: string;
+    default_theme: "light" | "dark" | "system";
+    allow_indexing: boolean;
+  },
+): FormValues {
   return {
     system_name: s?.system_name ?? defaults.system_name,
     primary_color: s?.primary_color ?? defaults.primary_color,
@@ -176,14 +166,20 @@ function FileField({
   );
 }
 
-function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-6">
       <header className="mb-4">
         <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
-        {description && (
-          <p className="mt-1 text-xs text-[var(--text-muted)]">{description}</p>
-        )}
+        {description && <p className="mt-1 text-xs text-[var(--text-muted)]">{description}</p>}
       </header>
       <div className="space-y-4">{children}</div>
     </section>
@@ -209,7 +205,6 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
     form.reset(fromSettings(settings, defaults));
   }, [settings, defaults, form]);
 
-
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
   const [logoCollapsedFile, setLogoCollapsedFile] = useState<File | null>(null);
@@ -221,13 +216,16 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
   const [logoCollapsedDarkPreview, setLogoCollapsedDarkPreview] = useState<string | null>(null);
   const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
 
-  useEffect(() => () => {
-    if (logoPreview) URL.revokeObjectURL(logoPreview);
-    if (logoDarkPreview) URL.revokeObjectURL(logoDarkPreview);
-    if (logoCollapsedPreview) URL.revokeObjectURL(logoCollapsedPreview);
-    if (logoCollapsedDarkPreview) URL.revokeObjectURL(logoCollapsedDarkPreview);
-    if (faviconPreview) URL.revokeObjectURL(faviconPreview);
-  }, [logoPreview, logoDarkPreview, logoCollapsedPreview, logoCollapsedDarkPreview, faviconPreview]);
+  useEffect(
+    () => () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+      if (logoDarkPreview) URL.revokeObjectURL(logoDarkPreview);
+      if (logoCollapsedPreview) URL.revokeObjectURL(logoCollapsedPreview);
+      if (logoCollapsedDarkPreview) URL.revokeObjectURL(logoCollapsedDarkPreview);
+      if (faviconPreview) URL.revokeObjectURL(faviconPreview);
+    },
+    [logoPreview, logoDarkPreview, logoCollapsedPreview, logoCollapsedDarkPreview, faviconPreview],
+  );
 
   const primaryColor = form.watch("primary_color");
   const systemName = form.watch("system_name");
@@ -256,13 +254,16 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
       if (logoFile) logo_url = await uploadToBrand(logoFile, "logo");
       if (logoDarkFile) logo_url_dark = await uploadToBrand(logoDarkFile, "logo");
       if (logoCollapsedFile) logo_url_collapsed = await uploadToBrand(logoCollapsedFile, "logo");
-      if (logoCollapsedDarkFile) logo_url_collapsed_dark = await uploadToBrand(logoCollapsedDarkFile, "logo");
+      if (logoCollapsedDarkFile)
+        logo_url_collapsed_dark = await uploadToBrand(logoCollapsedDarkFile, "logo");
       if (faviconFile) favicon_url = await uploadToBrand(faviconFile, "favicon");
 
       // Validação: garante que as logos do modo expandido sempre tenham um valor,
       // caindo automaticamente na versão colapsada quando estiverem vazias.
-      if (!logo_url) logo_url = logo_url_collapsed ?? logo_url_dark ?? logo_url_collapsed_dark ?? null;
-      if (!logo_url_dark) logo_url_dark = logo_url_collapsed_dark ?? logo_url ?? logo_url_collapsed ?? null;
+      if (!logo_url)
+        logo_url = logo_url_collapsed ?? logo_url_dark ?? logo_url_collapsed_dark ?? null;
+      if (!logo_url_dark)
+        logo_url_dark = logo_url_collapsed_dark ?? logo_url ?? logo_url_collapsed ?? null;
 
       const payload = {
         system_name: values.system_name,
@@ -350,10 +351,16 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
 
   return (
     <form
-      onSubmit={form.handleSubmit((v) => onSubmit(v, false), (errs) => focusFirstError(errs as Record<string, unknown>))}
+      onSubmit={form.handleSubmit(
+        (v) => onSubmit(v, false),
+        (errs) => focusFirstError(errs as Record<string, unknown>),
+      )}
       className="space-y-4"
     >
-      <Section title="Identidade" description="Logo, favicon e nome exibidos na sidebar e abas do navegador.">
+      <Section
+        title="Identidade"
+        description="Logo, favicon e nome exibidos na sidebar e abas do navegador."
+      >
         <FileField
           label="Logomarca (fundo claro)"
           hint="Versão escura da logo, exibida sobre fundos claros. PNG ou SVG, até 2 MB."
@@ -400,7 +407,9 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
           accept="image/png,image/svg+xml"
           maxBytes={LOGO_MAX}
           acceptedTypes={LOGO_TYPES}
-          currentUrl={(settings as { logo_url_collapsed?: string | null } | null)?.logo_url_collapsed ?? null}
+          currentUrl={
+            (settings as { logo_url_collapsed?: string | null } | null)?.logo_url_collapsed ?? null
+          }
           previewUrl={logoCollapsedPreview}
           onPick={(f) => {
             if (logoCollapsedPreview) URL.revokeObjectURL(logoCollapsedPreview);
@@ -420,7 +429,10 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
           accept="image/png,image/svg+xml"
           maxBytes={LOGO_MAX}
           acceptedTypes={LOGO_TYPES}
-          currentUrl={(settings as { logo_url_collapsed_dark?: string | null } | null)?.logo_url_collapsed_dark ?? null}
+          currentUrl={
+            (settings as { logo_url_collapsed_dark?: string | null } | null)
+              ?.logo_url_collapsed_dark ?? null
+          }
           previewUrl={logoCollapsedDarkPreview}
           onPick={(f) => {
             if (logoCollapsedDarkPreview) URL.revokeObjectURL(logoCollapsedDarkPreview);
@@ -455,7 +467,10 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
           size={48}
         />
         <div className="space-y-2 max-w-md">
-          <Label htmlFor="system_name" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+          <Label
+            htmlFor="system_name"
+            className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]"
+          >
             Nome do sistema
           </Label>
           <Input id="system_name" {...form.register("system_name")} />
@@ -468,7 +483,10 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
       <Section title="Aparência" description="Cor de destaque e tema padrão para novos usuários.">
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-2">
-            <Label htmlFor="primary_color" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <Label
+              htmlFor="primary_color"
+              className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]"
+            >
               Cor de destaque
             </Label>
             <div className="flex items-center gap-2">
@@ -478,13 +496,12 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
                 {...form.register("primary_color")}
                 className="h-10 w-14 cursor-pointer rounded border border-[var(--bg-border)] bg-transparent p-0"
               />
-              <Input
-                {...form.register("primary_color")}
-                className="w-32 font-mono uppercase"
-              />
+              <Input {...form.register("primary_color")} className="w-32 font-mono uppercase" />
             </div>
             {form.formState.errors.primary_color && (
-              <p className="text-xs text-destructive">{form.formState.errors.primary_color.message}</p>
+              <p className="text-xs text-destructive">
+                {form.formState.errors.primary_color.message}
+              </p>
             )}
           </div>
           {/* Live preview */}
@@ -514,7 +531,11 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
           </Label>
           <RadioGroup
             value={form.watch("default_theme")}
-            onValueChange={(v) => form.setValue("default_theme", v as FormValues["default_theme"], { shouldDirty: true })}
+            onValueChange={(v) =>
+              form.setValue("default_theme", v as FormValues["default_theme"], {
+                shouldDirty: true,
+              })
+            }
             className="flex flex-wrap gap-4"
           >
             {[
@@ -522,7 +543,10 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
               { v: "dark", l: "Dark" },
               { v: "system", l: "Seguir sistema" },
             ].map((o) => (
-              <label key={o.v} className="flex items-center gap-2 text-sm text-[var(--text-primary)]">
+              <label
+                key={o.v}
+                className="flex items-center gap-2 text-sm text-[var(--text-primary)]"
+              >
                 <RadioGroupItem value={o.v} />
                 {o.l}
               </label>
@@ -531,27 +555,51 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
         </div>
       </Section>
 
-      <Section title="Comunicação" description="Informações exibidas na tela de login e no rodapé do app.">
+      <Section
+        title="Comunicação"
+        description="Informações exibidas na tela de login e no rodapé do app."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="support_email" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <Label
+              htmlFor="support_email"
+              className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]"
+            >
               E-mail de suporte
             </Label>
-            <Input id="support_email" type="email" placeholder="suporte@empresa.com" {...form.register("support_email")} />
+            <Input
+              id="support_email"
+              type="email"
+              placeholder="suporte@empresa.com"
+              {...form.register("support_email")}
+            />
             {form.formState.errors.support_email && (
-              <p className="text-xs text-destructive">{form.formState.errors.support_email.message}</p>
+              <p className="text-xs text-destructive">
+                {form.formState.errors.support_email.message}
+              </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="footer_text" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <Label
+              htmlFor="footer_text"
+              className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]"
+            >
               Texto do rodapé
             </Label>
-            <Input id="footer_text" placeholder="© 2026 SLTK Americas" maxLength={200} {...form.register("footer_text")} />
+            <Input
+              id="footer_text"
+              placeholder="© 2026 SLTK Americas"
+              maxLength={200}
+              {...form.register("footer_text")}
+            />
           </div>
         </div>
       </Section>
 
-      <Section title="SEO & Indexação" description="Metadados padrão e controle de indexação por buscadores.">
+      <Section
+        title="SEO & Indexação"
+        description="Metadados padrão e controle de indexação por buscadores."
+      >
         <SeoFieldsCard
           titleId="meta_title"
           title={metaTitle}
@@ -562,12 +610,21 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
         />
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="canonical_base_url" className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <Label
+              htmlFor="canonical_base_url"
+              className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]"
+            >
               URL canônica base
             </Label>
-            <Input id="canonical_base_url" placeholder="https://app.empresa.com" {...form.register("canonical_base_url")} />
+            <Input
+              id="canonical_base_url"
+              placeholder="https://app.empresa.com"
+              {...form.register("canonical_base_url")}
+            />
             {form.formState.errors.canonical_base_url && (
-              <p className="text-xs text-destructive">{form.formState.errors.canonical_base_url.message}</p>
+              <p className="text-xs text-destructive">
+                {form.formState.errors.canonical_base_url.message}
+              </p>
             )}
           </div>
           <div className="space-y-2">
@@ -588,14 +645,22 @@ export function ConfiguracoesTab({ onClose }: { onClose?: () => void }) {
           </div>
         </div>
         <p className="mt-3 text-[11px] text-[var(--text-muted)]">
-          Preview do título: <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">{metaTitle || systemName}</code>
+          Preview do título:{" "}
+          <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">
+            {metaTitle || systemName}
+          </code>
         </p>
       </Section>
       <BottomActions
         form={form}
         saving={saving}
-        hasDirtyFiles={!!(logoFile || logoDarkFile || logoCollapsedFile || logoCollapsedDarkFile || faviconFile)}
-        onSaveAndClose={form.handleSubmit((v) => onSubmit(v, true), (errs) => focusFirstError(errs as Record<string, unknown>))}
+        hasDirtyFiles={
+          !!(logoFile || logoDarkFile || logoCollapsedFile || logoCollapsedDarkFile || faviconFile)
+        }
+        onSaveAndClose={form.handleSubmit(
+          (v) => onSubmit(v, true),
+          (errs) => focusFirstError(errs as Record<string, unknown>),
+        )}
         onCancel={() => {
           form.reset(fromSettings(settings, defaults));
           setLogoFile(null);

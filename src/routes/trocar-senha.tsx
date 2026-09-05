@@ -50,7 +50,9 @@ function TrocarSenhaPage() {
     }
     const { error: rpcError } = await (supabase as any).rpc("clear_must_change_password");
     if (rpcError) {
-      setServerError("Senha alterada, mas não foi possível liberar o acesso. Recarregue e tente novamente.");
+      setServerError(
+        "Senha alterada, mas não foi possível liberar o acesso. Recarregue e tente novamente.",
+      );
       return;
     }
     window.location.replace("/dashboard");
@@ -66,11 +68,18 @@ function TrocarSenhaPage() {
     >
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-secondary)" }}>
+          <Label
+            htmlFor="password"
+            className="text-xs font-medium uppercase tracking-wider"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Nova senha
           </Label>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--color-text-muted)" }} />
+            <Lock
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
+              style={{ color: "var(--color-text-muted)" }}
+            />
             <Input
               id="password"
               type={show ? "text" : "password"}
@@ -98,11 +107,18 @@ function TrocarSenhaPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirm" className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-secondary)" }}>
+          <Label
+            htmlFor="confirm"
+            className="text-xs font-medium uppercase tracking-wider"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Confirmar senha
           </Label>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--color-text-muted)" }} />
+            <Lock
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
+              style={{ color: "var(--color-text-muted)" }}
+            />
             <Input
               id="confirm"
               type={show ? "text" : "password"}

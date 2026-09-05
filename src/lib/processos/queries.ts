@@ -107,7 +107,9 @@ export const processosListQueryOptions = (search: ProcessosListSearch) =>
     staleTime: 15_000,
   });
 
-export const processosArquivadosQueryOptions = (search: Omit<ProcessosListSearch, "apenasArquivados"> = {}) =>
+export const processosArquivadosQueryOptions = (
+  search: Omit<ProcessosListSearch, "apenasArquivados"> = {},
+) =>
   queryOptions({
     queryKey: ["processos", "arquivados", search],
     queryFn: async () => {
@@ -215,8 +217,7 @@ export function useToggleChecklistItem(processoId: string | null) {
     mutationFn: (input: { template_id: string; done: boolean; comentario?: string }) =>
       fn({ data: { processo_id: processoId!, ...input } }),
     onSuccess: () => {
-      if (processoId)
-        qc.invalidateQueries({ queryKey: ["processos", "checklist", processoId] });
+      if (processoId) qc.invalidateQueries({ queryKey: ["processos", "checklist", processoId] });
     },
     onError: (e) => toast.error((e as Error).message ?? "Falha ao atualizar checklist."),
   });

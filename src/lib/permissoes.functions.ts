@@ -127,11 +127,7 @@ export type PermissionRule = {
   ) => Omit<RuleViolation, "ruleId" | "role"> | null;
 };
 
-function requires(
-  trigger: AppModule,
-  dep: AppModule,
-  motivo: string,
-) {
+function requires(trigger: AppModule, dep: AppModule, motivo: string) {
   return (_role: AppRoleName, m: Partial<Record<AppModule, boolean>>) => {
     if (m[trigger] && !m[dep]) {
       return {
@@ -321,7 +317,7 @@ export const listPermissoesAuditLog = createServerFn({ method: "GET" })
     }>;
     // Resolve user names
     const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean) as string[]));
-    let profileMap = new Map<string, { email: string | null; full_name: string | null }>();
+    const profileMap = new Map<string, { email: string | null; full_name: string | null }>();
     if (userIds.length > 0) {
       const { data: profs } = await context.supabase
         .from("profiles")

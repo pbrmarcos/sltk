@@ -16,9 +16,7 @@ export interface AuditEntry {
  * Nunca lança — falhas no audit não devem derrubar a operação principal.
  * Use fire-and-forget (`void logAudit(...)`) quando o caller não precisa esperar.
  */
-export async function logAudit(
-  entry: AuditEntry | AuditEntry[],
-): Promise<{ ok: boolean }> {
+export async function logAudit(entry: AuditEntry | AuditEntry[]): Promise<{ ok: boolean }> {
   const entries = Array.isArray(entry) ? entry : [entry];
   if (entries.length === 0) return { ok: true };
   try {

@@ -9,9 +9,7 @@ import { hasRole, assertAdminOrManager } from "@/lib/admin-guard";
 
 export const listEquipamentoEtps = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ equipamento_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("equipamento_etps")
@@ -29,7 +27,10 @@ export const listEquipamentoEtps = createServerFn({ method: "POST" })
 
 const listAllInput = z.object({
   q: z.string().optional(),
-  status: z.enum(["todos", ...ETP_STATUS]).optional().default("todos"),
+  status: z
+    .enum(["todos", ...ETP_STATUS])
+    .optional()
+    .default("todos"),
   page: z.number().int().min(1).optional().default(1),
   per_page: z.number().int().min(1).max(100).optional().default(50),
 });
@@ -54,7 +55,11 @@ export const listAllEtps = createServerFn({ method: "POST" })
         `cliente_equipamentos.modelo.ilike.${term},cliente_equipamentos.codigo.ilike.${term},clientes.razao_social.ilike.${term}`,
       );
     }
-    const { data: rows, count, error } = await q.order("updated_at", { ascending: false }).range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("updated_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
@@ -63,9 +68,7 @@ export const listAllEtps = createServerFn({ method: "POST" })
 
 export const createEtp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ equipamento_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: eqp, error: eqpErr } = await context.supabase
       .from("cliente_equipamentos")
@@ -121,9 +124,7 @@ export const getEtp = createServerFn({ method: "POST" })
         .eq("id", row.aprovado_por)
         .maybeSingle();
       aprovado_por_nome =
-        (prof?.full_name as string | undefined) ??
-        (prof?.email as string | undefined) ??
-        null;
+        (prof?.full_name as string | undefined) ?? (prof?.email as string | undefined) ?? null;
     }
     return { ...row, aprovado_por_nome };
   });
@@ -209,14 +210,7 @@ export const aprovarEtp = createServerFn({ method: "POST" })
       .update({ status: "aprovado", updated_by: context.userId })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
-    await logStatus(
-      context as EtpCtx,
-      data.id,
-      anterior,
-      "aprovado",
-      "ETP aprovado.",
-      "aprovacao",
-    );
+    await logStatus(context as EtpCtx, data.id, anterior, "aprovado", "ETP aprovado.", "aprovacao");
     return { ok: true };
   });
 
@@ -273,11 +267,13 @@ export const reabrirEtp = createServerFn({ method: "POST" })
       (prof as { full_name?: string; email?: string } | null)?.email ??
       "Usuário";
 
-    await (context.supabase as unknown as {
-      from: (t: string) => {
-        insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-      };
-    })
+    await (
+      context.supabase as unknown as {
+        from: (t: string) => {
+          insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+        };
+      }
+    )
       .from("equipamento_etp_historico")
       .insert({
         etp_id: data.id,
@@ -358,9 +354,7 @@ export const buscarEtpsParaVincular = createServerFn({ method: "POST" })
 export const vincularEtpAoEquipamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({ etp_id: z.string().uuid(), equipamento_id: z.string().uuid() })
-      .parse(input),
+    z.object({ etp_id: z.string().uuid(), equipamento_id: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertCanEditEtp(context);
@@ -413,11 +407,13 @@ export const vincularEtpAoEquipamento = createServerFn({ method: "POST" })
       (prof as { full_name?: string; email?: string } | null)?.email ??
       "Usuário";
 
-    await (context.supabase as unknown as {
-      from: (t: string) => {
-        insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-      };
-    })
+    await (
+      context.supabase as unknown as {
+        from: (t: string) => {
+          insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+        };
+      }
+    )
       .from("equipamento_etp_historico")
       .insert({
         etp_id: data.etp_id,
@@ -459,11 +455,13 @@ async function logStatus(
   tipo: "status" | "aprovacao" | "reabertura" = "status",
 ) {
   const nome = await nomeDoUsuario(context);
-  await (context.supabase as unknown as {
-    from: (t: string) => {
-      insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-    };
-  })
+  await (
+    context.supabase as unknown as {
+      from: (t: string) => {
+        insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+      };
+    }
+  )
     .from("equipamento_etp_historico")
     .insert({
       etp_id: etpId,
@@ -508,7 +506,9 @@ export const enviarEtpParaRevisao = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { isAdmin, isManager, isEngineer } = await getRoles(context as EtpCtx);
     if (!isAdmin && !isManager && !isEngineer) {
-      throw new Error("Sem permissão: apenas admin, gestores e engenheiros podem enviar para revisão.");
+      throw new Error(
+        "Sem permissão: apenas admin, gestores e engenheiros podem enviar para revisão.",
+      );
     }
     const atual = await statusAtual(context as EtpCtx, data.id);
     if (atual !== "rascunho") {
@@ -539,13 +539,20 @@ export const voltarEtpParaRascunho = createServerFn({ method: "POST" })
       throw new Error("Sem permissão para alterar o status deste ETP.");
     }
     const atual = await statusAtual(context as EtpCtx, data.id);
-    if (atual !== "em_revisao") throw new Error("Apenas ETPs em revisão podem voltar para rascunho.");
+    if (atual !== "em_revisao")
+      throw new Error("Apenas ETPs em revisão podem voltar para rascunho.");
     const { error } = await context.supabase
       .from("equipamento_etps")
       .update({ status: "rascunho" as never, updated_by: context.userId })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
-    await logStatus(context as EtpCtx, data.id, "em_revisao", "rascunho", "ETP devolvido para rascunho.");
+    await logStatus(
+      context as EtpCtx,
+      data.id,
+      "em_revisao",
+      "rascunho",
+      "ETP devolvido para rascunho.",
+    );
     return { ok: true };
   });
 
@@ -583,7 +590,14 @@ export const rejeitarEtp = createServerFn({ method: "POST" })
       })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
-    await logStatus(context as EtpCtx, data.id, "em_revisao", "rejeitado", data.motivo, "aprovacao");
+    await logStatus(
+      context as EtpCtx,
+      data.id,
+      "em_revisao",
+      "rejeitado",
+      data.motivo,
+      "aprovacao",
+    );
     return { ok: true };
   });
 

@@ -33,7 +33,10 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
     z
       .object({
         insumo_id: z.string().uuid(),
-        idiomas: z.array(z.enum(IDIOMAS)).min(1).default([...IDIOMAS]),
+        idiomas: z
+          .array(z.enum(IDIOMAS))
+          .min(1)
+          .default([...IDIOMAS]),
         fornecedor_id: z.string().uuid().nullish(),
         nota_compras: z.string().max(2000).optional().nullable(),
       })
@@ -124,20 +127,13 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
     }, 0);
     const versao = String(maxVer + 1);
 
-
     // Drive: pasta destino (mesma organização do restante do sistema)
     let folderId: string | null = null;
     let folderUrl: string | null = null;
     let driveOk = true;
     try {
       const { ensurePath, getFolderUrl } = await import("@/lib/docs/drive.server");
-      folderId = await ensurePath([
-        "Compras",
-        "Solicitacoes",
-        cliente_codigo,
-        projeto_codigo,
-        tag,
-      ]);
+      folderId = await ensurePath(["Compras", "Solicitacoes", cliente_codigo, projeto_codigo, tag]);
       folderUrl = await getFolderUrl(folderId);
     } catch {
       driveOk = false;
@@ -189,7 +185,6 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
           item,
           responsavel,
           nota_compras: data.nota_compras ?? null,
-
         }) as any,
       );
 
@@ -259,9 +254,7 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
 /** Lista o histórico de documentos Checklist gerados para um insumo. */
 export const listInsumoDocumentos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ insumo_id: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ insumo_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
@@ -336,7 +329,9 @@ export const listRfqDocumentosGerados = createServerFn({ method: "GET" })
         fornecedor_nome: string | null;
         criado_em: string;
         drive_folder_url: string | null;
-        idiomas: Partial<Record<Idioma, { url: string | null; file_name: string | null; id: string }>>;
+        idiomas: Partial<
+          Record<Idioma, { url: string | null; file_name: string | null; id: string }>
+        >;
       }
     >();
 
@@ -362,21 +357,19 @@ export const listRfqDocumentosGerados = createServerFn({ method: "GET" })
       if (!matches(r)) continue;
       const minuteKey = new Date(r.criado_em).toISOString().slice(0, 16);
       const key = `${r.insumo_id}|${r.fornecedor_id ?? "sem"}|${minuteKey}`;
-      const g =
-        groups.get(key) ??
-        {
-          key,
-          insumo_id: r.insumo_id,
-          insumo_descricao: r.projeto_insumos?.descricao ?? "—",
-          insumo_codigo: r.projeto_insumos?.codigo_interno ?? null,
-          projeto_codigo: r.projeto_insumos?.equipamento_projetos?.cliente_equipamentos?.codigo ?? null,
-          fornecedor_id: r.fornecedor_id,
-          fornecedor_nome:
-            r.fornecedores?.nome_fantasia ?? r.fornecedores?.razao_social ?? null,
-          criado_em: r.criado_em,
-          drive_folder_url: r.drive_folder_url,
-          idiomas: {},
-        };
+      const g = groups.get(key) ?? {
+        key,
+        insumo_id: r.insumo_id,
+        insumo_descricao: r.projeto_insumos?.descricao ?? "—",
+        insumo_codigo: r.projeto_insumos?.codigo_interno ?? null,
+        projeto_codigo:
+          r.projeto_insumos?.equipamento_projetos?.cliente_equipamentos?.codigo ?? null,
+        fornecedor_id: r.fornecedor_id,
+        fornecedor_nome: r.fornecedores?.nome_fantasia ?? r.fornecedores?.razao_social ?? null,
+        criado_em: r.criado_em,
+        drive_folder_url: r.drive_folder_url,
+        idiomas: {},
+      };
       g.idiomas[r.idioma] = { url: r.drive_view_url, file_name: r.file_name, id: r.id };
       if (new Date(r.criado_em) > new Date(g.criado_em)) g.criado_em = r.criado_em;
       groups.set(key, g);

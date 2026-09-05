@@ -28,7 +28,9 @@ export function AdminSettingsPage({
         <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-12 text-center">
           <ShieldAlert className="h-10 w-10 text-[var(--danger)]" />
           <h2 className="text-lg font-semibold">Acesso restrito</h2>
-          <p className="text-sm text-[var(--text-muted)]">Esta área é exclusiva para administradores.</p>
+          <p className="text-sm text-[var(--text-muted)]">
+            Esta área é exclusiva para administradores.
+          </p>
         </div>
       </PageContainer>
     );

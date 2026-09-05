@@ -22,10 +22,25 @@ export function EngineeringDashboard({ userName }: { userName: string }) {
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="ETPs em aberto" value={isLoading ? "…" : String(d?.kpis.etpsAbertos ?? 0)} accent="primary" />
-        <KpiCard label="Etapas em aberto" value={isLoading ? "…" : String(d?.kpis.etapasAbertas ?? 0)} />
-        <KpiCard label="Revisões abertas" value={isLoading ? "…" : String(d?.kpis.revisoes ?? 0)} accent="warning" />
-        <KpiCard label="Etapas atrasadas" value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)} accent="danger" />
+        <KpiCard
+          label="ETPs em aberto"
+          value={isLoading ? "…" : String(d?.kpis.etpsAbertos ?? 0)}
+          accent="primary"
+        />
+        <KpiCard
+          label="Etapas em aberto"
+          value={isLoading ? "…" : String(d?.kpis.etapasAbertas ?? 0)}
+        />
+        <KpiCard
+          label="Revisões abertas"
+          value={isLoading ? "…" : String(d?.kpis.revisoes ?? 0)}
+          accent="warning"
+        />
+        <KpiCard
+          label="Etapas atrasadas"
+          value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)}
+          accent="danger"
+        />
       </div>
 
       <DashboardCard title="ETPs por situação" hint="Contagem atual">
@@ -33,7 +48,10 @@ export function EngineeringDashboard({ userName }: { userName: string }) {
       </DashboardCard>
 
       <DashboardCard title="Etapas mais urgentes" hint="Priorize hoje">
-        <StatusList items={d?.criticas ?? []} empty="Nenhuma etapa de engenharia cadastrada ainda." />
+        <StatusList
+          items={d?.criticas ?? []}
+          empty="Nenhuma etapa de engenharia cadastrada ainda."
+        />
       </DashboardCard>
     </DashboardShell>
   );

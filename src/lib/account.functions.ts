@@ -28,10 +28,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     };
     if (data.avatar_url !== undefined) update.avatar_url = data.avatar_url;
 
-    const { error: upErr } = await db
-      .from("profiles")
-      .update(update)
-      .eq("id", context.userId);
+    const { error: upErr } = await db.from("profiles").update(update).eq("id", context.userId);
     if (upErr) throw friendlyDbError(upErr);
 
     const entries: Array<Record<string, unknown>> = [];
@@ -132,11 +129,9 @@ export const changeMyPassword = createServerFn({ method: "POST" })
 
     // Verify current password by attempting sign-in on a throwaway client.
     const { url: supabaseUrl, publishableKey: supabasePublishableKey } = getSupabasePublicConfig();
-    const verify = createClient(
-      supabaseUrl,
-      supabasePublishableKey,
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    );
+    const verify = createClient(supabaseUrl, supabasePublishableKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const { data: signed, error: signErr } = await verify.auth.signInWithPassword({
       email: profile.email,
       password: data.current_password,
@@ -150,7 +145,8 @@ export const changeMyPassword = createServerFn({ method: "POST" })
       if (upErr) throw friendlyDbError(upErr);
     } else {
       // No service role available: update through the freshly signed-in session.
-      if (!signed?.session) throw new Error("Não foi possível validar a sessão para trocar a senha.");
+      if (!signed?.session)
+        throw new Error("Não foi possível validar a sessão para trocar a senha.");
       const { error: upErr } = await verify.auth.updateUser({ password: data.new_password });
       if (upErr) throw friendlyDbError(upErr);
     }
@@ -219,8 +215,20 @@ const agendaInput = z.object({
   agenda_provider: z.enum(["google", "teams", "ambos"]),
   agenda_google_email: emailOrNull,
   agenda_teams_email: emailOrNull,
-  agenda_teams_tenant: z.string().trim().max(160).optional().nullable().transform((v) => (v ? v : null)),
-  agenda_sala_padrao: z.string().trim().max(500).optional().nullable().transform((v) => (v ? v : null)),
+  agenda_teams_tenant: z
+    .string()
+    .trim()
+    .max(160)
+    .optional()
+    .nullable()
+    .transform((v) => (v ? v : null)),
+  agenda_sala_padrao: z
+    .string()
+    .trim()
+    .max(500)
+    .optional()
+    .nullable()
+    .transform((v) => (v ? v : null)),
   agenda_convidados_padrao: z
     .string()
     .trim()

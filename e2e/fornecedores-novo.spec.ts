@@ -13,14 +13,9 @@ import { test, expect } from "@playwright/test";
 const skip = !process.env.E2E_BASE_URL || !process.env.E2E_STORAGE_STATE;
 
 test.describe("Fornecedores — cadastro → listagem → ficha", () => {
-  test.skip(
-    skip,
-    "Defina E2E_BASE_URL e E2E_STORAGE_STATE (usuário logado) para rodar.",
-  );
+  test.skip(skip, "Defina E2E_BASE_URL e E2E_STORAGE_STATE (usuário logado) para rodar.");
 
-  test("cria fornecedor, seleciona categorias e valida persistência", async ({
-    page,
-  }) => {
+  test("cria fornecedor, seleciona categorias e valida persistência", async ({ page }) => {
     const stamp = Date.now();
     const nome = `E2E Fornecedor ${stamp}`;
     const cidade = "Shenzhen";
@@ -34,7 +29,10 @@ test.describe("Fornecedores — cadastro → listagem → ficha", () => {
     // 3) Preenche campos obrigatórios
     await page.getByLabel(/^Nome/i).first().fill(nome);
     // país já vem como CN por padrão; força para garantir
-    await page.getByLabel(/Cidade/i).first().fill(cidade);
+    await page
+      .getByLabel(/Cidade/i)
+      .first()
+      .fill(cidade);
 
     // 4) Picker de categorias — verifica ARIA e seleciona dois tiles
     const picker = page.getByTestId("categorias-picker");
@@ -64,7 +62,10 @@ test.describe("Fornecedores — cadastro → listagem → ficha", () => {
     // 7) Vai para a listagem e filtra por categoria via picker "Válvulas"
     await page.goto("/fornecedores");
     await expect(page.getByRole("heading", { name: /Fornecedores/i })).toBeVisible();
-    await page.getByRole("button", { name: /Categorias/i }).first().click();
+    await page
+      .getByRole("button", { name: /Categorias/i })
+      .first()
+      .click();
     await page.locator('[data-testid="categorias-picker"] button[data-slug="valvulas"]').click();
     await expect(page).toHaveURL(/categoria=valvulas/);
 

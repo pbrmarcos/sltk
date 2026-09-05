@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Image,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import type { DocumentoLayoutConfig, Idioma } from "./types";
 import { formatDate, formatNumber } from "./formatters";
 import { CHROME_PAGE_STYLE, PdfHeader, PdfFooter } from "./pdf-chrome";
@@ -27,20 +20,53 @@ const styles = (accent: string) =>
     page: { ...CHROME_PAGE_STYLE },
     coverWrap: { marginTop: 8, marginBottom: 16 },
     coverTitle: { fontSize: 24, fontFamily: TOKENS.fontBold, color: TOKENS.text },
-    coverAccentBar: { width: 56, height: 3, backgroundColor: accent, marginTop: 14, marginBottom: 18 },
+    coverAccentBar: {
+      width: 56,
+      height: 3,
+      backgroundColor: accent,
+      marginTop: 14,
+      marginBottom: 18,
+    },
     coverSubtitle: { fontSize: 11, color: TOKENS.muted },
     sectionTitle: {
-      fontSize: 12, fontFamily: TOKENS.fontBold, color: TOKENS.text,
-      marginTop: 18, marginBottom: 8, paddingBottom: 4,
-      borderBottomWidth: 1, borderBottomColor: accent, borderBottomStyle: "solid",
+      fontSize: 12,
+      fontFamily: TOKENS.fontBold,
+      color: TOKENS.text,
+      marginTop: 18,
+      marginBottom: 8,
+      paddingBottom: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: accent,
+      borderBottomStyle: "solid",
     },
     keyGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 8 },
     keyCell: { width: "50%", marginBottom: 4, paddingRight: 8 },
-    keyLabel: { fontSize: 7.5, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
+    keyLabel: {
+      fontSize: 7.5,
+      color: TOKENS.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
     keyValue: { fontSize: 9.5, color: TOKENS.text },
-    table: { borderWidth: 0.5, borderColor: TOKENS.borderStrong, borderStyle: "solid", marginBottom: 8 },
-    tHeader: { flexDirection: "row", backgroundColor: accent, color: "#FFFFFF", fontSize: 8.5, fontFamily: TOKENS.fontBold },
-    tRow: { flexDirection: "row", borderTopWidth: 0.5, borderTopColor: TOKENS.border, borderTopStyle: "solid" },
+    table: {
+      borderWidth: 0.5,
+      borderColor: TOKENS.borderStrong,
+      borderStyle: "solid",
+      marginBottom: 8,
+    },
+    tHeader: {
+      flexDirection: "row",
+      backgroundColor: accent,
+      color: "#FFFFFF",
+      fontSize: 8.5,
+      fontFamily: TOKENS.fontBold,
+    },
+    tRow: {
+      flexDirection: "row",
+      borderTopWidth: 0.5,
+      borderTopColor: TOKENS.border,
+      borderTopStyle: "solid",
+    },
     tRowZebra: { backgroundColor: TOKENS.zebra },
     tCell: { padding: 5, fontSize: 9 },
     tRight: { textAlign: "right" },
@@ -48,13 +74,22 @@ const styles = (accent: string) =>
     chipNok: { color: "#991B1B" },
     para: { marginBottom: 6 },
     rncBox: {
-      borderLeftWidth: 3, borderLeftColor: "#F59E0B", borderLeftStyle: "solid",
-      paddingLeft: 8, marginBottom: 8,
+      borderLeftWidth: 3,
+      borderLeftColor: "#F59E0B",
+      borderLeftStyle: "solid",
+      paddingLeft: 8,
+      marginBottom: 8,
     },
     rncTitle: { fontSize: 10, fontFamily: TOKENS.fontBold },
     rncMeta: { fontSize: 8, color: TOKENS.muted, marginBottom: 2 },
     signGrid: { flexDirection: "row", marginTop: 24, gap: 16 },
-    signBox: { flex: 1, borderTopWidth: 0.5, borderTopColor: TOKENS.text, borderTopStyle: "solid", paddingTop: 4 },
+    signBox: {
+      flex: 1,
+      borderTopWidth: 0.5,
+      borderTopColor: TOKENS.text,
+      borderTopStyle: "solid",
+      paddingTop: 4,
+    },
     signLabel: { fontSize: 8, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
     signValue: { fontSize: 9.5, fontFamily: TOKENS.fontBold },
     auditFoot: { marginTop: 16, fontSize: 7, color: TOKENS.muted },
@@ -64,54 +99,128 @@ const L: Record<Idioma, Record<string, string>> = {
   pt: {
     title: "Relatório FAT",
     subtitle: "Factory Acceptance Test",
-    identificacao: "Identificação", os: "OS", tag: "TAG", data: "Data do ensaio",
-    inspetor: "Inspetor", testemunha: "Testemunha", local: "Local",
-    cond: "Condições", temp: "Temperatura", umid: "Umidade", tensao: "Tensão",
-    motivos: "Motivos da viagem", periodo: "Período",
-    medicoes: "Medições", parametro: "Parâmetro", unidade: "Unidade",
-    nominal: "Nominal", tol: "Tolerância", medido: "Medido", status: "Status",
-    rncs: "Não conformidades (RNC)", prazo: "Prazo", plano: "Plano de ação",
-    obs: "Observações gerais", semObs: "Sem observações.",
-    homolog: "Homologação", homologadoEm: "Homologado em", homologadoPor: "Homologado por",
-    assInspetor: "Inspetor", assTestemunha: "Testemunha",
-    pagina: "Página", de: "de",
+    identificacao: "Identificação",
+    os: "OS",
+    tag: "TAG",
+    data: "Data do ensaio",
+    inspetor: "Inspetor",
+    testemunha: "Testemunha",
+    local: "Local",
+    cond: "Condições",
+    temp: "Temperatura",
+    umid: "Umidade",
+    tensao: "Tensão",
+    motivos: "Motivos da viagem",
+    periodo: "Período",
+    medicoes: "Medições",
+    parametro: "Parâmetro",
+    unidade: "Unidade",
+    nominal: "Nominal",
+    tol: "Tolerância",
+    medido: "Medido",
+    status: "Status",
+    rncs: "Não conformidades (RNC)",
+    prazo: "Prazo",
+    plano: "Plano de ação",
+    obs: "Observações gerais",
+    semObs: "Sem observações.",
+    homolog: "Homologação",
+    homologadoEm: "Homologado em",
+    homologadoPor: "Homologado por",
+    assInspetor: "Inspetor",
+    assTestemunha: "Testemunha",
+    pagina: "Página",
+    de: "de",
     audit: "Documento assinado digitalmente — verificação HMAC-SHA256 disponível no portal.",
-    semRnc: "Sem RNCs registradas.", semMed: "Sem medições registradas.",
-    ok: "OK", nok: "NOK", na: "N/A",
+    semRnc: "Sem RNCs registradas.",
+    semMed: "Sem medições registradas.",
+    ok: "OK",
+    nok: "NOK",
+    na: "N/A",
   },
   es: {
-    title: "Informe FAT", subtitle: "Factory Acceptance Test",
-    identificacao: "Identificación", os: "OS", tag: "TAG", data: "Fecha del ensayo",
-    inspetor: "Inspector", testemunha: "Testigo", local: "Lugar",
-    cond: "Condiciones", temp: "Temperatura", umid: "Humedad", tensao: "Tensión",
-    motivos: "Motivos del viaje", periodo: "Período",
-    medicoes: "Mediciones", parametro: "Parámetro", unidade: "Unidad",
-    nominal: "Nominal", tol: "Tolerancia", medido: "Medido", status: "Estado",
-    rncs: "No conformidades (RNC)", prazo: "Plazo", plano: "Plan de acción",
-    obs: "Observaciones generales", semObs: "Sin observaciones.",
-    homolog: "Homologación", homologadoEm: "Homologado el", homologadoPor: "Homologado por",
-    assInspetor: "Inspector", assTestemunha: "Testigo",
-    pagina: "Página", de: "de",
+    title: "Informe FAT",
+    subtitle: "Factory Acceptance Test",
+    identificacao: "Identificación",
+    os: "OS",
+    tag: "TAG",
+    data: "Fecha del ensayo",
+    inspetor: "Inspector",
+    testemunha: "Testigo",
+    local: "Lugar",
+    cond: "Condiciones",
+    temp: "Temperatura",
+    umid: "Humedad",
+    tensao: "Tensión",
+    motivos: "Motivos del viaje",
+    periodo: "Período",
+    medicoes: "Mediciones",
+    parametro: "Parámetro",
+    unidade: "Unidad",
+    nominal: "Nominal",
+    tol: "Tolerancia",
+    medido: "Medido",
+    status: "Estado",
+    rncs: "No conformidades (RNC)",
+    prazo: "Plazo",
+    plano: "Plan de acción",
+    obs: "Observaciones generales",
+    semObs: "Sin observaciones.",
+    homolog: "Homologación",
+    homologadoEm: "Homologado el",
+    homologadoPor: "Homologado por",
+    assInspetor: "Inspector",
+    assTestemunha: "Testigo",
+    pagina: "Página",
+    de: "de",
     audit: "Documento firmado digitalmente — verificación HMAC-SHA256 disponible en el portal.",
-    semRnc: "Sin RNCs registradas.", semMed: "Sin mediciones registradas.",
-    ok: "OK", nok: "NOK", na: "N/A",
+    semRnc: "Sin RNCs registradas.",
+    semMed: "Sin mediciones registradas.",
+    ok: "OK",
+    nok: "NOK",
+    na: "N/A",
   },
   en: {
-    title: "FAT Report", subtitle: "Factory Acceptance Test",
-    identificacao: "Identification", os: "WO", tag: "TAG", data: "Test date",
-    inspetor: "Inspector", testemunha: "Witness", local: "Location",
-    cond: "Conditions", temp: "Temperature", umid: "Humidity", tensao: "Voltage",
-    motivos: "Trip motives", periodo: "Period",
-    medicoes: "Measurements", parametro: "Parameter", unidade: "Unit",
-    nominal: "Nominal", tol: "Tolerance", medido: "Measured", status: "Status",
-    rncs: "Non-conformities (NCR)", prazo: "Due", plano: "Action plan",
-    obs: "General notes", semObs: "No notes.",
-    homolog: "Approval", homologadoEm: "Approved on", homologadoPor: "Approved by",
-    assInspetor: "Inspector", assTestemunha: "Witness",
-    pagina: "Page", de: "of",
+    title: "FAT Report",
+    subtitle: "Factory Acceptance Test",
+    identificacao: "Identification",
+    os: "WO",
+    tag: "TAG",
+    data: "Test date",
+    inspetor: "Inspector",
+    testemunha: "Witness",
+    local: "Location",
+    cond: "Conditions",
+    temp: "Temperature",
+    umid: "Humidity",
+    tensao: "Voltage",
+    motivos: "Trip motives",
+    periodo: "Period",
+    medicoes: "Measurements",
+    parametro: "Parameter",
+    unidade: "Unit",
+    nominal: "Nominal",
+    tol: "Tolerance",
+    medido: "Measured",
+    status: "Status",
+    rncs: "Non-conformities (NCR)",
+    prazo: "Due",
+    plano: "Action plan",
+    obs: "General notes",
+    semObs: "No notes.",
+    homolog: "Approval",
+    homologadoEm: "Approved on",
+    homologadoPor: "Approved by",
+    assInspetor: "Inspector",
+    assTestemunha: "Witness",
+    pagina: "Page",
+    de: "of",
     audit: "Digitally signed document — HMAC-SHA256 verification available on the portal.",
-    semRnc: "No NCRs recorded.", semMed: "No measurements recorded.",
-    ok: "OK", nok: "NOK", na: "N/A",
+    semRnc: "No NCRs recorded.",
+    semMed: "No measurements recorded.",
+    ok: "OK",
+    nok: "NOK",
+    na: "N/A",
   },
 };
 
@@ -140,20 +249,38 @@ export type FatPdfPayload = {
   inspetor: { nome: string; email: string | null };
   homologador: { nome: string | null };
   medicoes: Array<{
-    ordem: number; parametro: string; unidade: string | null;
-    nominal: number | null; tolerancia: string | null; medido: number | null; status_auto: string | null;
+    ordem: number;
+    parametro: string;
+    unidade: string | null;
+    nominal: number | null;
+    tolerancia: string | null;
+    medido: number | null;
+    status_auto: string | null;
   }>;
   rncs: Array<{
-    codigo: string; titulo: string; descricao: string | null;
-    plano_acao: string | null; prazo: string | null; status: string;
+    codigo: string;
+    titulo: string;
+    descricao: string | null;
+    plano_acao: string | null;
+    prazo: string | null;
+    status: string;
   }>;
 };
 
 export function FatPdf({
-  codigo, versao, idioma, data, payload, layout,
+  codigo,
+  versao,
+  idioma,
+  data,
+  payload,
+  layout,
 }: {
-  codigo: string; versao: string; idioma: Idioma; data: Date;
-  payload: FatPdfPayload; layout: DocumentoLayoutConfig;
+  codigo: string;
+  versao: string;
+  idioma: Idioma;
+  data: Date;
+  payload: FatPdfPayload;
+  layout: DocumentoLayoutConfig;
 }) {
   const s = styles(layout.accent_color || "#0F172A");
   const t = L[idioma];
@@ -190,7 +317,10 @@ export function FatPdf({
         <View style={s.coverWrap}>
           <Text style={s.coverTitle}>{t.title}</Text>
           <View style={s.coverAccentBar} />
-          <Text style={s.coverSubtitle}>{t.subtitle}{payload.processo ? ` · ${payload.processo.codigo} — ${payload.processo.titulo}` : ""}</Text>
+          <Text style={s.coverSubtitle}>
+            {t.subtitle}
+            {payload.processo ? ` · ${payload.processo.codigo} — ${payload.processo.titulo}` : ""}
+          </Text>
         </View>
 
         {/* Identificação */}
@@ -202,8 +332,16 @@ export function FatPdf({
           <KV label={t.local} value={payload.fat.local_ensaio || "—"} s={s} />
           <KV label={t.inspetor} value={payload.inspetor.nome} s={s} />
           <KV label={t.testemunha} value={payload.fat.testemunha_nome || "—"} s={s} />
-          <KV label={t.periodo} value={`${fmtDate(payload.fat.periodo_de)} — ${fmtDate(payload.fat.periodo_ate)}`} s={s} />
-          <KV label={t.motivos} value={(payload.fat.motivos_viagem || []).join(", ") || "—"} s={s} />
+          <KV
+            label={t.periodo}
+            value={`${fmtDate(payload.fat.periodo_de)} — ${fmtDate(payload.fat.periodo_ate)}`}
+            s={s}
+          />
+          <KV
+            label={t.motivos}
+            value={(payload.fat.motivos_viagem || []).join(", ") || "—"}
+            s={s}
+          />
         </View>
 
         <Text style={s.sectionTitle}>{t.cond}</Text>
@@ -236,7 +374,13 @@ export function FatPdf({
                 <Text style={[s.tCell, { width: "14%" }, s.tRight]}>{fmtNum(m.nominal)}</Text>
                 <Text style={[s.tCell, { width: "14%" }]}>{m.tolerancia || "—"}</Text>
                 <Text style={[s.tCell, { width: "14%" }, s.tRight]}>{fmtNum(m.medido)}</Text>
-                <Text style={[s.tCell, { width: "8%" }, m.status_auto === "ok" ? s.chipOk : m.status_auto === "nok" ? s.chipNok : {}]}>
+                <Text
+                  style={[
+                    s.tCell,
+                    { width: "8%" },
+                    m.status_auto === "ok" ? s.chipOk : m.status_auto === "nok" ? s.chipNok : {},
+                  ]}
+                >
                   {statusLabel(m.status_auto)}
                 </Text>
               </View>
@@ -251,10 +395,18 @@ export function FatPdf({
         ) : (
           payload.rncs.map((r, i) => (
             <View key={i} style={s.rncBox} wrap={false}>
-              <Text style={s.rncTitle}>{r.codigo} — {r.titulo}</Text>
-              <Text style={s.rncMeta}>{t.prazo}: {fmtDate(r.prazo)} · {t.status}: {r.status}</Text>
+              <Text style={s.rncTitle}>
+                {r.codigo} — {r.titulo}
+              </Text>
+              <Text style={s.rncMeta}>
+                {t.prazo}: {fmtDate(r.prazo)} · {t.status}: {r.status}
+              </Text>
               {r.descricao ? <Text>{r.descricao}</Text> : null}
-              {r.plano_acao ? <Text>{t.plano}: {r.plano_acao}</Text> : null}
+              {r.plano_acao ? (
+                <Text>
+                  {t.plano}: {r.plano_acao}
+                </Text>
+              ) : null}
             </View>
           ))
         )}
@@ -280,7 +432,6 @@ export function FatPdf({
           </View>
         </View>
         <Text style={s.auditFoot}>{t.audit}</Text>
-
       </Page>
     </Document>
   );

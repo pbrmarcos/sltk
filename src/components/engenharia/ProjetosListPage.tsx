@@ -8,12 +8,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -47,7 +42,11 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
 
   const { data, isLoading } = useQuery(allProjetosQueryOptions({ disciplina, q, status, page }));
   const realRows = (data?.rows ?? []).filter((r: any) =>
-    revisao.trim() ? String(r.revisao ?? "").toLowerCase().includes(revisao.trim().toLowerCase()) : true,
+    revisao.trim()
+      ? String(r.revisao ?? "")
+          .toLowerCase()
+          .includes(revisao.trim().toLowerCase())
+      : true,
   );
   const hasFilters = !!q || status !== "todos" || !!revisao;
 
@@ -101,7 +100,8 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
           <span className="inline-flex items-center rounded-sm bg-[var(--gantt-text)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
             Demo
           </span>
-          Nenhuma revisão cadastrada ainda — exibindo exemplos. Clique em "Nova revisão" para criar a primeira.
+          Nenhuma revisão cadastrada ainda — exibindo exemplos. Clique em "Nova revisão" para criar
+          a primeira.
         </div>
       )}
 
@@ -133,12 +133,22 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
           value={revisao}
           onChange={(e) => setRevisao(e.target.value)}
         />
-        <Select value={status} onValueChange={(v) => { setStatus(v as typeof status); setPage(1); }}>
-          <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+        <Select
+          value={status}
+          onValueChange={(v) => {
+            setStatus(v as typeof status);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos os status</SelectItem>
             {PROJETO_STATUS.map((s) => (
-              <SelectItem key={s} value={s}>{PROJETO_STATUS_LABEL[s]}</SelectItem>
+              <SelectItem key={s} value={s}>
+                {PROJETO_STATUS_LABEL[s]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -147,7 +157,9 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
         <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
           {q && <Badge variant="outline">Busca: {q}</Badge>}
           {revisao && <Badge variant="outline">Revisão: {revisao}</Badge>}
-          {status !== "todos" && <Badge variant="outline">Status: {PROJETO_STATUS_LABEL[status]}</Badge>}
+          {status !== "todos" && (
+            <Badge variant="outline">Status: {PROJETO_STATUS_LABEL[status]}</Badge>
+          )}
           <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={clearFilters}>
             Limpar filtros
           </Button>
@@ -166,64 +178,71 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
             {rowsFiltered.map((r: any) => {
               const isDemoRow = !!r.__demo;
               return (
-              <li
-                key={r.id}
-                className={cn(
-                  "grid grid-cols-[120px_1fr_80px_auto_auto_auto] items-center gap-3 p-4 text-sm transition-colors",
-                  !isDemoRow && "cursor-pointer hover:bg-[var(--gantt-row-hover)]",
-                )}
-                onClick={() => { if (!isDemoRow) setDetalhe(r); }}
-              >
-                <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-medium">{r.cliente_equipamentos?.modelo}</span>
-                    {isDemoRow && (
-                      <span className="rounded-sm bg-[var(--gantt-text)] px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-                        Demo
-                      </span>
-                    )}
-                  </div>
-                  <div className="truncate text-xs text-[var(--text-muted)]">
-                    {r.clientes?.razao_social} · H/H: {Number(r.hh_consumida ?? 0).toFixed(1)}
-                  </div>
-                </div>
-                <Badge variant="outline" className="text-[11px]">{r.revisao}</Badge>
-                <Badge variant="outline" className={cn("text-[11px]", PROJETO_STATUS_COLOR[r.status as ProjetoStatus])}>
-                  {PROJETO_STATUS_LABEL[r.status as ProjetoStatus]}
-                </Badge>
-                <Button
-                  asChild
-                  size="sm"
-                  variant="ghost"
-                  title="Ver Gantt / Etapas"
-                  onClick={(e) => e.stopPropagation()}
+                <li
+                  key={r.id}
+                  className={cn(
+                    "grid grid-cols-[120px_1fr_80px_auto_auto_auto] items-center gap-3 p-4 text-sm transition-colors",
+                    !isDemoRow && "cursor-pointer hover:bg-[var(--gantt-row-hover)]",
+                  )}
+                  onClick={() => {
+                    if (!isDemoRow) setDetalhe(r);
+                  }}
                 >
-                  <Link
-                    to="/engenharia/etapas"
-                    search={{
-                      eqp: isDemoRow ? undefined : r.equipamento_id,
-                      fase: isDemoRow ? undefined : "engenharia",
-                    }}
-                  >
-                    <CalendarRange className="h-3.5 w-3.5" /> Gantt
-                  </Link>
-                </Button>
-                {!isDemoRow && (r.status === "em_elaboracao" || r.status === "em_aprovacao") ? (
-                  <Button
-                    size="sm"
+                  <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate font-medium">{r.cliente_equipamentos?.modelo}</span>
+                      {isDemoRow && (
+                        <span className="rounded-sm bg-[var(--gantt-text)] px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                          Demo
+                        </span>
+                      )}
+                    </div>
+                    <div className="truncate text-xs text-[var(--text-muted)]">
+                      {r.clientes?.razao_social} · H/H: {Number(r.hh_consumida ?? 0).toFixed(1)}
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[11px]">
+                    {r.revisao}
+                  </Badge>
+                  <Badge
                     variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm("Liberar esta revisão para produção?")) liberaMut.mutate(r.id);
-                    }}
+                    className={cn("text-[11px]", PROJETO_STATUS_COLOR[r.status as ProjetoStatus])}
                   >
-                    Liberar
+                    {PROJETO_STATUS_LABEL[r.status as ProjetoStatus]}
+                  </Badge>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    title="Ver Gantt / Etapas"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Link
+                      to="/engenharia/etapas"
+                      search={{
+                        eqp: isDemoRow ? undefined : r.equipamento_id,
+                        fase: isDemoRow ? undefined : "engenharia",
+                      }}
+                    >
+                      <CalendarRange className="h-3.5 w-3.5" /> Gantt
+                    </Link>
                   </Button>
-                ) : (
-                  <span />
-                )}
-              </li>
+                  {!isDemoRow && (r.status === "em_elaboracao" || r.status === "em_aprovacao") ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm("Liberar esta revisão para produção?")) liberaMut.mutate(r.id);
+                      }}
+                    >
+                      Liberar
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
+                </li>
               );
             })}
           </ul>
@@ -234,10 +253,20 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
         <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>Total: {data.total}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
               Anterior
             </Button>
-            <Button variant="outline" size="sm" disabled={page * 50 >= data.total} onClick={() => setPage(page + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page * 50 >= data.total}
+              onClick={() => setPage(page + 1)}
+            >
               Próxima
             </Button>
           </div>
@@ -338,7 +367,9 @@ function ProjetoDetalheDialog({
           <DialogTitle>
             {disciplina === "mecanico" ? "Projeto Mecânico" : "Projeto Elétrico"} ·{" "}
             <span className="font-mono text-base">{projeto?.cliente_equipamentos?.codigo}</span>{" "}
-            <Badge variant="outline" className="ml-2 text-[10px]">{projeto?.revisao}</Badge>
+            <Badge variant="outline" className="ml-2 text-[10px]">
+              {projeto?.revisao}
+            </Badge>
           </DialogTitle>
         </DialogHeader>
         {projeto && (
@@ -357,30 +388,50 @@ function ProjetoDetalheDialog({
                 <Info
                   label="Status"
                   value={
-                    <Badge variant="outline" className={cn("text-[11px]", PROJETO_STATUS_COLOR[projeto.status as ProjetoStatus])}>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[11px]",
+                        PROJETO_STATUS_COLOR[projeto.status as ProjetoStatus],
+                      )}
+                    >
                       {PROJETO_STATUS_LABEL[projeto.status as ProjetoStatus]}
                     </Badge>
                   }
                 />
-                <Info label="H/H consumida" value={`${Number(projeto.hh_consumida ?? 0).toFixed(1)} h`} />
+                <Info
+                  label="H/H consumida"
+                  value={`${Number(projeto.hh_consumida ?? 0).toFixed(1)} h`}
+                />
                 <Info
                   label="Liberado em"
-                  value={projeto.liberado_em ? new Date(projeto.liberado_em).toLocaleString("pt-BR") : "—"}
+                  value={
+                    projeto.liberado_em
+                      ? new Date(projeto.liberado_em).toLocaleString("pt-BR")
+                      : "—"
+                  }
                 />
               </div>
               {projeto.observacoes && (
                 <div>
-                  <div className="mb-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Observações</div>
+                  <div className="mb-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">
+                    Observações
+                  </div>
                   <div className="whitespace-pre-wrap rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 text-xs">
                     {projeto.observacoes}
                   </div>
                 </div>
               )}
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={onClose}>Fechar</Button>
+                <Button variant="outline" onClick={onClose}>
+                  Fechar
+                </Button>
                 {!projeto.__demo && (
                   <Button asChild>
-                    <Link to="/engenharia/etapas" search={{ eqp: projeto.equipamento_id, fase: "engenharia" }}>
+                    <Link
+                      to="/engenharia/etapas"
+                      search={{ eqp: projeto.equipamento_id, fase: "engenharia" }}
+                    >
                       Abrir Gantt
                     </Link>
                   </Button>
@@ -447,7 +498,8 @@ function NovaRevisaoDialog({
   });
 
   const createMut = useMutation({
-    mutationFn: () => createProjeto({ data: { equipamento_id: equipamentoId, disciplina, revisao } }),
+    mutationFn: () =>
+      createProjeto({ data: { equipamento_id: equipamentoId, disciplina, revisao } }),
     onSuccess: () => {
       toast.success("Revisão criada.");
       onCreated();
@@ -459,7 +511,9 @@ function NovaRevisaoDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Nova revisão · {disciplina === "mecanico" ? "Mecânico" : "Elétrico"}</DialogTitle>
+          <DialogTitle>
+            Nova revisão · {disciplina === "mecanico" ? "Mecânico" : "Elétrico"}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 text-sm">
           <label className="block space-y-1">
@@ -469,7 +523,9 @@ function NovaRevisaoDialog({
           <label className="block space-y-1">
             <span className="text-muted-foreground text-xs">Equipamento</span>
             <Select value={equipamentoId} onValueChange={setEquipamentoId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Selecione…" />
+              </SelectTrigger>
               <SelectContent className="max-h-80">
                 {(eqps ?? []).map((e: any) => (
                   <SelectItem key={e.id} value={e.id}>
@@ -485,8 +541,13 @@ function NovaRevisaoDialog({
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button disabled={!equipamentoId || createMut.isPending} onClick={() => createMut.mutate()}>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={!equipamentoId || createMut.isPending}
+            onClick={() => createMut.mutate()}
+          >
             Criar
           </Button>
         </div>

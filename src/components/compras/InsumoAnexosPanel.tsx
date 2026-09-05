@@ -270,7 +270,10 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             <Label className="text-[11px] text-[var(--text-muted)]">
               Fornecedor {kind === "orcamento" && <span className="text-red-500">*</span>}
             </Label>
-            <Select value={fornecedorId || "none"} onValueChange={(v) => setFornecedorId(v === "none" ? "" : v)}>
+            <Select
+              value={fornecedorId || "none"}
+              onValueChange={(v) => setFornecedorId(v === "none" ? "" : v)}
+            >
               <SelectTrigger className={cn("h-8 text-xs", errors.fornecedor && "border-red-400")}>
                 <SelectValue placeholder="Selecionar fornecedor…" />
               </SelectTrigger>
@@ -294,7 +297,6 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             {errors.fornecedor && <FieldError msg={errors.fornecedor} />}
           </div>
         </div>
-
 
         {kind === "orcamento" && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded border border-emerald-200 bg-emerald-50/40 p-2">
@@ -338,7 +340,10 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
             </div>
             <div>
               <Label className="text-[11px] text-[var(--text-muted)]">Incoterm</Label>
-              <Select value={incoterm || "none"} onValueChange={(v) => setIncoterm(v === "none" ? "" : v)}>
+              <Select
+                value={incoterm || "none"}
+                onValueChange={(v) => setIncoterm(v === "none" ? "" : v)}
+              >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder="—" />
                 </SelectTrigger>
@@ -418,11 +423,7 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
               if (f) void handleFile(f);
             }}
           />
-          <Button
-            size="sm"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-          >
+          <Button size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
             {uploading ? (
               <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
             ) : (
@@ -436,7 +437,6 @@ export function InsumoAnexosPanel({ insumoId }: Props) {
         </div>
         {errors.file && <FieldError msg={errors.file} />}
       </div>
-
 
       {/* Listagens */}
       <Section
@@ -498,10 +498,7 @@ function Section({
                 className="rounded border border-[var(--bg-border)] bg-[var(--bg-surface)] p-2.5 flex flex-col md:flex-row md:items-center gap-2 text-xs"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Badge
-                    variant="outline"
-                    className={cn("font-normal shrink-0", KIND_COLOR[kind])}
-                  >
+                  <Badge variant="outline" className={cn("font-normal shrink-0", KIND_COLOR[kind])}>
                     {KIND_LABEL[kind]}
                   </Badge>
                   <div className="min-w-0 flex-1">
@@ -510,23 +507,24 @@ function Section({
                     </div>
                     <div className="text-[10px] text-[var(--text-muted)] flex flex-wrap gap-x-2">
                       <span>{formatSize(r.size_bytes)}</span>
-                      {forn && (
-                        <span>· {forn.nome_fantasia ?? forn.nome}</span>
-                      )}
+                      {forn && <span>· {forn.nome_fantasia ?? forn.nome}</span>}
                       {r.uploaded_by_nome && <span>· {r.uploaded_by_nome}</span>}
                       <span>· {new Date(r.criado_em).toLocaleString("pt-BR")}</span>
                     </div>
-                    {showCotacaoFields && (valorFmt || r.condicao_pagamento || r.lead_time_dias || r.incoterm) && (
-                      <div className="text-[10px] text-emerald-700 flex flex-wrap gap-x-2 mt-0.5">
-                        {valorFmt && <span className="font-semibold">{valorFmt}</span>}
-                        {r.condicao_pagamento && <span>· {r.condicao_pagamento}</span>}
-                        {r.lead_time_dias != null && <span>· {r.lead_time_dias} dias</span>}
-                        {r.incoterm && <span>· {r.incoterm}</span>}
-                        {r.validade_ate && (
-                          <span>· val. {new Date(r.validade_ate).toLocaleDateString("pt-BR")}</span>
-                        )}
-                      </div>
-                    )}
+                    {showCotacaoFields &&
+                      (valorFmt || r.condicao_pagamento || r.lead_time_dias || r.incoterm) && (
+                        <div className="text-[10px] text-emerald-700 flex flex-wrap gap-x-2 mt-0.5">
+                          {valorFmt && <span className="font-semibold">{valorFmt}</span>}
+                          {r.condicao_pagamento && <span>· {r.condicao_pagamento}</span>}
+                          {r.lead_time_dias != null && <span>· {r.lead_time_dias} dias</span>}
+                          {r.incoterm && <span>· {r.incoterm}</span>}
+                          {r.validade_ate && (
+                            <span>
+                              · val. {new Date(r.validade_ate).toLocaleDateString("pt-BR")}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     {r.observacoes && (
                       <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 italic truncate">
                         {r.observacoes}
@@ -536,14 +534,26 @@ function Section({
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   {r.drive_view_url && (
-                    <Button asChild size="sm" variant="ghost" className="h-7" title="Abrir no Drive">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="h-7"
+                      title="Abrir no Drive"
+                    >
                       <a href={r.drive_view_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     </Button>
                   )}
                   {r.drive_file_id && (
-                    <Button asChild size="sm" variant="ghost" className="h-7" title="Baixar arquivo">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="h-7"
+                      title="Baixar arquivo"
+                    >
                       <a
                         href={`https://drive.google.com/uc?export=download&id=${r.drive_file_id}`}
                         target="_blank"

@@ -11,10 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useSuporteT } from "@/components/suporte/PublicShell";
 import { PublicSiteShell } from "@/components/site/PublicSiteShell";
 
-import {
-  publicAbrirChamado,
-  publicResolverCodigo,
-} from "@/lib/suporte-publico.functions";
+import { publicAbrirChamado, publicResolverCodigo } from "@/lib/suporte-publico.functions";
 
 export const Route = createFileRoute("/suporte/")({
   ssr: false,
@@ -82,7 +79,11 @@ function SuporteHome() {
               </TabButton>
             </div>
 
-            {tab === "new" ? <NovoChamadoForm /> : <ConsultarChamadoForm onNew={() => setTab("new")} />}
+            {tab === "new" ? (
+              <NovoChamadoForm />
+            ) : (
+              <ConsultarChamadoForm onNew={() => setTab("new")} />
+            )}
           </div>
 
           {/* Side panel */}
@@ -115,7 +116,6 @@ function TabButton({
     </button>
   );
 }
-
 
 function SidePanel() {
   const { t } = useSuporteT();
@@ -209,9 +209,7 @@ function NovoChamadoForm() {
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
           <Button
-            onClick={() =>
-              navigate({ to: "/suporte/$token", params: { token: resultado.token } })
-            }
+            onClick={() => navigate({ to: "/suporte/$token", params: { token: resultado.token } })}
           >
             {t.success.open}
           </Button>
@@ -234,27 +232,56 @@ function NovoChamadoForm() {
       <div className="mt-5 grid grid-cols-2 gap-3">
         <div className="col-span-2">
           <Label htmlFor="nome">{t.form.nome} *</Label>
-          <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={120} />
+          <Input
+            id="nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+            maxLength={120}
+          />
         </div>
         <div>
           <Label htmlFor="email">{t.form.email} *</Label>
-          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} />
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            maxLength={255}
+          />
         </div>
         <div>
           <Label htmlFor="tel">
             {t.form.telefone} <span className="text-slate-400">{t.form.telefoneOpt}</span>
           </Label>
-          <Input id="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} maxLength={40} />
+          <Input
+            id="tel"
+            value={telefone}
+            onChange={(e) => setTelefone(e.target.value)}
+            maxLength={40}
+          />
         </div>
         <div className="col-span-2">
           <Label htmlFor="serie">{t.form.serie} *</Label>
-          <Input id="serie" value={serie} onChange={(e) => setSerie(e.target.value)} required maxLength={80} />
+          <Input
+            id="serie"
+            value={serie}
+            onChange={(e) => setSerie(e.target.value)}
+            required
+            maxLength={80}
+          />
         </div>
         <div className="col-span-2">
           <Label htmlFor="assunto">
             {t.form.assunto} <span className="text-slate-400">{t.form.assuntoOpt}</span>
           </Label>
-          <Input id="assunto" value={assunto} onChange={(e) => setAssunto(e.target.value)} maxLength={200} />
+          <Input
+            id="assunto"
+            value={assunto}
+            onChange={(e) => setAssunto(e.target.value)}
+            maxLength={200}
+          />
         </div>
         <div className="col-span-2">
           <Label htmlFor="desc">{t.form.descricao} *</Label>
@@ -272,7 +299,11 @@ function NovoChamadoForm() {
       </div>
 
       <label className="mt-4 flex items-start gap-2 text-sm text-slate-600">
-        <Checkbox checked={aceite} onCheckedChange={(v) => setAceite(v === true)} className="mt-0.5" />
+        <Checkbox
+          checked={aceite}
+          onCheckedChange={(v) => setAceite(v === true)}
+          className="mt-0.5"
+        />
         <span>{t.form.aceite}</span>
       </label>
 

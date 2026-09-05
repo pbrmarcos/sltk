@@ -13,27 +13,71 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Plus, GripVertical, Trash2, Pencil, Sparkles, ChevronsUpDown, History,
-  MessageSquareText, ListChecks, TextCursorInput, Hash, Globe2, ChevronsRight,
+  ArrowLeft,
+  Plus,
+  GripVertical,
+  Trash2,
+  Pencil,
+  Sparkles,
+  ChevronsUpDown,
+  History,
+  MessageSquareText,
+  ListChecks,
+  TextCursorInput,
+  Hash,
+  Globe2,
+  ChevronsRight,
 } from "lucide-react";
 import {
-  DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  SortableContext, useSortable, verticalListSortingStrategy, arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  getSegmentoAdmin, upsertPergunta, excluirPergunta, reordenarPerguntas,
-  upsertOpcao, excluirOpcao, reordenarOpcoes, traduzirTexto, historicoSegmento,
-  type PerguntaAdminRow, type OpcaoAdminRow,
+  getSegmentoAdmin,
+  upsertPergunta,
+  excluirPergunta,
+  reordenarPerguntas,
+  upsertOpcao,
+  excluirOpcao,
+  reordenarOpcoes,
+  traduzirTexto,
+  historicoSegmento,
+  type PerguntaAdminRow,
+  type OpcaoAdminRow,
 } from "@/lib/entrevistas-admin.functions";
 import { groupContactMatrix } from "@/lib/entrevistas-shared";
 
@@ -44,7 +88,10 @@ export const Route = createFileRoute("/_authenticated/admin/entrevistas/$segment
   head: () => ({
     meta: [
       { title: "Editar segmento — Admin Entrevistas | SLTK" },
-      { name: "description", content: "Adicione, edite, reordene e traduza perguntas de um segmento de entrevista." },
+      {
+        name: "description",
+        content: "Adicione, edite, reordene e traduza perguntas de um segmento de entrevista.",
+      },
     ],
   }),
 });
@@ -93,18 +140,29 @@ function AdminEntrevistaEditor() {
   };
 
   const [editing, setEditing] = useState<Partial<PerguntaAdminRow> | null>(null);
-  const [editOpcao, setEditOpcao] = useState<{ perguntaId: string; opcao: Partial<OpcaoAdminRow> | null } | null>(null);
+  const [editOpcao, setEditOpcao] = useState<{
+    perguntaId: string;
+    opcao: Partial<OpcaoAdminRow> | null;
+  } | null>(null);
   const [confirmDel, setConfirmDel] = useState<PerguntaAdminRow | null>(null);
   const [previewLang, setPreviewLang] = useState<"pt" | "es" | "en">("pt");
 
   const salvarPerg = useMutation({
     mutationFn: (payload: any) => upPergFn({ data: payload }),
-    onSuccess: () => { toast.success("Pergunta salva."); setEditing(null); invalidate(); },
+    onSuccess: () => {
+      toast.success("Pergunta salva.");
+      setEditing(null);
+      invalidate();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao salvar."),
   });
   const excluirPerg = useMutation({
     mutationFn: (id: string) => delPergFn({ data: { id } }),
-    onSuccess: () => { toast.success("Pergunta removida."); setConfirmDel(null); invalidate(); },
+    onSuccess: () => {
+      toast.success("Pergunta removida.");
+      setConfirmDel(null);
+      invalidate();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao excluir."),
   });
   const reordPerg = useMutation({
@@ -115,16 +173,24 @@ function AdminEntrevistaEditor() {
 
   const salvarOp = useMutation({
     mutationFn: (payload: any) => upOpFn({ data: payload }),
-    onSuccess: () => { toast.success("Opção salva."); setEditOpcao(null); invalidate(); },
+    onSuccess: () => {
+      toast.success("Opção salva.");
+      setEditOpcao(null);
+      invalidate();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao salvar opção."),
   });
   const excluirOp = useMutation({
     mutationFn: (id: string) => delOpFn({ data: { id } }),
-    onSuccess: () => { toast.success("Opção removida."); invalidate(); },
+    onSuccess: () => {
+      toast.success("Opção removida.");
+      invalidate();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao excluir opção."),
   });
   const reordOp = useMutation({
-    mutationFn: (v: { perguntaId: string; ordem: string[] }) => reordOpFn({ data: { pergunta_id: v.perguntaId, ordem: v.ordem } }),
+    mutationFn: (v: { perguntaId: string; ordem: string[] }) =>
+      reordOpFn({ data: { pergunta_id: v.perguntaId, ordem: v.ordem } }),
     onSuccess: () => invalidate(),
     onError: (e: any) => toast.error(e?.message ?? "Falha ao reordenar."),
   });
@@ -134,8 +200,15 @@ function AdminEntrevistaEditor() {
   if (!canManage) {
     return (
       <PageContainer>
-        <PageHeader breadcrumbs={[{ label: "Administração", href: "/admin" }, { label: "Entrevistas" }]} title="Formulário de Entrevista" />
-        <Card className="mt-6"><CardContent className="py-12 text-center text-muted-foreground">Acesso restrito a admin e manager.</CardContent></Card>
+        <PageHeader
+          breadcrumbs={[{ label: "Administração", href: "/admin" }, { label: "Entrevistas" }]}
+          title="Formulário de Entrevista"
+        />
+        <Card className="mt-6">
+          <CardContent className="py-12 text-center text-muted-foreground">
+            Acesso restrito a admin e manager.
+          </CardContent>
+        </Card>
       </PageContainer>
     );
   }
@@ -151,7 +224,8 @@ function AdminEntrevistaEditor() {
     if (oldIdx < 0 || newIdx < 0) return;
     const nova = arrayMove(perguntas, oldIdx, newIdx).map((p) => p.id);
     qc.setQueryData(["admin-entrev-seg", segmentoId], (prev: any) => ({
-      ...prev, perguntas: arrayMove(prev.perguntas, oldIdx, newIdx),
+      ...prev,
+      perguntas: arrayMove(prev.perguntas, oldIdx, newIdx),
     }));
     reordPerg.mutate(nova);
   };
@@ -168,8 +242,23 @@ function AdminEntrevistaEditor() {
         subtitle="Reordene por arraste, edite os enunciados, ative/desative obrigatoriedade e traduza para ES/EN."
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" asChild><Link to="/admin/modelos-formulario"><ArrowLeft className="h-4 w-4 mr-2" /> Voltar</Link></Button>
-            <Button onClick={() => setEditing({ segmento_id: segmentoId, formato: "single_choice", obrigatoria: true, enunciado_pt: "", enunciado_es: "", enunciado_en: "" })}>
+            <Button variant="outline" asChild>
+              <Link to="/admin/modelos-formulario">
+                <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+              </Link>
+            </Button>
+            <Button
+              onClick={() =>
+                setEditing({
+                  segmento_id: segmentoId,
+                  formato: "single_choice",
+                  obrigatoria: true,
+                  enunciado_pt: "",
+                  enunciado_es: "",
+                  enunciado_en: "",
+                })
+              }
+            >
               <Plus className="h-4 w-4 mr-2" /> Nova pergunta
             </Button>
           </div>
@@ -178,19 +267,32 @@ function AdminEntrevistaEditor() {
 
       <Tabs defaultValue="perguntas" className="mt-4">
         <TabsList>
-          <TabsTrigger value="perguntas"><MessageSquareText className="h-3.5 w-3.5 mr-1.5" /> Perguntas</TabsTrigger>
-          <TabsTrigger value="preview"><ChevronsRight className="h-3.5 w-3.5 mr-1.5" /> Prévia</TabsTrigger>
-          <TabsTrigger value="historico"><History className="h-3.5 w-3.5 mr-1.5" /> Histórico</TabsTrigger>
+          <TabsTrigger value="perguntas">
+            <MessageSquareText className="h-3.5 w-3.5 mr-1.5" /> Perguntas
+          </TabsTrigger>
+          <TabsTrigger value="preview">
+            <ChevronsRight className="h-3.5 w-3.5 mr-1.5" /> Prévia
+          </TabsTrigger>
+          <TabsTrigger value="historico">
+            <History className="h-3.5 w-3.5 mr-1.5" /> Histórico
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="perguntas" className="mt-4 space-y-3">
           {dados.isLoading ? (
             <div className="text-sm text-muted-foreground">Carregando…</div>
           ) : perguntas.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">Nenhuma pergunta ainda. Clique em "Nova pergunta".</CardContent></Card>
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                Nenhuma pergunta ainda. Clique em "Nova pergunta".
+              </CardContent>
+            </Card>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragPerg}>
-              <SortableContext items={perguntas.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext
+                items={perguntas.map((p) => p.id)}
+                strategy={verticalListSortingStrategy}
+              >
                 <div className="space-y-2">
                   {perguntas.map((p, idx) => (
                     <PerguntaCard
@@ -213,93 +315,140 @@ function AdminEntrevistaEditor() {
 
         <TabsContent value="preview" className="mt-4">
           <div className="mb-3 flex gap-1">
-            {(["pt","es","en"] as const).map((l) => (
-              <Button key={l} size="sm" variant={previewLang === l ? "default" : "outline"} onClick={() => setPreviewLang(l)}>
+            {(["pt", "es", "en"] as const).map((l) => (
+              <Button
+                key={l}
+                size="sm"
+                variant={previewLang === l ? "default" : "outline"}
+                onClick={() => setPreviewLang(l)}
+              >
                 {l.toUpperCase()}
               </Button>
             ))}
           </div>
-          <Card><CardContent className="p-6 space-y-6">
-            {perguntas.map((p, idx) => (
-              <div key={p.id} className="space-y-2">
-                <div className="text-xs text-muted-foreground">Pergunta {idx + 1} · {formatoLabel(p.formato)} {p.obrigatoria ? "· obrigatória" : ""}</div>
-                <div className="font-medium">{pickLang(p, previewLang)}</div>
-                {(p.formato === "single_choice" || p.formato === "multi_choice") && (() => {
-                  const matrix = p.formato === "multi_choice" ? groupContactMatrix(p.opcoes) : null;
-                  if (matrix) {
-                    return (
-                      <div className="border rounded-md overflow-hidden text-sm">
-                        <div className="grid bg-slate-50 text-xs font-medium text-muted-foreground px-3 py-2"
-                             style={{ gridTemplateColumns: "1.2fr 1.4fr 1.6fr 1.2fr" }}>
-                          <div>Responsável</div>
-                          <div>Nome</div>
-                          <div>E-mail</div>
-                          <div>WhatsApp</div>
-                        </div>
-                        {matrix.map((g) => (
-                          <div key={g.role.id} className="grid px-3 py-2 border-t items-center"
-                               style={{ gridTemplateColumns: "1.2fr 1.4fr 1.6fr 1.2fr" }}>
-                            <div className="font-medium">{pickOpLang(g.role, previewLang)}</div>
-                            <div className="text-muted-foreground italic">[nome]</div>
-                            <div className="text-muted-foreground italic">[e-mail]</div>
-                            <div className="text-muted-foreground italic">[whatsapp]</div>
+          <Card>
+            <CardContent className="p-6 space-y-6">
+              {perguntas.map((p, idx) => (
+                <div key={p.id} className="space-y-2">
+                  <div className="text-xs text-muted-foreground">
+                    Pergunta {idx + 1} · {formatoLabel(p.formato)}{" "}
+                    {p.obrigatoria ? "· obrigatória" : ""}
+                  </div>
+                  <div className="font-medium">{pickLang(p, previewLang)}</div>
+                  {(p.formato === "single_choice" || p.formato === "multi_choice") &&
+                    (() => {
+                      const matrix =
+                        p.formato === "multi_choice" ? groupContactMatrix(p.opcoes) : null;
+                      if (matrix) {
+                        return (
+                          <div className="border rounded-md overflow-hidden text-sm">
+                            <div
+                              className="grid bg-slate-50 text-xs font-medium text-muted-foreground px-3 py-2"
+                              style={{ gridTemplateColumns: "1.2fr 1.4fr 1.6fr 1.2fr" }}
+                            >
+                              <div>Responsável</div>
+                              <div>Nome</div>
+                              <div>E-mail</div>
+                              <div>WhatsApp</div>
+                            </div>
+                            {matrix.map((g) => (
+                              <div
+                                key={g.role.id}
+                                className="grid px-3 py-2 border-t items-center"
+                                style={{ gridTemplateColumns: "1.2fr 1.4fr 1.6fr 1.2fr" }}
+                              >
+                                <div className="font-medium">{pickOpLang(g.role, previewLang)}</div>
+                                <div className="text-muted-foreground italic">[nome]</div>
+                                <div className="text-muted-foreground italic">[e-mail]</div>
+                                <div className="text-muted-foreground italic">[whatsapp]</div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    );
-                  }
-                  return (
-                    <ul className="text-sm space-y-1 pl-4 list-disc marker:text-muted-foreground">
-                      {p.opcoes.map((o) => (
-                        <li key={o.id}>{pickOpLang(o, previewLang)}{o.tem_descricao && <span className="text-xs text-muted-foreground"> (com "Descreva")</span>}</li>
-                      ))}
-                    </ul>
-                  );
-                })()}
+                        );
+                      }
+                      return (
+                        <ul className="text-sm space-y-1 pl-4 list-disc marker:text-muted-foreground">
+                          {p.opcoes.map((o) => (
+                            <li key={o.id}>
+                              {pickOpLang(o, previewLang)}
+                              {o.tem_descricao && (
+                                <span className="text-xs text-muted-foreground">
+                                  {" "}
+                                  (com "Descreva")
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      );
+                    })()}
 
-                {(p.formato === "text" || p.formato === "textarea") && (
-                  <div className="text-xs text-muted-foreground italic">[campo de {p.formato === "textarea" ? "texto longo" : "texto curto"}]</div>
-                )}
-                {p.formato === "number" && <div className="text-xs text-muted-foreground italic">[campo numérico]</div>}
-                {p.formato === "country" && <div className="text-xs text-muted-foreground italic">[seletor de país]</div>}
-              </div>
-            ))}
-          </CardContent></Card>
+                  {(p.formato === "text" || p.formato === "textarea") && (
+                    <div className="text-xs text-muted-foreground italic">
+                      [campo de {p.formato === "textarea" ? "texto longo" : "texto curto"}]
+                    </div>
+                  )}
+                  {p.formato === "number" && (
+                    <div className="text-xs text-muted-foreground italic">[campo numérico]</div>
+                  )}
+                  {p.formato === "country" && (
+                    <div className="text-xs text-muted-foreground italic">[seletor de país]</div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="historico" className="mt-4">
-          <Card><CardContent className="p-0">
-            {hist.isLoading ? (
-              <div className="p-6 text-sm text-muted-foreground">Carregando…</div>
-            ) : (hist.data ?? []).length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground">Sem alterações registradas.</div>
-            ) : (
-              <ul className="divide-y">
-                {hist.data!.map((h: any) => (
-                  <li key={h.id} className="p-3 text-sm flex items-start gap-3">
-                    <Badge variant="outline" className="uppercase text-[10px]">{h.action}</Badge>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs text-muted-foreground">
-                        {h.entity_type} · {new Date(h.created_at).toLocaleString("pt-BR")} · {h.actor_email ?? "—"}
+          <Card>
+            <CardContent className="p-0">
+              {hist.isLoading ? (
+                <div className="p-6 text-sm text-muted-foreground">Carregando…</div>
+              ) : (hist.data ?? []).length === 0 ? (
+                <div className="p-6 text-sm text-muted-foreground">Sem alterações registradas.</div>
+              ) : (
+                <ul className="divide-y">
+                  {hist.data!.map((h: any) => (
+                    <li key={h.id} className="p-3 text-sm flex items-start gap-3">
+                      <Badge variant="outline" className="uppercase text-[10px]">
+                        {h.action}
+                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-muted-foreground">
+                          {h.entity_type} · {new Date(h.created_at).toLocaleString("pt-BR")} ·{" "}
+                          {h.actor_email ?? "—"}
+                        </div>
+                        <div className="truncate">
+                          {h.after?.enunciado_pt ||
+                            h.after?.label_pt ||
+                            h.before?.enunciado_pt ||
+                            h.before?.label_pt ||
+                            "—"}
+                        </div>
                       </div>
-                      <div className="truncate">
-                        {h.after?.enunciado_pt || h.after?.label_pt || h.before?.enunciado_pt || h.before?.label_pt || "—"}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent></Card>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
       {/* Dialog Pergunta */}
-      <Dialog open={!!editing} onOpenChange={(o) => { if (!o) setEditing(null); }}>
+      <Dialog
+        open={!!editing}
+        onOpenChange={(o) => {
+          if (!o) setEditing(null);
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing?.id ? "Editar pergunta" : "Nova pergunta"}</DialogTitle>
-            <DialogDescription>Enunciados em três idiomas. Use "Traduzir" para preencher ES/EN a partir do português.</DialogDescription>
+            <DialogDescription>
+              Enunciados em três idiomas. Use "Traduzir" para preencher ES/EN a partir do português.
+            </DialogDescription>
           </DialogHeader>
           {editing && (
             <PerguntaForm
@@ -317,14 +466,25 @@ function AdminEntrevistaEditor() {
       </Dialog>
 
       {/* Dialog Opção */}
-      <Dialog open={!!editOpcao} onOpenChange={(o) => { if (!o) setEditOpcao(null); }}>
+      <Dialog
+        open={!!editOpcao}
+        onOpenChange={(o) => {
+          if (!o) setEditOpcao(null);
+        }}
+      >
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editOpcao?.opcao?.id ? "Editar opção" : "Nova opção"}</DialogTitle>
           </DialogHeader>
           {editOpcao && (
             <OpcaoForm
-              initial={editOpcao.opcao ?? { pergunta_id: editOpcao.perguntaId, label_pt: "", tem_descricao: false }}
+              initial={
+                editOpcao.opcao ?? {
+                  pergunta_id: editOpcao.perguntaId,
+                  label_pt: "",
+                  tem_descricao: false,
+                }
+              }
               onCancel={() => setEditOpcao(null)}
               onSubmit={(v) => salvarOp.mutate({ ...v, pergunta_id: editOpcao.perguntaId })}
               pending={salvarOp.isPending}
@@ -338,20 +498,33 @@ function AdminEntrevistaEditor() {
       </Dialog>
 
       {/* Confirmação de exclusão */}
-      <Dialog open={!!confirmDel} onOpenChange={(o) => { if (!o) setConfirmDel(null); }}>
+      <Dialog
+        open={!!confirmDel}
+        onOpenChange={(o) => {
+          if (!o) setConfirmDel(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Excluir pergunta</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja excluir <strong>{confirmDel?.enunciado_pt}</strong>?
               {(confirmDel?.respostas_count ?? 0) > 0 && (
-                <span className="block mt-2 text-rose-700">Esta pergunta tem {confirmDel!.respostas_count} respostas — só admin pode excluir.</span>
+                <span className="block mt-2 text-rose-700">
+                  Esta pergunta tem {confirmDel!.respostas_count} respostas — só admin pode excluir.
+                </span>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDel(null)}>Cancelar</Button>
-            <Button variant="destructive" disabled={excluirPerg.isPending} onClick={() => confirmDel && excluirPerg.mutate(confirmDel.id)}>
+            <Button variant="outline" onClick={() => setConfirmDel(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={excluirPerg.isPending}
+              onClick={() => confirmDel && excluirPerg.mutate(confirmDel.id)}
+            >
               {excluirPerg.isPending ? "Excluindo…" : "Excluir"}
             </Button>
           </DialogFooter>
@@ -362,7 +535,9 @@ function AdminEntrevistaEditor() {
 }
 
 function pickLang(p: PerguntaAdminRow, l: "pt" | "es" | "en") {
-  return (l === "es" ? p.enunciado_es : l === "en" ? p.enunciado_en : p.enunciado_pt) || p.enunciado_pt;
+  return (
+    (l === "es" ? p.enunciado_es : l === "en" ? p.enunciado_en : p.enunciado_pt) || p.enunciado_pt
+  );
 }
 function pickOpLang(o: OpcaoAdminRow, l: "pt" | "es" | "en") {
   return (l === "es" ? o.label_es : l === "en" ? o.label_en : o.label_pt) || o.label_pt;
@@ -382,8 +557,14 @@ function PerguntaCard(props: {
   onReorderOpcoes: (ordem: string[]) => void;
 }) {
   const { pergunta: p, indice } = props;
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: p.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : undefined };
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: p.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 20 : undefined,
+  };
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const suportaOpcoes = p.formato === "single_choice" || p.formato === "multi_choice";
@@ -403,15 +584,33 @@ function PerguntaCard(props: {
       <Accordion type="single" collapsible>
         <AccordionItem value={p.id} className="border rounded-md bg-card">
           <div className="flex items-start gap-2 p-3">
-            <button className="mt-1 text-muted-foreground cursor-grab active:cursor-grabbing" {...attributes} {...listeners} aria-label="Arrastar">
+            <button
+              className="mt-1 text-muted-foreground cursor-grab active:cursor-grabbing"
+              {...attributes}
+              {...listeners}
+              aria-label="Arrastar"
+            >
               <GripVertical className="h-4 w-4" />
             </button>
             <div className="flex-1 min-w-0">
               <div className="text-[11px] text-muted-foreground flex items-center gap-2">
                 <span>#{indice}</span>
-                <Badge variant="outline" className="uppercase text-[10px]">{formatoLabel(p.formato)}</Badge>
-                {p.obrigatoria && <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 text-[10px]">obrigatória</Badge>}
-                {p.respostas_count > 0 && <span>· {p.respostas_count} resposta{p.respostas_count === 1 ? "" : "s"}</span>}
+                <Badge variant="outline" className="uppercase text-[10px]">
+                  {formatoLabel(p.formato)}
+                </Badge>
+                {p.obrigatoria && (
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-50 text-amber-800 border-amber-200 text-[10px]"
+                  >
+                    obrigatória
+                  </Badge>
+                )}
+                {p.respostas_count > 0 && (
+                  <span>
+                    · {p.respostas_count} resposta{p.respostas_count === 1 ? "" : "s"}
+                  </span>
+                )}
               </div>
               <div className="font-medium leading-snug">{p.enunciado_pt}</div>
               <div className="text-xs text-muted-foreground truncate">
@@ -419,10 +618,29 @@ function PerguntaCard(props: {
               </div>
             </div>
             <div className="flex items-center gap-1 shrink-0">
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={props.onEdit} title="Editar"><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-rose-700" onClick={props.onDelete} title="Excluir"><Trash2 className="h-4 w-4" /></Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7"
+                onClick={props.onEdit}
+                title="Editar"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-rose-700"
+                onClick={props.onDelete}
+                title="Excluir"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
               {suportaOpcoes && (
-                <AccordionTrigger className="p-1.5 hover:bg-muted rounded-md" aria-label="Ver opções">
+                <AccordionTrigger
+                  className="p-1.5 hover:bg-muted rounded-md"
+                  aria-label="Ver opções"
+                >
                   <ChevronsUpDown className="h-4 w-4" />
                 </AccordionTrigger>
               )}
@@ -431,17 +649,33 @@ function PerguntaCard(props: {
           {suportaOpcoes && (
             <AccordionContent className="border-t p-3 bg-muted/30">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-xs font-medium text-muted-foreground">Opções ({p.opcoes.length})</div>
-                <Button size="sm" variant="outline" onClick={props.onAddOpcao}><Plus className="h-3 w-3 mr-1" /> Adicionar opção</Button>
+                <div className="text-xs font-medium text-muted-foreground">
+                  Opções ({p.opcoes.length})
+                </div>
+                <Button size="sm" variant="outline" onClick={props.onAddOpcao}>
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar opção
+                </Button>
               </div>
               {p.opcoes.length === 0 ? (
                 <div className="text-xs text-muted-foreground italic">Nenhuma opção ainda.</div>
               ) : (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragOp}>
-                  <SortableContext items={p.opcoes.map((o) => o.id)} strategy={verticalListSortingStrategy}>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={onDragOp}
+                >
+                  <SortableContext
+                    items={p.opcoes.map((o) => o.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
                     <ul className="space-y-1">
                       {p.opcoes.map((o) => (
-                        <OpcaoRow key={o.id} opcao={o} onEdit={() => props.onEditOpcao(o)} onDelete={() => props.onDeleteOpcao(o.id)} />
+                        <OpcaoRow
+                          key={o.id}
+                          opcao={o}
+                          onEdit={() => props.onEditOpcao(o)}
+                          onDelete={() => props.onDeleteOpcao(o.id)}
+                        />
                       ))}
                     </ul>
                   </SortableContext>
@@ -455,20 +689,53 @@ function PerguntaCard(props: {
   );
 }
 
-function OpcaoRow({ opcao, onEdit, onDelete }: { opcao: OpcaoAdminRow; onEdit: () => void; onDelete: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: opcao.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : undefined };
+function OpcaoRow({
+  opcao,
+  onEdit,
+  onDelete,
+}: {
+  opcao: OpcaoAdminRow;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: opcao.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 20 : undefined,
+  };
   return (
-    <li ref={setNodeRef} style={style} className="flex items-center gap-2 bg-background border rounded px-2 py-1.5">
-      <button className="text-muted-foreground cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 bg-background border rounded px-2 py-1.5"
+    >
+      <button
+        className="text-muted-foreground cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
         <GripVertical className="h-3.5 w-3.5" />
       </button>
       <div className="flex-1 min-w-0">
-        <div className="text-sm truncate">{opcao.label_pt}{opcao.tem_descricao && <span className="text-xs text-muted-foreground"> · Descreva</span>}</div>
-        <div className="text-[11px] text-muted-foreground truncate">ES: {opcao.label_es || "—"} · EN: {opcao.label_en || "—"}</div>
+        <div className="text-sm truncate">
+          {opcao.label_pt}
+          {opcao.tem_descricao && (
+            <span className="text-xs text-muted-foreground"> · Descreva</span>
+          )}
+        </div>
+        <div className="text-[11px] text-muted-foreground truncate">
+          ES: {opcao.label_es || "—"} · EN: {opcao.label_en || "—"}
+        </div>
       </div>
-      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onEdit}><Pencil className="h-3 w-3" /></Button>
-      <Button size="icon" variant="ghost" className="h-6 w-6 text-rose-700" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onEdit}>
+        <Pencil className="h-3 w-3" />
+      </Button>
+      <Button size="icon" variant="ghost" className="h-6 w-6 text-rose-700" onClick={onDelete}>
+        <Trash2 className="h-3 w-3" />
+      </Button>
     </li>
   );
 }
@@ -488,15 +755,21 @@ function PerguntaForm(props: {
   const [translating, setTranslating] = useState<null | "es" | "en">(null);
 
   const traduzir = async (para: "es" | "en") => {
-    if (!pt.trim()) { toast.info("Preencha o enunciado em PT primeiro."); return; }
+    if (!pt.trim()) {
+      toast.info("Preencha o enunciado em PT primeiro.");
+      return;
+    }
     try {
       setTranslating(para);
       const r = await props.onTraduzir(pt, para);
-      if (para === "es") setEs(r); else setEn(r);
+      if (para === "es") setEs(r);
+      else setEn(r);
       toast.success(`Traduzido para ${para.toUpperCase()}.`);
     } catch (e: any) {
       toast.error(e?.message ?? "Falha na tradução.");
-    } finally { setTranslating(null); }
+    } finally {
+      setTranslating(null);
+    }
   };
 
   return (
@@ -505,9 +778,15 @@ function PerguntaForm(props: {
         <div>
           <Label>Formato *</Label>
           <Select value={formato} onValueChange={(v) => setFormato(v as any)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {FORMATOS.map((f) => <SelectItem key={f.v} value={f.v}>{f.label}</SelectItem>)}
+              {FORMATOS.map((f) => (
+                <SelectItem key={f.v} value={f.v}>
+                  {f.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -522,11 +801,23 @@ function PerguntaForm(props: {
         <div className="flex items-center justify-between">
           <Label>Enunciado (PT) *</Label>
           <div className="flex gap-1">
-            <Button size="sm" variant="ghost" onClick={() => traduzir("es")} disabled={translating !== null || !pt.trim()}>
-              <Sparkles className="h-3.5 w-3.5 mr-1" /> {translating === "es" ? "Traduzindo…" : "Preencher ES"}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => traduzir("es")}
+              disabled={translating !== null || !pt.trim()}
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1" />{" "}
+              {translating === "es" ? "Traduzindo…" : "Preencher ES"}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => traduzir("en")} disabled={translating !== null || !pt.trim()}>
-              <Sparkles className="h-3.5 w-3.5 mr-1" /> {translating === "en" ? "Traduzindo…" : "Preencher EN"}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => traduzir("en")}
+              disabled={translating !== null || !pt.trim()}
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1" />{" "}
+              {translating === "en" ? "Traduzindo…" : "Preencher EN"}
             </Button>
           </div>
         </div>
@@ -543,12 +834,23 @@ function PerguntaForm(props: {
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" onClick={props.onCancel}>Cancelar</Button>
-        <Button disabled={!pt.trim() || props.pending} onClick={() => props.onSubmit({
-          id: props.initial.id, segmento_id: props.initial.segmento_id,
-          formato, obrigatoria: obrig,
-          enunciado_pt: pt, enunciado_es: es || null, enunciado_en: en || null,
-        })}>
+        <Button variant="outline" onClick={props.onCancel}>
+          Cancelar
+        </Button>
+        <Button
+          disabled={!pt.trim() || props.pending}
+          onClick={() =>
+            props.onSubmit({
+              id: props.initial.id,
+              segmento_id: props.initial.segmento_id,
+              formato,
+              obrigatoria: obrig,
+              enunciado_pt: pt,
+              enunciado_es: es || null,
+              enunciado_en: en || null,
+            })
+          }
+        >
           {props.pending ? "Salvando…" : "Salvar pergunta"}
         </Button>
       </DialogFooter>
@@ -574,9 +876,13 @@ function OpcaoForm(props: {
     try {
       setTranslating(para);
       const r = await props.onTraduzir(pt, para);
-      if (para === "es") setEs(r); else setEn(r);
-    } catch (e: any) { toast.error(e?.message ?? "Falha na tradução."); }
-    finally { setTranslating(null); }
+      if (para === "es") setEs(r);
+      else setEn(r);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha na tradução.");
+    } finally {
+      setTranslating(null);
+    }
   };
 
   return (
@@ -585,10 +891,20 @@ function OpcaoForm(props: {
         <div className="flex items-center justify-between">
           <Label>Rótulo (PT) *</Label>
           <div className="flex gap-1">
-            <Button size="sm" variant="ghost" onClick={() => traduzir("es")} disabled={translating !== null || !pt.trim()}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => traduzir("es")}
+              disabled={translating !== null || !pt.trim()}
+            >
               <Sparkles className="h-3.5 w-3.5 mr-1" /> ES
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => traduzir("en")} disabled={translating !== null || !pt.trim()}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => traduzir("en")}
+              disabled={translating !== null || !pt.trim()}
+            >
               <Sparkles className="h-3.5 w-3.5 mr-1" /> EN
             </Button>
           </div>
@@ -610,10 +926,23 @@ function OpcaoForm(props: {
         Ao selecionar, pedir campo "Descreva" (texto extra)
       </label>
       <DialogFooter>
-        <Button variant="outline" onClick={props.onCancel}>Cancelar</Button>
-        <Button disabled={!pt.trim() || props.pending} onClick={() => props.onSubmit({
-          id: props.initial.id, label_pt: pt, label_es: es || null, label_en: en || null, tem_descricao: descreva,
-        })}>{props.pending ? "Salvando…" : "Salvar opção"}</Button>
+        <Button variant="outline" onClick={props.onCancel}>
+          Cancelar
+        </Button>
+        <Button
+          disabled={!pt.trim() || props.pending}
+          onClick={() =>
+            props.onSubmit({
+              id: props.initial.id,
+              label_pt: pt,
+              label_es: es || null,
+              label_en: en || null,
+              tem_descricao: descreva,
+            })
+          }
+        >
+          {props.pending ? "Salvando…" : "Salvar opção"}
+        </Button>
       </DialogFooter>
     </div>
   );

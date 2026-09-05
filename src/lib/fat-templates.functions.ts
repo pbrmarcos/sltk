@@ -129,9 +129,7 @@ export const getFATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => getInput.parse(input))
   .handler(async ({ data, context }): Promise<FATTemplateDetalhe | null> => {
-    let q = context.supabase
-      .from(TBL)
-      .select("id, nome, versao, ativo, descricao");
+    let q = context.supabase.from(TBL).select("id, nome, versao, ativo, descricao");
     if (data.id) q = q.eq("id", data.id);
     else if (data.ativo) q = q.eq("ativo", true);
     else throw new Error("Informe id ou ativo");
@@ -139,7 +137,13 @@ export const getFATTemplate = createServerFn({ method: "POST" })
     if (error) throw friendlyDbError(error);
     if (!tpl) return null;
 
-    const tplRow = tpl as unknown as { id: string; nome: string; versao: number; ativo: boolean; descricao: string | null };
+    const tplRow = tpl as unknown as {
+      id: string;
+      nome: string;
+      versao: number;
+      ativo: boolean;
+      descricao: string | null;
+    };
 
     const { data: secs, error: sErr } = await context.supabase
       .from(TBL_SEC)
@@ -197,7 +201,7 @@ export const novaVersaoFATTemplate = createServerFn({ method: "POST" })
       .order("versao", { ascending: false })
       .limit(1)
       .maybeSingle();
-    const nextV = (((maxRow as { versao?: number } | null)?.versao) ?? 0) + 1;
+    const nextV = ((maxRow as { versao?: number } | null)?.versao ?? 0) + 1;
 
     const { data: novo, error } = await context.supabase
       .from(TBL)
@@ -220,7 +224,12 @@ export const novaVersaoFATTemplate = createServerFn({ method: "POST" })
         .select("id, ordem, titulo, descricao")
         .eq("template_id", data.base_id)
         .order("ordem");
-      for (const s of (secs ?? []) as Array<{ id: string; ordem: number; titulo: string; descricao: string | null }>) {
+      for (const s of (secs ?? []) as Array<{
+        id: string;
+        ordem: number;
+        titulo: string;
+        descricao: string | null;
+      }>) {
         const { data: novaSec } = await context.supabase
           .from(TBL_SEC)
           .insert({
@@ -234,13 +243,17 @@ export const novaVersaoFATTemplate = createServerFn({ method: "POST" })
         const novaSecId = (novaSec as unknown as { id: string }).id;
         const { data: items } = await context.supabase
           .from(TBL_ITEM)
-          .select("ordem, label, tipo, obrigatorio, permite_anexo, permite_comentario, requer_foto_nok, ajuda, opcoes")
+          .select(
+            "ordem, label, tipo, obrigatorio, permite_anexo, permite_comentario, requer_foto_nok, ajuda, opcoes",
+          )
           .eq("secao_id", s.id)
           .order("ordem");
         if (items && items.length > 0) {
-          await context.supabase.from(TBL_ITEM).insert(
-            (items as Array<object>).map((it) => ({ ...it, secao_id: novaSecId })) as never,
-          );
+          await context.supabase
+            .from(TBL_ITEM)
+            .insert(
+              (items as Array<object>).map((it) => ({ ...it, secao_id: novaSecId })) as never,
+            );
         }
       }
     }

@@ -12,12 +12,12 @@ export type ShareTipo = "fat" | "sat";
 export type ShareScope = "checklist" | "assinatura" | "identificacao" | "medicoes";
 
 export type ShareTokenPayload = {
-  jti: string;       // identificador único do token (referenciado pela tabela)
+  jti: string; // identificador único do token (referenciado pela tabela)
   tipo: ShareTipo;
-  rid: string;       // relatorio id (uuid)
+  rid: string; // relatorio id (uuid)
   iat: number;
   exp: number;
-  iss: string;       // user id do emissor
+  iss: string; // user id do emissor
   scope: ShareScope[];
 };
 
@@ -31,7 +31,10 @@ function b64urlDecode(s: string): Buffer {
 
 function getSecret(): string {
   const s = process.env.RELATORIO_SHARE_SECRET;
-  if (!s) throw new Error("Compartilhamento externo de relatórios indisponível — a integração não está configurada.");
+  if (!s)
+    throw new Error(
+      "Compartilhamento externo de relatórios indisponível — a integração não está configurada.",
+    );
   return s;
 }
 
@@ -98,4 +101,3 @@ export function verifyShareTokenSignature(token: string): ShareTokenPayload {
   }
   return payload;
 }
-

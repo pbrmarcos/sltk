@@ -33,7 +33,10 @@ const PRINT_CSS = `
 function KnowHowPrint() {
   const { slug } = Route.useParams();
   const getFn = useServerFn(getItemBySlug);
-  const item = useQuery({ queryKey: ["kh", "item", slug], queryFn: () => getFn({ data: { slug } }) });
+  const item = useQuery({
+    queryKey: ["kh", "item", slug],
+    queryFn: () => getFn({ data: { slug } }),
+  });
 
   useEffect(() => {
     if (item.data) {
@@ -44,7 +47,9 @@ function KnowHowPrint() {
   }, [item.data]);
 
   if (item.isLoading) {
-    return <p className="p-10 text-sm text-[var(--text-muted)]">Preparando versão para impressão…</p>;
+    return (
+      <p className="p-10 text-sm text-[var(--text-muted)]">Preparando versão para impressão…</p>
+    );
   }
   if (item.error || !item.data) {
     return (
@@ -62,7 +67,10 @@ function KnowHowPrint() {
     <div className="kh-print-root min-h-screen bg-[var(--bg-elevated)] py-8 print:bg-white print:py-0">
       <style dangerouslySetInnerHTML={{ __html: PRINT_CSS }} />
 
-      <div className="mx-auto mb-4 flex max-w-[820px] items-center justify-between px-4" data-print-hide>
+      <div
+        className="mx-auto mb-4 flex max-w-[820px] items-center justify-between px-4"
+        data-print-hide
+      >
         <Button asChild variant="ghost" size="sm">
           <Link to="/know-how/$slug" params={{ slug }}>
             <ArrowLeft className="mr-1.5 h-4 w-4" />
@@ -89,10 +97,14 @@ function KnowHowPrint() {
             <span>Atualizado em {new Date(it.atualizado_em).toLocaleDateString("pt-BR")}</span>
           </div>
           {it.tags?.length > 0 && (
-            <p className="mt-2 text-[11px] text-neutral-500">Tags: {it.tags.map((t) => `#${t}`).join("  ")}</p>
+            <p className="mt-2 text-[11px] text-neutral-500">
+              Tags: {it.tags.map((t) => `#${t}`).join("  ")}
+            </p>
           )}
           {it.papeis_alvo?.length > 0 && (
-            <p className="mt-1 text-[11px] text-neutral-500">Perfis-alvo: {it.papeis_alvo.join(", ")}</p>
+            <p className="mt-1 text-[11px] text-neutral-500">
+              Perfis-alvo: {it.papeis_alvo.join(", ")}
+            </p>
           )}
         </header>
 
@@ -101,7 +113,9 @@ function KnowHowPrint() {
             {it.corpo}
           </div>
         ) : (
-          <p className="text-sm text-neutral-500">Este material não possui corpo em texto (conteúdo em mídia anexa).</p>
+          <p className="text-sm text-neutral-500">
+            Este material não possui corpo em texto (conteúdo em mídia anexa).
+          </p>
         )}
 
         {it.midia_url && (
@@ -111,7 +125,8 @@ function KnowHowPrint() {
         )}
 
         <footer className="kh-print-avoid-break mt-8 border-t border-neutral-300 pt-3 text-[10px] text-neutral-500">
-          Documento gerado pelo Solutek Hub · uso interno · confira sempre a versão vigente em /know-how/{it.slug}
+          Documento gerado pelo Solutek Hub · uso interno · confira sempre a versão vigente em
+          /know-how/{it.slug}
         </footer>
       </article>
     </div>

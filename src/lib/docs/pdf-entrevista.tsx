@@ -17,64 +17,143 @@ const styles = (accent: string) =>
     page: { ...CHROME_PAGE_STYLE },
     coverWrap: { marginTop: 8, marginBottom: 12 },
     coverTitle: { fontSize: 22, fontFamily: TOKENS.fontBold, color: TOKENS.text },
-    coverAccentBar: { width: 56, height: 3, backgroundColor: accent, marginTop: 12, marginBottom: 14 },
+    coverAccentBar: {
+      width: 56,
+      height: 3,
+      backgroundColor: accent,
+      marginTop: 12,
+      marginBottom: 14,
+    },
     coverSubtitle: { fontSize: 11, color: TOKENS.muted },
     keyGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 8, marginBottom: 6 },
     keyCell: { width: "50%", marginBottom: 5, paddingRight: 8 },
-    keyLabel: { fontSize: 7.5, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
+    keyLabel: {
+      fontSize: 7.5,
+      color: TOKENS.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
     keyValue: { fontSize: 9.5, color: TOKENS.text },
     sectionTitle: {
-      fontSize: 12, fontFamily: TOKENS.fontBold, color: TOKENS.text,
-      marginTop: 16, marginBottom: 8, paddingBottom: 4,
-      borderBottomWidth: 1, borderBottomColor: accent, borderBottomStyle: "solid",
+      fontSize: 12,
+      fontFamily: TOKENS.fontBold,
+      color: TOKENS.text,
+      marginTop: 16,
+      marginBottom: 8,
+      paddingBottom: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: accent,
+      borderBottomStyle: "solid",
     },
     qBlock: {
-      marginBottom: 10, padding: 8,
-      borderWidth: 0.5, borderColor: TOKENS.border, borderStyle: "solid",
-      borderRadius: 3, backgroundColor: TOKENS.zebra,
+      marginBottom: 10,
+      padding: 8,
+      borderWidth: 0.5,
+      borderColor: TOKENS.border,
+      borderStyle: "solid",
+      borderRadius: 3,
+      backgroundColor: TOKENS.zebra,
     },
-    qNum: { fontSize: 7.5, color: TOKENS.muted, marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.4 },
+    qNum: {
+      fontSize: 7.5,
+      color: TOKENS.muted,
+      marginBottom: 2,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
     qText: { fontSize: 10, fontFamily: TOKENS.fontBold, color: TOKENS.text, marginBottom: 6 },
     aText: { fontSize: 9.5, color: TOKENS.text, marginBottom: 2 },
     aBullet: { fontSize: 9.5, color: TOKENS.text, marginLeft: 10 },
     extra: {
-      marginTop: 4, paddingLeft: 8, fontSize: 8.5, color: TOKENS.muted,
-      borderLeftWidth: 2, borderLeftColor: accent, borderLeftStyle: "solid",
+      marginTop: 4,
+      paddingLeft: 8,
+      fontSize: 8.5,
+      color: TOKENS.muted,
+      borderLeftWidth: 2,
+      borderLeftColor: accent,
+      borderLeftStyle: "solid",
     },
     empty: { fontSize: 9.5, color: TOKENS.muted, fontStyle: "italic" },
   });
 
-const L: Record<Idioma, {
-  title: string; subtitle: string;
-  ident: string; codigo: string; segmento: string; idioma: string;
-  lead: string; empresa: string; email: string; pilar: string;
-  criada: string; respondida: string;
-  respostas: string; semRespostas: string;
-  pergunta: string; semResposta: string; observacao: string;
-}> = {
+const L: Record<
+  Idioma,
+  {
+    title: string;
+    subtitle: string;
+    ident: string;
+    codigo: string;
+    segmento: string;
+    idioma: string;
+    lead: string;
+    empresa: string;
+    email: string;
+    pilar: string;
+    criada: string;
+    respondida: string;
+    respostas: string;
+    semRespostas: string;
+    pergunta: string;
+    semResposta: string;
+    observacao: string;
+  }
+> = {
   pt: {
-    title: "Entrevista Técnica", subtitle: "Respostas do lead",
-    ident: "Identificação", codigo: "Código", segmento: "Segmento", idioma: "Idioma",
-    lead: "Lead", empresa: "Empresa", email: "E-mail", pilar: "Pilar (criador)",
-    criada: "Criada em", respondida: "Respondida em",
-    respostas: "Respostas", semRespostas: "Sem respostas registradas.",
-    pergunta: "Pergunta", semResposta: "— não respondida —", observacao: "Observação",
+    title: "Entrevista Técnica",
+    subtitle: "Respostas do lead",
+    ident: "Identificação",
+    codigo: "Código",
+    segmento: "Segmento",
+    idioma: "Idioma",
+    lead: "Lead",
+    empresa: "Empresa",
+    email: "E-mail",
+    pilar: "Pilar (criador)",
+    criada: "Criada em",
+    respondida: "Respondida em",
+    respostas: "Respostas",
+    semRespostas: "Sem respostas registradas.",
+    pergunta: "Pergunta",
+    semResposta: "— não respondida —",
+    observacao: "Observação",
   },
   es: {
-    title: "Entrevista Técnica", subtitle: "Respuestas del lead",
-    ident: "Identificación", codigo: "Código", segmento: "Segmento", idioma: "Idioma",
-    lead: "Lead", empresa: "Empresa", email: "E-mail", pilar: "Pilar (creador)",
-    criada: "Creada el", respondida: "Respondida el",
-    respostas: "Respuestas", semRespostas: "Sin respuestas registradas.",
-    pergunta: "Pregunta", semResposta: "— sin respuesta —", observacao: "Observación",
+    title: "Entrevista Técnica",
+    subtitle: "Respuestas del lead",
+    ident: "Identificación",
+    codigo: "Código",
+    segmento: "Segmento",
+    idioma: "Idioma",
+    lead: "Lead",
+    empresa: "Empresa",
+    email: "E-mail",
+    pilar: "Pilar (creador)",
+    criada: "Creada el",
+    respondida: "Respondida el",
+    respostas: "Respuestas",
+    semRespostas: "Sin respuestas registradas.",
+    pergunta: "Pregunta",
+    semResposta: "— sin respuesta —",
+    observacao: "Observación",
   },
   en: {
-    title: "Technical Interview", subtitle: "Lead answers",
-    ident: "Identification", codigo: "Code", segmento: "Segment", idioma: "Language",
-    lead: "Lead", empresa: "Company", email: "E-mail", pilar: "Pillar (owner)",
-    criada: "Created at", respondida: "Answered at",
-    respostas: "Answers", semRespostas: "No answers recorded.",
-    pergunta: "Question", semResposta: "— not answered —", observacao: "Note",
+    title: "Technical Interview",
+    subtitle: "Lead answers",
+    ident: "Identification",
+    codigo: "Code",
+    segmento: "Segment",
+    idioma: "Language",
+    lead: "Lead",
+    empresa: "Company",
+    email: "E-mail",
+    pilar: "Pillar (owner)",
+    criada: "Created at",
+    respondida: "Answered at",
+    respostas: "Answers",
+    semRespostas: "No answers recorded.",
+    pergunta: "Question",
+    semResposta: "— not answered —",
+    observacao: "Note",
   },
 };
 
@@ -126,7 +205,9 @@ export function EntrevistaPdf(props: EntrevistaPdfInput) {
         <View style={s.coverWrap}>
           <Text style={s.coverTitle}>{t.title}</Text>
           <View style={s.coverAccentBar} />
-          <Text style={s.coverSubtitle}>{t.subtitle} · {props.segmento_nome}</Text>
+          <Text style={s.coverSubtitle}>
+            {t.subtitle} · {props.segmento_nome}
+          </Text>
         </View>
 
         <Text style={s.sectionTitle}>{t.ident}</Text>
@@ -175,15 +256,21 @@ export function EntrevistaPdf(props: EntrevistaPdfInput) {
             const hasAny = opts.length > 0 || hasText;
             return (
               <View key={`${r.numero}-${r.enunciado}`} style={s.qBlock} wrap={false}>
-                <Text style={s.qNum}>{t.pergunta} {r.numero}</Text>
+                <Text style={s.qNum}>
+                  {t.pergunta} {r.numero}
+                </Text>
                 <Text style={s.qText}>{r.enunciado}</Text>
                 {opts.map((o, i) => (
-                  <Text key={i} style={s.aBullet}>• {o}</Text>
+                  <Text key={i} style={s.aBullet}>
+                    • {o}
+                  </Text>
                 ))}
                 {hasText && <Text style={s.aText}>{r.valor_text}</Text>}
                 {!hasAny && <Text style={s.empty}>{t.semResposta}</Text>}
                 {r.descricao_extra ? (
-                  <Text style={s.extra}>{t.observacao}: {r.descricao_extra}</Text>
+                  <Text style={s.extra}>
+                    {t.observacao}: {r.descricao_extra}
+                  </Text>
                 ) : null}
               </View>
             );

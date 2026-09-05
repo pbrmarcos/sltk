@@ -18,7 +18,14 @@ type Hit =
       tags: string[];
       atualizadoEm: string;
     }
-  | { kind: "faq"; category: string; id: string; question: string; excerpt: string; tags: string[] };
+  | {
+      kind: "faq";
+      category: string;
+      id: string;
+      question: string;
+      excerpt: string;
+      tags: string[];
+    };
 
 type SortMode = "relevance" | "updated" | "az";
 
@@ -50,7 +57,11 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "az", label: "A → Z" },
 ];
 
-export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact", maxResults = 10 }: DocSearchProps) {
+export function DocSearch({
+  placeholder = "Buscar na ajuda…",
+  mode = "compact",
+  maxResults = 10,
+}: DocSearchProps) {
   const [q, setQ] = useState("");
   const [moduleFilter, setModuleFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState<"all" | DocTipo | "faq">("all");
@@ -89,7 +100,9 @@ export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact"
         const moduleOk = moduleFilter === "all" || item.category === moduleFilter;
         const typeOk =
           typeFilter === "all" ||
-          (typeFilter === "faq" ? item.kind === "faq" : item.kind === "article" && item.tipo === typeFilter);
+          (typeFilter === "faq"
+            ? item.kind === "faq"
+            : item.kind === "article" && item.tipo === typeFilter);
         const nivelOk =
           nivelFilter === "all" || (item.kind === "article" && item.nivel === nivelFilter);
         return moduleOk && typeOk && nivelOk;
@@ -143,7 +156,11 @@ export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact"
   const results = sortItems(rawResults).slice(0, limit);
 
   const hasActiveFilters =
-    !!q.trim() || moduleFilter !== "all" || typeFilter !== "all" || nivelFilter !== "all" || sort !== "relevance";
+    !!q.trim() ||
+    moduleFilter !== "all" ||
+    typeFilter !== "all" ||
+    nivelFilter !== "all" ||
+    sort !== "relevance";
 
   const resetFilters = () => {
     setQ("");
@@ -152,7 +169,6 @@ export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact"
     setNivelFilter("all");
     setSort("relevance");
   };
-
 
   const renderHitContent = (r: Hit) => {
     const cat = getCategory(r.category);
@@ -167,8 +183,12 @@ export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact"
         </div>
         <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-muted)]">{r.excerpt}</p>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
-          <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">{cat?.label ?? r.category}</span>
-          {r.kind === "article" && <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">{r.nivel}</span>}
+          <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">
+            {cat?.label ?? r.category}
+          </span>
+          {r.kind === "article" && (
+            <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5">{r.nivel}</span>
+          )}
         </div>
       </>
     );
@@ -287,7 +307,6 @@ export function DocSearch({ placeholder = "Buscar na ajuda…", mode = "compact"
             </select>
           </label>
         </div>
-
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">

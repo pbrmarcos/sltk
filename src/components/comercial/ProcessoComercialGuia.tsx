@@ -9,7 +9,13 @@ import type { PipelineStage } from "@/lib/oportunidades.functions";
 
 const STORAGE_KEY = "comercial-guia-aberto";
 
-export function ProcessoComercialGuia({ className, destaque }: { className?: string; destaque?: string }) {
+export function ProcessoComercialGuia({
+  className,
+  destaque,
+}: {
+  className?: string;
+  destaque?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -63,7 +69,8 @@ export function ProcessoComercialGuia({ className, destaque }: { className?: str
                     size="sm"
                     className={cn(
                       "h-7 bg-white text-xs",
-                      destaque === etapa.id && "border-primary text-primary font-medium bg-primary/5",
+                      destaque === etapa.id &&
+                        "border-primary text-primary font-medium bg-primary/5",
                     )}
                   >
                     {etapa.titulo}

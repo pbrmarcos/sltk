@@ -93,7 +93,9 @@ export function AgendaPrefsCard() {
               value={form.agenda_provider}
               onValueChange={(v) => set("agenda_provider", v as AgendaPrefs["agenda_provider"])}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="google">Google Agenda (Workspace)</SelectItem>
                 <SelectItem value="teams">Microsoft Teams / Outlook</SelectItem>
@@ -108,10 +110,14 @@ export function AgendaPrefsCard() {
               value={String(form.agenda_duracao_min)}
               onValueChange={(v) => set("agenda_duracao_min", Number(v))}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {DURACOES.map((d) => (
-                  <SelectItem key={d} value={String(d)}>{d} min</SelectItem>
+                  <SelectItem key={d} value={String(d)}>
+                    {d} min
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -162,10 +168,14 @@ export function AgendaPrefsCard() {
           <div className="space-y-1.5">
             <Label>Fuso horário</Label>
             <Select value={form.agenda_fuso} onValueChange={(v) => set("agenda_fuso", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {FUSOS.map((f) => (
-                  <SelectItem key={f} value={f}>{f}</SelectItem>
+                  <SelectItem key={f} value={f}>
+                    {f}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

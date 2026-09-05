@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { ArticleRenderer } from "./ArticleRenderer";
 import { CATEGORIES, getCategory } from "@/content/docs/types";
 import type { FaqEntry } from "@/content/docs/types";
@@ -68,9 +73,17 @@ export function FaqAccordion({ items }: { items: FaqEntry[] }) {
               <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                 {getCategory(c.id)?.label}
               </h2>
-              <Accordion type="multiple" className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+              <Accordion
+                type="multiple"
+                className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]"
+              >
                 {entries.map((f) => (
-                  <AccordionItem key={f.id} value={f.id} id={f.id} className="border-b border-[var(--bg-border)] last:border-b-0 px-4">
+                  <AccordionItem
+                    key={f.id}
+                    value={f.id}
+                    id={f.id}
+                    className="border-b border-[var(--bg-border)] last:border-b-0 px-4"
+                  >
                     <AccordionTrigger className="text-left text-sm font-medium text-[var(--text-primary)]">
                       {f.question}
                     </AccordionTrigger>

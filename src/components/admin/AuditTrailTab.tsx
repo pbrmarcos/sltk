@@ -170,7 +170,6 @@ export function AuditTrailTab() {
     }
   };
 
-
   return (
     <>
       <Toolbar>
@@ -217,10 +216,7 @@ export function AuditTrailTab() {
             ))}
           </SelectContent>
         </Select>
-        <Select
-          value={filters.action}
-          onValueChange={(v) => set("action", v as Filters["action"])}
-        >
+        <Select value={filters.action} onValueChange={(v) => set("action", v as Filters["action"])}>
           <SelectTrigger className="h-9 w-[140px] text-[12.5px]">
             <SelectValue />
           </SelectTrigger>
@@ -311,16 +307,18 @@ export function AuditTrailTab() {
                     {new Date(r.created_at).toLocaleString("pt-BR")}
                   </TableCell>
                   <TableCell className="text-[12px]">
-                    {r.user_name ?? r.user_email ?? (
-                      r.user_id ? (
+                    {r.user_name ??
+                      r.user_email ??
+                      (r.user_id ? (
                         <span className="font-mono text-[11px]">{r.user_id.slice(0, 8)}</span>
                       ) : (
                         <span className="text-[var(--text-muted)]">Sistema</span>
-                      )
-                    )}
+                      ))}
                   </TableCell>
                   <TableCell>{r.table_name}</TableCell>
-                  <TableCell className="font-mono text-[11px]">{r.record_id.slice(0, 12)}</TableCell>
+                  <TableCell className="font-mono text-[11px]">
+                    {r.record_id.slice(0, 12)}
+                  </TableCell>
                   <TableCell>
                     <ActionBadge action={r.action} />
                   </TableCell>
@@ -371,7 +369,10 @@ export function AuditTrailTab() {
           </DialogHeader>
           {selected && (
             <div className="space-y-3 text-[12.5px]">
-              <Row label="Usuário" value={selected.user_name ?? selected.user_email ?? selected.user_id ?? "—"} />
+              <Row
+                label="Usuário"
+                value={selected.user_name ?? selected.user_email ?? selected.user_id ?? "—"}
+              />
               <Row label="Tabela" value={selected.table_name} />
               <Row label="Registro" value={selected.record_id} mono />
               <Row label="Ação" value={selected.action} />

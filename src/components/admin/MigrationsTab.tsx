@@ -2,7 +2,14 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, PlayCircle, CheckCircle2, ChevronDown, ChevronRight, TriangleAlert } from "lucide-react";
+import {
+  Loader2,
+  PlayCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  TriangleAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -67,9 +74,8 @@ export function MigrationsTab() {
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 text-sm text-[var(--text-muted)]">
-        Arquivos em <code>supabase/pending-migrations/</code>. Ao aplicar, o SQL é
-        executado via Management API do Supabase e registrado em{" "}
-        <code>public._migrations_applied</code>.{" "}
+        Arquivos em <code>supabase/pending-migrations/</code>. Ao aplicar, o SQL é executado via
+        Management API do Supabase e registrado em <code>public._migrations_applied</code>.{" "}
         <span className="text-[var(--text-primary)]">{pendentes.length} pendente(s)</span>.
       </div>
 
@@ -89,7 +95,11 @@ export function MigrationsTab() {
                     className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     aria-label="Ver SQL"
                   >
-                    {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    {open ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
                   </button>
                   {applied ? (
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--success)]" />
@@ -119,7 +129,7 @@ export function MigrationsTab() {
               </div>
               {open && (
                 <pre className="max-h-80 overflow-auto border-t border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 text-xs">
-{m.sql}
+                  {m.sql}
                 </pre>
               )}
             </div>
@@ -136,12 +146,13 @@ export function MigrationsTab() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <TriangleAlert className="h-4 w-4 text-[var(--warning)]" /> Aplicar migration em produção
+              <TriangleAlert className="h-4 w-4 text-[var(--warning)]" /> Aplicar migration em
+              produção
             </AlertDialogTitle>
             <AlertDialogDescription>
-              O SQL de <code className="font-mono">{confirmName}</code> será executado diretamente no
-              banco de produção via Management API, sem possibilidade de desfazer automaticamente. A
-              aplicação fica registrada em Auditoria com o seu usuário. Confirma?
+              O SQL de <code className="font-mono">{confirmName}</code> será executado diretamente
+              no banco de produção via Management API, sem possibilidade de desfazer
+              automaticamente. A aplicação fica registrada em Auditoria com o seu usuário. Confirma?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

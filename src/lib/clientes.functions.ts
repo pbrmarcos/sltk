@@ -47,11 +47,20 @@ export const listPaises = createServerFn({ method: "GET" })
 
 const listInput = z.object({
   q: z.string().max(120).optional().default(""),
-  status: z.enum(["todos", ...CLIENTE_STATUS]).optional().default("todos"),
-  lifecycle: z.enum(["todos", "suspect", "prospect", "cliente", "inativo"]).optional().default("todos"),
+  status: z
+    .enum(["todos", ...CLIENTE_STATUS])
+    .optional()
+    .default("todos"),
+  lifecycle: z
+    .enum(["todos", "suspect", "prospect", "cliente", "inativo"])
+    .optional()
+    .default("todos"),
   pais: z.string().length(2).or(z.literal("todos")).optional().default("todos"),
   page: z.number().int().min(1).max(10_000).optional().default(1),
-  pageSize: z.union([z.literal(25), z.literal(50), z.literal(100)]).optional().default(25),
+  pageSize: z
+    .union([z.literal(25), z.literal(50), z.literal(100)])
+    .optional()
+    .default(25),
 });
 
 export const listClientes = createServerFn({ method: "POST" })
@@ -85,16 +94,16 @@ export const listClientes = createServerFn({ method: "POST" })
 
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, count, error } = await q
-      .order("codigo", { ascending: true })
-      .range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("codigo", { ascending: true }).range(from, to);
     if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
-export type ClienteListRow = NonNullable<
-  Awaited<ReturnType<typeof listClientes>>
->["rows"][number];
+export type ClienteListRow = NonNullable<Awaited<ReturnType<typeof listClientes>>>["rows"][number];
 
 /* ===================== getCliente ===================== */
 
@@ -195,7 +204,6 @@ export const createCliente = createServerFn({ method: "POST" })
       (err as any).field = "documento_fiscal_numero";
       throw err;
     }
-
 
     const { data: dup } = await admin
       .from("clientes")
@@ -372,7 +380,9 @@ export const updateCliente = createServerFn({ method: "POST" })
         .neq("id", data.id)
         .maybeSingle();
       if (dup) {
-        const err = new Error(`Já existe um cliente com este ${pais.documento_nome} (${dup.codigo}).`);
+        const err = new Error(
+          `Já existe um cliente com este ${pais.documento_nome} (${dup.codigo}).`,
+        );
         (err as any).code = "documento_duplicado";
         (err as any).field = "documento_fiscal_numero";
         throw err;
@@ -383,7 +393,10 @@ export const updateCliente = createServerFn({ method: "POST" })
 
     patch.updated_by = context.userId;
 
-    const { error: upErr } = await admin.from("clientes").update(patch as never).eq("id", data.id);
+    const { error: upErr } = await admin
+      .from("clientes")
+      .update(patch as never)
+      .eq("id", data.id);
     if (upErr) throw friendlyDbError(upErr);
 
     // Diff por campo
@@ -578,7 +591,12 @@ export const listClienteTimeline = createServerFn({ method: "POST" })
     for (const o of opps ?? []) {
       items.push({
         id: `opp-${o.id}`,
-        tipo: o.pipeline_stage === "ganho" ? "oportunidade_ganha" : o.pipeline_stage === "perdido" ? "oportunidade_perdida" : "oportunidade",
+        tipo:
+          o.pipeline_stage === "ganho"
+            ? "oportunidade_ganha"
+            : o.pipeline_stage === "perdido"
+              ? "oportunidade_perdida"
+              : "oportunidade",
         titulo: `Oportunidade ${o.codigo ?? ""} — ${o.titulo}`,
         descricao: `Estágio: ${o.pipeline_stage}`,
         ts: o.updated_at ?? o.created_at,
@@ -726,9 +744,7 @@ export const addClienteSocio = createServerFn({ method: "POST" })
 
 export const removerClienteSocio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const admin = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
     const { data: row, error: gErr } = await admin

@@ -12,7 +12,7 @@ const STATUS = z.enum(["pendente", "lido"]);
 
 async function requireAdminOrManager(userId: string) {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
@@ -32,14 +32,20 @@ export type FormInboxStatusRow = {
 
 export const listFormInboxStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ entity_type: ENTITY }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ entity_type: ENTITY }).parse(i))
   .handler(async ({ data, context }): Promise<FormInboxStatusRow[]> => {
     const admin = (await requireAdminOrManager(context.userId)) as unknown as {
       from: (t: string) => {
-        select: (c: string) => { eq: (col: string, val: string) => Promise<{ data: FormInboxStatusRow[] | null; error: { message: string } | null }> };
-        upsert: (row: Record<string, unknown>, opts?: { onConflict?: string }) => Promise<{ error: { message: string } | null }>;
+        select: (c: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => Promise<{ data: FormInboxStatusRow[] | null; error: { message: string } | null }>;
+        };
+        upsert: (
+          row: Record<string, unknown>,
+          opts?: { onConflict?: string },
+        ) => Promise<{ error: { message: string } | null }>;
       };
     };
     const { data: rows, error } = await admin
@@ -64,7 +70,10 @@ export const setFormInboxStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = (await requireAdminOrManager(context.userId)) as unknown as {
       from: (t: string) => {
-        upsert: (row: Record<string, unknown>, opts?: { onConflict?: string }) => Promise<{ error: { message: string } | null }>;
+        upsert: (
+          row: Record<string, unknown>,
+          opts?: { onConflict?: string },
+        ) => Promise<{ error: { message: string } | null }>;
       };
     };
     const { error } = await admin.from("form_inbox_status").upsert(

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { PageDocLink } from "@/components/ajuda/PageDocLink";
 
-
 export type Crumb = { label: string; href?: string };
 
 export type PageHeaderProps = {
@@ -39,7 +38,10 @@ export function PageHeader({ breadcrumbs, title, subtitle, actions }: PageHeader
                         </BreadcrumbPage>
                       ) : (
                         <BreadcrumbLink asChild>
-                          <Link to={c.href} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                          <Link
+                            to={c.href}
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                          >
                             {c.label}
                           </Link>
                         </BreadcrumbLink>
@@ -60,15 +62,12 @@ export function PageHeader({ breadcrumbs, title, subtitle, actions }: PageHeader
         </div>
       </div>
 
-
       {/* Title block in content area */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
           {title}
         </h1>
-        {subtitle && (
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">{subtitle}</p>
-        )}
+        {subtitle && <p className="mt-1 text-sm text-[var(--text-secondary)]">{subtitle}</p>}
       </div>
     </header>
   );

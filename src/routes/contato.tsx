@@ -88,7 +88,12 @@ function ContactInfo() {
 
   const cards: { icon: typeof MapPin; label: string; value: string; href?: string }[] = [
     { icon: MapPin, label: t.footer.address.split(",")[0] || "Endereço", value: address },
-    { icon: Phone, label: "Telefone", value: phone, href: `tel:${phone.replace(/\s|\(|\)|-/g, "")}` },
+    {
+      icon: Phone,
+      label: "Telefone",
+      value: phone,
+      href: `tel:${phone.replace(/\s|\(|\)|-/g, "")}`,
+    },
     {
       icon: MessageCircle,
       label: "WhatsApp",

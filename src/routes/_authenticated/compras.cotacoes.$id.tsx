@@ -8,7 +8,13 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   escolherVencedor,
@@ -34,11 +40,35 @@ type Convite = {
   fornecedor_id: string;
   token: string;
   status: string;
-  fornecedores?: { codigo: string; nome_fantasia: string; razao_social: string; pais: string } | null;
+  fornecedores?: {
+    codigo: string;
+    nome_fantasia: string;
+    razao_social: string;
+    pais: string;
+  } | null;
 };
-type Item = { id: string; descricao: string; part_number: string | null; quantidade: number; unidade: string };
-type Proposta = { id: string; convite_id: string; moeda: string; valido_ate: string | null; total: number | null; status: string };
-type PropostaItem = { id: string; proposta_id: string; cotacao_item_id: string; preco_unitario: number; prazo_entrega_dias: number | null };
+type Item = {
+  id: string;
+  descricao: string;
+  part_number: string | null;
+  quantidade: number;
+  unidade: string;
+};
+type Proposta = {
+  id: string;
+  convite_id: string;
+  moeda: string;
+  valido_ate: string | null;
+  total: number | null;
+  status: string;
+};
+type PropostaItem = {
+  id: string;
+  proposta_id: string;
+  cotacao_item_id: string;
+  preco_unitario: number;
+  prazo_entrega_dias: number | null;
+};
 type Escolha = { cotacao_item_id: string; proposta_item_id: string; justificativa: string | null };
 
 function CotacaoDetailPage() {
@@ -159,7 +189,9 @@ function CotacaoDetailPage() {
           {COTACAO_STATUS_LABEL[cot.status]}
         </Badge>
         <span className="text-[var(--text-muted)]">Moeda: {cot.moeda}</span>
-        {cot.incoterm && <span className="text-[var(--text-muted)]">• Incoterm: {cot.incoterm}</span>}
+        {cot.incoterm && (
+          <span className="text-[var(--text-muted)]">• Incoterm: {cot.incoterm}</span>
+        )}
         {cot.prazo_resposta && (
           <span className="text-[var(--text-muted)]">
             • Prazo: {new Date(cot.prazo_resposta).toLocaleDateString("pt-BR")}
@@ -203,7 +235,9 @@ function CotacaoDetailPage() {
                     <td className="p-2 capitalize">{c.status}</td>
                     <td className="p-2">{p ? p.status : "—"}</td>
                     <td className="p-2 font-mono">
-                      {p?.total != null ? p.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) : "—"}
+                      {p?.total != null
+                        ? p.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+                        : "—"}
                     </td>
                     <td className="p-2">
                       <div className="flex items-center gap-1">
@@ -255,11 +289,15 @@ function CotacaoDetailPage() {
                   return (
                     <th key={p.id} className="p-2 min-w-[180px]">
                       <div className="font-medium">
-                        {conv?.fornecedores?.nome_fantasia || conv?.fornecedores?.razao_social || "—"}
+                        {conv?.fornecedores?.nome_fantasia ||
+                          conv?.fornecedores?.razao_social ||
+                          "—"}
                       </div>
                       <div className="text-[11px] text-[var(--text-muted)]">
                         {p.moeda}
-                        {p.valido_ate ? ` • até ${new Date(p.valido_ate).toLocaleDateString("pt-BR")}` : ""}
+                        {p.valido_ate
+                          ? ` • até ${new Date(p.valido_ate).toLocaleDateString("pt-BR")}`
+                          : ""}
                       </div>
                     </th>
                   );
@@ -288,7 +326,12 @@ function CotacaoDetailPage() {
                     </td>
                     {propostas.map((p) => {
                       const pi = itemPriceMap.get(`${p.id}:${it.id}`);
-                      if (!pi) return <td key={p.id} className="p-2 text-[var(--text-muted)]">—</td>;
+                      if (!pi)
+                        return (
+                          <td key={p.id} className="p-2 text-[var(--text-muted)]">
+                            —
+                          </td>
+                        );
                       const isMin = min != null && Number(pi.preco_unitario) === min;
                       const isWinner = escolha?.proposta_item_id === pi.id;
                       return (
@@ -331,7 +374,10 @@ function CotacaoDetailPage() {
               })}
               {itens.length === 0 && (
                 <tr>
-                  <td colSpan={2 + propostas.length} className="p-6 text-center text-sm text-[var(--text-muted)]">
+                  <td
+                    colSpan={2 + propostas.length}
+                    className="p-6 text-center text-sm text-[var(--text-muted)]"
+                  >
                     Sem itens.
                   </td>
                 </tr>
@@ -360,7 +406,13 @@ function CotacaoDetailPage() {
               </thead>
               <tbody>
                 {(fornsQ.data ?? []).map((f) => {
-                  const it = f as { id: string; codigo: string; nome_fantasia: string; razao_social: string; pais: string };
+                  const it = f as {
+                    id: string;
+                    codigo: string;
+                    nome_fantasia: string;
+                    razao_social: string;
+                    pais: string;
+                  };
                   const checked = fornSel.has(it.id);
                   return (
                     <tr key={it.id} className="border-t">

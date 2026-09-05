@@ -27,8 +27,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRestoreOportunidade, useUpdateOportunidade, useUpdateStage } from "@/lib/oportunidades.queries";
-import { RotateCcw, XCircle, Paperclip, MessageSquare, FileText, Upload, Trash2, ExternalLink, Loader2, Sparkles, UserPlus, Clock, TrendingUp, Calendar, Copy, Mail, Phone, Building2, Trophy } from "lucide-react";
+import {
+  useRestoreOportunidade,
+  useUpdateOportunidade,
+  useUpdateStage,
+} from "@/lib/oportunidades.queries";
+import {
+  RotateCcw,
+  XCircle,
+  Paperclip,
+  MessageSquare,
+  FileText,
+  Upload,
+  Trash2,
+  ExternalLink,
+  Loader2,
+  Sparkles,
+  UserPlus,
+  Clock,
+  TrendingUp,
+  Calendar,
+  Copy,
+  Mail,
+  Phone,
+  Building2,
+  Trophy,
+} from "lucide-react";
 import {
   PIPELINE_STAGES,
   STAGE_LABEL,
@@ -84,7 +108,11 @@ function daysUntil(a: string | null | undefined) {
 
 function formatCurrencyBRL(v: number | null | undefined) {
   if (v == null) return "—";
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  return v.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
 }
 
 const PAIS_OPTIONS: Array<{ value: string; label: string; doc: string }> = [
@@ -163,7 +191,6 @@ export function EditOportunidadeDialog({
     });
   }
 
-
   // Enriquecimento
   const enrichFn = useServerFn(enrichDocumento);
   const enrichMut = useMutation({
@@ -177,9 +204,13 @@ export function EditOportunidadeDialog({
       const nextEmpresa = d.razao_social || d.nome_fantasia || empresa;
       if (nextEmpresa) setEmpresa(nextEmpresa);
       if (!email && d.email_corporativo) setEmail(d.email_corporativo);
-      const tel = [d.telefone_corporativo_ddi, d.telefone_corporativo_numero].filter(Boolean).join(" ");
+      const tel = [d.telefone_corporativo_ddi, d.telefone_corporativo_numero]
+        .filter(Boolean)
+        .join(" ");
       if (!telefone && tel) setTelefone(tel);
-      toast.success(`Dados preenchidos (${d._source ?? "fonte oficial"}${res.cached ? " · cache" : ""})`);
+      toast.success(
+        `Dados preenchidos (${d._source ?? "fonte oficial"}${res.cached ? " · cache" : ""})`,
+      );
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -268,25 +299,61 @@ export function EditOportunidadeDialog({
     setWizardOpen(false);
   }, [opp]);
 
-  const initialDraft = useMemo(() => ({
-    titulo: opp?.titulo ?? "", empresa: opp?.empresa_lead ?? "", nome: opp?.nome_lead ?? "",
-    email: opp?.email ?? "", telefone: opp?.telefone ?? "",
-    valor: opp?.valor_estimado != null ? String(opp.valor_estimado) : "",
-    prob: opp ? String(opp.probabilidade) : "10", expected: opp?.expected_close_date ?? "",
-    stage: opp?.pipeline_stage ?? "novo" as PipelineStage, obs: opp?.observacoes ?? "",
-    tab: "dados" as const, pais: "BR", documento: "", novaNota: "",
-  }), [opp]);
-  const currentDraft = { titulo, empresa, nome, email, telefone, valor, prob, expected, stage, obs, tab, pais, documento, novaNota };
+  const initialDraft = useMemo(
+    () => ({
+      titulo: opp?.titulo ?? "",
+      empresa: opp?.empresa_lead ?? "",
+      nome: opp?.nome_lead ?? "",
+      email: opp?.email ?? "",
+      telefone: opp?.telefone ?? "",
+      valor: opp?.valor_estimado != null ? String(opp.valor_estimado) : "",
+      prob: opp ? String(opp.probabilidade) : "10",
+      expected: opp?.expected_close_date ?? "",
+      stage: opp?.pipeline_stage ?? ("novo" as PipelineStage),
+      obs: opp?.observacoes ?? "",
+      tab: "dados" as const,
+      pais: "BR",
+      documento: "",
+      novaNota: "",
+    }),
+    [opp],
+  );
+  const currentDraft = {
+    titulo,
+    empresa,
+    nome,
+    email,
+    telefone,
+    valor,
+    prob,
+    expected,
+    stage,
+    obs,
+    tab,
+    pais,
+    documento,
+    novaNota,
+  };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `oportunidade:editar:${opp?.id ?? "fechado"}`,
     value: currentDraft,
     initialValue: initialDraft,
     enabled: !!opp,
     onRestore: (saved) => {
-      setTitulo(saved.titulo); setEmpresa(saved.empresa); setNome(saved.nome); setEmail(saved.email);
-      setTelefone(saved.telefone); setValor(saved.valor); setProb(saved.prob); setExpected(saved.expected);
-      setStage(saved.stage); setObs(saved.obs); setTab(saved.tab); setPais(saved.pais);
-      setDocumento(saved.documento); setNovaNota(saved.novaNota);
+      setTitulo(saved.titulo);
+      setEmpresa(saved.empresa);
+      setNome(saved.nome);
+      setEmail(saved.email);
+      setTelefone(saved.telefone);
+      setValor(saved.valor);
+      setProb(saved.prob);
+      setExpected(saved.expected);
+      setStage(saved.stage);
+      setObs(saved.obs);
+      setTab(saved.tab);
+      setPais(saved.pais);
+      setDocumento(saved.documento);
+      setNovaNota(saved.novaNota);
     },
   });
 
@@ -326,7 +393,12 @@ export function EditOportunidadeDialog({
         expected_close_date: expected || null,
         observacoes: obs.trim() || null,
       },
-      { onSuccess: () => { clearDraft(); if (close) onOpenChange(false); } },
+      {
+        onSuccess: () => {
+          clearDraft();
+          if (close) onOpenChange(false);
+        },
+      },
     );
   }
 
@@ -337,7 +409,12 @@ export function EditOportunidadeDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) requestClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) requestClose();
+      }}
+    >
       <DialogContent className="w-[95vw] max-w-[1400px] max-h-[96vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between gap-2 pr-6">
@@ -359,16 +436,31 @@ export function EditOportunidadeDialog({
         </DialogHeader>
 
         <div className="flex flex-wrap gap-2 mt-2">
-          <Button size="sm" disabled={locked || update.isPending} onClick={() => handleSave(false)}>Save</Button>
-          <Button size="sm" variant="secondary" disabled={locked || update.isPending} onClick={() => handleSave(true)}>Save &amp; Close</Button>
-          <Button size="sm" variant="ghost" onClick={requestClose}>Cancelar</Button>
+          <Button size="sm" disabled={locked || update.isPending} onClick={() => handleSave(false)}>
+            Save
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={locked || update.isPending}
+            onClick={() => handleSave(true)}
+          >
+            Save &amp; Close
+          </Button>
+          <Button size="sm" variant="ghost" onClick={requestClose}>
+            Cancelar
+          </Button>
           {!locked && !alreadyLost && (
             <Button
               size="sm"
               variant="outline"
               className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
               onClick={() => setWizardOpen(true)}
-              title={isCliente ? "Atualizar ficha do cliente" : "Promover lead a cliente ativo e abrir ficha completa"}
+              title={
+                isCliente
+                  ? "Atualizar ficha do cliente"
+                  : "Promover lead a cliente ativo e abrir ficha completa"
+              }
             >
               <Trophy className="w-4 h-4 mr-1" />
               {isCliente ? "Ficha do cliente" : "Promover a cliente"}
@@ -390,7 +482,18 @@ export function EditOportunidadeDialog({
               variant="outline"
               className="ml-auto text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
               disabled={restoreMut.isPending}
-              onClick={() => opp && restoreMut.mutate({ id: opp.id }, { onSuccess: () => { clearDraft(); onOpenChange(false); } })}
+              onClick={() =>
+                opp &&
+                restoreMut.mutate(
+                  { id: opp.id },
+                  {
+                    onSuccess: () => {
+                      clearDraft();
+                      onOpenChange(false);
+                    },
+                  },
+                )
+              }
             >
               <RotateCcw className="w-4 h-4 mr-1" /> Restaurar
             </Button>
@@ -399,7 +502,9 @@ export function EditOportunidadeDialog({
 
         {lostMode && !alreadyLost && (
           <div className="rounded border border-rose-200 bg-rose-50 p-3 space-y-2">
-            <Label htmlFor="ed-lost-reason" className="text-rose-900">Motivo da perda *</Label>
+            <Label htmlFor="ed-lost-reason" className="text-rose-900">
+              Motivo da perda *
+            </Label>
             <Textarea
               id="ed-lost-reason"
               value={lostReason}
@@ -409,7 +514,14 @@ export function EditOportunidadeDialog({
               placeholder="Ex: preço, prazo, concorrente X, sem fit técnico..."
             />
             <div className="flex gap-2 justify-end">
-              <Button size="sm" variant="ghost" onClick={() => { setLostMode(false); setLostReason(""); }}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setLostMode(false);
+                  setLostReason("");
+                }}
+              >
                 Cancelar
               </Button>
               <Button
@@ -420,7 +532,12 @@ export function EditOportunidadeDialog({
                   if (!opp || !lostReason.trim()) return;
                   updateStageMut.mutate(
                     { id: opp.id, stage: "perdido", lost_reason: lostReason.trim() },
-                    { onSuccess: () => { clearDraft(); onOpenChange(false); } },
+                    {
+                      onSuccess: () => {
+                        clearDraft();
+                        onOpenChange(false);
+                      },
+                    },
                   );
                 }}
               >
@@ -433,12 +550,24 @@ export function EditOportunidadeDialog({
         {alreadyLost && (
           <div className="rounded border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 space-y-1">
             <div className="font-medium">Oportunidade arquivada (perdida).</div>
-            <div>Marcada por {opp?.lost_by_nome || "—"} em {opp?.lost_at ? new Date(opp.lost_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—"}.</div>
+            <div>
+              Marcada por {opp?.lost_by_nome || "—"} em{" "}
+              {opp?.lost_at
+                ? new Date(opp.lost_at).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })
+                : "—"}
+              .
+            </div>
             <div className="text-rose-700">Motivo: {opp?.lost_reason || "—"}</div>
           </div>
         )}
 
-        <RestoredOportunidadeBadge restoredAt={opp?.restored_at ?? null} restoredBy={opp?.restored_by_nome ?? null} />
+        <RestoredOportunidadeBadge
+          restoredAt={opp?.restored_at ?? null}
+          restoredBy={opp?.restored_by_nome ?? null}
+        />
 
         {locked && (
           <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
@@ -457,7 +586,11 @@ export function EditOportunidadeDialog({
               onAvancar: (stage) => {
                 updateStageMut.mutate(
                   { id: opp.id, stage },
-                  { onSuccess: () => { if (stage === "ganho") setWizardOpen(true); } },
+                  {
+                    onSuccess: () => {
+                      if (stage === "ganho") setWizardOpen(true);
+                    },
+                  },
                 );
               },
               onPromover: () => setWizardOpen(true),
@@ -466,382 +599,534 @@ export function EditOportunidadeDialog({
         )}
 
         <div className="mt-2 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-        <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-          <TabsList>
-            <TabsTrigger value="dados" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Dados</TabsTrigger>
-            <TabsTrigger value="agenda" className="gap-1.5"><Calendar className="h-3.5 w-3.5" /> Agenda</TabsTrigger>
-            <TabsTrigger value="orcamentos" className="gap-1.5">
-              <FileText className="h-3.5 w-3.5" /> Orçamentos
-              <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">{orcamentos.length}</span>
-            </TabsTrigger>
-            <TabsTrigger value="notas" className="gap-1.5">
-              <MessageSquare className="h-3.5 w-3.5" /> Anotações
-              <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">{notasQ.data?.length ?? 0}</span>
-            </TabsTrigger>
-            <TabsTrigger value="anexos" className="gap-1.5">
-              <Paperclip className="h-3.5 w-3.5" /> Anexos
-              <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">{anexosQ.data?.length ?? 0}</span>
-            </TabsTrigger>
-          </TabsList>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+            <TabsList>
+              <TabsTrigger value="dados" className="gap-1.5">
+                <FileText className="h-3.5 w-3.5" /> Dados
+              </TabsTrigger>
+              <TabsTrigger value="agenda" className="gap-1.5">
+                <Calendar className="h-3.5 w-3.5" /> Agenda
+              </TabsTrigger>
+              <TabsTrigger value="orcamentos" className="gap-1.5">
+                <FileText className="h-3.5 w-3.5" /> Orçamentos
+                <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
+                  {orcamentos.length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="notas" className="gap-1.5">
+                <MessageSquare className="h-3.5 w-3.5" /> Anotações
+                <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
+                  {notasQ.data?.length ?? 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="anexos" className="gap-1.5">
+                <Paperclip className="h-3.5 w-3.5" /> Anexos
+                <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
+                  {anexosQ.data?.length ?? 0}
+                </span>
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="orcamentos" className="mt-3 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[12px] text-muted-foreground">
-                Documentos de orçamento vinculados a esta oportunidade.
-              </p>
-              <Button size="sm" disabled={locked} onClick={gerarOrcamento}>
-                <FileText className="h-3.5 w-3.5 mr-1" /> Gerar orçamento
-              </Button>
-            </div>
-            {orcamentosQ.isLoading && (
-              <p className="text-center text-[12px] text-muted-foreground py-4">
-                <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
-              </p>
-            )}
-            {!orcamentosQ.isLoading && orcamentos.length === 0 && (
-              <p className="text-center text-[12px] text-muted-foreground py-6">
-                Nenhum orçamento ainda. Gere o primeiro a partir do botão acima.
-              </p>
-            )}
-            <div className="space-y-1.5">
-              {orcamentos.map((d) => (
-                <div key={d.id} className="flex items-center gap-2 rounded-lg border bg-card p-2 text-[13px]">
-                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-medium">{d.codigo} · {d.titulo ?? "—"}</div>
-                    <div className="text-[11px] text-muted-foreground">
-                      v{d.versao} • {d.status} • {formatDateTime(d.created_at)}
-                    </div>
-                  </div>
-                  <Button size="sm" variant="ghost" asChild>
-                    <Link to="/comercial/orcamento/$id" params={{ id: d.id }}>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-
-          <TabsContent value="dados" className="mt-3">
-        <div className="grid gap-3">
-          {!locked && (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
-              <div className="flex items-center gap-1.5 text-[12px] font-medium text-primary">
-                <Sparkles className="h-3.5 w-3.5" /> Enriquecer dados da empresa
-              </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(180px,0.7fr)_minmax(240px,1.5fr)_auto] sm:items-center">
-                <Select value={pais} onValueChange={setPais}>
-                  <SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {PAIS_OPTIONS.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>{p.label} ({p.doc})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  className="h-10 min-w-0"
-                  placeholder={`Digite o ${PAIS_OPTIONS.find((p) => p.value === pais)?.doc ?? "documento"}`}
-                  value={documento}
-                  onChange={(e) => setDocumento(e.target.value)}
-                  maxLength={40}
-                />
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="h-10 w-full shrink-0 sm:w-auto sm:px-5"
-                  disabled={!documento.trim() || enrichMut.isPending}
-                  onClick={() => enrichMut.mutate()}
-                >
-                  {enrichMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  <span className="ml-1">Buscar</span>
+            <TabsContent value="orcamentos" className="mt-3 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[12px] text-muted-foreground">
+                  Documentos de orçamento vinculados a esta oportunidade.
+                </p>
+                <Button size="sm" disabled={locked} onClick={gerarOrcamento}>
+                  <FileText className="h-3.5 w-3.5 mr-1" /> Gerar orçamento
                 </Button>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Busca razão social, endereço, telefone e e-mail em fontes oficiais. Preenche somente campos vazios.
-              </p>
-            </div>
-          )}
-          <div className="grid gap-1">
-            <Label htmlFor="ed-titulo">Título *</Label>
-            <Input id="ed-titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={200} disabled={locked} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="grid gap-1">
-              <Label htmlFor="ed-empresa">Empresa</Label>
-              <Input id="ed-empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)} maxLength={200} disabled={locked} />
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="ed-nome">Contato</Label>
-              <Input id="ed-nome" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={200} disabled={locked} />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="grid gap-1">
-              <Label htmlFor="ed-email">Email</Label>
-              <Input id="ed-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={200} disabled={locked} placeholder="—" />
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="ed-tel">Telefone</Label>
-              <Input id="ed-tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} maxLength={50} disabled={locked} placeholder="—" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="grid gap-1">
-              <Label htmlFor="ed-valor">Valor (R$)</Label>
-              <Input id="ed-valor" type="number" inputMode="decimal" value={valor} onChange={(e) => setValor(e.target.value)} disabled={locked} />
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="ed-prob">Prob. (%)</Label>
-              <Input id="ed-prob" type="number" min={0} max={100} value={prob} onChange={(e) => setProb(e.target.value)} disabled={locked} />
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="ed-close">Fechamento</Label>
-              <Input id="ed-close" type="date" value={expected} onChange={(e) => setExpected(e.target.value)} disabled={locked} />
-            </div>
-          </div>
-          <div className="grid gap-1">
-            <Label>Estágio</Label>
-            <Select
-              value={stage}
-              disabled={locked || alreadyLost || updateStageMut.isPending}
-              onValueChange={(v) => {
-                const next = v as PipelineStage;
-                if (!opp || next === stage) return;
-                setStage(next);
-                updateStageMut.mutate(
-                  { id: opp.id, stage: next },
-                  {
-                    onSuccess: () => { if (next === "ganho") setWizardOpen(true); },
-                    onError: () => setStage(opp.pipeline_stage),
-                  },
-                );
-              }}
-            >
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {PIPELINE_STAGES.map((s) => {
-                  const bloqueado = s === "perdido" && s !== stage;
-                  return (
-                    <SelectItem
-                      key={s}
-                      value={s}
-                      disabled={bloqueado}
-                      title={bloqueado ? "Use “Marcar como perdida” — o motivo da perda é obrigatório." : undefined}
-                    >
-                      {STAGE_LABEL[s]}
-                      {bloqueado ? " — use “Marcar como perdida”" : ""}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            <p className="text-[11px] text-muted-foreground">
-              {locked
-                ? "Oportunidade já convertida em processo — estágio somente leitura."
-                : alreadyLost
-                  ? "Oportunidade arquivada como perdida — reabra para mudar de estágio."
-                  : "Você também pode arrastar o card no kanban. A mudança é registrada no histórico."}
-            </p>
-          </div>
-
-          <div className="grid gap-1">
-            <Label htmlFor="ed-obs">Observações</Label>
-            <Textarea id="ed-obs" value={obs} onChange={(e) => setObs(e.target.value)} maxLength={2000} rows={3} disabled={locked} placeholder="Anotações internas…" />
-          </div>
-        </div>
-          </TabsContent>
-
-          <TabsContent value="agenda" className="mt-3">
-            {opp ? (
-              <AgendarEntrevista
-                opp={opp}
-                onRegistrada={() => {
-                  void notasQ.refetch();
-                  setTab("notas");
-                }}
-              />
-            ) : null}
-          </TabsContent>
-
-          <TabsContent value="notas" className="mt-3 space-y-3">
-            <div className="space-y-2">
-              <Textarea
-                value={novaNota}
-                onChange={(e) => setNovaNota(e.target.value)}
-                rows={3}
-                maxLength={4000}
-                placeholder="Escreva uma anotação… (ex.: ligação 12/06, cliente pediu nova proposta)"
-              />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  disabled={!novaNota.trim() || addNotaMut.isPending}
-                  onClick={() => addNotaMut.mutate(novaNota.trim())}
-                >
-                  {addNotaMut.isPending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
-                  Adicionar
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2 max-h-[360px] overflow-auto pr-1">
-              {notasQ.isLoading && (
+              {orcamentosQ.isLoading && (
                 <p className="text-center text-[12px] text-muted-foreground py-4">
                   <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
                 </p>
               )}
-              {!notasQ.isLoading && (notasQ.data?.length ?? 0) === 0 && (
-                <p className="text-center text-[12px] text-muted-foreground py-6">Sem anotações.</p>
+              {!orcamentosQ.isLoading && orcamentos.length === 0 && (
+                <p className="text-center text-[12px] text-muted-foreground py-6">
+                  Nenhum orçamento ainda. Gere o primeiro a partir do botão acima.
+                </p>
               )}
-              {(notasQ.data ?? []).map((n) => (
-                <div key={n.id} className="rounded-lg border bg-card p-3 text-[13px]">
-                  <div className="whitespace-pre-wrap">{n.texto}</div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span>{n.user_nome ?? "—"} • {formatDateTime(n.created_at)}</span>
-                    <Button size="sm" variant="ghost" onClick={() => delNotaMut.mutate(n.id)}>
+              <div className="space-y-1.5">
+                {orcamentos.map((d) => (
+                  <div
+                    key={d.id}
+                    className="flex items-center gap-2 rounded-lg border bg-card p-2 text-[13px]"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate font-medium">
+                        {d.codigo} · {d.titulo ?? "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        v{d.versao} • {d.status} • {formatDateTime(d.created_at)}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="ghost" asChild>
+                      <Link to="/comercial/orcamento/$id" params={{ id: d.id }}>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="dados" className="mt-3">
+              <div className="grid gap-3">
+                {!locked && (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
+                    <div className="flex items-center gap-1.5 text-[12px] font-medium text-primary">
+                      <Sparkles className="h-3.5 w-3.5" /> Enriquecer dados da empresa
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(180px,0.7fr)_minmax(240px,1.5fr)_auto] sm:items-center">
+                      <Select value={pais} onValueChange={setPais}>
+                        <SelectTrigger className="h-10 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PAIS_OPTIONS.map((p) => (
+                            <SelectItem key={p.value} value={p.value}>
+                              {p.label} ({p.doc})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        className="h-10 min-w-0"
+                        placeholder={`Digite o ${PAIS_OPTIONS.find((p) => p.value === pais)?.doc ?? "documento"}`}
+                        value={documento}
+                        onChange={(e) => setDocumento(e.target.value)}
+                        maxLength={40}
+                      />
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-10 w-full shrink-0 sm:w-auto sm:px-5"
+                        disabled={!documento.trim() || enrichMut.isPending}
+                        onClick={() => enrichMut.mutate()}
+                      >
+                        {enrichMut.isPending ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" />
+                        )}
+                        <span className="ml-1">Buscar</span>
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Busca razão social, endereço, telefone e e-mail em fontes oficiais. Preenche
+                      somente campos vazios.
+                    </p>
+                  </div>
+                )}
+                <div className="grid gap-1">
+                  <Label htmlFor="ed-titulo">Título *</Label>
+                  <Input
+                    id="ed-titulo"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    maxLength={200}
+                    disabled={locked}
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-empresa">Empresa</Label>
+                    <Input
+                      id="ed-empresa"
+                      value={empresa}
+                      onChange={(e) => setEmpresa(e.target.value)}
+                      maxLength={200}
+                      disabled={locked}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-nome">Contato</Label>
+                    <Input
+                      id="ed-nome"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      maxLength={200}
+                      disabled={locked}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-email">Email</Label>
+                    <Input
+                      id="ed-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      maxLength={200}
+                      disabled={locked}
+                      placeholder="—"
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-tel">Telefone</Label>
+                    <Input
+                      id="ed-tel"
+                      value={telefone}
+                      onChange={(e) => setTelefone(e.target.value)}
+                      maxLength={50}
+                      disabled={locked}
+                      placeholder="—"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-valor">Valor (R$)</Label>
+                    <Input
+                      id="ed-valor"
+                      type="number"
+                      inputMode="decimal"
+                      value={valor}
+                      onChange={(e) => setValor(e.target.value)}
+                      disabled={locked}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-prob">Prob. (%)</Label>
+                    <Input
+                      id="ed-prob"
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={prob}
+                      onChange={(e) => setProb(e.target.value)}
+                      disabled={locked}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="ed-close">Fechamento</Label>
+                    <Input
+                      id="ed-close"
+                      type="date"
+                      value={expected}
+                      onChange={(e) => setExpected(e.target.value)}
+                      disabled={locked}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-1">
+                  <Label>Estágio</Label>
+                  <Select
+                    value={stage}
+                    disabled={locked || alreadyLost || updateStageMut.isPending}
+                    onValueChange={(v) => {
+                      const next = v as PipelineStage;
+                      if (!opp || next === stage) return;
+                      setStage(next);
+                      updateStageMut.mutate(
+                        { id: opp.id, stage: next },
+                        {
+                          onSuccess: () => {
+                            if (next === "ganho") setWizardOpen(true);
+                          },
+                          onError: () => setStage(opp.pipeline_stage),
+                        },
+                      );
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PIPELINE_STAGES.map((s) => {
+                        const bloqueado = s === "perdido" && s !== stage;
+                        return (
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            disabled={bloqueado}
+                            title={
+                              bloqueado
+                                ? "Use “Marcar como perdida” — o motivo da perda é obrigatório."
+                                : undefined
+                            }
+                          >
+                            {STAGE_LABEL[s]}
+                            {bloqueado ? " — use “Marcar como perdida”" : ""}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-muted-foreground">
+                    {locked
+                      ? "Oportunidade já convertida em processo — estágio somente leitura."
+                      : alreadyLost
+                        ? "Oportunidade arquivada como perdida — reabra para mudar de estágio."
+                        : "Você também pode arrastar o card no kanban. A mudança é registrada no histórico."}
+                  </p>
+                </div>
+
+                <div className="grid gap-1">
+                  <Label htmlFor="ed-obs">Observações</Label>
+                  <Textarea
+                    id="ed-obs"
+                    value={obs}
+                    onChange={(e) => setObs(e.target.value)}
+                    maxLength={2000}
+                    rows={3}
+                    disabled={locked}
+                    placeholder="Anotações internas…"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="agenda" className="mt-3">
+              {opp ? (
+                <AgendarEntrevista
+                  opp={opp}
+                  onRegistrada={() => {
+                    void notasQ.refetch();
+                    setTab("notas");
+                  }}
+                />
+              ) : null}
+            </TabsContent>
+
+            <TabsContent value="notas" className="mt-3 space-y-3">
+              <div className="space-y-2">
+                <Textarea
+                  value={novaNota}
+                  onChange={(e) => setNovaNota(e.target.value)}
+                  rows={3}
+                  maxLength={4000}
+                  placeholder="Escreva uma anotação… (ex.: ligação 12/06, cliente pediu nova proposta)"
+                />
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    disabled={!novaNota.trim() || addNotaMut.isPending}
+                    onClick={() => addNotaMut.mutate(novaNota.trim())}
+                  >
+                    {addNotaMut.isPending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-[360px] overflow-auto pr-1">
+                {notasQ.isLoading && (
+                  <p className="text-center text-[12px] text-muted-foreground py-4">
+                    <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
+                  </p>
+                )}
+                {!notasQ.isLoading && (notasQ.data?.length ?? 0) === 0 && (
+                  <p className="text-center text-[12px] text-muted-foreground py-6">
+                    Sem anotações.
+                  </p>
+                )}
+                {(notasQ.data ?? []).map((n) => (
+                  <div key={n.id} className="rounded-lg border bg-card p-3 text-[13px]">
+                    <div className="whitespace-pre-wrap">{n.texto}</div>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>
+                        {n.user_nome ?? "—"} • {formatDateTime(n.created_at)}
+                      </span>
+                      <Button size="sm" variant="ghost" onClick={() => delNotaMut.mutate(n.id)}>
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="anexos" className="mt-3 space-y-3">
+              <div className="rounded-lg border border-dashed p-4 text-center">
+                <input
+                  id="op-file"
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadMut.mutate(f);
+                    e.currentTarget.value = "";
+                  }}
+                />
+                <label htmlFor="op-file" className="cursor-pointer">
+                  <div className="flex flex-col items-center gap-1">
+                    <Upload className="h-5 w-5 text-muted-foreground" />
+                    <div className="text-[13px]">
+                      {uploadMut.isPending ? "Enviando…" : "Clique para enviar um arquivo"}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      PDF / JPG / PNG até 25MB · ZIP até 50MB
+                    </div>
+                  </div>
+                </label>
+              </div>
+              <div className="space-y-1.5 max-h-[360px] overflow-auto pr-1">
+                {anexosQ.isLoading && (
+                  <p className="text-center text-[12px] text-muted-foreground py-4">
+                    <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
+                  </p>
+                )}
+                {!anexosQ.isLoading && (anexosQ.data?.length ?? 0) === 0 && (
+                  <p className="text-center text-[12px] text-muted-foreground py-6">
+                    Sem arquivos.
+                  </p>
+                )}
+                {(anexosQ.data ?? []).map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 rounded-lg border bg-card p-2 text-[13px]"
+                  >
+                    <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate font-medium">{a.nome_final}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {a.user_nome ?? "—"} • {formatDateTime(a.created_at)} •{" "}
+                        {formatBytes(a.tamanho_bytes)}
+                      </div>
+                    </div>
+                    {a.drive_view_url && (
+                      <Button size="sm" variant="ghost" asChild>
+                        <a
+                          href={a.drive_view_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="Abrir no Drive"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => delAnexoMut.mutate(a.id)}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="anexos" className="mt-3 space-y-3">
-            <div className="rounded-lg border border-dashed p-4 text-center">
-              <input
-                id="op-file"
-                type="file"
-                className="hidden"
-                accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) uploadMut.mutate(f);
-                  e.currentTarget.value = "";
-                }}
-              />
-              <label htmlFor="op-file" className="cursor-pointer">
-                <div className="flex flex-col items-center gap-1">
-                  <Upload className="h-5 w-5 text-muted-foreground" />
-                  <div className="text-[13px]">
-                    {uploadMut.isPending ? "Enviando…" : "Clique para enviar um arquivo"}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    PDF / JPG / PNG até 25MB · ZIP até 50MB
-                  </div>
-                </div>
-              </label>
-            </div>
-            <div className="space-y-1.5 max-h-[360px] overflow-auto pr-1">
-              {anexosQ.isLoading && (
-                <p className="text-center text-[12px] text-muted-foreground py-4">
-                  <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
-                </p>
-              )}
-              {!anexosQ.isLoading && (anexosQ.data?.length ?? 0) === 0 && (
-                <p className="text-center text-[12px] text-muted-foreground py-6">Sem arquivos.</p>
-              )}
-              {(anexosQ.data ?? []).map((a) => (
-                <div key={a.id} className="flex items-center gap-2 rounded-lg border bg-card p-2 text-[13px]">
-                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-medium">{a.nome_final}</div>
-                    <div className="text-[11px] text-muted-foreground">
-                      {a.user_nome ?? "—"} • {formatDateTime(a.created_at)} • {formatBytes(a.tamanho_bytes)}
-                    </div>
-                  </div>
-                  {a.drive_view_url && (
-                    <Button size="sm" variant="ghost" asChild>
-                      <a href={a.drive_view_url} target="_blank" rel="noreferrer" title="Abrir no Drive">
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    </Button>
-                  )}
-                  <Button size="sm" variant="ghost" onClick={() => delAnexoMut.mutate(a.id)}>
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Os arquivos são salvos no SLTK Drive em <code>{"{cliente} / Comercial / {OPP-código} / {AAAAMM}"}</code> ou, sem cliente, em <code>_Comercial / {"{ano}"} / {"{OPP-código}"}</code>.
-            </p>
-          </TabsContent>
-        </Tabs>
-
-        <aside className="space-y-3 lg:sticky lg:top-0 lg:self-start">
-          <div className="rounded-lg border bg-card p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" /> Insights
-            </div>
-            <div className="space-y-2 text-[12.5px]">
-              <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><span className="font-medium">{formatCurrencyBRL(valorNum)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Ponderado</span><span className="font-medium text-primary">{formatCurrencyBRL(valorPonderado)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Probabilidade</span><span className="font-medium">{probNum}%</span></div>
-              <div className="h-px bg-border my-1" />
-              <div className="flex justify-between"><span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> No estágio</span><span className="font-medium">{diasNoEstagio}d</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Idade total</span><span className="font-medium">{idadeOpp}d</span></div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> Fechamento</span>
-                <span className={`font-medium ${diasAteFechamento != null && diasAteFechamento < 0 ? "text-rose-600" : diasAteFechamento != null && diasAteFechamento <= 7 ? "text-amber-600" : ""}`}>
-                  {diasAteFechamento == null ? "—" : diasAteFechamento < 0 ? `${Math.abs(diasAteFechamento)}d atrasado` : `em ${diasAteFechamento}d`}
-                </span>
+                ))}
               </div>
-              <div className="h-px bg-border my-1" />
-              <div className="flex justify-between"><span className="text-muted-foreground">Anotações</span><span className="font-medium">{notasQ.data?.length ?? 0}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Anexos</span><span className="font-medium">{anexosQ.data?.length ?? 0}</span></div>
-              {opp?.lost_count ? (
-                <div className="flex justify-between"><span className="text-muted-foreground">Perdas anteriores</span><span className="font-medium text-rose-600">{opp.lost_count}</span></div>
-              ) : null}
-            </div>
-          </div>
-
-          {(email || telefone) && (
-            <div className="rounded-lg border bg-card p-3 space-y-2">
-              <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Contato rápido</div>
-              {email && (
-                <button
-                  className="w-full flex items-center gap-2 text-[12px] hover:bg-muted rounded px-2 py-1.5 text-left"
-                  onClick={() => copyToClipboard(email, "E-mail")}
-                >
-                  <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="truncate flex-1">{email}</span>
-                  <Copy className="h-3 w-3 text-muted-foreground" />
-                </button>
-              )}
-              {telefone && (
-                <button
-                  className="w-full flex items-center gap-2 text-[12px] hover:bg-muted rounded px-2 py-1.5 text-left"
-                  onClick={() => copyToClipboard(telefone, "Telefone")}
-                >
-                  <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="truncate flex-1">{telefone}</span>
-                  <Copy className="h-3 w-3 text-muted-foreground" />
-                </button>
-              )}
-            </div>
-          )}
-
-          {!isCliente && !locked && !alreadyLost && (
-            <div className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50/50 p-3 text-[12px] space-y-2">
-              <div className="flex items-center gap-1.5 font-medium text-emerald-800">
-                <UserPlus className="h-3.5 w-3.5" /> Promover a cliente
-              </div>
-              <p className="text-[11.5px] text-emerald-900/80">
-                Esta oportunidade ainda é um lead. Preencha a ficha completa para virar cliente ativo.
+              <p className="text-[11px] text-muted-foreground">
+                Os arquivos são salvos no SLTK Drive em{" "}
+                <code>{"{cliente} / Comercial / {OPP-código} / {AAAAMM}"}</code> ou, sem cliente, em{" "}
+                <code>
+                  _Comercial / {"{ano}"} / {"{OPP-código}"}
+                </code>
+                .
               </p>
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full border-emerald-300 text-emerald-800 hover:bg-emerald-100"
-                onClick={() => setWizardOpen(true)}
-              >
-                Abrir ficha completa
-              </Button>
+            </TabsContent>
+          </Tabs>
+
+          <aside className="space-y-3 lg:sticky lg:top-0 lg:self-start">
+            <div className="rounded-lg border bg-card p-3">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" /> Insights
+              </div>
+              <div className="space-y-2 text-[12.5px]">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Valor</span>
+                  <span className="font-medium">{formatCurrencyBRL(valorNum)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Ponderado</span>
+                  <span className="font-medium text-primary">
+                    {formatCurrencyBRL(valorPonderado)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Probabilidade</span>
+                  <span className="font-medium">{probNum}%</span>
+                </div>
+                <div className="h-px bg-border my-1" />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> No estágio
+                  </span>
+                  <span className="font-medium">{diasNoEstagio}d</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Idade total</span>
+                  <span className="font-medium">{idadeOpp}d</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" /> Fechamento
+                  </span>
+                  <span
+                    className={`font-medium ${diasAteFechamento != null && diasAteFechamento < 0 ? "text-rose-600" : diasAteFechamento != null && diasAteFechamento <= 7 ? "text-amber-600" : ""}`}
+                  >
+                    {diasAteFechamento == null
+                      ? "—"
+                      : diasAteFechamento < 0
+                        ? `${Math.abs(diasAteFechamento)}d atrasado`
+                        : `em ${diasAteFechamento}d`}
+                  </span>
+                </div>
+                <div className="h-px bg-border my-1" />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Anotações</span>
+                  <span className="font-medium">{notasQ.data?.length ?? 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Anexos</span>
+                  <span className="font-medium">{anexosQ.data?.length ?? 0}</span>
+                </div>
+                {opp?.lost_count ? (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Perdas anteriores</span>
+                    <span className="font-medium text-rose-600">{opp.lost_count}</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          )}
-        </aside>
+
+            {(email || telefone) && (
+              <div className="rounded-lg border bg-card p-3 space-y-2">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Contato rápido
+                </div>
+                {email && (
+                  <button
+                    className="w-full flex items-center gap-2 text-[12px] hover:bg-muted rounded px-2 py-1.5 text-left"
+                    onClick={() => copyToClipboard(email, "E-mail")}
+                  >
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate flex-1">{email}</span>
+                    <Copy className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                )}
+                {telefone && (
+                  <button
+                    className="w-full flex items-center gap-2 text-[12px] hover:bg-muted rounded px-2 py-1.5 text-left"
+                    onClick={() => copyToClipboard(telefone, "Telefone")}
+                  >
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate flex-1">{telefone}</span>
+                    <Copy className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {!isCliente && !locked && !alreadyLost && (
+              <div className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50/50 p-3 text-[12px] space-y-2">
+                <div className="flex items-center gap-1.5 font-medium text-emerald-800">
+                  <UserPlus className="h-3.5 w-3.5" /> Promover a cliente
+                </div>
+                <p className="text-[11.5px] text-emerald-900/80">
+                  Esta oportunidade ainda é um lead. Preencha a ficha completa para virar cliente
+                  ativo.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-emerald-300 text-emerald-800 hover:bg-emerald-100"
+                  onClick={() => setWizardOpen(true)}
+                >
+                  Abrir ficha completa
+                </Button>
+              </div>
+            )}
+          </aside>
         </div>
 
         <DialogFooter className="text-xs text-muted-foreground">

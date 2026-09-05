@@ -32,8 +32,6 @@ const LABELS: Record<Idioma, { tag: string; descricao: string }> = {
   en: { tag: "TAG", descricao: "Product description" },
 };
 
-
-
 const styles = (accent: string) =>
   StyleSheet.create({
     page: { ...CHROME_PAGE_STYLE, fontSize: 9.5, lineHeight: 1.35 },
@@ -91,9 +89,10 @@ const styles = (accent: string) =>
     debugRow: { fontSize: 7.5, color: "#92400E", marginBottom: 1 },
   });
 
-
 function pickConteudo(b: Bloco, idioma: Idioma): { titulo: string; texto: string } {
-  const raw = (idioma === "pt" ? b.conteudo_pt : idioma === "es" ? b.conteudo_es : b.conteudo_en) as any;
+  const raw = (
+    idioma === "pt" ? b.conteudo_pt : idioma === "es" ? b.conteudo_es : b.conteudo_en
+  ) as any;
   const fb = (b.conteudo_pt as any) ?? {};
   return {
     titulo: String(raw?.titulo ?? fb?.titulo ?? ""),
@@ -136,7 +135,6 @@ function RichText({ style, text }: { style: any; text: string }) {
   );
 }
 
-
 export type RfqPdfProps = {
   codigo: string;
   versao: string;
@@ -170,7 +168,6 @@ export function RfqPdf(props: RfqPdfProps) {
   const L = LABELS[idioma];
   const titulo = DOC_TITLE[idioma];
 
-
   // Descrição consolidada: descrição + (observações) + (especificação), sem
   // rótulos técnicos que possam expor referências internas.
   const partes = [item.descricao, item.observacoes, item.especificacao]
@@ -196,7 +193,9 @@ export function RfqPdf(props: RfqPdfProps) {
     "item.quantidade": qtd || "—",
     "item.quantidade_unidade": qtdUn,
     "item.unidade": dash(item.unidade),
-    "item.lead_time": leadTxt ? `${leadTxt} ${idioma === "en" ? "day(s)" : idioma === "es" ? "día(s)" : "dia(s)"}` : "—",
+    "item.lead_time": leadTxt
+      ? `${leadTxt} ${idioma === "en" ? "day(s)" : idioma === "es" ? "día(s)" : "dia(s)"}`
+      : "—",
     "item.necessidade_em": dash(item.necessidade_em),
     "item.criticidade": dash(item.criticidade),
     "item.observacoes": dash(item.observacoes),
@@ -238,14 +237,15 @@ export function RfqPdf(props: RfqPdfProps) {
 
         <Text style={s.title}>{titulo}</Text>
         <View style={s.accentBar} />
-        <Text style={s.subline}>{L.tag}: {item.tag} · {dataFmt}</Text>
+        <Text style={s.subline}>
+          {L.tag}: {item.tag} · {dataFmt}
+        </Text>
 
         {/* Descrição do produto — cabeçalho fixo do item */}
         <View style={s.descBox}>
           <Text style={s.descLabel}>{L.descricao}</Text>
           <Text style={s.descText}>{descricaoConsolidada}</Text>
         </View>
-
 
         {/* Blocos extras (Central de Documentos) — agrupa 50%+50% lado a lado. */}
         {(() => {
@@ -257,7 +257,9 @@ export function RfqPdf(props: RfqPdfProps) {
             return (
               <>
                 {tituloBloco ? <RichText style={s.sectionTitle} text={tituloBloco} /> : null}
-                {texto ? <RichText style={{ fontSize: 9.5, lineHeight: 1.45 }} text={texto} /> : null}
+                {texto ? (
+                  <RichText style={{ fontSize: 9.5, lineHeight: 1.45 }} text={texto} />
+                ) : null}
               </>
             );
           };
@@ -269,18 +271,25 @@ export function RfqPdf(props: RfqPdfProps) {
             const nextLargura = next ? ((next as any).largura === 50 ? 50 : 100) : 100;
             if (largura === 50 && next && nextLargura === 50) {
               rows.push(
-                <View key={`${b.id}-row`} wrap={false} style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+                <View
+                  key={`${b.id}-row`}
+                  wrap={false}
+                  style={{ flexDirection: "row", gap: 10, marginTop: 10 }}
+                >
                   <View style={{ flex: 1 }}>{renderBloco(b)}</View>
                   <View style={{ flex: 1 }}>{renderBloco(next)}</View>
-                </View>
+                </View>,
               );
               i++;
-
             } else {
               rows.push(
-                <View key={b.id} wrap={false} style={{ marginTop: 10, width: largura === 50 ? "50%" : "100%" }}>
+                <View
+                  key={b.id}
+                  wrap={false}
+                  style={{ marginTop: 10, width: largura === 50 ? "50%" : "100%" }}
+                >
                   {renderBloco(b)}
-                </View>
+                </View>,
               );
             }
           }

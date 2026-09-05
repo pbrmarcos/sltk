@@ -21,7 +21,8 @@ export async function firecrawlScrapeJson<T = Record<string, unknown>>(
   opts: ScrapeJsonOptions,
 ): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
-  if (!apiKey) return { ok: false, error: "Busca web indisponível — a integração não está configurada." };
+  if (!apiKey)
+    return { ok: false, error: "Busca web indisponível — a integração não está configurada." };
 
   const body: Record<string, unknown> = {
     url: opts.url,
@@ -35,7 +36,12 @@ export async function firecrawlScrapeJson<T = Record<string, unknown>>(
     ],
     ...(opts.waitFor ? { waitFor: opts.waitFor } : {}),
     ...(opts.country || opts.languages
-      ? { location: { ...(opts.country ? { country: opts.country } : {}), ...(opts.languages ? { languages: opts.languages } : {}) } }
+      ? {
+          location: {
+            ...(opts.country ? { country: opts.country } : {}),
+            ...(opts.languages ? { languages: opts.languages } : {}),
+          },
+        }
       : {}),
   };
 
@@ -79,11 +85,14 @@ export async function firecrawlSearchEnrich<T = Record<string, unknown>>(opts: {
   logLabel?: string;
 }): Promise<{ ok: true; data: T; url: string } | { ok: false; error: string }> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
-  if (!apiKey) return { ok: false, error: "Busca web indisponível — a integração não está configurada." };
+  if (!apiKey)
+    return { ok: false, error: "Busca web indisponível — a integração não está configurada." };
 
   const tag = `[enrich:${opts.logLabel ?? "search"}]`;
   const t0 = Date.now();
-  console.log(`${tag} query=${JSON.stringify(opts.query)} doc=${opts.doc} limit=${opts.limit ?? 3}`);
+  console.log(
+    `${tag} query=${JSON.stringify(opts.query)} doc=${opts.doc} limit=${opts.limit ?? 3}`,
+  );
 
   try {
     const res = await fetch(FIRECRAWL_SEARCH_URL, {
@@ -106,22 +115,31 @@ export async function firecrawlSearchEnrich<T = Record<string, unknown>>(opts: {
     }
     const j: any = await res.json();
     const web: any[] = j?.data?.web ?? [];
-    console.log(`${tag} results=${web.length} urls=${JSON.stringify(web.map((r) => r?.url).slice(0, 5))}`);
+    console.log(
+      `${tag} results=${web.length} urls=${JSON.stringify(web.map((r) => r?.url).slice(0, 5))}`,
+    );
     const docDigits = (opts.doc || "").replace(/\D/g, "");
     for (let i = 0; i < web.length; i++) {
       const r = web[i];
       const data = r?.json;
       const mdLen = typeof r?.markdown === "string" ? r.markdown.length : 0;
-      console.log(`${tag} [${i}] url=${r?.url} title=${JSON.stringify((r?.title || "").slice(0, 80))} mdLen=${mdLen} hasJson=${!!data}`);
+      console.log(
+        `${tag} [${i}] url=${r?.url} title=${JSON.stringify((r?.title || "").slice(0, 80))} mdLen=${mdLen} hasJson=${!!data}`,
+      );
       if (!data) {
-        if (mdLen > 0) console.log(`${tag} [${i}] md snippet=${JSON.stringify(String(r.markdown).slice(0, 300))}`);
+        if (mdLen > 0)
+          console.log(
+            `${tag} [${i}] md snippet=${JSON.stringify(String(r.markdown).slice(0, 300))}`,
+          );
         continue;
       }
       // Validação anti-alucinação: o documento precisa estar na página.
       const haystack = `${r.url ?? ""} ${r.title ?? ""} ${r.description ?? ""} ${r.markdown ?? ""}`;
       const haystackDigits = haystack.replace(/[.\-\s/]/g, "");
       const docMatches = !(docDigits.length >= 6 && !haystackDigits.includes(docDigits));
-      console.log(`${tag} [${i}] docMatches=${docMatches} extracted=${JSON.stringify(data).slice(0, 500)}`);
+      console.log(
+        `${tag} [${i}] docMatches=${docMatches} extracted=${JSON.stringify(data).slice(0, 500)}`,
+      );
       if (!docMatches) continue;
       return { ok: true, data: data as T, url: r.url ?? "" };
     }

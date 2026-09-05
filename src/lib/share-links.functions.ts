@@ -13,11 +13,7 @@ import {
   type ShareTipo,
   type ShareScope,
 } from "./share-token.server";
-import {
-  generateFatDocumentInternal,
-  generateSatDocumentInternal,
-} from "./docs/docs.functions";
-
+import { generateFatDocumentInternal, generateSatDocumentInternal } from "./docs/docs.functions";
 
 /**
  * Links públicos persistidos para preenchimento em campo de FAT/SAT.
@@ -35,7 +31,12 @@ import {
 const createInput = z.object({
   tipo: z.enum(["fat", "sat"]),
   relatorio_id: z.string().uuid(),
-  ttl_hours: z.number().int().min(1).max(24 * 30).default(72),
+  ttl_hours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(72),
   scope: z
     .array(z.enum(["checklist", "assinatura", "identificacao", "medicoes"]))
     .min(1)
@@ -49,7 +50,10 @@ export const createShareLink = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const table = data.tipo === "fat" ? "fat_relatorios" : "sat_relatorio";
     const { data: row, error } = await (context.supabase as any)
-      .from(table).select("id").eq("id", data.relatorio_id).maybeSingle();
+      .from(table)
+      .select("id")
+      .eq("id", data.relatorio_id)
+      .maybeSingle();
     if (error || !row) throw new Error("Relatório não encontrado ou sem acesso.");
 
     const now = Math.floor(Date.now() / 1000);
@@ -119,29 +123,34 @@ export const listShareLinks = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
     const { data: links, error } = await (supabaseAdmin as any)
       .from("relatorio_share_links")
-      .select("id, rotulo, scope, created_by, created_at, expires_at, revoked_at, revoked_by, last_used_at, use_count")
+      .select(
+        "id, rotulo, scope, created_by, created_at, expires_at, revoked_at, revoked_by, last_used_at, use_count",
+      )
       .eq("tipo", data.tipo)
       .eq("relatorio_id", data.relatorio_id)
       .order("created_at", { ascending: false });
     if (error) throw friendlyDbError(error);
 
     const userIds = Array.from(
-      new Set(
-        (links ?? []).flatMap((l: any) => [l.created_by, l.revoked_by].filter(Boolean)),
-      ),
+      new Set((links ?? []).flatMap((l: any) => [l.created_by, l.revoked_by].filter(Boolean))),
     );
     let nameMap = new Map<string, string>();
     if (userIds.length > 0) {
       const { data: profs } = await (supabaseAdmin as any)
-        .from("profiles").select("id, full_name, email").in("id", userIds);
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
       nameMap = new Map(
-        (profs ?? []).map((p: any) => [p.id as string, (p.full_name as string) || (p.email as string) || p.id]),
+        (profs ?? []).map((p: any) => [
+          p.id as string,
+          (p.full_name as string) || (p.email as string) || p.id,
+        ]),
       );
     }
     return (links ?? []).map((l: any) => ({
       ...l,
       created_by_nome: nameMap.get(l.created_by) ?? null,
-      revoked_by_nome: l.revoked_by ? nameMap.get(l.revoked_by) ?? null : null,
+      revoked_by_nome: l.revoked_by ? (nameMap.get(l.revoked_by) ?? null) : null,
     }));
   });
 
@@ -183,7 +192,13 @@ export const revokeShareLink = createServerFn({ method: "POST" })
 export const listShareSubmissoes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ tipo: z.enum(["fat", "sat"]), relatorio_id: z.string().uuid(), limit: z.number().int().min(1).max(200).default(50) }).parse(input),
+    z
+      .object({
+        tipo: z.enum(["fat", "sat"]),
+        relatorio_id: z.string().uuid(),
+        limit: z.number().int().min(1).max(200).default(50),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessRelatorio(context.supabase, context.userId, data.tipo, data.relatorio_id);
@@ -191,7 +206,9 @@ export const listShareSubmissoes = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
     const { data: rows, error } = await (supabaseAdmin as any)
       .from("relatorio_share_submissoes")
-      .select("id, share_link_id, acao, alvo_id, payload, signatario_nome, signatario_cargo, ip, user_agent, status, created_at")
+      .select(
+        "id, share_link_id, acao, alvo_id, payload, signatario_nome, signatario_cargo, ip, user_agent, status, created_at",
+      )
       .eq("tipo", data.tipo)
       .eq("relatorio_id", data.relatorio_id)
       .order("created_at", { ascending: false })
@@ -203,7 +220,10 @@ export const listShareSubmissoes = createServerFn({ method: "POST" })
 // ============================================================
 // Helpers internos — verificação + auditoria
 // ============================================================
-function shareErr(code: "invalid" | "expired" | "revoked" | "notfound" | "tampered" | "mismatch", msg: string): Error {
+function shareErr(
+  code: "invalid" | "expired" | "revoked" | "notfound" | "tampered" | "mismatch",
+  msg: string,
+): Error {
   const e: any = new Error(`[${code}] ${msg}`);
   e.code = code;
   return e;
@@ -213,7 +233,11 @@ function readRequestMeta(): { ip: string | null; user_agent: string | null } {
   try {
     const ua = getRequestHeader("user-agent") ?? null;
     const xff = getRequestHeader("x-forwarded-for");
-    const ip = xff?.split(",")[0]?.trim() || getRequestHeader("cf-connecting-ip") || getRequestHeader("x-real-ip") || null;
+    const ip =
+      xff?.split(",")[0]?.trim() ||
+      getRequestHeader("cf-connecting-ip") ||
+      getRequestHeader("x-real-ip") ||
+      null;
     return { ip: ip ?? null, user_agent: ua };
   } catch {
     return { ip: null, user_agent: null };
@@ -223,7 +247,7 @@ function readRequestMeta(): { ip: string | null; user_agent: string | null } {
 async function loadActiveLink(token: string) {
   const payload = verifyShareTokenSignature(token); // already throws [invalid] / [expired]
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   const { data: link, error } = await (supabaseAdmin as any)
     .from("relatorio_share_links")
     .select("id, tipo, relatorio_id, token_hash, scope, created_by, expires_at, revoked_at")
@@ -244,13 +268,16 @@ async function loadActiveLink(token: string) {
 
 async function touchLink(jti: string) {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   await (supabaseAdmin as any)
     .from("relatorio_share_links")
     .update({ last_used_at: new Date().toISOString() })
     .eq("id", jti);
   const { data: cur } = await (supabaseAdmin as any)
-    .from("relatorio_share_links").select("use_count").eq("id", jti).maybeSingle();
+    .from("relatorio_share_links")
+    .select("use_count")
+    .eq("id", jti)
+    .maybeSingle();
   if (cur) {
     await (supabaseAdmin as any)
       .from("relatorio_share_links")
@@ -273,7 +300,7 @@ async function logSubmissao(args: {
   user_agent?: string | null;
 }) {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   await (supabaseAdmin as any).from("relatorio_share_submissoes").insert({
     share_link_id: args.share_link_id,
     tipo: args.tipo,
@@ -316,7 +343,6 @@ async function logVisualizacaoSeguro(
   }
 }
 
-
 // ============================================================
 // PUBLIC GET — leitura do relatório alvo
 // ============================================================
@@ -335,74 +361,134 @@ export const publicGetRelatorio = createServerFn({ method: "POST" })
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
 
-
     if (payload.tipo === "fat") {
-      const [{ data: fat }, { data: tpl }, { data: resp }, { data: ass }, cliRes, procRes] = await Promise.all([
-        (supabaseAdmin as any)
-          .from("fat_relatorios")
-          .select("id, codigo, status, progresso, ok_count, nok_count, na_count, cliente_id, processo_id, tag_equipamento, os_codigo, data_ensaio, local_ensaio, observacoes_gerais")
-          .eq("id", payload.rid).maybeSingle(),
-        (supabaseAdmin as any)
-          .from("fat_checklist_template")
-          .select("id, secao, ordem, titulo, descricao, requer_foto_nok")
-          .eq("ativo", true).order("secao").order("ordem"),
-        (supabaseAdmin as any)
-          .from("fat_checklist_resposta")
-          .select("id, template_id, status, comentario").eq("fat_id", payload.rid),
-        (supabaseAdmin as any).from("fat_assinaturas").select("tipo, nome, assinado_em").eq("fat_id", payload.rid),
-        (async () => {
-          const f = await (supabaseAdmin as any).from("fat_relatorios").select("cliente_id").eq("id", payload.rid).maybeSingle();
-          if (!f.data?.cliente_id) return { data: null };
-          return (supabaseAdmin as any).from("clientes").select("razao_social, nome_fantasia").eq("id", f.data.cliente_id).maybeSingle();
-        })(),
-        (async () => {
-          const f = await (supabaseAdmin as any).from("fat_relatorios").select("processo_id").eq("id", payload.rid).maybeSingle();
-          if (!f.data?.processo_id) return { data: null };
-          return (supabaseAdmin as any).from("processos").select("codigo, titulo").eq("id", f.data.processo_id).maybeSingle();
-        })(),
-      ]);
+      const [{ data: fat }, { data: tpl }, { data: resp }, { data: ass }, cliRes, procRes] =
+        await Promise.all([
+          (supabaseAdmin as any)
+            .from("fat_relatorios")
+            .select(
+              "id, codigo, status, progresso, ok_count, nok_count, na_count, cliente_id, processo_id, tag_equipamento, os_codigo, data_ensaio, local_ensaio, observacoes_gerais",
+            )
+            .eq("id", payload.rid)
+            .maybeSingle(),
+          (supabaseAdmin as any)
+            .from("fat_checklist_template")
+            .select("id, secao, ordem, titulo, descricao, requer_foto_nok")
+            .eq("ativo", true)
+            .order("secao")
+            .order("ordem"),
+          (supabaseAdmin as any)
+            .from("fat_checklist_resposta")
+            .select("id, template_id, status, comentario")
+            .eq("fat_id", payload.rid),
+          (supabaseAdmin as any)
+            .from("fat_assinaturas")
+            .select("tipo, nome, assinado_em")
+            .eq("fat_id", payload.rid),
+          (async () => {
+            const f = await (supabaseAdmin as any)
+              .from("fat_relatorios")
+              .select("cliente_id")
+              .eq("id", payload.rid)
+              .maybeSingle();
+            if (!f.data?.cliente_id) return { data: null };
+            return (supabaseAdmin as any)
+              .from("clientes")
+              .select("razao_social, nome_fantasia")
+              .eq("id", f.data.cliente_id)
+              .maybeSingle();
+          })(),
+          (async () => {
+            const f = await (supabaseAdmin as any)
+              .from("fat_relatorios")
+              .select("processo_id")
+              .eq("id", payload.rid)
+              .maybeSingle();
+            if (!f.data?.processo_id) return { data: null };
+            return (supabaseAdmin as any)
+              .from("processos")
+              .select("codigo, titulo")
+              .eq("id", f.data.processo_id)
+              .maybeSingle();
+          })(),
+        ]);
       if (!fat) {
         await logVisualizacaoSeguro(data.token, "rejeitada", "fat_inexistente", meta);
         throw shareErr("notfound", "FAT não encontrado.");
       }
       await touchLink(link.id);
       await logSubmissao({
-        share_link_id: link.id, tipo: "fat", relatorio_id: payload.rid,
-        acao: "visualizacao", status: "aplicada", ip: meta.ip, user_agent: meta.user_agent,
+        share_link_id: link.id,
+        tipo: "fat",
+        relatorio_id: payload.rid,
+        acao: "visualizacao",
+        status: "aplicada",
+        ip: meta.ip,
+        user_agent: meta.user_agent,
       });
       return {
-        tipo: "fat" as const, scope: payload.scope, exp: payload.exp,
-        relatorio: fat, template: tpl ?? [], respostas: resp ?? [],
-        assinaturas: ass ?? [], cliente: cliRes.data, processo: procRes.data,
+        tipo: "fat" as const,
+        scope: payload.scope,
+        exp: payload.exp,
+        relatorio: fat,
+        template: tpl ?? [],
+        respostas: resp ?? [],
+        assinaturas: ass ?? [],
+        cliente: cliRes.data,
+        processo: procRes.data,
         link_id: link.id,
       };
     }
-
 
     // SAT
     const [{ data: sat }, { data: secoes }, cliRes2, procRes2] = await Promise.all([
       (supabaseAdmin as any)
         .from("sat_relatorio")
-        .select("id, codigo, status, cliente_id, processo_id, periodo_de, periodo_ate, local_endereco, observacoes, dados, tecnicos, assinatura_tecnico, assinatura_cliente, template_id")
-        .eq("id", payload.rid).maybeSingle(),
+        .select(
+          "id, codigo, status, cliente_id, processo_id, periodo_de, periodo_ate, local_endereco, observacoes, dados, tecnicos, assinatura_tecnico, assinatura_cliente, template_id",
+        )
+        .eq("id", payload.rid)
+        .maybeSingle(),
       (async () => {
-        const s = await (supabaseAdmin as any).from("sat_relatorio").select("template_id").eq("id", payload.rid).maybeSingle();
+        const s = await (supabaseAdmin as any)
+          .from("sat_relatorio")
+          .select("template_id")
+          .eq("id", payload.rid)
+          .maybeSingle();
         if (!s.data?.template_id) return { data: [] };
         return (supabaseAdmin as any)
           .from("sat_template_secao")
-          .select("id, ordem, titulo, descricao, sat_template_item(id, secao_id, ordem, label, tipo, obrigatorio, opcoes, ajuda)")
+          .select(
+            "id, ordem, titulo, descricao, sat_template_item(id, secao_id, ordem, label, tipo, obrigatorio, opcoes, ajuda)",
+          )
           .eq("template_id", s.data.template_id)
           .order("ordem");
       })(),
       (async () => {
-        const s = await (supabaseAdmin as any).from("sat_relatorio").select("cliente_id").eq("id", payload.rid).maybeSingle();
+        const s = await (supabaseAdmin as any)
+          .from("sat_relatorio")
+          .select("cliente_id")
+          .eq("id", payload.rid)
+          .maybeSingle();
         if (!s.data?.cliente_id) return { data: null };
-        return (supabaseAdmin as any).from("clientes").select("razao_social, nome_fantasia").eq("id", s.data.cliente_id).maybeSingle();
+        return (supabaseAdmin as any)
+          .from("clientes")
+          .select("razao_social, nome_fantasia")
+          .eq("id", s.data.cliente_id)
+          .maybeSingle();
       })(),
       (async () => {
-        const s = await (supabaseAdmin as any).from("sat_relatorio").select("processo_id").eq("id", payload.rid).maybeSingle();
+        const s = await (supabaseAdmin as any)
+          .from("sat_relatorio")
+          .select("processo_id")
+          .eq("id", payload.rid)
+          .maybeSingle();
         if (!s.data?.processo_id) return { data: null };
-        return (supabaseAdmin as any).from("processos").select("codigo, titulo").eq("id", s.data.processo_id).maybeSingle();
+        return (supabaseAdmin as any)
+          .from("processos")
+          .select("codigo, titulo")
+          .eq("id", s.data.processo_id)
+          .maybeSingle();
       })(),
     ]);
     if (!sat) {
@@ -411,20 +497,40 @@ export const publicGetRelatorio = createServerFn({ method: "POST" })
     }
     await touchLink(link.id);
     await logSubmissao({
-      share_link_id: link.id, tipo: "sat", relatorio_id: payload.rid,
-      acao: "visualizacao", status: "aplicada", ip: meta.ip, user_agent: meta.user_agent,
+      share_link_id: link.id,
+      tipo: "sat",
+      relatorio_id: payload.rid,
+      acao: "visualizacao",
+      status: "aplicada",
+      ip: meta.ip,
+      user_agent: meta.user_agent,
     });
 
     return {
-      tipo: "sat" as const, scope: payload.scope, exp: payload.exp,
+      tipo: "sat" as const,
+      scope: payload.scope,
+      exp: payload.exp,
       relatorio: sat,
       template: (secoes ?? []) as Array<{
-        id: string; ordem: number; titulo: string; descricao: string | null;
-        sat_template_item: Array<{ id: string; secao_id: string; ordem: number; label: string; tipo: string; obrigatorio: boolean; opcoes: string[] | null; ajuda: string | null }>;
+        id: string;
+        ordem: number;
+        titulo: string;
+        descricao: string | null;
+        sat_template_item: Array<{
+          id: string;
+          secao_id: string;
+          ordem: number;
+          label: string;
+          tipo: string;
+          obrigatorio: boolean;
+          opcoes: string[] | null;
+          ajuda: string | null;
+        }>;
       }>,
       respostas: [],
       assinaturas: Array.isArray(sat.tecnicos) ? sat.tecnicos : [],
-      cliente: cliRes2.data, processo: procRes2.data,
+      cliente: cliRes2.data,
+      processo: procRes2.data,
       link_id: link.id,
     };
   });
@@ -449,24 +555,26 @@ export const publicSetChecklistResposta = createServerFn({ method: "POST" })
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
 
-    const { error } = await (supabaseAdmin as any)
-      .from("fat_checklist_resposta")
-      .upsert(
-        {
-          fat_id: payload.rid,
-          template_id: data.template_id,
-          status: data.status,
-          comentario: data.comentario ?? null,
-        },
-        { onConflict: "fat_id,template_id" },
-      );
+    const { error } = await (supabaseAdmin as any).from("fat_checklist_resposta").upsert(
+      {
+        fat_id: payload.rid,
+        template_id: data.template_id,
+        status: data.status,
+        comentario: data.comentario ?? null,
+      },
+      { onConflict: "fat_id,template_id" },
+    );
     if (error) throw friendlyDbError(error);
 
     // recalcula contadores
     const { count: totalCount } = await (supabaseAdmin as any)
-      .from("fat_checklist_template").select("id", { count: "exact", head: true }).eq("ativo", true);
+      .from("fat_checklist_template")
+      .select("id", { count: "exact", head: true })
+      .eq("ativo", true);
     const { data: rs } = await (supabaseAdmin as any)
-      .from("fat_checklist_resposta").select("status").eq("fat_id", payload.rid);
+      .from("fat_checklist_resposta")
+      .select("status")
+      .eq("fat_id", payload.rid);
     const ok = (rs ?? []).filter((r: { status: string }) => r.status === "ok").length;
     const nok = (rs ?? []).filter((r: { status: string }) => r.status === "nok").length;
     const na = (rs ?? []).filter((r: { status: string }) => r.status === "na").length;
@@ -479,10 +587,14 @@ export const publicSetChecklistResposta = createServerFn({ method: "POST" })
 
     await touchLink(link.id);
     await logSubmissao({
-      share_link_id: link.id, tipo: "fat", relatorio_id: payload.rid,
-      acao: "checklist_resposta", alvo_id: data.template_id,
+      share_link_id: link.id,
+      tipo: "fat",
+      relatorio_id: payload.rid,
+      acao: "checklist_resposta",
+      alvo_id: data.template_id,
       payload: { status: data.status, comentario: data.comentario ?? null, progresso },
-      ip: meta.ip, user_agent: meta.user_agent
+      ip: meta.ip,
+      user_agent: meta.user_agent,
     });
     return { ok: true, progresso };
   });
@@ -508,7 +620,10 @@ export const publicSetSatResposta = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
 
     const { data: sat } = await (supabaseAdmin as any)
-      .from("sat_relatorio").select("dados").eq("id", payload.rid).maybeSingle();
+      .from("sat_relatorio")
+      .select("dados")
+      .eq("id", payload.rid)
+      .maybeSingle();
     const dados = ((sat?.dados as Record<string, any>) ?? {}) as Record<string, any>;
     dados[data.item_id] = {
       valor: data.valor ?? null,
@@ -523,10 +638,14 @@ export const publicSetSatResposta = createServerFn({ method: "POST" })
 
     await touchLink(link.id);
     await logSubmissao({
-      share_link_id: link.id, tipo: "sat", relatorio_id: payload.rid,
-      acao: "checklist_resposta", alvo_id: data.item_id,
+      share_link_id: link.id,
+      tipo: "sat",
+      relatorio_id: payload.rid,
+      acao: "checklist_resposta",
+      alvo_id: data.item_id,
       payload: { valor: data.valor ?? null, comentario: data.comentario ?? null },
-      ip: meta.ip, user_agent: meta.user_agent
+      ip: meta.ip,
+      user_agent: meta.user_agent,
     });
     return { ok: true };
   });
@@ -556,49 +675,70 @@ export const publicSubmitAssinatura = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
 
     if (payload.tipo === "fat") {
-      const fatTipo = data.tipo === "tecnico" ? "inspetor" : data.tipo === "cliente" ? "testemunha" : data.tipo;
-      const { error } = await (supabaseAdmin as any)
-        .from("fat_assinaturas")
-        .upsert(
-          {
-            fat_id: payload.rid,
-            tipo: fatTipo,
-            nome: data.nome,
-            cargo: data.cargo ?? null,
-            assinatura_svg: data.assinatura_svg,
-            hash_sha256: hash,
-            assinado_em: new Date().toISOString(),
-          },
-          { onConflict: "fat_id,tipo" },
-        );
+      const fatTipo =
+        data.tipo === "tecnico" ? "inspetor" : data.tipo === "cliente" ? "testemunha" : data.tipo;
+      const { error } = await (supabaseAdmin as any).from("fat_assinaturas").upsert(
+        {
+          fat_id: payload.rid,
+          tipo: fatTipo,
+          nome: data.nome,
+          cargo: data.cargo ?? null,
+          assinatura_svg: data.assinatura_svg,
+          hash_sha256: hash,
+          assinado_em: new Date().toISOString(),
+        },
+        { onConflict: "fat_id,tipo" },
+      );
       if (error) throw friendlyDbError(error);
     } else {
       // SAT — anexa em sat_relatorio.assinatura_tecnico / assinatura_cliente e em tecnicos[]
       const field = data.tipo === "cliente" ? "assinatura_cliente" : "assinatura_tecnico";
       const sigObj = {
-        nome: data.nome, cargo: data.cargo ?? null,
+        nome: data.nome,
+        cargo: data.cargo ?? null,
         data_url: `data:image/svg+xml;utf8,${encodeURIComponent(data.assinatura_svg)}`,
         url: `data:image/svg+xml;utf8,${encodeURIComponent(data.assinatura_svg)}`,
-        hash_sha256: hash, assinado_em: new Date().toISOString(),
+        hash_sha256: hash,
+        assinado_em: new Date().toISOString(),
       };
       const { data: sat } = await (supabaseAdmin as any)
-        .from("sat_relatorio").select("tecnicos").eq("id", payload.rid).maybeSingle();
+        .from("sat_relatorio")
+        .select("tecnicos")
+        .eq("id", payload.rid)
+        .maybeSingle();
       const tecnicos = Array.isArray(sat?.tecnicos) ? [...(sat!.tecnicos as any[])] : [];
       // remove existing same-name to avoid duplicates
       const filtered = tecnicos.filter((t: any) => (t?.nome ?? "") !== data.nome);
-      filtered.push({ nome: data.nome, cargo: data.cargo ?? null, tipo: data.tipo, assinado_em: new Date().toISOString() });
-      const patch: Record<string, unknown> = { [field]: sigObj, tecnicos: filtered, status: "assinado" };
-      const { error } = await (supabaseAdmin as any).from("sat_relatorio").update(patch).eq("id", payload.rid);
+      filtered.push({
+        nome: data.nome,
+        cargo: data.cargo ?? null,
+        tipo: data.tipo,
+        assinado_em: new Date().toISOString(),
+      });
+      const patch: Record<string, unknown> = {
+        [field]: sigObj,
+        tecnicos: filtered,
+        status: "assinado",
+      };
+      const { error } = await (supabaseAdmin as any)
+        .from("sat_relatorio")
+        .update(patch)
+        .eq("id", payload.rid);
       if (error) throw friendlyDbError(error);
     }
 
     await touchLink(link.id);
     await logSubmissao({
-      share_link_id: link.id, tipo: payload.tipo, relatorio_id: payload.rid,
-      acao: "assinatura", alvo_id: data.tipo,
-      signatario_nome: data.nome, signatario_cargo: data.cargo ?? null,
+      share_link_id: link.id,
+      tipo: payload.tipo,
+      relatorio_id: payload.rid,
+      acao: "assinatura",
+      alvo_id: data.tipo,
+      signatario_nome: data.nome,
+      signatario_cargo: data.cargo ?? null,
       payload: { hash, tipo_assinatura: data.tipo },
-      ip: meta.ip, user_agent: meta.user_agent
+      ip: meta.ip,
+      user_agent: meta.user_agent,
     });
     return { ok: true, hash };
   });
@@ -611,9 +751,10 @@ export const publicExportRelatorioPdf = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const meta = readRequestMeta();
     const { payload, link } = await loadActiveLink(data.token);
-    const res = payload.tipo === "fat"
-      ? await generateFatDocumentInternal({ fat_id: payload.rid, actor_id: link.created_by })
-      : await generateSatDocumentInternal({ sat_id: payload.rid, actor_id: link.created_by });
+    const res =
+      payload.tipo === "fat"
+        ? await generateFatDocumentInternal({ fat_id: payload.rid, actor_id: link.created_by })
+        : await generateSatDocumentInternal({ sat_id: payload.rid, actor_id: link.created_by });
 
     // gera URLs assinadas (15min) para os PDFs no bucket "documentos"
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
@@ -621,15 +762,20 @@ export const publicExportRelatorioPdf = createServerFn({ method: "POST" })
     const urls: Record<string, string> = {};
     for (const [idioma, path] of Object.entries(res.arquivos)) {
       const { data: signed } = await (supabaseAdmin as any).storage
-        .from("documentos").createSignedUrl(path as string, 900);
+        .from("documentos")
+        .createSignedUrl(path as string, 900);
       if (signed?.signedUrl) urls[idioma] = signed.signedUrl;
     }
 
     await touchLink(link.id);
     await logSubmissao({
-      share_link_id: link.id, tipo: payload.tipo, relatorio_id: payload.rid,
-      acao: "pdf_export", payload: { documento_id: res.documento_id, codigo: res.codigo, versao: res.versao },
-      ip: meta.ip, user_agent: meta.user_agent
+      share_link_id: link.id,
+      tipo: payload.tipo,
+      relatorio_id: payload.rid,
+      acao: "pdf_export",
+      payload: { documento_id: res.documento_id, codigo: res.codigo, versao: res.versao },
+      ip: meta.ip,
+      user_agent: meta.user_agent,
     });
     return { documento_id: res.documento_id, codigo: res.codigo, versao: res.versao, urls };
   });

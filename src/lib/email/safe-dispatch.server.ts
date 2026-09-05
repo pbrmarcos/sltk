@@ -13,9 +13,11 @@
  */
 import type { DispatchInput } from "./dispatch.server";
 
-export async function safeDispatch(input: Omit<DispatchInput, "triggeredByKind"> & {
-  triggeredByKind?: DispatchInput["triggeredByKind"];
-}): Promise<void> {
+export async function safeDispatch(
+  input: Omit<DispatchInput, "triggeredByKind"> & {
+    triggeredByKind?: DispatchInput["triggeredByKind"];
+  },
+): Promise<void> {
   try {
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();

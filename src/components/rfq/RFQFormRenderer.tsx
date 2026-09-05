@@ -254,11 +254,7 @@ export function RFQFormRenderer({
 
   const total = Math.max(obrigatorios.length + 3, 1); // +3 = nome, email
   const preenchidos =
-    obrigatorios.length -
-    pendentes.length +
-    (nome.trim() ? 1 : 0) +
-    (email.trim() ? 1 : 0) +
-    1; // conta o "leia atento" como já feito
+    obrigatorios.length - pendentes.length + (nome.trim() ? 1 : 0) + (email.trim() ? 1 : 0) + 1; // conta o "leia atento" como já feito
   const progresso = Math.min(100, Math.round((preenchidos / total) * 100));
 
   function addPending(campoId: string, p: PendingFile) {
@@ -298,7 +294,11 @@ export function RFQFormRenderer({
           updatePending(campoId, key, {
             status: "erro",
             erro:
-              idioma === "es" ? "Error de red." : idioma === "en" ? "Network error." : "Erro de rede.",
+              idioma === "es"
+                ? "Error de red."
+                : idioma === "en"
+                  ? "Network error."
+                  : "Erro de rede.",
           });
           resolve();
         };
@@ -334,7 +334,11 @@ export function RFQFormRenderer({
         updatePending(campoId, key, {
           status: "erro",
           erro:
-            idioma === "es" ? "Error de red." : idioma === "en" ? "Network error." : "Erro de rede.",
+            idioma === "es"
+              ? "Error de red."
+              : idioma === "en"
+                ? "Network error."
+                : "Erro de rede.",
         });
         resolve();
       }
@@ -433,7 +437,6 @@ export function RFQFormRenderer({
     }
   }
 
-
   return (
     <form
       className="space-y-6"
@@ -511,13 +514,24 @@ export function RFQFormRenderer({
             <Label className="text-[13px]">
               {t.nome} <span className="text-red-500">*</span>
             </Label>
-            <Input required value={nome} onChange={(e) => setNome(e.target.value)} placeholder={t.nome} />
+            <Input
+              required
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder={t.nome}
+            />
           </div>
           <div>
             <Label className="text-[13px]">
               {t.email} <span className="text-red-500">*</span>
             </Label>
-            <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" />
+            <Input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="voce@empresa.com"
+            />
           </div>
           <div>
             <Label className="text-[13px]">{t.tel}</Label>
@@ -535,7 +549,6 @@ export function RFQFormRenderer({
             ref={(el) => {
               sectionRefs.current[sec.id] = el;
             }}
-
             className="rounded-xl border border-border bg-card p-5 shadow-sm"
           >
             <div className="mb-4 flex items-start gap-3">
@@ -612,7 +625,10 @@ export function RFQFormRenderer({
                         <span className="text-xs text-muted-foreground">
                           {value ? t.sim : t.nao}
                         </span>
-                        <Switch checked={Boolean(value)} onCheckedChange={(v) => set(campo.id, v)} />
+                        <Switch
+                          checked={Boolean(value)}
+                          onCheckedChange={(v) => set(campo.id, v)}
+                        />
                       </div>
                     );
                     break;
@@ -638,7 +654,12 @@ export function RFQFormRenderer({
                   case "multi_select": {
                     const arr = (value as string[]) ?? [];
                     control = (
-                      <div className={cn("mt-2 flex flex-wrap gap-2", hasError && "outline outline-1 outline-red-300 rounded-md p-1")}>
+                      <div
+                        className={cn(
+                          "mt-2 flex flex-wrap gap-2",
+                          hasError && "outline outline-1 outline-red-300 rounded-md p-1",
+                        )}
+                      >
                         {(campo.opcoes ?? []).map((o) => {
                           const active = arr.includes(o);
                           return (
@@ -725,7 +746,11 @@ export function RFQFormRenderer({
                                         ? "Uploading…"
                                         : "Enviando…";
                               const retryLabel =
-                                idioma === "es" ? "Reintentar" : idioma === "en" ? "Retry" : "Tentar novamente";
+                                idioma === "es"
+                                  ? "Reintentar"
+                                  : idioma === "en"
+                                    ? "Retry"
+                                    : "Tentar novamente";
                               return (
                                 <li
                                   key={p.key}
@@ -755,7 +780,8 @@ export function RFQFormRenderer({
                                           <span
                                             className={cn(
                                               p.status === "erro" && "text-red-600",
-                                              p.status === "concluido" && "text-emerald-700 dark:text-emerald-400",
+                                              p.status === "concluido" &&
+                                                "text-emerald-700 dark:text-emerald-400",
                                             )}
                                           >
                                             {statusLabel}
@@ -795,9 +821,13 @@ export function RFQFormRenderer({
                                       <div
                                         className={cn(
                                           "h-full rounded-full transition-all duration-200",
-                                          p.status === "concluido" ? "bg-emerald-500" : "bg-primary",
+                                          p.status === "concluido"
+                                            ? "bg-emerald-500"
+                                            : "bg-primary",
                                         )}
-                                        style={{ width: `${p.status === "concluido" ? 100 : p.progress}%` }}
+                                        style={{
+                                          width: `${p.status === "concluido" ? 100 : p.progress}%`,
+                                        }}
                                       />
                                     </div>
                                   )}
@@ -816,7 +846,9 @@ export function RFQFormRenderer({
                                 <div className="flex min-w-0 items-center gap-2">
                                   {mimeIcon(a.mime)}
                                   <div className="min-w-0">
-                                    <div className="truncate font-medium">{a.nome_original || a.nome}</div>
+                                    <div className="truncate font-medium">
+                                      {a.nome_original || a.nome}
+                                    </div>
                                     <div className="text-[11px] text-muted-foreground">
                                       {formatBytes(a.tamanho_bytes)}
                                     </div>

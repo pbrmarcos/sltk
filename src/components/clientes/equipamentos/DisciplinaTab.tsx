@@ -11,7 +11,12 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -244,7 +249,8 @@ export function DisciplinaTab({
           <div>
             <h3 className="text-sm font-semibold">Etapas · {DISCIPLINA_LABEL[disciplina]}</h3>
             <p className="text-[11px] text-muted-foreground">
-              Arraste para reordenar ou solte em outro grupo para mudar o status. Digite abaixo para adicionar rapidamente.
+              Arraste para reordenar ou solte em outro grupo para mudar o status. Digite abaixo para
+              adicionar rapidamente.
             </p>
           </div>
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -274,14 +280,19 @@ export function DisciplinaTab({
         </div>
         {!emPlanejamento && statusInfo && (
           <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-            Equipamento em fase <strong>{statusInfo.status}</strong> — edição em bloco por Excel só é liberada durante o planejamento. Use os diálogos para editar etapas individualmente.
+            Equipamento em fase <strong>{statusInfo.status}</strong> — edição em bloco por Excel só
+            é liberada durante o planejamento. Use os diálogos para editar etapas individualmente.
           </div>
         )}
 
         {isLoading ? (
           <div className="text-[12px] text-muted-foreground">Carregando etapas…</div>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <div className="grid gap-2 md:grid-cols-2">
               {ETAPA_STATUS_ORDEM.map((status) => (
                 <StatusGroup
@@ -312,11 +323,7 @@ export function DisciplinaTab({
       </section>
 
       {openEtapa && (
-        <EtapaSheet
-          etapa={openEtapa}
-          onClose={() => setOpenEtapa(null)}
-          onChanged={invalidate}
-        />
+        <EtapaSheet etapa={openEtapa} onClose={() => setOpenEtapa(null)} onChanged={invalidate} />
       )}
 
       <ImportarDisciplinaDialog
@@ -340,7 +347,8 @@ const STATUS_BG: Record<EtapaStatus, string> = {
   em_progresso: "bg-blue-50/60 dark:bg-blue-950/20 border-blue-200/70 dark:border-blue-900/40",
   nao_iniciado: "bg-zinc-50/70 dark:bg-zinc-900/30 border-zinc-200/70 dark:border-zinc-800/60",
   bloqueado: "bg-rose-50/60 dark:bg-rose-950/20 border-rose-200/70 dark:border-rose-900/40",
-  concluido: "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200/70 dark:border-emerald-900/40",
+  concluido:
+    "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200/70 dark:border-emerald-900/40",
 };
 const STATUS_BAR: Record<EtapaStatus, string> = {
   em_progresso: "before:bg-blue-500",
@@ -398,7 +406,11 @@ function StatusGroup({
           className="text-muted-foreground hover:text-foreground"
           aria-label="Recolher"
         >
-          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          {collapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )}
         </button>
         <span className={cn("h-2 w-2 rounded-full", ETAPA_STATUS_DOT[status])} />
         <span className="text-[12px] font-semibold">{ETAPA_STATUS_LABEL[status]}</span>
@@ -485,8 +497,14 @@ function SortableEtapa({
   setEditing: (v: boolean) => void;
   isManager: boolean;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: row.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.6 : 1 };
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
   const [titulo, setTitulo] = useState(row.titulo);
 
   const dueRed = isDueDatePast(row.data_vencimento) && row.status !== "concluido";
@@ -511,7 +529,11 @@ function SortableEtapa({
         </button>
 
         {hasChildren ? (
-          <button onClick={onToggle} className="text-muted-foreground hover:text-foreground" aria-label="Expandir">
+          <button
+            onClick={onToggle}
+            className="text-muted-foreground hover:text-foreground"
+            aria-label="Expandir"
+          >
             {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
         ) : (
@@ -571,11 +593,17 @@ function SortableEtapa({
           )}
           {row.data_vencimento && (
             <span
-              className={cn("inline-flex items-center gap-0.5", dueRed && "font-medium text-rose-600")}
+              className={cn(
+                "inline-flex items-center gap-0.5",
+                dueRed && "font-medium text-rose-600",
+              )}
               title="Vencimento"
             >
               <CalendarClock className="h-3 w-3" />
-              {new Date(row.data_vencimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+              {new Date(row.data_vencimento).toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              })}
               {dueRed && <AlertTriangle className="h-3 w-3" />}
             </span>
           )}
@@ -626,12 +654,18 @@ function SortableEtapa({
               <span className={cn("h-1.5 w-1.5 rounded-full", ETAPA_STATUS_DOT[c.status])} />
               <button
                 onClick={() => onOpenChild(c)}
-                className={cn("flex-1 truncate text-left hover:underline", c.status === "concluido" && "text-muted-foreground line-through")}
+                className={cn(
+                  "flex-1 truncate text-left hover:underline",
+                  c.status === "concluido" && "text-muted-foreground line-through",
+                )}
               >
                 {c.titulo}
               </button>
               <span className="text-[10px] text-muted-foreground">{c.progresso}%</span>
-              <Select value={c.status} onValueChange={(v) => onChangeChildStatus(c.id, v as EtapaStatus)}>
+              <Select
+                value={c.status}
+                onValueChange={(v) => onChangeChildStatus(c.id, v as EtapaStatus)}
+              >
                 <SelectTrigger className="h-5 w-[110px] text-[10px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -706,7 +740,9 @@ function EtapaSheet({
 
   const addCom = useMutation({
     mutationFn: (payload: { texto: string; mentions: string[] }) =>
-      addEtapaComentario({ data: { etapa_id: etapa.id, texto: payload.texto, mentions: payload.mentions } }),
+      addEtapaComentario({
+        data: { etapa_id: etapa.id, texto: payload.texto, mentions: payload.mentions },
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["etapa-com", etapa.id] });
       onChanged();
@@ -756,12 +792,25 @@ function EtapaSheet({
   };
 
   return (
-    <Dialog open onOpenChange={(o) => { if (!o) attemptClose(); }}>
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) attemptClose();
+      }}
+    >
       <DialogContent
         className="z-[70] w-full max-w-md p-5"
-        onEscapeKeyDown={(e) => { e.preventDefault(); attemptClose(); }}
-        onPointerDownOutside={(e) => { e.preventDefault(); attemptClose(); }}
-        onInteractOutside={(e) => { e.preventDefault(); }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+          attemptClose();
+        }}
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+          attemptClose();
+        }}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
       >
         <DialogHeader>
           <DialogTitle className="text-sm">Editar etapa</DialogTitle>
@@ -783,10 +832,14 @@ function EtapaSheet({
             <div>
               <label className="text-[11px] text-muted-foreground">Status</label>
               <Select value={status} onValueChange={(v) => setStatus(v as EtapaStatus)}>
-                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ETAPA_STATUS_LIST.map((s) => (
-                    <SelectItem key={s} value={s}>{ETAPA_STATUS_LABEL[s]}</SelectItem>
+                    <SelectItem key={s} value={s}>
+                      {ETAPA_STATUS_LABEL[s]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -794,10 +847,14 @@ function EtapaSheet({
             <div>
               <label className="text-[11px] text-muted-foreground">Prioridade</label>
               <Select value={prioridade} onValueChange={(v) => setPrioridade(v as Prioridade)}>
-                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {PRIORIDADES.map((p) => (
-                    <SelectItem key={p} value={p}>{PRIORIDADE_LABEL[p]}</SelectItem>
+                    <SelectItem key={p} value={p}>
+                      {PRIORIDADE_LABEL[p]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -809,7 +866,9 @@ function EtapaSheet({
                 min={0}
                 max={100}
                 value={progresso}
-                onChange={(e) => setProgresso(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+                onChange={(e) =>
+                  setProgresso(Math.max(0, Math.min(100, Number(e.target.value) || 0)))
+                }
                 className="h-8"
               />
             </div>
@@ -855,8 +914,13 @@ function EtapaSheet({
           </div>
           <div>
             <label className="text-[11px] text-muted-foreground">Responsável</label>
-            <Select value={responsavelId ?? "none"} onValueChange={(v) => setResponsavelId(v === "none" ? null : v)}>
-              <SelectTrigger className="h-8"><SelectValue placeholder="—" /></SelectTrigger>
+            <Select
+              value={responsavelId ?? "none"}
+              onValueChange={(v) => setResponsavelId(v === "none" ? null : v)}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="—" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">— Sem responsável —</SelectItem>
                 {(usuarios as any[]).map((u) => (
@@ -930,4 +994,3 @@ function EtapaSheet({
     </Dialog>
   );
 }
-

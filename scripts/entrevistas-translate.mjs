@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
+
 /**
  * Backfill translations (ES/EN) for entrevista_perguntas.enunciado_* and
  * entrevista_opcoes.label_*.  Uses Lovable AI Gateway.
@@ -54,7 +54,11 @@ function esc(s) {
 
 function extractArray(content) {
   const tryParse = (s) => {
-    try { return JSON.parse(s); } catch { return null; }
+    try {
+      return JSON.parse(s);
+    } catch {
+      return null;
+    }
   };
   let parsed = tryParse(content);
   if (!parsed) {
@@ -64,11 +68,16 @@ function extractArray(content) {
   if (!parsed) return [];
   return Array.isArray(parsed)
     ? parsed
-    : parsed.items || parsed.results || parsed.translations || Object.values(parsed).find(Array.isArray) || [];
+    : parsed.items ||
+        parsed.results ||
+        parsed.translations ||
+        Object.values(parsed).find(Array.isArray) ||
+        [];
 }
 
 async function translateBatch(items, target) {
-  const langName = target === "es" ? "Spanish (neutral, Latin America)" : "English (US, professional)";
+  const langName =
+    target === "es" ? "Spanish (neutral, Latin America)" : "English (US, professional)";
   const prompt =
     `Translate each item to ${langName}. Keep meaning, keep it short and professional (industrial B2B / procurement / manufacturing context). ` +
     `Do NOT add explanations. Return ONLY a compact JSON array of objects {"id":"...","t":"..."} matching input length.\n\n` +
@@ -104,7 +113,10 @@ async function translateBatch(items, target) {
         body: JSON.stringify({
           model: LOVABLE_MODEL,
           messages: [
-            { role: "system", content: "You are a precise industrial translator. Output valid JSON only." },
+            {
+              role: "system",
+              content: "You are a precise industrial translator. Output valid JSON only.",
+            },
             { role: "user", content: prompt },
           ],
           response_format: { type: "json_object" },
@@ -127,7 +139,7 @@ async function translateBatch(items, target) {
 async function processTable({ table, textCol, targetPrefix }) {
   for (const target of ["es", "en"]) {
     const targetCol = `${targetPrefix}_${target}`;
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       const rows = await sql(
         `select id, ${textCol} as text from ${table} where ${targetCol} is null or ${targetCol}='' limit ${BATCH};`,
@@ -163,7 +175,9 @@ async function processTable({ table, textCol, targetPrefix }) {
       // fallback fill for missing ids
       const missing = rows.filter((r) => !map.has(String(r.id))).map((r) => `'${r.id}'`);
       if (missing.length) {
-        await sql(`update ${table} set ${targetCol} = ${textCol} where id in (${missing.join(",")});`);
+        await sql(
+          `update ${table} set ${targetCol} = ${textCol} where id in (${missing.join(",")});`,
+        );
       }
       console.log(`done ${Date.now() - t0}ms`);
     }
@@ -172,7 +186,11 @@ async function processTable({ table, textCol, targetPrefix }) {
 
 (async () => {
   console.log("== entrevista_perguntas ==");
-  await processTable({ table: "entrevista_perguntas", textCol: "enunciado_pt", targetPrefix: "enunciado" });
+  await processTable({
+    table: "entrevista_perguntas",
+    textCol: "enunciado_pt",
+    targetPrefix: "enunciado",
+  });
   console.log("== entrevista_opcoes ==");
   await processTable({ table: "entrevista_opcoes", textCol: "label_pt", targetPrefix: "label" });
   console.log("DONE");

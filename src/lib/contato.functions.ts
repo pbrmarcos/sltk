@@ -64,7 +64,9 @@ export const enviarContato = createServerFn({ method: "POST" })
       .eq("visitante_email", data.email.trim().toLowerCase())
       .gte("created_at", desdeH);
     if ((cEmail ?? 0) >= 3) {
-      throw new Error("Já enviamos várias mensagens deste e-mail recentemente. Aguarde nossa resposta.");
+      throw new Error(
+        "Já enviamos várias mensagens deste e-mail recentemente. Aguarde nossa resposta.",
+      );
     }
 
     // Gera codigo + token com retry em colisão.
@@ -90,7 +92,10 @@ export const enviarContato = createServerFn({ method: "POST" })
         })
         .select("id")
         .single();
-      if (!error) { inserted = row; break; }
+      if (!error) {
+        inserted = row;
+        break;
+      }
       if (error.code !== "23505") {
         throw new Error("Não foi possível enviar sua mensagem agora. Tente novamente.");
       }
@@ -121,7 +126,9 @@ export const enviarContato = createServerFn({ method: "POST" })
           link: appUrl("/admin/formularios-recebidos"),
         },
       });
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
 
     return { ok: true } as const;
   });

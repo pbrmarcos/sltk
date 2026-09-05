@@ -7,9 +7,7 @@ import { assertEngineerOrHigher } from "@/lib/admin-guard";
 /** Equipamentos de um cliente, para escolher onde o ETP será criado. */
 export const listEquipamentosDoCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ cliente_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ cliente_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("cliente_equipamentos")
@@ -70,7 +68,13 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
       for (const campo of sec.campos ?? []) {
         const v = respostas[campo.id];
         if (v === undefined || v === null || v === "") continue;
-        const valor = Array.isArray(v) ? v.join(", ") : typeof v === "boolean" ? (v ? "Sim" : "Não") : String(v);
+        const valor = Array.isArray(v)
+          ? v.join(", ")
+          : typeof v === "boolean"
+            ? v
+              ? "Sim"
+              : "Não"
+            : String(v);
         linhas.push(`- ${campo.label?.pt ?? campo.id}: ${valor}`);
       }
       if (linhas.length) {
@@ -116,11 +120,13 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
       (prof as { full_name?: string; email?: string } | null)?.email ??
       "Usuário";
 
-    await (context.supabase as unknown as {
-      from: (t: string) => {
-        insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-      };
-    })
+    await (
+      context.supabase as unknown as {
+        from: (t: string) => {
+          insert: (v: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+        };
+      }
+    )
       .from("equipamento_etp_historico")
       .insert({
         etp_id: novo.id,

@@ -12,7 +12,7 @@ import { logAuditServer } from "@/lib/audit.server";
 
 async function requireAdmin(userId: string) {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
@@ -26,7 +26,7 @@ async function requireAdmin(userId: string) {
 
 async function requireAdminOrManager(userId: string) {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
@@ -55,54 +55,59 @@ export type LastSendInfo = { at: string; status: string; to: string[] };
 
 export const listEmailEvents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{
-    events: EmailEventRow[];
-    recipients: EmailRecipientRow[];
-    lastSends: Record<string, LastSendInfo>;
-  }> => {
-    const admin = await requireAdminOrManager(context.userId);
-    const { data: events, error } = await admin
-      .from("email_event_config")
-      .select("*")
-      .order("module")
-      .order("event_key");
-    if (error) throw friendlyDbError(error);
-    const { data: recs, error: rErr } = await admin
-      .from("email_event_recipients")
-      .select("event_key, role, mode");
-    if (rErr) throw friendlyDbError(rErr);
+  .handler(
+    async ({
+      context,
+    }): Promise<{
+      events: EmailEventRow[];
+      recipients: EmailRecipientRow[];
+      lastSends: Record<string, LastSendInfo>;
+    }> => {
+      const admin = await requireAdminOrManager(context.userId);
+      const { data: events, error } = await admin
+        .from("email_event_config")
+        .select("*")
+        .order("module")
+        .order("event_key");
+      if (error) throw friendlyDbError(error);
+      const { data: recs, error: rErr } = await admin
+        .from("email_event_recipients")
+        .select("event_key, role, mode");
+      if (rErr) throw friendlyDbError(rErr);
 
-    // Último envio por event_key. Pega os 500 mais recentes (janela grande
-    // o suficiente para cobrir todos os eventos ativos) e reduz no JS.
-    const { data: logs } = await admin
-      .from("email_send_log")
-      .select("event_key, created_at, status, to_addresses")
-      .order("created_at", { ascending: false })
-      .limit(500);
-    const lastSends: Record<string, LastSendInfo> = {};
-    for (const l of (logs ?? []) as Array<{
-      event_key: string; created_at: string; status: string; to_addresses: string[] | null;
-    }>) {
-      if (!lastSends[l.event_key]) {
-        lastSends[l.event_key] = {
-          at: l.created_at,
-          status: l.status,
-          to: l.to_addresses ?? [],
-        };
+      // Último envio por event_key. Pega os 500 mais recentes (janela grande
+      // o suficiente para cobrir todos os eventos ativos) e reduz no JS.
+      const { data: logs } = await admin
+        .from("email_send_log")
+        .select("event_key, created_at, status, to_addresses")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      const lastSends: Record<string, LastSendInfo> = {};
+      for (const l of (logs ?? []) as Array<{
+        event_key: string;
+        created_at: string;
+        status: string;
+        to_addresses: string[] | null;
+      }>) {
+        if (!lastSends[l.event_key]) {
+          lastSends[l.event_key] = {
+            at: l.created_at,
+            status: l.status,
+            to: l.to_addresses ?? [],
+          };
+        }
       }
-    }
 
-    return {
-      events: ((events ?? []) as unknown as EmailEventRow[]).map((e) => ({
-        ...e,
-        required_vars: e.required_vars ?? [],
-      })),
-      recipients: (recs ?? []) as EmailRecipientRow[],
-      lastSends,
-    };
-  });
-
-
+      return {
+        events: ((events ?? []) as unknown as EmailEventRow[]).map((e) => ({
+          ...e,
+          required_vars: e.required_vars ?? [],
+        })),
+        recipients: (recs ?? []) as EmailRecipientRow[],
+        lastSends,
+      };
+    },
+  );
 
 const toggleInput = z.object({ event_key: z.string(), enabled: z.boolean() });
 export const toggleEmailEvent = createServerFn({ method: "POST" })
@@ -137,7 +142,10 @@ const templateInput = z.object({
   body_template: z.string().min(1).max(10_000),
   create_calendar_event: z.boolean(),
   calendar_duration_min: z.number().int().min(5).max(720).nullable(),
-  required_vars: z.array(z.string().regex(/^[a-zA-Z0-9_]+$/)).max(30).default([]),
+  required_vars: z
+    .array(z.string().regex(/^[a-zA-Z0-9_]+$/))
+    .max(30)
+    .default([]),
 });
 export const updateEmailTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -150,7 +158,9 @@ export const updateEmailTemplate = createServerFn({ method: "POST" })
       .eq("event_key", data.event_key)
       .maybeSingle();
     const updateTable = admin.from("email_event_config") as unknown as {
-      update: (patch: Record<string, unknown>) => { eq: (col: string, val: string) => Promise<{ error: { message: string } | null }> };
+      update: (patch: Record<string, unknown>) => {
+        eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>;
+      };
     };
     const { error } = await updateTable
       .update({
@@ -173,14 +183,26 @@ export const updateEmailTemplate = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
-const APP_ROLES = ["admin","manager","engineer","production","purchasing","assembly","field","sales"] as const;
+const APP_ROLES = [
+  "admin",
+  "manager",
+  "engineer",
+  "production",
+  "purchasing",
+  "assembly",
+  "field",
+  "sales",
+] as const;
 const recipientsInput = z.object({
   event_key: z.string(),
-  recipients: z.array(z.object({
-    role: z.enum(APP_ROLES),
-    mode: z.enum(["to","cc"]),
-  })).max(APP_ROLES.length * 2),
+  recipients: z
+    .array(
+      z.object({
+        role: z.enum(APP_ROLES),
+        mode: z.enum(["to", "cc"]),
+      }),
+    )
+    .max(APP_ROLES.length * 2),
 });
 export const updateEmailRecipients = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -235,7 +257,6 @@ export type EmailLogRow = {
   vars_used: Record<string, string | number | boolean | null> | null;
   template_snapshot: { subject_template: string; body_template: string } | null;
   required_missing: string[] | null;
-
 };
 
 const logsInput = z.object({
@@ -249,16 +270,16 @@ export const listEmailLogs = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => logsInput.parse(i))
   .handler(async ({ data, context }): Promise<{ rows: EmailLogRow[]; total: number }> => {
     const admin = await requireAdminOrManager(context.userId);
-    let q = admin
-      .from("email_send_log")
-      .select("*", { count: "exact" });
+    let q = admin.from("email_send_log").select("*", { count: "exact" });
     if (data.event_key) q = q.eq("event_key", data.event_key);
     if (data.status) q = q.eq("status", data.status);
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
     return { rows: (rows ?? []) as unknown as EmailLogRow[], total: count ?? 0 };
   });
@@ -277,7 +298,10 @@ export const sendTestEmail = createServerFn({ method: "POST" })
     let recipient = data.recipient?.trim() || null;
     if (!recipient) {
       const { data: prof } = await admin
-        .from("profiles").select("email").eq("id", context.userId).maybeSingle();
+        .from("profiles")
+        .select("email")
+        .eq("id", context.userId)
+        .maybeSingle();
       recipient = prof?.email ?? null;
     }
     if (!recipient) throw new Error("Informe um destinatário ou cadastre e-mail no seu perfil.");
@@ -349,14 +373,25 @@ export const previewEmailTemplate = createServerFn({ method: "POST" })
     const unknownVars = allVars.filter((v) => !knownVars.has(v));
 
     const warnings: string[] = [];
-    if (subject.length > 120) warnings.push(`Assunto tem ${subject.length} caracteres (>120 pode ser cortado por Gmail/Outlook).`);
-    if (!data.body_template.includes("{{link}}")) warnings.push('O corpo não usa {{link}} — o botão de CTA aparece só quando o dispatch fornece link.');
-    if (/<\/(script|style)>/i.test(data.body_template)) warnings.push("Template contém <script> ou <style>; a maioria dos clientes de e-mail bloqueia.");
-    if (unknownVars.length > 0) warnings.push(`Variáveis sem valor-exemplo: ${unknownVars.join(", ")}.`);
+    if (subject.length > 120)
+      warnings.push(
+        `Assunto tem ${subject.length} caracteres (>120 pode ser cortado por Gmail/Outlook).`,
+      );
+    if (!data.body_template.includes("{{link}}"))
+      warnings.push(
+        "O corpo não usa {{link}} — o botão de CTA aparece só quando o dispatch fornece link.",
+      );
+    if (/<\/(script|style)>/i.test(data.body_template))
+      warnings.push(
+        "Template contém <script> ou <style>; a maioria dos clientes de e-mail bloqueia.",
+      );
+    if (unknownVars.length > 0)
+      warnings.push(`Variáveis sem valor-exemplo: ${unknownVars.join(", ")}.`);
     // Verifica balanceamento simples de tags {{ e }}
     const openTags = (data.body_template.match(/\{\{/g) || []).length;
     const closeTags = (data.body_template.match(/\}\}/g) || []).length;
-    if (openTags !== closeTags) warnings.push(`Chaves desbalanceadas: ${openTags} "{{" x ${closeTags} "}}".`);
+    if (openTags !== closeTags)
+      warnings.push(`Chaves desbalanceadas: ${openTags} "{{" x ${closeTags} "}}".`);
 
     return {
       subject,

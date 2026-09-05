@@ -64,11 +64,15 @@ describe("saldo, reservas e disponível", () => {
   const passado = new Date(Date.now() - 86_400_000).toISOString();
 
   it("reserva ativa e vigente bloqueia", () => {
-    expect(reservaBloqueia({ projetoId: "p1", quantidade: 5, status: "ativa", expiraEm: futuro })).toBe(true);
+    expect(
+      reservaBloqueia({ projetoId: "p1", quantidade: 5, status: "ativa", expiraEm: futuro }),
+    ).toBe(true);
   });
 
   it("reserva vencida deixa de bloquear por leitura, sem job", () => {
-    expect(reservaBloqueia({ projetoId: "p1", quantidade: 5, status: "ativa", expiraEm: passado })).toBe(false);
+    expect(
+      reservaBloqueia({ projetoId: "p1", quantidade: 5, status: "ativa", expiraEm: passado }),
+    ).toBe(false);
   });
 
   it("reserva cancelada ou atendida não bloqueia", () => {

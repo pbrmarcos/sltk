@@ -1,4 +1,8 @@
-import type { Disciplina, EtapaStatus, Prioridade } from "@/lib/equipamento-disciplina-etapas.functions";
+import type {
+  Disciplina,
+  EtapaStatus,
+  Prioridade,
+} from "@/lib/equipamento-disciplina-etapas.functions";
 
 export const DISCIPLINA_LABEL: Record<Disciplina, string> = {
   planejamento: "Planejamento",
@@ -8,7 +12,12 @@ export const DISCIPLINA_LABEL: Record<Disciplina, string> = {
   pos_venda: "Pós-venda",
 };
 
-export const ETAPA_STATUS_ORDEM: EtapaStatus[] = ["em_progresso", "nao_iniciado", "bloqueado", "concluido"];
+export const ETAPA_STATUS_ORDEM: EtapaStatus[] = [
+  "em_progresso",
+  "nao_iniciado",
+  "bloqueado",
+  "concluido",
+];
 export const ETAPA_STATUS_LABEL: Record<EtapaStatus, string> = {
   em_progresso: "Em progresso",
   nao_iniciado: "Não iniciado",

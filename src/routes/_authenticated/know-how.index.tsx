@@ -21,7 +21,13 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   listColecoes,
@@ -34,7 +40,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/know-how/")({
-  head: () => ({ meta: [{ title: "Know-how & Treinamentos — Solutek Hub" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [
+      { title: "Know-how & Treinamentos — Solutek Hub" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: KnowHowIndex,
 });
 
@@ -169,8 +180,12 @@ function KnowHowIndex() {
               <Icon className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="line-clamp-2 text-sm font-semibold text-[var(--text-primary)]">{it.titulo}</div>
-              {it.resumo && <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">{it.resumo}</p>}
+              <div className="line-clamp-2 text-sm font-semibold text-[var(--text-primary)]">
+                {it.titulo}
+              </div>
+              {it.resumo && (
+                <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">{it.resumo}</p>
+              )}
             </div>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1">
@@ -178,7 +193,10 @@ function KnowHowIndex() {
               {it.tipo}
             </Badge>
             {it.status !== "publicado" && (
-              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-[10px] text-amber-800">
+              <Badge
+                variant="outline"
+                className="border-amber-200 bg-amber-50 text-[10px] text-amber-800"
+              >
                 {it.status}
               </Badge>
             )}
@@ -192,7 +210,10 @@ function KnowHowIndex() {
           {it.tags?.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {it.tags.slice(0, 4).map((t) => (
-                <span key={t} className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
+                <span
+                  key={t}
+                  className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]"
+                >
                   #{t}
                 </span>
               ))}
@@ -350,7 +371,9 @@ function KnowHowIndex() {
             return (
               <section key={col.id}>
                 <div className="mb-2 flex items-baseline justify-between">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">{col.nome}</h2>
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                    {col.nome}
+                  </h2>
                   <span className="text-xs text-[var(--text-muted)]">{list.length} item(s)</span>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

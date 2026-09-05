@@ -14,11 +14,7 @@ import {
   X,
   Youtube,
 } from "lucide-react";
-import {
-  LandingI18nProvider,
-  useLandingI18n,
-  type Lang,
-} from "@/lib/landing-i18n";
+import { LandingI18nProvider, useLandingI18n, type Lang } from "@/lib/landing-i18n";
 import { useBrandSettingsOptional } from "@/hooks/use-brand-settings";
 
 type Variant = "overlay" | "solid";
@@ -49,8 +45,8 @@ function LanguageSwitcher({ dark }: { dark: boolean }) {
               active
                 ? "bg-white text-slate-900 shadow-sm"
                 : dark
-                ? "text-white/80 hover:text-white"
-                : "text-slate-500 hover:text-slate-900"
+                  ? "text-white/80 hover:text-white"
+                  : "text-slate-500 hover:text-slate-900"
             }`}
           >
             <img
@@ -105,7 +101,6 @@ function Header({ variant }: { variant: Variant }) {
     { hash: "sobre", label: t.nav.about },
   ];
 
-
   return (
     <header
       className={`${
@@ -119,11 +114,7 @@ function Header({ variant }: { variant: Variant }) {
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between gap-6 px-5 md:h-20 md:px-10">
         <Link to="/" className="flex items-center gap-2">
           {headerLogo ? (
-            <img
-              src={headerLogo}
-              alt="Solutek"
-              className="h-12 w-auto transition md:h-14"
-            />
+            <img src={headerLogo} alt="Solutek" className="h-12 w-auto transition md:h-14" />
           ) : (
             <span
               className={`font-mono text-sm uppercase tracking-[0.32em] ${
@@ -161,15 +152,24 @@ function Header({ variant }: { variant: Variant }) {
             </button>
             <div className="invisible absolute left-0 top-full z-50 w-[280px] pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
               <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-                <Link to="/solucoes/projetos-industriais-automacao" className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50">
+                <Link
+                  to="/solucoes/projetos-industriais-automacao"
+                  className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                >
                   <div className="font-semibold text-slate-900">Projetos & Automação</div>
                   <div className="text-xs text-slate-500">Linhas turn-key e integração</div>
                 </Link>
-                <Link to="/solucoes/tecnologia-de-processos" className="block border-t border-slate-100 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50">
+                <Link
+                  to="/solucoes/tecnologia-de-processos"
+                  className="block border-t border-slate-100 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                >
                   <div className="font-semibold text-slate-900">Tecnologia de Processos</div>
                   <div className="text-xs text-slate-500">Flowpack, envase, codificação</div>
                 </Link>
-                <Link to="/solucoes/consultoria-implementacao" className="block border-t border-slate-100 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50">
+                <Link
+                  to="/solucoes/consultoria-implementacao"
+                  className="block border-t border-slate-100 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                >
                   <div className="font-semibold text-slate-900">Consultoria & Implementação</div>
                   <div className="text-xs text-slate-500">Diagnóstico OEE e roadmap 4.0</div>
                 </Link>
@@ -192,9 +192,7 @@ function Header({ variant }: { variant: Variant }) {
           >
             {t.nav.contact}
           </Link>
-
         </nav>
-
 
         <div className="flex items-center gap-2">
           <div className="hidden md:inline-flex">
@@ -239,10 +237,30 @@ function Header({ variant }: { variant: Variant }) {
                 </a>
               );
             })}
-            <div className="mt-1 border-t border-slate-100 pt-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Soluções</div>
-            <Link to="/solucoes/projetos-industriais-automacao" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-slate-700">Projetos & Automação</Link>
-            <Link to="/solucoes/tecnologia-de-processos" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-slate-700">Tecnologia de Processos</Link>
-            <Link to="/solucoes/consultoria-implementacao" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-slate-700">Consultoria & Implementação</Link>
+            <div className="mt-1 border-t border-slate-100 pt-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Soluções
+            </div>
+            <Link
+              to="/solucoes/projetos-industriais-automacao"
+              onClick={() => setOpen(false)}
+              className="py-2 text-sm font-medium text-slate-700"
+            >
+              Projetos & Automação
+            </Link>
+            <Link
+              to="/solucoes/tecnologia-de-processos"
+              onClick={() => setOpen(false)}
+              className="py-2 text-sm font-medium text-slate-700"
+            >
+              Tecnologia de Processos
+            </Link>
+            <Link
+              to="/solucoes/consultoria-implementacao"
+              onClick={() => setOpen(false)}
+              className="py-2 text-sm font-medium text-slate-700"
+            >
+              Consultoria & Implementação
+            </Link>
             <Link
               to="/equipamentos"
               onClick={() => setOpen(false)}
@@ -257,7 +275,6 @@ function Header({ variant }: { variant: Variant }) {
             >
               {t.nav.contact}
             </Link>
-
 
             <div className="my-2">
               <LanguageSwitcher dark={false} />
@@ -306,9 +323,7 @@ function Footer() {
   const instagram = s?.social_instagram || "#";
   const linkedin = s?.social_linkedin || "#";
   const youtube = s?.social_youtube || "#";
-  const supportEmail = settings?.support_email
-    ? `mailto:${settings.support_email}`
-    : "#";
+  const supportEmail = settings?.support_email ? `mailto:${settings.support_email}` : "#";
 
   const socials: { icon: typeof Instagram; href: string }[] = [
     { icon: Instagram, href: instagram },
@@ -329,7 +344,9 @@ function Footer() {
                 Solutek
               </span>
             )}
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-400">{t.footer.tagline}</p>
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-400">
+              {t.footer.tagline}
+            </p>
             <div className="mt-6 space-y-2 text-[13px] text-slate-400">
               <div className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 flex-none text-slate-500" />
@@ -358,9 +375,13 @@ function Footer() {
                   return (
                     <li key={l.label}>
                       {isInternal ? (
-                        <Link to={l.href} className={cls}>{l.label}</Link>
+                        <Link to={l.href} className={cls}>
+                          {l.label}
+                        </Link>
                       ) : (
-                        <a href={l.href} className={cls}>{l.label}</a>
+                        <a href={l.href} className={cls}>
+                          {l.label}
+                        </a>
                       )}
                     </li>
                   );
@@ -398,7 +419,9 @@ function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-[12px] text-slate-500 md:flex-row">
-          <span>© {year} Solutek Américas. {t.footer.rights}</span>
+          <span>
+            © {year} Solutek Américas. {t.footer.rights}
+          </span>
           <Link to="/login" className="transition hover:text-white">
             {t.nav.access} →
           </Link>

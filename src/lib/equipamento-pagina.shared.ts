@@ -27,7 +27,6 @@ export type EquipamentoPagina = {
   nome_pt?: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type EquipamentoBloco = {
   id: string;
   pagina_id: string;
@@ -51,7 +50,10 @@ export const BLOCO_LABEL: Record<BlocoTipo, string> = {
   cta_orcamento: "CTA — Solicitar orçamento",
 };
 
-export function defaultBlocoConteudo(tipo: BlocoTipo, nomeTipo = "Equipamento"): Record<string, unknown> {
+export function defaultBlocoConteudo(
+  tipo: BlocoTipo,
+  nomeTipo = "Equipamento",
+): Record<string, unknown> {
   switch (tipo) {
     case "hero":
       return {
@@ -79,7 +81,8 @@ export function defaultBlocoConteudo(tipo: BlocoTipo, nomeTipo = "Equipamento"):
       return {
         eyebrow_pt: "ESPECIFICAÇÕES TÉCNICAS",
         titulo_pt: "Configuração técnica padrão.",
-        descricao_pt: "Personalizamos cada projeto de acordo com o seu produto, formato e cadência.",
+        descricao_pt:
+          "Personalizamos cada projeto de acordo com o seu produto, formato e cadência.",
         itens: [
           { label_pt: "Cadência", valor_pt: "sob consulta" },
           { label_pt: "Formato", valor_pt: "sob medida" },
@@ -96,10 +99,26 @@ export function defaultBlocoConteudo(tipo: BlocoTipo, nomeTipo = "Equipamento"):
         descricao_pt:
           "Cada componente é escolhido para maximizar OEE — sem dependência de fornecedor exclusivo.",
         itens: [
-          { icone: "Gauge", titulo_pt: "Alta performance", texto_pt: "Cadência estável mesmo em produtos com variabilidade." },
-          { icone: "Settings2", titulo_pt: "Setup rápido", texto_pt: "Troca de formato em minutos, reduzindo downtime." },
-          { icone: "ShieldCheck", titulo_pt: "Padrão sanitário", texto_pt: "Design CIP-friendly conforme GMP." },
-          { icone: "Zap", titulo_pt: "Pronta para integração", texto_pt: "CLP aberto, OPC-UA e dashboards em tempo real." },
+          {
+            icone: "Gauge",
+            titulo_pt: "Alta performance",
+            texto_pt: "Cadência estável mesmo em produtos com variabilidade.",
+          },
+          {
+            icone: "Settings2",
+            titulo_pt: "Setup rápido",
+            texto_pt: "Troca de formato em minutos, reduzindo downtime.",
+          },
+          {
+            icone: "ShieldCheck",
+            titulo_pt: "Padrão sanitário",
+            texto_pt: "Design CIP-friendly conforme GMP.",
+          },
+          {
+            icone: "Zap",
+            titulo_pt: "Pronta para integração",
+            texto_pt: "CLP aberto, OPC-UA e dashboards em tempo real.",
+          },
         ],
       };
     case "casos_uso":
@@ -108,8 +127,16 @@ export function defaultBlocoConteudo(tipo: BlocoTipo, nomeTipo = "Equipamento"):
         titulo_pt: "Para o seu segmento, do seu jeito.",
         descricao_pt: "Entregamos cada projeto com receita validada para o seu produto.",
         itens: [
-          { titulo_pt: "Farmacêutico", texto_pt: "Formatos e processos que atendem GMP.", imagem_url: "" },
-          { titulo_pt: "Alimentício", texto_pt: "Materiais sanitários e limpeza CIP.", imagem_url: "" },
+          {
+            titulo_pt: "Farmacêutico",
+            texto_pt: "Formatos e processos que atendem GMP.",
+            imagem_url: "",
+          },
+          {
+            titulo_pt: "Alimentício",
+            texto_pt: "Materiais sanitários e limpeza CIP.",
+            imagem_url: "",
+          },
           { titulo_pt: "Químico", texto_pt: "Ambientes ATEX quando aplicável.", imagem_url: "" },
         ],
       };
@@ -119,9 +146,20 @@ export function defaultBlocoConteudo(tipo: BlocoTipo, nomeTipo = "Equipamento"):
       return {
         titulo_pt: "Perguntas frequentes",
         itens: [
-          { pergunta_pt: "Qual o prazo médio de entrega?", resposta_pt: "Depende do projeto, mas costuma variar de 90 a 180 dias após a validação técnica." },
-          { pergunta_pt: "Vocês fazem testes com o meu produto?", resposta_pt: "Sim. Testes com sua amostra são feitos antes do FAT." },
-          { pergunta_pt: "Qual o suporte pós-venda?", resposta_pt: "Contrato de manutenção e assistência técnica dedicada, presencial e remota." },
+          {
+            pergunta_pt: "Qual o prazo médio de entrega?",
+            resposta_pt:
+              "Depende do projeto, mas costuma variar de 90 a 180 dias após a validação técnica.",
+          },
+          {
+            pergunta_pt: "Vocês fazem testes com o meu produto?",
+            resposta_pt: "Sim. Testes com sua amostra são feitos antes do FAT.",
+          },
+          {
+            pergunta_pt: "Qual o suporte pós-venda?",
+            resposta_pt:
+              "Contrato de manutenção e assistência técnica dedicada, presencial e remota.",
+          },
         ],
       };
     case "video":
@@ -129,7 +167,8 @@ export function defaultBlocoConteudo(tipo: BlocoTipo, nomeTipo = "Equipamento"):
     case "cta_orcamento":
       return {
         titulo_pt: "Pronto para automatizar a sua linha?",
-        subtitulo_pt: "Fale com nosso time e receba um projeto sob medida — do dimensionamento ao FAT.",
+        subtitulo_pt:
+          "Fale com nosso time e receba um projeto sob medida — do dimensionamento ao FAT.",
         cta_label_pt: "Solicitar orçamento",
       };
   }

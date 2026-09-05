@@ -51,7 +51,6 @@ function PageButton({
   );
 }
 
-
 function getPageItems(current: number, total: number): (number | "ellipsis")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
@@ -84,18 +83,13 @@ export function Pagination({
   return (
     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 py-2 shadow-[var(--shadow-sm)]">
       <div className="text-[12.5px] text-[var(--text-secondary)]">
-        {total === 0
-          ? "Nenhum resultado"
-          : `Exibindo ${start}–${end} de ${total}`}
+        {total === 0 ? "Nenhum resultado" : `Exibindo ${start}–${end} de ${total}`}
       </div>
       <div className="flex items-center gap-3">
         {onPageSizeChange && (
           <div className="flex items-center gap-2 text-[12.5px] text-[var(--text-secondary)]">
             <span>Por página</span>
-            <Select
-              value={String(pageSize)}
-              onValueChange={(v) => onPageSizeChange(Number(v))}
-            >
+            <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
               <SelectTrigger className="h-8 w-[72px] text-[12.5px]">
                 <SelectValue />
               </SelectTrigger>

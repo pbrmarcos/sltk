@@ -3,12 +3,7 @@ import { useQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/r
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Save, Trash2, Search } from "lucide-react";
-import {
-  listPageSeo,
-  scanPageSeo,
-  upsertPageSeo,
-  deletePageSeo,
-} from "@/lib/page-seo.functions";
+import { listPageSeo, scanPageSeo, upsertPageSeo, deletePageSeo } from "@/lib/page-seo.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,11 +81,7 @@ export function SeoTab() {
             Edite título, descrição, OpenGraph e indexação por rota.
           </p>
         </div>
-        <Button
-          onClick={() => scan.mutate()}
-          disabled={scan.isPending}
-          className="gap-2"
-        >
+        <Button onClick={() => scan.mutate()} disabled={scan.isPending} className="gap-2">
           {scan.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -102,7 +93,8 @@ export function SeoTab() {
 
       {rows.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[var(--bg-border)] p-8 text-center text-sm text-[var(--text-muted)]">
-          Nenhuma página mapeada. Clique em <strong>Rastrear páginas públicas</strong> para gerar o SEO base.
+          Nenhuma página mapeada. Clique em <strong>Rastrear páginas públicas</strong> para gerar o
+          SEO base.
         </div>
       ) : (
         <div className="space-y-3">
@@ -161,12 +153,7 @@ function SeoCard({
               noindex
             </Label>
           </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onDelete}
-            className="text-[var(--danger)]"
-          >
+          <Button size="sm" variant="ghost" onClick={onDelete} className="text-[var(--danger)]">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -192,10 +179,7 @@ function SeoCard({
         </div>
         <div>
           <Label className="text-xs">og:title</Label>
-          <Input
-            value={local.og_title ?? ""}
-            onChange={(e) => field("og_title", e.target.value)}
-          />
+          <Input value={local.og_title ?? ""} onChange={(e) => field("og_title", e.target.value)} />
         </div>
         <div className="sm:col-span-2">
           <Label className="text-xs">og:description</Label>
@@ -208,12 +192,7 @@ function SeoCard({
       </div>
 
       <div className="mt-3 flex justify-end gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!dirty}
-          onClick={() => setLocal(row)}
-        >
+        <Button size="sm" variant="outline" disabled={!dirty} onClick={() => setLocal(row)}>
           Cancelar
         </Button>
         <Button
@@ -239,5 +218,3 @@ function SeoCard({
     </div>
   );
 }
-
-

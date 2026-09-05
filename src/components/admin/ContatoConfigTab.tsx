@@ -76,9 +76,13 @@ export function ContatoConfigTab() {
       });
       (payload as Record<string, unknown>).updated_by = user?.id ?? null;
 
-      const { error } = await (supabase.from("brand_settings") as unknown as {
-        update: (v: unknown) => { eq: (c: string, id: string) => Promise<{ error: { message: string } | null }> };
-      })
+      const { error } = await (
+        supabase.from("brand_settings") as unknown as {
+          update: (v: unknown) => {
+            eq: (c: string, id: string) => Promise<{ error: { message: string } | null }>;
+          };
+        }
+      )
         .update(payload)
         .eq("id", settings.id);
       if (error) throw error;
@@ -92,16 +96,42 @@ export function ContatoConfigTab() {
     }
   }
 
-  const fields: { key: keyof ContactFields; label: string; placeholder?: string; type?: string }[] = [
-    { key: "contact_address", label: "Endereço", placeholder: "Av. Santa Catarina, 1207 — Joinville/SC" },
-    { key: "contact_phone", label: "Telefone", placeholder: "+55 (47) 9635-0101" },
-    { key: "contact_whatsapp", label: "WhatsApp", placeholder: "+55 (47) 9635-0101" },
-    { key: "contact_email", label: "E-mail de contato", type: "email", placeholder: "contato@solutekgroup.com" },
-    { key: "contact_hours", label: "Horário de atendimento", placeholder: "Seg a Sex · 08h – 18h (BRT)" },
-    { key: "social_instagram", label: "Instagram (URL)", placeholder: "https://instagram.com/solutek" },
-    { key: "social_linkedin", label: "LinkedIn (URL)", placeholder: "https://linkedin.com/company/solutek" },
-    { key: "social_youtube", label: "YouTube (URL)", placeholder: "https://youtube.com/@solutek" },
-  ];
+  const fields: { key: keyof ContactFields; label: string; placeholder?: string; type?: string }[] =
+    [
+      {
+        key: "contact_address",
+        label: "Endereço",
+        placeholder: "Av. Santa Catarina, 1207 — Joinville/SC",
+      },
+      { key: "contact_phone", label: "Telefone", placeholder: "+55 (47) 9635-0101" },
+      { key: "contact_whatsapp", label: "WhatsApp", placeholder: "+55 (47) 9635-0101" },
+      {
+        key: "contact_email",
+        label: "E-mail de contato",
+        type: "email",
+        placeholder: "contato@solutekgroup.com",
+      },
+      {
+        key: "contact_hours",
+        label: "Horário de atendimento",
+        placeholder: "Seg a Sex · 08h – 18h (BRT)",
+      },
+      {
+        key: "social_instagram",
+        label: "Instagram (URL)",
+        placeholder: "https://instagram.com/solutek",
+      },
+      {
+        key: "social_linkedin",
+        label: "LinkedIn (URL)",
+        placeholder: "https://linkedin.com/company/solutek",
+      },
+      {
+        key: "social_youtube",
+        label: "YouTube (URL)",
+        placeholder: "https://youtube.com/@solutek",
+      },
+    ];
 
   return (
     <section className="space-y-6">
@@ -109,7 +139,8 @@ export function ContatoConfigTab() {
         <header className="mb-4">
           <h3 className="text-sm font-semibold">Dados de contato do site</h3>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Usados no rodapé público, na página /contato e em cards de canais diretos. Deixe em branco para usar o padrão traduzido.
+            Usados no rodapé público, na página /contato e em cards de canais diretos. Deixe em
+            branco para usar o padrão traduzido.
           </p>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

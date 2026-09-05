@@ -70,7 +70,9 @@ export function BomTable({
   const { data: rows = [], isLoading } = useQuery({
     queryKey,
     queryFn: () =>
-      listEquipamentoBom({ data: { equipamento_id: equipamentoId, disciplina: equipamentoDisciplina } }),
+      listEquipamentoBom({
+        data: { equipamento_id: equipamentoId, disciplina: equipamentoDisciplina },
+      }),
   });
 
   const [novo, setNovo] = useState<{ desc: string; qtd: number; un: string; custo: string }>({
@@ -240,7 +242,13 @@ export function BomTable({
                   />
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={cn("h-5 px-1.5 text-[10px]", INSUMO_CRITICIDADE_COLOR[r.criticidade])}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "h-5 px-1.5 text-[10px]",
+                      INSUMO_CRITICIDADE_COLOR[r.criticidade],
+                    )}
+                  >
                     {INSUMO_CRITICIDADE_LABEL[r.criticidade]}
                   </Badge>
                 </TableCell>
@@ -256,8 +264,15 @@ export function BomTable({
                       Comprado ✓
                     </Link>
                   ) : (
-                    <Badge variant="outline" className={cn("h-5 px-1.5 text-[10px]", INSUMO_STATUS_COLOR[r.status as keyof typeof INSUMO_STATUS_COLOR] ?? "")}>
-                      {INSUMO_STATUS_LABEL[r.status as keyof typeof INSUMO_STATUS_LABEL] ?? r.status}
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "h-5 px-1.5 text-[10px]",
+                        INSUMO_STATUS_COLOR[r.status as keyof typeof INSUMO_STATUS_COLOR] ?? "",
+                      )}
+                    >
+                      {INSUMO_STATUS_LABEL[r.status as keyof typeof INSUMO_STATUS_LABEL] ??
+                        r.status}
                     </Badge>
                   )}
                 </TableCell>
@@ -265,10 +280,22 @@ export function BomTable({
                   <div className="inline-flex items-center gap-1">
                     {isManager && r.status === "pronto_aprovacao" && (
                       <>
-                        <Button size="icon" variant="ghost" className="h-6 w-6 text-emerald-600" onClick={() => approveMut.mutate(r.id)} title="Aprovar">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 text-emerald-600"
+                          onClick={() => approveMut.mutate(r.id)}
+                          title="Aprovar"
+                        >
                           <Check className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="h-6 w-6 text-rose-600" onClick={() => rejectMut.mutate(r.id)} title="Rejeitar">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 text-rose-600"
+                          onClick={() => rejectMut.mutate(r.id)}
+                          title="Rejeitar"
+                        >
                           <XIcon className="h-3.5 w-3.5" />
                         </Button>
                       </>

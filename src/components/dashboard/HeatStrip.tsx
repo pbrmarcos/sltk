@@ -15,7 +15,10 @@ export function HeatStrip({ segments, hint }: { segments: Segment[]; hint?: stri
       </div>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
         {segments.map((s) => (
-          <div key={s.label} className="flex items-center gap-1.5 text-[11.5px] text-[var(--text-muted)]">
+          <div
+            key={s.label}
+            className="flex items-center gap-1.5 text-[11.5px] text-[var(--text-muted)]"
+          >
             <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
             <span className="text-[var(--text-primary)]">{s.value}</span>
             <span>{s.label}</span>

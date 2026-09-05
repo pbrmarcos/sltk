@@ -23,7 +23,9 @@ export function GaugeCard({ label, value, hint, tone = "primary" }: Props) {
 
   return (
     <div className="flex h-full flex-col rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-      <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">{label}</span>
+      <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+        {label}
+      </span>
       <div className="mt-2 flex flex-1 items-center justify-center">
         <div className="relative" style={{ width: size, height: size / 2 + 8 }}>
           <svg width={size} height={size / 2 + stroke} viewBox={`0 0 ${size} ${size / 2 + stroke}`}>
@@ -51,7 +53,9 @@ export function GaugeCard({ label, value, hint, tone = "primary" }: Props) {
           </div>
         </div>
       </div>
-      {hint && <div className="mt-1 text-center text-[11.5px] text-[var(--text-muted)]">{hint}</div>}
+      {hint && (
+        <div className="mt-1 text-center text-[11.5px] text-[var(--text-muted)]">{hint}</div>
+      )}
     </div>
   );
 }

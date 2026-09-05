@@ -8,7 +8,10 @@ import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialG
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { clientesListQueryOptions, paisesQueryOptions } from "@/lib/clientes.queries";
 import { formatDocumento, CLIENTE_STATUS } from "@/lib/clientes.shared";
-import { ClienteStatusBadge, useClienteStatusLabel } from "@/components/clientes/ClienteStatusBadge";
+import {
+  ClienteStatusBadge,
+  useClienteStatusLabel,
+} from "@/components/clientes/ClienteStatusBadge";
 import { Flag } from "@/components/ui/flag";
 import {
   Table,
@@ -35,10 +38,9 @@ import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
-  status: fallback(
-    z.enum(["todos", "ativo", "suspect", "prospect", "inativo"]),
+  status: fallback(z.enum(["todos", "ativo", "suspect", "prospect", "inativo"]), "todos").default(
     "todos",
-  ).default("todos"),
+  ),
   pais: fallback(z.string(), "todos").default("todos"),
   page: fallback(z.number().int().min(1), 1).default(1),
   pageSize: fallback(z.union([z.literal(25), z.literal(50), z.literal(100)]), 25).default(25),
@@ -97,9 +99,7 @@ function ClientesListPage() {
   const statusLabel = useClienteStatusLabel();
 
   const paises = useSuspenseQuery(paisesQueryOptions());
-  const list = useSuspenseQuery(
-    clientesListQueryOptions({ q, status, pais, page, pageSize }),
-  );
+  const list = useSuspenseQuery(clientesListQueryOptions({ q, status, pais, page, pageSize }));
   const total = list.data.total;
   const rows = list.data.rows;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -140,14 +140,13 @@ function ClientesListPage() {
           <SelectContent>
             <SelectItem value="todos">Todos os status</SelectItem>
             {CLIENTE_STATUS.map((s) => (
-              <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>
+              <SelectItem key={s} value={s}>
+                {statusLabel(s)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select
-          value={pais}
-          onValueChange={(v) => update({ pais: v, page: 1 })}
-        >
+        <Select value={pais} onValueChange={(v) => update({ pais: v, page: 1 })}>
           <SelectTrigger className="h-9 w-[160px] text-[12.5px]">
             <SelectValue />
           </SelectTrigger>
@@ -155,10 +154,10 @@ function ClientesListPage() {
             <SelectItem value="todos">Todos os países</SelectItem>
             {paises.data.map((p) => (
               <SelectItem key={p.codigo} value={p.codigo}>
-                 <span className="inline-flex items-center gap-2">
-                   <Flag code={p.codigo} size={16} />
-                   <span>{p.nome}</span>
-                 </span>
+                <span className="inline-flex items-center gap-2">
+                  <Flag code={p.codigo} size={16} />
+                  <span>{p.nome}</span>
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -203,57 +202,71 @@ function ClientesListPage() {
                   .join("")
                   .toUpperCase();
                 const paisCfg = paisMap.get(c.pais);
-                const docFmt = paisCfg ? formatDocumento(c.documento_fiscal_numero, paisCfg.documento_mascara) : c.documento_fiscal_numero;
+                const docFmt = paisCfg
+                  ? formatDocumento(c.documento_fiscal_numero, paisCfg.documento_mascara)
+                  : c.documento_fiscal_numero;
                 const color = pickColor(c.razao_social);
                 return (
-                <TableRow key={c.id} className="cursor-pointer">
-                  <TableCell className="font-mono text-[11.5px] text-[var(--text-muted)]">
-                    <Link to="/clientes/$codigo" params={{ codigo: c.codigo }} className="hover:underline">
-                      {c.codigo}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Link to="/clientes/$codigo" params={{ codigo: c.codigo }} className="flex items-center gap-3">
-                      <span
-                        className={cn(
-                          "flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br text-[12px] font-semibold text-white shadow-sm",
-                          color,
-                        )}
+                  <TableRow key={c.id} className="cursor-pointer">
+                    <TableCell className="font-mono text-[11.5px] text-[var(--text-muted)]">
+                      <Link
+                        to="/clientes/$codigo"
+                        params={{ codigo: c.codigo }}
+                        className="hover:underline"
                       >
-                        {initials}
-                      </span>
-                      <span className="flex flex-col">
-                        <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]">
-                          {c.razao_social}
-                          {c.key_account && (
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        {c.codigo}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        to="/clientes/$codigo"
+                        params={{ codigo: c.codigo }}
+                        className="flex items-center gap-3"
+                      >
+                        <span
+                          className={cn(
+                            "flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br text-[12px] font-semibold text-white shadow-sm",
+                            color,
                           )}
+                        >
+                          {initials}
                         </span>
-                        <span className="text-[11.5px] text-[var(--text-muted)]">
-                          <Building2 className="mr-1 inline h-3 w-3" />
-                          {c.segmento ?? "—"}
+                        <span className="flex flex-col">
+                          <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]">
+                            {c.razao_social}
+                            {c.key_account && (
+                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            )}
+                          </span>
+                          <span className="text-[11.5px] text-[var(--text-muted)]">
+                            <Building2 className="mr-1 inline h-3 w-3" />
+                            {c.segmento ?? "—"}
+                          </span>
                         </span>
+                      </Link>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-[12.5px] text-[var(--text-secondary)]">
+                      {docFmt}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-[12.5px] text-[var(--text-secondary)]">
+                      {c.endereco_cidade ?? "—"}
+                      {c.endereco_estado ? ` — ${c.endereco_estado}` : ""}
+                    </TableCell>
+                    <TableCell>
+                      <ClienteStatusBadge status={c.status ?? c.lifecycle_stage} />
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-[12.5px] text-[var(--text-secondary)]">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Flag code={c.pais} size={16} />
+                        {paisCfg?.nome ?? c.pais}
                       </span>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-[12.5px] text-[var(--text-secondary)]">
-                    {docFmt}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-[12.5px] text-[var(--text-secondary)]">
-                    {c.endereco_cidade ?? "—"}{c.endereco_estado ? ` — ${c.endereco_estado}` : ""}
-                  </TableCell>
-                  <TableCell>
-                    <ClienteStatusBadge status={c.status ?? c.lifecycle_stage} />
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-[12.5px] text-[var(--text-secondary)]">
-                     <span className="inline-flex items-center gap-1.5">
-                       <Flag code={c.pais} size={16} />
-                       {paisCfg?.nome ?? c.pais}
-                     </span>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-[12.5px] text-[var(--text-muted)]">{c.segmento ?? "—"}</TableCell>
-                </TableRow>
-              );})}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-[12.5px] text-[var(--text-muted)]">
+                      {c.segmento ?? "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
@@ -264,7 +277,7 @@ function ClientesListPage() {
         pageSize={pageSize}
         total={total}
         onPageChange={(p) => update({ page: p })}
-        onPageSizeChange={(s) => update({ pageSize: (s as 25 | 50 | 100), page: 1 })}
+        onPageSizeChange={(s) => update({ pageSize: s as 25 | 50 | 100, page: 1 })}
       />
     </PageContainer>
   );

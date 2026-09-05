@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,13 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, Plus, Trash2, GripVertical } from "lucide-react";
-import type { CampoSchema, CampoTipo, FormularioSchema, Idioma, SecaoSchema } from "@/lib/rfq.shared";
+import type {
+  CampoSchema,
+  CampoTipo,
+  FormularioSchema,
+  Idioma,
+  SecaoSchema,
+} from "@/lib/rfq.shared";
 import { RFQFormRenderer } from "@/components/rfq/RFQFormRenderer";
 
 export type RfqTipoDraft = {
@@ -142,15 +147,24 @@ export function RfqTipoEditor({
         <div className="grid gap-3 md:grid-cols-3">
           <div>
             <Label>Nome (PT)</Label>
-            <Input value={draft.nome_pt} onChange={(e) => onChange({ ...draft, nome_pt: e.target.value })} />
+            <Input
+              value={draft.nome_pt}
+              onChange={(e) => onChange({ ...draft, nome_pt: e.target.value })}
+            />
           </div>
           <div>
             <Label>Nome (ES)</Label>
-            <Input value={draft.nome_es} onChange={(e) => onChange({ ...draft, nome_es: e.target.value })} />
+            <Input
+              value={draft.nome_es}
+              onChange={(e) => onChange({ ...draft, nome_es: e.target.value })}
+            />
           </div>
           <div>
             <Label>Nome (EN)</Label>
-            <Input value={draft.nome_en} onChange={(e) => onChange({ ...draft, nome_en: e.target.value })} />
+            <Input
+              value={draft.nome_en}
+              onChange={(e) => onChange({ ...draft, nome_en: e.target.value })}
+            />
           </div>
         </div>
         <div>
@@ -206,7 +220,9 @@ export function RfqTipoEditor({
                   <Input
                     className="h-8"
                     value={sec.id}
-                    onChange={(e) => updateSecao(sIdx, (s) => ({ ...s, id: slugId(e.target.value) }))}
+                    onChange={(e) =>
+                      updateSecao(sIdx, (s) => ({ ...s, id: slugId(e.target.value) }))
+                    }
                   />
                 </div>
                 <div>
@@ -215,7 +231,10 @@ export function RfqTipoEditor({
                     className="h-8"
                     value={sec.titulo.pt}
                     onChange={(e) =>
-                      updateSecao(sIdx, (s) => ({ ...s, titulo: { ...s.titulo, pt: e.target.value } }))
+                      updateSecao(sIdx, (s) => ({
+                        ...s,
+                        titulo: { ...s.titulo, pt: e.target.value },
+                      }))
                     }
                   />
                 </div>
@@ -225,7 +244,10 @@ export function RfqTipoEditor({
                     className="h-8"
                     value={sec.titulo.es ?? ""}
                     onChange={(e) =>
-                      updateSecao(sIdx, (s) => ({ ...s, titulo: { ...s.titulo, es: e.target.value } }))
+                      updateSecao(sIdx, (s) => ({
+                        ...s,
+                        titulo: { ...s.titulo, es: e.target.value },
+                      }))
                     }
                   />
                 </div>
@@ -235,7 +257,10 @@ export function RfqTipoEditor({
                     className="h-8"
                     value={sec.titulo.en ?? ""}
                     onChange={(e) =>
-                      updateSecao(sIdx, (s) => ({ ...s, titulo: { ...s.titulo, en: e.target.value } }))
+                      updateSecao(sIdx, (s) => ({
+                        ...s,
+                        titulo: { ...s.titulo, en: e.target.value },
+                      }))
                     }
                   />
                 </div>
@@ -261,7 +286,10 @@ export function RfqTipoEditor({
                         type="button"
                         className="text-muted-foreground hover:text-foreground"
                         onClick={() =>
-                          updateSecao(sIdx, (s) => ({ ...s, campos: moveInArray(s.campos, cIdx, cIdx - 1) }))
+                          updateSecao(sIdx, (s) => ({
+                            ...s,
+                            campos: moveInArray(s.campos, cIdx, cIdx - 1),
+                          }))
                         }
                       >
                         <ChevronUp className="h-3.5 w-3.5" />
@@ -270,7 +298,10 @@ export function RfqTipoEditor({
                         type="button"
                         className="text-muted-foreground hover:text-foreground"
                         onClick={() =>
-                          updateSecao(sIdx, (s) => ({ ...s, campos: moveInArray(s.campos, cIdx, cIdx + 1) }))
+                          updateSecao(sIdx, (s) => ({
+                            ...s,
+                            campos: moveInArray(s.campos, cIdx, cIdx + 1),
+                          }))
                         }
                       >
                         <ChevronDown className="h-3.5 w-3.5" />
@@ -352,7 +383,10 @@ export function RfqTipoEditor({
                             type="checkbox"
                             checked={campo.obrigatorio ?? false}
                             onChange={(e) =>
-                              updateCampo(sIdx, cIdx, (c) => ({ ...c, obrigatorio: e.target.checked }))
+                              updateCampo(sIdx, cIdx, (c) => ({
+                                ...c,
+                                obrigatorio: e.target.checked,
+                              }))
                             }
                           />
                           Obrig.

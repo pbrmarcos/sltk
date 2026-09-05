@@ -7,7 +7,8 @@ import type { EnrichedCliente } from "./types";
  */
 export async function enrichApisNetPe(ruc: string): Promise<EnrichedCliente | null> {
   const token = process.env.APIS_NET_PE_TOKEN;
-  if (!token) throw new Error("Consulta de RUC do Peru indisponível — a integração não está configurada.");
+  if (!token)
+    throw new Error("Consulta de RUC do Peru indisponível — a integração não está configurada.");
 
   const res = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${ruc}`, {
     headers: { accept: "application/json", authorization: `Bearer ${token}` },

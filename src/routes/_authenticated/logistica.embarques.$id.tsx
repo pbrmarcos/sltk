@@ -41,7 +41,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   getEmbarque,
   updateEmbarque,
@@ -114,11 +120,7 @@ function EmbarqueDetalhe() {
     : !CRITICAL_STATUS.includes(statusDialog.target) || statusDialog.notas.trim().length >= 5;
 
   const statusMut = useMutation({
-    mutationFn: async (payload: {
-      s: LogisticaStatus;
-      notas?: string;
-      files: File[];
-    }) => {
+    mutationFn: async (payload: { s: LogisticaStatus; notas?: string; files: File[] }) => {
       // 1) Fazer upload dos anexos (se houver) e registrar cada um
       const anexoIds: string[] = [];
       for (const f of payload.files) {
@@ -185,7 +187,11 @@ function EmbarqueDetalhe() {
       });
     },
     onSuccess: () => {
-      setNewDesc(""); setNewQtd("1"); setNewSerial(""); setNewPeso(""); setNewVolume("");
+      setNewDesc("");
+      setNewQtd("1");
+      setNewSerial("");
+      setNewPeso("");
+      setNewVolume("");
       invalidate();
       toast.success("Item adicionado.");
     },
@@ -193,7 +199,10 @@ function EmbarqueDetalhe() {
   });
   const removeMut = useMutation({
     mutationFn: (itemId: string) => removeFn({ data: { id: itemId } }),
-    onSuccess: () => { invalidate(); toast.success("Item removido."); },
+    onSuccess: () => {
+      invalidate();
+      toast.success("Item removido.");
+    },
     onError: (e: unknown) => toast.error((e as Error).message),
   });
 
@@ -238,8 +247,12 @@ function EmbarqueDetalhe() {
   }
 
   const removeAnexoMut = useMutation({
-    mutationFn: (a: EmbarqueAnexo) => removerAnexoFn({ data: { id: a.id, storage_path: a.storage_path } }),
-    onSuccess: () => { invalidate(); toast.success("Anexo removido."); },
+    mutationFn: (a: EmbarqueAnexo) =>
+      removerAnexoFn({ data: { id: a.id, storage_path: a.storage_path } }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Anexo removido.");
+    },
     onError: (e: unknown) => toast.error((e as Error).message),
   });
 
@@ -297,7 +310,9 @@ function EmbarqueDetalhe() {
   async function handleGeneratePdf() {
     setPdfLoading(true);
     try {
-      const ids = Object.entries(pdfSelected).filter(([, v]) => v).map(([k]) => k);
+      const ids = Object.entries(pdfSelected)
+        .filter(([, v]) => v)
+        .map(([k]) => k);
       const res = await pdfFn({ data: { embarque_id: id, anexo_ids: ids } });
       const bin = atob(res.base64);
       const bytes = new Uint8Array(bin.length);
@@ -320,16 +335,21 @@ function EmbarqueDetalhe() {
     }
   }
 
-
   if (q.isLoading) {
-    return <PageContainer><p className="text-sm text-[var(--text-muted)]">Carregando…</p></PageContainer>;
+    return (
+      <PageContainer>
+        <p className="text-sm text-[var(--text-muted)]">Carregando…</p>
+      </PageContainer>
+    );
   }
   if (q.isError || !q.data) {
     return (
       <PageContainer>
         <p className="text-sm text-[var(--text-muted)]">Embarque não encontrado.</p>
         <Button asChild variant="outline" size="sm" className="mt-4">
-          <Link to="/logistica/embarques"><ArrowLeft className="mr-1.5 h-4 w-4" /> Voltar</Link>
+          <Link to="/logistica/embarques">
+            <ArrowLeft className="mr-1.5 h-4 w-4" /> Voltar
+          </Link>
         </Button>
       </PageContainer>
     );
@@ -352,22 +372,47 @@ function EmbarqueDetalhe() {
         subtitle={`${cli?.nome_fantasia || cli?.razao_social || "Cliente"} · ${eq?.apelido || eq?.modelo || "Equipamento"}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className={`text-[11px] uppercase ${STATUS_TONE[s]}`}>{s}</Badge>
-            <Button size="sm" variant="outline" onClick={() => { setPdfSelected({}); setPdfOpen(true); }}>
+            <Badge variant="outline" className={`text-[11px] uppercase ${STATUS_TONE[s]}`}>
+              {s}
+            </Badge>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setPdfSelected({});
+                setPdfOpen(true);
+              }}
+            >
               <FileText className="mr-1.5 h-4 w-4" /> Exportar PDF
             </Button>
             {canEdit && s === "rascunho" && (
-              <Button size="sm" variant="outline" onClick={() => setStatusDialog({ target: "programado", notas: "", files: [], uploading: false })}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  setStatusDialog({ target: "programado", notas: "", files: [], uploading: false })
+                }
+              >
                 Programar
               </Button>
             )}
             {canEdit && (s === "rascunho" || s === "programado") && (
-              <Button size="sm" onClick={() => setStatusDialog({ target: "embarcado", notas: "", files: [], uploading: false })}>
+              <Button
+                size="sm"
+                onClick={() =>
+                  setStatusDialog({ target: "embarcado", notas: "", files: [], uploading: false })
+                }
+              >
                 <Truck className="mr-1.5 h-4 w-4" /> Marcar embarcado
               </Button>
             )}
             {canEdit && s === "embarcado" && (
-              <Button size="sm" onClick={() => setStatusDialog({ target: "entregue", notas: "", files: [], uploading: false })}>
+              <Button
+                size="sm"
+                onClick={() =>
+                  setStatusDialog({ target: "entregue", notas: "", files: [], uploading: false })
+                }
+              >
                 <CheckCircle2 className="mr-1.5 h-4 w-4" /> Marcar entregue
               </Button>
             )}
@@ -379,7 +424,9 @@ function EmbarqueDetalhe() {
         <div className="space-y-6">
           {/* Cabeçalho editável */}
           <section className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-            <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">Informações do embarque</h2>
+            <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
+              Informações do embarque
+            </h2>
             <CabecalhoForm
               embarque={embarque}
               transportadoras={transportadoras.data ?? []}
@@ -446,11 +493,40 @@ function EmbarqueDetalhe() {
 
             {canEdit && (
               <div className="grid gap-2 sm:grid-cols-[2fr_60px_120px_80px_80px_auto]">
-                <Input placeholder="Descrição" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
-                <Input placeholder="Qtd" type="number" min="0" step="0.001" value={newQtd} onChange={(e) => setNewQtd(e.target.value)} />
-                <Input placeholder="Serial" value={newSerial} onChange={(e) => setNewSerial(e.target.value)} />
-                <Input placeholder="Peso kg" type="number" min="0" step="0.001" value={newPeso} onChange={(e) => setNewPeso(e.target.value)} />
-                <Input placeholder="Vol m³" type="number" min="0" step="0.001" value={newVolume} onChange={(e) => setNewVolume(e.target.value)} />
+                <Input
+                  placeholder="Descrição"
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                />
+                <Input
+                  placeholder="Qtd"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={newQtd}
+                  onChange={(e) => setNewQtd(e.target.value)}
+                />
+                <Input
+                  placeholder="Serial"
+                  value={newSerial}
+                  onChange={(e) => setNewSerial(e.target.value)}
+                />
+                <Input
+                  placeholder="Peso kg"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={newPeso}
+                  onChange={(e) => setNewPeso(e.target.value)}
+                />
+                <Input
+                  placeholder="Vol m³"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={newVolume}
+                  onChange={(e) => setNewVolume(e.target.value)}
+                />
                 <Button size="sm" onClick={() => addMut.mutate()} disabled={addMut.isPending}>
                   <Plus className="mr-1 h-4 w-4" /> Adicionar
                 </Button>
@@ -473,9 +549,13 @@ function EmbarqueDetalhe() {
                     <DropdownMenuTrigger asChild>
                       <Button size="sm" variant="outline" disabled={!!exportingTrail}>
                         {exportingTrail ? (
-                          <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Exportando…</>
+                          <>
+                            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Exportando…
+                          </>
                         ) : (
-                          <><Download className="mr-1.5 h-4 w-4" /> Exportar</>
+                          <>
+                            <Download className="mr-1.5 h-4 w-4" /> Exportar
+                          </>
                         )}
                       </Button>
                     </DropdownMenuTrigger>
@@ -509,21 +589,27 @@ function EmbarqueDetalhe() {
                     </span>
                     <span className="text-xs text-[var(--text-muted)]">·</span>
                     {l.from_status ? (
-                      <Badge variant="outline" className={`text-[10px] uppercase ${STATUS_TONE[l.from_status]}`}>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] uppercase ${STATUS_TONE[l.from_status]}`}
+                      >
                         {l.from_status}
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] uppercase">novo</Badge>
+                      <Badge variant="outline" className="text-[10px] uppercase">
+                        novo
+                      </Badge>
                     )}
                     <span className="text-xs text-[var(--text-muted)]">→</span>
-                    <Badge variant="outline" className={`text-[10px] uppercase ${STATUS_TONE[l.to_status]}`}>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] uppercase ${STATUS_TONE[l.to_status]}`}
+                    >
                       {l.to_status}
                     </Badge>
                     <span className="text-xs">
                       por{" "}
-                      <span className="font-medium">
-                        {l.actor_nome || l.actor_email || "—"}
-                      </span>
+                      <span className="font-medium">{l.actor_nome || l.actor_email || "—"}</span>
                     </span>
                     {l.notas && (
                       <span className="w-full text-xs text-[var(--text-muted)]">“{l.notas}”</span>
@@ -555,12 +641,16 @@ function EmbarqueDetalhe() {
         {/* Anexos */}
         <aside>
           <section className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-            <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">Anexos ({anexos.length})</h2>
+            <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
+              Anexos ({anexos.length})
+            </h2>
 
             {canEdit && (
               <div className="mb-4 space-y-2 rounded border border-dashed border-[var(--bg-border)] p-3">
                 <Select value={categoria} onValueChange={(v) => setCategoria(v as any)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="foto">Foto de embarque</SelectItem>
                     <SelectItem value="nf">Nota fiscal / XML</SelectItem>
@@ -593,14 +683,19 @@ function EmbarqueDetalhe() {
 
             <ul className="space-y-2">
               {anexos.map((a: EmbarqueAnexo) => (
-                <AnexoRow key={a.id} anexo={a} canEdit={canEdit} onRemove={() => removeAnexoMut.mutate(a)} />
+                <AnexoRow
+                  key={a.id}
+                  anexo={a}
+                  canEdit={canEdit}
+                  onRemove={() => removeAnexoMut.mutate(a)}
+                />
               ))}
               {anexos.length === 0 && (
                 <li className="text-xs text-[var(--text-muted)]">Nenhum anexo.</li>
               )}
             </ul>
           </section>
-      </aside>
+        </aside>
       </div>
 
       {/* Diálogo — Exportar romaneio em PDF */}
@@ -610,7 +705,8 @@ function EmbarqueDetalhe() {
             <DialogTitle>Exportar romaneio em PDF</DialogTitle>
             <DialogDescription>
               O PDF inclui o cabeçalho, os itens, a trilha de auditoria e a área de assinaturas.
-              Selecione anexos abaixo para incluí-los no documento (imagens são embutidas; demais arquivos são apenas referenciados).
+              Selecione anexos abaixo para incluí-los no documento (imagens são embutidas; demais
+              arquivos são apenas referenciados).
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[300px] space-y-2 overflow-y-auto rounded border border-[var(--bg-border)] p-2">
@@ -644,9 +740,13 @@ function EmbarqueDetalhe() {
             </Button>
             <Button onClick={handleGeneratePdf} disabled={pdfLoading}>
               {pdfLoading ? (
-                <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Gerando…</>
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Gerando…
+                </>
               ) : (
-                <><FileText className="mr-1.5 h-4 w-4" /> Gerar PDF</>
+                <>
+                  <FileText className="mr-1.5 h-4 w-4" /> Gerar PDF
+                </>
               )}
             </Button>
           </DialogFooter>
@@ -654,12 +754,14 @@ function EmbarqueDetalhe() {
       </Dialog>
 
       {/* Diálogo de mudança de status com motivo/comentário + anexos */}
-      <Dialog open={!!statusDialog} onOpenChange={(o) => !o && !statusMut.isPending && setStatusDialog(null)}>
+      <Dialog
+        open={!!statusDialog}
+        onOpenChange={(o) => !o && !statusMut.isPending && setStatusDialog(null)}
+      >
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              Alterar status para{" "}
-              <span className="uppercase">{statusDialog?.target}</span>
+              Alterar status para <span className="uppercase">{statusDialog?.target}</span>
             </DialogTitle>
             <DialogDescription>
               {isCritical
@@ -670,7 +772,8 @@ function EmbarqueDetalhe() {
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label className="text-xs uppercase text-[var(--text-muted)]">
-                Motivo / comentário {isCritical ? <span className="text-rose-600">*</span> : "(opcional)"}
+                Motivo / comentário{" "}
+                {isCritical ? <span className="text-rose-600">*</span> : "(opcional)"}
               </Label>
               <Textarea
                 rows={4}
@@ -681,7 +784,9 @@ function EmbarqueDetalhe() {
                 }
               />
               {isCritical && !reasonValid && (
-                <p className="text-xs text-rose-600">Informe um motivo com pelo menos 5 caracteres.</p>
+                <p className="text-xs text-rose-600">
+                  Informe um motivo com pelo menos 5 caracteres.
+                </p>
               )}
             </div>
 
@@ -700,7 +805,7 @@ function EmbarqueDetalhe() {
                     const picked = Array.from(e.target.files ?? []);
                     if (picked.length === 0) return;
                     setStatusDialog((prev) =>
-                      prev ? { ...prev, files: [...prev.files, ...picked] } : prev
+                      prev ? { ...prev, files: [...prev.files, ...picked] } : prev,
                     );
                     e.target.value = "";
                   }}
@@ -709,16 +814,24 @@ function EmbarqueDetalhe() {
               {statusDialog && statusDialog.files.length > 0 && (
                 <ul className="space-y-1">
                   {statusDialog.files.map((f, idx) => (
-                    <li key={idx} className="flex items-center justify-between rounded bg-[var(--bg-elevated)] px-2 py-1 text-xs">
+                    <li
+                      key={idx}
+                      className="flex items-center justify-between rounded bg-[var(--bg-elevated)] px-2 py-1 text-xs"
+                    >
                       <span className="truncate">
-                        {f.name} <span className="text-[var(--text-muted)]">({Math.round(f.size / 1024)} KB)</span>
+                        {f.name}{" "}
+                        <span className="text-[var(--text-muted)]">
+                          ({Math.round(f.size / 1024)} KB)
+                        </span>
                       </span>
                       <button
                         type="button"
                         className="text-[var(--text-muted)] hover:text-rose-600"
                         onClick={() =>
                           setStatusDialog((prev) =>
-                            prev ? { ...prev, files: prev.files.filter((_, i) => i !== idx) } : prev
+                            prev
+                              ? { ...prev, files: prev.files.filter((_, i) => i !== idx) }
+                              : prev,
                           )
                         }
                         aria-label="Remover arquivo"
@@ -732,7 +845,11 @@ function EmbarqueDetalhe() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setStatusDialog(null)} disabled={statusMut.isPending}>
+            <Button
+              variant="ghost"
+              onClick={() => setStatusDialog(null)}
+              disabled={statusMut.isPending}
+            >
               Cancelar
             </Button>
             <Button
@@ -747,7 +864,9 @@ function EmbarqueDetalhe() {
               disabled={statusMut.isPending || !reasonValid}
             >
               {statusMut.isPending ? (
-                <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Salvando…</>
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Salvando…
+                </>
               ) : (
                 "Confirmar"
               )}
@@ -776,7 +895,9 @@ function CabecalhoForm({
     observacoes?: string | null;
   }) => Promise<void>;
 }) {
-  const [transportadoraId, setTransportadoraId] = useState<string>(embarque.transportadora_id ?? "none");
+  const [transportadoraId, setTransportadoraId] = useState<string>(
+    embarque.transportadora_id ?? "none",
+  );
   const [previsao, setPrevisao] = useState<string>(embarque.previsao_saida ?? "");
   const [nf, setNf] = useState<string>(embarque.nf_saida ?? "");
   const [destino, setDestino] = useState<string>(embarque.destino ?? "");
@@ -787,23 +908,38 @@ function CabecalhoForm({
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Transportadora</Label>
+          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+            Transportadora
+          </Label>
           <Select value={transportadoraId} onValueChange={setTransportadoraId} disabled={!canEdit}>
-            <SelectTrigger><SelectValue placeholder="A definir" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="A definir" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">A definir</SelectItem>
               {transportadoras.map((t) => (
-                <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
+                <SelectItem key={t.id} value={t.id}>
+                  {t.nome}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Previsão de saída</Label>
-          <Input type="date" value={previsao ?? ""} onChange={(e) => setPrevisao(e.target.value)} disabled={!canEdit} />
+          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+            Previsão de saída
+          </Label>
+          <Input
+            type="date"
+            value={previsao ?? ""}
+            onChange={(e) => setPrevisao(e.target.value)}
+            disabled={!canEdit}
+          />
         </div>
         <div>
-          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">NF de saída</Label>
+          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+            NF de saída
+          </Label>
           <Input value={nf} onChange={(e) => setNf(e.target.value)} disabled={!canEdit} />
         </div>
         <div>
@@ -813,7 +949,12 @@ function CabecalhoForm({
       </div>
       <div>
         <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Observações</Label>
-        <Textarea rows={3} value={obs} onChange={(e) => setObs(e.target.value)} disabled={!canEdit} />
+        <Textarea
+          rows={3}
+          value={obs}
+          onChange={(e) => setObs(e.target.value)}
+          disabled={!canEdit}
+        />
       </div>
       {canEdit && (
         <div className="flex justify-end">
@@ -846,7 +987,8 @@ function CabecalhoForm({
       )}
       {embarque.data_entrega && (
         <p className="text-xs text-[var(--text-muted)]">
-          Entregue em {new Date(embarque.data_entrega).toLocaleString("pt-BR")}. Janela de garantia iniciada.
+          Entregue em {new Date(embarque.data_entrega).toLocaleString("pt-BR")}. Janela de garantia
+          iniciada.
         </p>
       )}
     </div>

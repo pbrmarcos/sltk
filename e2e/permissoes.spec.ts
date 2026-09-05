@@ -13,10 +13,7 @@ import { test, expect } from "@playwright/test";
 const skip = !process.env.E2E_BASE_URL || !process.env.E2E_STORAGE_STATE;
 
 test.describe("Permissões — bloqueio de combinações inválidas", () => {
-  test.skip(
-    skip,
-    "Defina E2E_BASE_URL e E2E_STORAGE_STATE (admin logado) para rodar.",
-  );
+  test.skip(skip, "Defina E2E_BASE_URL e E2E_STORAGE_STATE (admin logado) para rodar.");
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/admin/usuarios");
@@ -24,7 +21,9 @@ test.describe("Permissões — bloqueio de combinações inválidas", () => {
     await expect(page.getByRole("table")).toBeVisible();
   });
 
-  test("Habilitar 'Qualidade' sem 'Processos' mostra erro estruturado com hint e sugestão", async ({ page }) => {
+  test("Habilitar 'Qualidade' sem 'Processos' mostra erro estruturado com hint e sugestão", async ({
+    page,
+  }) => {
     // Encontra a linha do módulo qualidade e o switch da role engineer.
     const row = page.locator("tr", { hasText: /qualidade/i });
     const switchEl = row.locator("button[role='switch']").nth(2); // engineer (3ª col)
@@ -57,7 +56,9 @@ test.describe("Permissões — bloqueio de combinações inválidas", () => {
     await expect(page.getByRole("button", { name: /salvar altera/i })).toBeEnabled();
   });
 
-  test("Habilitar 'Administração' em role != manager bloqueia com código admin-only-manager", async ({ page }) => {
+  test("Habilitar 'Administração' em role != manager bloqueia com código admin-only-manager", async ({
+    page,
+  }) => {
     const row = page.locator("tr", { hasText: /administra/i });
     // sales é a última coluna editável (7ª)
     const salesSwitch = row.locator("button[role='switch']").last();
@@ -70,8 +71,6 @@ test.describe("Permissões — bloqueio de combinações inválidas", () => {
     await expect(violation.getByTestId("permissoes-violation-code")).toHaveText(
       "admin-only-manager",
     );
-    await expect(violation.getByTestId("permissoes-violation-fix")).toContainText(
-      /Desabilitar/i,
-    );
+    await expect(violation.getByTestId("permissoes-violation-fix")).toContainText(/Desabilitar/i);
   });
 });

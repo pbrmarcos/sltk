@@ -6,12 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -52,7 +47,9 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
 
   const aprovarMut = useMutation({
     mutationFn: (id: string) =>
-      updateRevisao({ data: { id, status: "aprovada", data_inspecao: new Date().toISOString().slice(0, 10) } }),
+      updateRevisao({
+        data: { id, status: "aprovada", data_inspecao: new Date().toISOString().slice(0, 10) },
+      }),
     onSuccess: () => {
       if (!mounted.current) return;
       toast.success("Revisão aprovada.");
@@ -73,11 +70,7 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Qualidade" },
-          { label: title },
-        ]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Qualidade" }, { label: title }]}
         title={title}
         subtitle={subtitle}
         actions={<Button onClick={() => setOpenNovo(true)}>Nova revisão</Button>}
@@ -101,14 +94,27 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
         <Input
           placeholder="Buscar por equipamento ou cliente…"
           value={q}
-          onChange={(e) => { setQ(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(1);
+          }}
         />
-        <Select value={status} onValueChange={(v) => { setStatus(v as typeof status); setPage(1); }}>
-          <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+        <Select
+          value={status}
+          onValueChange={(v) => {
+            setStatus(v as typeof status);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos os status</SelectItem>
             {REVISAO_STATUS.map((s) => (
-              <SelectItem key={s} value={s}>{REVISAO_STATUS_LABEL[s]}</SelectItem>
+              <SelectItem key={s} value={s}>
+                {REVISAO_STATUS_LABEL[s]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -132,10 +138,13 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
                 <div className="min-w-0">
                   <div className="truncate font-medium">{r.cliente_equipamentos?.modelo}</div>
                   <div className="truncate text-xs text-[var(--text-muted)]">
-                    {r.clientes?.razao_social} · NCs: {r.nao_conformidades ?? 0} · Itens: {r.itens_verificados ?? 0}/{r.itens_totais ?? 0}
+                    {r.clientes?.razao_social} · NCs: {r.nao_conformidades ?? 0} · Itens:{" "}
+                    {r.itens_verificados ?? 0}/{r.itens_totais ?? 0}
                   </div>
                 </div>
-                <Badge variant="outline" className="text-[11px]">Rev. {r.numero}</Badge>
+                <Badge variant="outline" className="text-[11px]">
+                  Rev. {r.numero}
+                </Badge>
                 <Badge
                   variant="outline"
                   className={cn("text-[11px]", REVISAO_STATUS_COLOR[r.status as RevisaoStatus])}
@@ -165,10 +174,20 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
         <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>Total: {data.total}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
               Anterior
             </Button>
-            <Button variant="outline" size="sm" disabled={page * 50 >= data.total} onClick={() => setPage(page + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page * 50 >= data.total}
+              onClick={() => setPage(page + 1)}
+            >
               Próxima
             </Button>
           </div>
@@ -251,7 +270,9 @@ function NovaRevisaoDialog({
           <label className="block space-y-1">
             <span className="text-muted-foreground text-xs">Equipamento</span>
             <Select value={equipamentoId} onValueChange={setEquipamentoId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Selecione…" />
+              </SelectTrigger>
               <SelectContent className="max-h-80">
                 {(eqps ?? []).map((e: any) => (
                   <SelectItem key={e.id} value={e.id}>
@@ -272,8 +293,13 @@ function NovaRevisaoDialog({
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button disabled={!equipamentoId || createMut.isPending} onClick={() => createMut.mutate()}>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={!equipamentoId || createMut.isPending}
+            onClick={() => createMut.mutate()}
+          >
             Criar
           </Button>
         </div>

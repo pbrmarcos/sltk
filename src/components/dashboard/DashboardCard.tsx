@@ -19,7 +19,9 @@ export function DashboardCard({
     >
       <header className="mb-4 flex items-start justify-between gap-2">
         <div>
-          <h3 className="text-[13px] font-semibold tracking-tight text-[var(--text-primary)]">{title}</h3>
+          <h3 className="text-[13px] font-semibold tracking-tight text-[var(--text-primary)]">
+            {title}
+          </h3>
           {hint && <p className="text-[11.5px] text-[var(--text-muted)]">{hint}</p>}
         </div>
         {action}

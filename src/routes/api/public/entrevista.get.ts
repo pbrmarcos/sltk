@@ -29,7 +29,12 @@ export const Route = createFileRoute("/api/public/entrevista/get")({
       GET: async ({ request }) => {
         try {
           const url = new URL(request.url);
-          const codigo = z.string().min(4).max(12).parse(url.searchParams.get("codigo") ?? "").toUpperCase();
+          const codigo = z
+            .string()
+            .min(4)
+            .max(12)
+            .parse(url.searchParams.get("codigo") ?? "")
+            .toUpperCase();
           const sb = getPublicSupabase();
           const { data, error } = await sb.rpc("get_public_entrevista", { _codigo: codigo });
           if (error) throw error;
@@ -37,7 +42,8 @@ export const Route = createFileRoute("/api/public/entrevista/get")({
           const payload = data ?? { ok: false, error: "not_found" };
           if (payload.ok) return Response.json(payload, { headers: cors });
 
-          const status = payload.error === "not_found" ? 404 : payload.error === "invalid" ? 400 : 410;
+          const status =
+            payload.error === "not_found" ? 404 : payload.error === "invalid" ? 400 : 410;
           return Response.json(payload, { status, headers: cors });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "erro";

@@ -22,9 +22,7 @@ export type EtpHistoricoRow = {
 
 export const listEtpHistorico = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ etp_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ etp_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await (context.supabase as any)
       .from(TABLE)
@@ -73,8 +71,7 @@ export const addEtpHistoricoNota = createServerFn({ method: "POST" })
       .select("full_name, email")
       .eq("id", context.userId)
       .maybeSingle();
-    const nome =
-      (prof as any)?.full_name ?? (prof as any)?.email ?? "Usuário";
+    const nome = (prof as any)?.full_name ?? (prof as any)?.email ?? "Usuário";
 
     const { error } = await (context.supabase as any).from(TABLE).insert({
       etp_id: data.etp_id,

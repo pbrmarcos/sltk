@@ -23,10 +23,26 @@ export function FieldDashboard({ userName }: { userName: string }) {
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="SATs pendentes" value={isLoading ? "…" : String(d?.kpis.satsPendentes ?? 0)} accent="warning" />
-        <KpiCard label="Chamados abertos" value={isLoading ? "…" : String(d?.kpis.chamadosAbertos ?? 0)} accent="primary" />
-        <KpiCard label="SLA vencendo (24h)" value={isLoading ? "…" : String(d?.kpis.slaVencendo ?? 0)} accent="danger" />
-        <KpiCard label="SATs assinados (30d)" value={isLoading ? "…" : String(d?.kpis.satsAssinados30d ?? 0)} accent="success" />
+        <KpiCard
+          label="SATs pendentes"
+          value={isLoading ? "…" : String(d?.kpis.satsPendentes ?? 0)}
+          accent="warning"
+        />
+        <KpiCard
+          label="Chamados abertos"
+          value={isLoading ? "…" : String(d?.kpis.chamadosAbertos ?? 0)}
+          accent="primary"
+        />
+        <KpiCard
+          label="SLA vencendo (24h)"
+          value={isLoading ? "…" : String(d?.kpis.slaVencendo ?? 0)}
+          accent="danger"
+        />
+        <KpiCard
+          label="SATs assinados (30d)"
+          value={isLoading ? "…" : String(d?.kpis.satsAssinados30d ?? 0)}
+          accent="success"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">

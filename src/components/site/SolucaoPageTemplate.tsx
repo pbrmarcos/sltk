@@ -301,7 +301,6 @@ export function SolucaoPageTemplate(p: SolucaoPageProps) {
         </div>
       </section>
 
-
       {/* PROCESS */}
       <section className="border-y border-slate-200 bg-slate-900 py-16 text-white md:py-24">
         <div className="mx-auto max-w-[1180px] px-5 md:px-10">

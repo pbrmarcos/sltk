@@ -73,11 +73,7 @@ function formatDateTime(iso: string | null | undefined) {
   }
 }
 
-export function TemplatesProjetoPage({
-  view = "ativos",
-}: {
-  view?: "ativos" | "arquivados";
-}) {
+export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "arquivados" }) {
   const qc = useQueryClient();
   const listFn = useServerFn(listTemplates);
   const upsertFn = useServerFn(upsertTemplate);
@@ -169,7 +165,14 @@ export function TemplatesProjetoPage({
   const toggleAtivo = useMutation({
     mutationFn: (t: TemplateLite) =>
       upsertFn({
-        data: { id: t.id, nome: t.nome, tipo: t.tipo, descricao: t.descricao, ativo: !t.ativo, rfq_tipo_id: t.rfq_tipo_id },
+        data: {
+          id: t.id,
+          nome: t.nome,
+          tipo: t.tipo,
+          descricao: t.descricao,
+          ativo: !t.ativo,
+          rfq_tipo_id: t.rfq_tipo_id,
+        },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["processo-templates"] }),
     onError: (e: Error) => toast.error(e.message),
@@ -180,242 +183,268 @@ export function TemplatesProjetoPage({
 
   return (
     <TooltipProvider delayDuration={200}>
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[220px] flex-1">
-          <Label className="text-[12px] text-[var(--text-secondary)]">Buscar</Label>
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome do template" />
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-[220px] flex-1">
+            <Label className="text-[12px] text-[var(--text-secondary)]">Buscar</Label>
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Nome do template"
+            />
+          </div>
+          <div>
+            <Label className="text-[12px] text-[var(--text-secondary)]">Tipo</Label>
+            <Select value={tipoFiltro} onValueChange={(v) => setTipoFiltro(v as never)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="projeto">Projeto</SelectItem>
+                <SelectItem value="atendimento">Atendimento</SelectItem>
+                <SelectItem value="instalacao">Instalação</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={() => setNovoOpen(true)}>
+            <Plus className="mr-1.5 h-4 w-4" /> Novo template
+          </Button>
         </div>
-        <div>
-          <Label className="text-[12px] text-[var(--text-secondary)]">Tipo</Label>
-          <Select value={tipoFiltro} onValueChange={(v) => setTipoFiltro(v as never)}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="projeto">Projeto</SelectItem>
-              <SelectItem value="atendimento">Atendimento</SelectItem>
-              <SelectItem value="instalacao">Instalação</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Button onClick={() => setNovoOpen(true)}>
-          <Plus className="mr-1.5 h-4 w-4" /> Novo template
-        </Button>
-      </div>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
-        <table className="w-full text-[13px]">
-          <thead className="border-b border-[var(--bg-border)] text-left text-[12px] text-[var(--text-muted)]">
-            <tr>
-              <th className="px-4 py-2.5 font-medium">Nome</th>
-              <th className="px-4 py-2.5 font-medium">Tipo</th>
-              <th className="px-4 py-2.5 font-medium">Itens</th>
-              <th className="px-4 py-2.5 font-medium">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex items-center gap-1 cursor-help">
-                      Tarefas <Info className="h-3 w-3 opacity-60" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    Atividades acionáveis criadas automaticamente ao aplicar o template a um processo, com prazo e responsável por perfil (role).
-                  </TooltipContent>
-                </Tooltip>
-              </th>
-              <th className="px-4 py-2.5 font-medium">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex items-center gap-1 cursor-help">
-                      Eventos <Info className="h-3 w-3 opacity-60" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    Marcos da timeline do processo (kickoff, FAT, embarque, instalação, etc.) com data calculada a partir da data de início.
-                  </TooltipContent>
-                </Tooltip>
-              </th>
-              <th className="px-4 py-2.5 font-medium">Criado por</th>
-              <th className="px-4 py-2.5 font-medium">Atualizado por</th>
-              {aba === "ativos" && <th className="px-4 py-2.5 font-medium">Ativo</th>}
-              <th className="px-4 py-2.5 font-medium text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {listQ.isLoading && (
-              <tr><td colSpan={9} className="px-4 py-8 text-center text-[var(--text-muted)]">
-                <Loader2 className="inline h-4 w-4 animate-spin" /> Carregando…
-              </td></tr>
-            )}
-            {!listQ.isLoading && rows.length === 0 && (
-              <tr><td colSpan={9} className="px-4 py-8 text-center text-[var(--text-muted)]">
-                Nenhum template encontrado.
-              </td></tr>
-            )}
-            {rows.map((t) => (
-              <tr key={t.id} className="border-t border-[var(--bg-border)]">
-                <td className="px-4 py-2.5">
-                  <div className="font-medium text-[var(--text-primary)]">{t.nome}</div>
-                  {t.descricao && (
-                    <div className="text-[11.5px] text-[var(--text-muted)]">{t.descricao}</div>
-                  )}
-                </td>
-                <td className="px-4 py-2.5">
-                  <Badge className={`border ${TIPO_COLOR[t.tipo]}`}>{TIPO_LABEL[t.tipo]}</Badge>
-                </td>
-                <td className="px-4 py-2.5">{t.itens_count}</td>
-                <td className="px-4 py-2.5">{t.tarefas_count}</td>
-                <td className="px-4 py-2.5">{t.eventos_count}</td>
-                <td className="px-4 py-2.5 text-[12px]">
-                  <div>{t.created_by_nome ?? "—"}</div>
-                  <div className="text-[11px] text-[var(--text-muted)]">{formatDateTime(t.created_at)}</div>
-                </td>
-                <td className="px-4 py-2.5 text-[12px]">
-                  <div>{t.updated_by_nome ?? "—"}</div>
-                  <div className="text-[11px] text-[var(--text-muted)]">{formatDateTime(t.updated_at)}</div>
-                </td>
-                {aba === "ativos" && (
-                  <td className="px-4 py-2.5">
-                    <Switch
-                      checked={t.ativo}
-                      onCheckedChange={() => toggleAtivo.mutate(t)}
-                      disabled={toggleAtivo.isPending}
-                    />
-                  </td>
-                )}
-                <td className="px-4 py-2.5 text-right">
-                  {aba === "ativos" ? (
-                    <>
-                      <Button size="sm" variant="ghost" onClick={() => setEditId(t.id)}>
-                        <FileCog className="mr-1 h-3.5 w-3.5" /> Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => duplicateMut.mutate(t.id)}
-                        disabled={duplicateMut.isPending}
-                        title="Duplicar"
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-[var(--text-secondary)]"
-                        onClick={() => setDelTpl(t)}
-                        title="Arquivar"
-                      >
-                        <Archive className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => restoreMut.mutate(t.id)}
-                      disabled={restoreMut.isPending}
-                    >
-                      <Undo2 className="mr-1 h-3.5 w-3.5" /> Restaurar
-                    </Button>
-                  )}
-                </td>
+        <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+          <table className="w-full text-[13px]">
+            <thead className="border-b border-[var(--bg-border)] text-left text-[12px] text-[var(--text-muted)]">
+              <tr>
+                <th className="px-4 py-2.5 font-medium">Nome</th>
+                <th className="px-4 py-2.5 font-medium">Tipo</th>
+                <th className="px-4 py-2.5 font-medium">Itens</th>
+                <th className="px-4 py-2.5 font-medium">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex items-center gap-1 cursor-help">
+                        Tarefas <Info className="h-3 w-3 opacity-60" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      Atividades acionáveis criadas automaticamente ao aplicar o template a um
+                      processo, com prazo e responsável por perfil (role).
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex items-center gap-1 cursor-help">
+                        Eventos <Info className="h-3 w-3 opacity-60" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      Marcos da timeline do processo (kickoff, FAT, embarque, instalação, etc.) com
+                      data calculada a partir da data de início.
+                    </TooltipContent>
+                  </Tooltip>
+                </th>
+                <th className="px-4 py-2.5 font-medium">Criado por</th>
+                <th className="px-4 py-2.5 font-medium">Atualizado por</th>
+                {aba === "ativos" && <th className="px-4 py-2.5 font-medium">Ativo</th>}
+                <th className="px-4 py-2.5 font-medium text-right">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {listQ.isLoading && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-8 text-center text-[var(--text-muted)]">
+                    <Loader2 className="inline h-4 w-4 animate-spin" /> Carregando…
+                  </td>
+                </tr>
+              )}
+              {!listQ.isLoading && rows.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-8 text-center text-[var(--text-muted)]">
+                    Nenhum template encontrado.
+                  </td>
+                </tr>
+              )}
+              {rows.map((t) => (
+                <tr key={t.id} className="border-t border-[var(--bg-border)]">
+                  <td className="px-4 py-2.5">
+                    <div className="font-medium text-[var(--text-primary)]">{t.nome}</div>
+                    {t.descricao && (
+                      <div className="text-[11.5px] text-[var(--text-muted)]">{t.descricao}</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Badge className={`border ${TIPO_COLOR[t.tipo]}`}>{TIPO_LABEL[t.tipo]}</Badge>
+                  </td>
+                  <td className="px-4 py-2.5">{t.itens_count}</td>
+                  <td className="px-4 py-2.5">{t.tarefas_count}</td>
+                  <td className="px-4 py-2.5">{t.eventos_count}</td>
+                  <td className="px-4 py-2.5 text-[12px]">
+                    <div>{t.created_by_nome ?? "—"}</div>
+                    <div className="text-[11px] text-[var(--text-muted)]">
+                      {formatDateTime(t.created_at)}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-[12px]">
+                    <div>{t.updated_by_nome ?? "—"}</div>
+                    <div className="text-[11px] text-[var(--text-muted)]">
+                      {formatDateTime(t.updated_at)}
+                    </div>
+                  </td>
+                  {aba === "ativos" && (
+                    <td className="px-4 py-2.5">
+                      <Switch
+                        checked={t.ativo}
+                        onCheckedChange={() => toggleAtivo.mutate(t)}
+                        disabled={toggleAtivo.isPending}
+                      />
+                    </td>
+                  )}
+                  <td className="px-4 py-2.5 text-right">
+                    {aba === "ativos" ? (
+                      <>
+                        <Button size="sm" variant="ghost" onClick={() => setEditId(t.id)}>
+                          <FileCog className="mr-1 h-3.5 w-3.5" /> Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => duplicateMut.mutate(t.id)}
+                          disabled={duplicateMut.isPending}
+                          title="Duplicar"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[var(--text-secondary)]"
+                          onClick={() => setDelTpl(t)}
+                          title="Arquivar"
+                        >
+                          <Archive className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => restoreMut.mutate(t.id)}
+                        disabled={restoreMut.isPending}
+                      >
+                        <Undo2 className="mr-1 h-3.5 w-3.5" /> Restaurar
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Novo template */}
-      <Dialog open={novoOpen} onOpenChange={setNovoOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Novo template</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Nome</Label>
-              <Input
-                value={novoNome}
-                onChange={(e) => setNovoNome(capitalize(e.target.value))}
-                placeholder="Ex.: Máquina de embalagem padrão"
-              />
-            </div>
-            <div>
-              <Label>Tipo de processo</Label>
-              <Select value={novoTipo} onValueChange={(v) => setNovoTipo(v as ProcessoTipo)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="projeto">Projeto</SelectItem>
-                  <SelectItem value="atendimento">Atendimento</SelectItem>
-                  <SelectItem value="instalacao">Instalação</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Descrição (opcional)</Label>
-              <Input
-                value={novoDesc}
-                onChange={(e) => setNovoDesc(capitalize(e.target.value))}
-                placeholder="Subtítulo curto que descreve o uso do template"
-              />
-            </div>
-            {novoTipo === "projeto" && (
+        {/* Novo template */}
+        <Dialog open={novoOpen} onOpenChange={setNovoOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
               <div>
-                <Label>Máquina Checklist (opcional)</Label>
-                <Select value={novoRfqTipoId} onValueChange={setNovoRfqTipoId}>
-                  <SelectTrigger><SelectValue placeholder="Nenhuma máquina vinculada" /></SelectTrigger>
+                <Label>Nome</Label>
+                <Input
+                  value={novoNome}
+                  onChange={(e) => setNovoNome(capitalize(e.target.value))}
+                  placeholder="Ex.: Máquina de embalagem padrão"
+                />
+              </div>
+              <div>
+                <Label>Tipo de processo</Label>
+                <Select value={novoTipo} onValueChange={(v) => setNovoTipo(v as ProcessoTipo)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Nenhuma</SelectItem>
-                    {(rfqTiposQ.data ?? []).map((t) => (
-                      <SelectItem key={t.id} value={t.id}>{t.nome_pt}</SelectItem>
-                    ))}
+                    <SelectItem value="projeto">Projeto</SelectItem>
+                    <SelectItem value="atendimento">Atendimento</SelectItem>
+                    <SelectItem value="instalacao">Instalação</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Vinculando a uma máquina, este template é sugerido automaticamente ao converter oportunidades que já receberam formulário Checklist desse tipo.
-                </p>
               </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNovoOpen(false)}>Cancelar</Button>
-            <Button
-              onClick={() => createMut.mutate()}
-              disabled={!novoNome.trim() || createMut.isPending}
-            >
-              {createMut.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-              Criar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <div>
+                <Label>Descrição (opcional)</Label>
+                <Input
+                  value={novoDesc}
+                  onChange={(e) => setNovoDesc(capitalize(e.target.value))}
+                  placeholder="Subtítulo curto que descreve o uso do template"
+                />
+              </div>
+              {novoTipo === "projeto" && (
+                <div>
+                  <Label>Máquina Checklist (opcional)</Label>
+                  <Select value={novoRfqTipoId} onValueChange={setNovoRfqTipoId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Nenhuma máquina vinculada" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {(rfqTiposQ.data ?? []).map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.nome_pt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Vinculando a uma máquina, este template é sugerido automaticamente ao converter
+                    oportunidades que já receberam formulário Checklist desse tipo.
+                  </p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNovoOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => createMut.mutate()}
+                disabled={!novoNome.trim() || createMut.isPending}
+              >
+                {createMut.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+                Criar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Editor */}
-      {editId && (
-        <TemplateEditorDialog
-          templateId={editId}
-          open={!!editId}
-          onOpenChange={(o) => !o && setEditId(null)}
-        />
-      )}
+        {/* Editor */}
+        {editId && (
+          <TemplateEditorDialog
+            templateId={editId}
+            open={!!editId}
+            onOpenChange={(o) => !o && setEditId(null)}
+          />
+        )}
 
-      {/* Delete confirm */}
-      <AlertDialog open={!!delTpl} onOpenChange={(o: boolean) => !o && setDelTpl(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Arquivar template?</AlertDialogTitle>
-            <AlertDialogDescription>
-              O template "{delTpl?.nome}" vai para a aba <strong>Arquivados</strong> e pode ser restaurado a qualquer momento.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => delTpl && delMut.mutate(delTpl.id)}>
-              Arquivar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* Delete confirm */}
+        <AlertDialog open={!!delTpl} onOpenChange={(o: boolean) => !o && setDelTpl(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Arquivar template?</AlertDialogTitle>
+              <AlertDialogDescription>
+                O template "{delTpl?.nome}" vai para a aba <strong>Arquivados</strong> e pode ser
+                restaurado a qualquer momento.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => delTpl && delMut.mutate(delTpl.id)}>
+                Arquivar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </TooltipProvider>
   );
 }

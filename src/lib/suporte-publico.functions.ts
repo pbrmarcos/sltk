@@ -108,7 +108,9 @@ export const publicAbrirChamado = createServerFn({ method: "POST" })
       .eq("visitante_email", data.email.toLowerCase())
       .gte("created_at", desdeH);
     if ((cEmail ?? 0) >= 3) {
-      throw new Error("Já há chamados abertos recentemente para este e-mail. Use o código para continuar a conversa.");
+      throw new Error(
+        "Já há chamados abertos recentemente para este e-mail. Use o código para continuar a conversa.",
+      );
     }
 
     // Match automático de equipamento (não falha se não achar).
@@ -239,7 +241,8 @@ export const publicEnviarMensagem = createServerFn({ method: "POST" })
       .eq("chamado_id", chamado.id)
       .eq("autor_tipo", "visitante")
       .gte("created_at", desde);
-    if ((count ?? 0) >= 30) throw new Error("Muitas mensagens no último período. Aguarde alguns minutos.");
+    if ((count ?? 0) >= 30)
+      throw new Error("Muitas mensagens no último período. Aguarde alguns minutos.");
 
     const { error } = await sb.from("chamado_mensagens").insert({
       chamado_id: chamado.id,

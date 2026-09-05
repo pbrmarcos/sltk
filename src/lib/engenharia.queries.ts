@@ -2,10 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { listEquipamentoEtps, listAllEtps, getEtp } from "@/lib/equipamento-etps.functions";
 import { listEtpHistorico } from "@/lib/equipamento-etp-historico.functions";
 import { listEquipamentoEtapas, listHHConsolidado } from "@/lib/equipamento-etapas.functions";
-import {
-  listProjetosByEquipamento,
-  listAllProjetos,
-} from "@/lib/equipamento-projetos.functions";
+import { listProjetosByEquipamento, listAllProjetos } from "@/lib/equipamento-projetos.functions";
 import { listAllMontagens } from "@/lib/equipamento-montagens.functions";
 import { listAllRevisoes } from "@/lib/equipamento-revisoes.functions";
 import type {

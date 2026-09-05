@@ -7,7 +7,6 @@ import { COTACAO_STATUS } from "@/lib/cotacoes.shared";
 type SB = { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 async function isPurchasing(supabase: any, uid: string): Promise<boolean> {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
   const roles = ["admin", "manager", "purchasing"] as const;
   for (const r of roles) {
     const { data } = await supabase.rpc("has_role", { _user_id: uid, _role: r });
@@ -22,7 +21,10 @@ export const listCotacoes = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z
       .object({
-        status: z.enum(["todos", ...COTACAO_STATUS]).optional().default("todos"),
+        status: z
+          .enum(["todos", ...COTACAO_STATUS])
+          .optional()
+          .default("todos"),
         q: z.string().optional(),
         page: z.number().int().min(1).optional().default(1),
         per_page: z.number().int().min(1).max(100).optional().default(50),
@@ -44,14 +46,16 @@ export const listCotacoes = createServerFn({ method: "POST" })
       q = q.or(`codigo.ilike.${t},titulo.ilike.${t}`);
     }
     const from = (data.page - 1) * data.per_page;
-    const { data: rows, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, from + data.per_page - 1);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, from + data.per_page - 1);
     if (error) throw friendlyDbError(error);
 
     // Para cada RFQ, conta convites/respostas
     const ids = (rows ?? []).map((r: { id: string }) => r.id);
-    let counts: Record<string, { convites: number; respondidos: number }> = {};
+    const counts: Record<string, { convites: number; respondidos: number }> = {};
     if (ids.length) {
       const { data: cf } = await sb
         .from("cotacao_fornecedores")
@@ -175,14 +179,16 @@ export const createCotacao = createServerFn({ method: "POST" })
       .select("id, descricao, especificacao_tecnica, part_number, unidade, quantidade")
       .in("id", data.insumo_ids);
     if (insumos && insumos.length) {
-      const rows = (insumos as Array<{
-        id: string;
-        descricao: string;
-        especificacao_tecnica: string | null;
-        part_number: string | null;
-        unidade: string;
-        quantidade: number;
-      }>).map((i) => ({
+      const rows = (
+        insumos as Array<{
+          id: string;
+          descricao: string;
+          especificacao_tecnica: string | null;
+          part_number: string | null;
+          unidade: string;
+          quantidade: number;
+        }>
+      ).map((i) => ({
         cotacao_id: cot.id,
         insumo_id: i.id,
         quantidade: i.quantidade,
@@ -209,7 +215,11 @@ export const createCotacao = createServerFn({ method: "POST" })
       cotacao_id: cot.id,
       evento: "criada",
       ator: context.userId,
-      detalhes: { titulo: data.titulo, insumos: data.insumo_ids.length, fornecedores: data.fornecedor_ids.length },
+      detalhes: {
+        titulo: data.titulo,
+        insumos: data.insumo_ids.length,
+        fornecedores: data.fornecedor_ids.length,
+      },
     });
 
     if (data.abrir) {
@@ -289,18 +299,16 @@ export const escolherVencedor = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     if (!(await isPurchasing(sb, context.userId))) throw new Error("Sem permissão");
-    const { error } = await sb
-      .from("cotacao_escolhas")
-      .upsert(
-        {
-          cotacao_item_id: data.cotacao_item_id,
-          proposta_item_id: data.proposta_item_id,
-          escolhido_por: context.userId,
-          escolhido_em: new Date().toISOString(),
-          justificativa: data.justificativa,
-        },
-        { onConflict: "cotacao_item_id" },
-      );
+    const { error } = await sb.from("cotacao_escolhas").upsert(
+      {
+        cotacao_item_id: data.cotacao_item_id,
+        proposta_item_id: data.proposta_item_id,
+        escolhido_por: context.userId,
+        escolhido_em: new Date().toISOString(),
+        justificativa: data.justificativa,
+      },
+      { onConflict: "cotacao_item_id" },
+    );
     if (error) throw friendlyDbError(error);
     return { ok: true as const };
   });
@@ -345,9 +353,7 @@ export const listInsumosParaRFQ = createServerFn({ method: "POST" })
 /* ============ COTAÇÕES DO PROJETO (B.O.M. → RFQs) ============ */
 export const listCotacoesDoProjeto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ projeto_id: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ projeto_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const { data: rows, error } = await sb
@@ -359,7 +365,7 @@ export const listCotacoesDoProjeto = createServerFn({ method: "POST" })
       .limit(50);
     if (error) throw friendlyDbError(error);
     const ids = (rows ?? []).map((r: { id: string }) => r.id);
-    let counts: Record<string, number> = {};
+    const counts: Record<string, number> = {};
     if (ids.length) {
       const { data: ci } = await sb
         .from("cotacao_itens")
@@ -424,7 +430,9 @@ export const publicGetCotacao = createServerFn({ method: "POST" })
     const c = convite as { id: string; cotacao_id: string; fornecedor_id: string; status: string };
     const { data: cot } = await sb
       .from("cotacoes")
-      .select("id, codigo, titulo, descricao, status, prazo_resposta, incoterm, moeda, condicoes_pagamento, observacoes")
+      .select(
+        "id, codigo, titulo, descricao, status, prazo_resposta, incoterm, moeda, condicoes_pagamento, observacoes",
+      )
       .eq("id", c.cotacao_id)
       .single();
     const { data: itens } = await sb

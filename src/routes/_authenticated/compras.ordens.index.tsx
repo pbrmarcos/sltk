@@ -25,10 +25,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TableEmpty } from "@/components/data/TableStates";
-import { Plus, Search, FileText, Clock, CheckCircle2, Send, PackageCheck, Sparkles, Zap } from "lucide-react";
-import { listOrdensCompra, getOrdensCompraKpis, createOrdemDeInsumo } from "@/lib/ordens-compra.functions";
+import {
+  Plus,
+  Search,
+  FileText,
+  Clock,
+  CheckCircle2,
+  Send,
+  PackageCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import {
+  listOrdensCompra,
+  getOrdensCompraKpis,
+  createOrdemDeInsumo,
+} from "@/lib/ordens-compra.functions";
 import { listInsumosAguardandoOC } from "@/lib/projeto-insumos.functions";
-import { OC_STATUS, OC_STATUS_COLOR, OC_STATUS_LABEL, type OcStatus } from "@/lib/ordens-compra.shared";
+import {
+  OC_STATUS,
+  OC_STATUS_COLOR,
+  OC_STATUS_LABEL,
+  type OcStatus,
+} from "@/lib/ordens-compra.shared";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/compras/ordens/")({
@@ -87,7 +106,10 @@ function OrdensListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Compras", href: "/compras/solicitacao" }, { label: "Ordens de Compra" }]}
+        breadcrumbs={[
+          { label: "Compras", href: "/compras/solicitacao" },
+          { label: "Ordens de Compra" },
+        ]}
         title="Ordens de Compra"
         subtitle="Gere, aprove e acompanhe as OCs emitidas para os fornecedores."
         actions={
@@ -109,14 +131,21 @@ function OrdensListPage() {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-amber-900 dark:text-amber-100">
-                  {aguardando.length} {aguardando.length === 1 ? "solicitação aprovada" : "solicitações aprovadas"} aguardando emissão
+                  {aguardando.length}{" "}
+                  {aguardando.length === 1 ? "solicitação aprovada" : "solicitações aprovadas"}{" "}
+                  aguardando emissão
                 </h3>
-                <Badge variant="outline" className="border-amber-300 text-amber-800 dark:text-amber-200">
+                <Badge
+                  variant="outline"
+                  className="border-amber-300 text-amber-800 dark:text-amber-200"
+                >
                   Ação rápida
                 </Badge>
               </div>
               <p className="text-sm text-amber-800/80 dark:text-amber-200/80 mt-0.5">
-                Insumos já aprovados por engenharia/gerência. Clique em <b>Emitir OC</b> para gerar a Ordem de Compra em um clique — os PDFs (PT/ES/EN) são salvos automaticamente no Drive.
+                Insumos já aprovados por engenharia/gerência. Clique em <b>Emitir OC</b> para gerar
+                a Ordem de Compra em um clique — os PDFs (PT/ES/EN) são salvos automaticamente no
+                Drive.
               </p>
             </div>
           </div>
@@ -131,13 +160,26 @@ function OrdensListPage() {
                     <span className="truncate font-medium">{r.descricao}</span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap gap-x-3">
-                    <span>Qtd: <b>{r.quantidade} {r.unidade}</b></span>
+                    <span>
+                      Qtd:{" "}
+                      <b>
+                        {r.quantidade} {r.unidade}
+                      </b>
+                    </span>
                     {r.fornecedor_sugerido_nome && (
-                      <span>Fornecedor: <b>{r.fornecedor_sugerido_nome}</b></span>
+                      <span>
+                        Fornecedor: <b>{r.fornecedor_sugerido_nome}</b>
+                      </span>
                     )}
                     {r.valor_previsto != null && (
                       <span>
-                        Valor: <b>{new Intl.NumberFormat("pt-BR", { style: "currency", currency: r.moeda_prevista || "BRL" }).format(Number(r.valor_previsto))}</b>
+                        Valor:{" "}
+                        <b>
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: r.moeda_prevista || "BRL",
+                          }).format(Number(r.valor_previsto))}
+                        </b>
                       </span>
                     )}
                     {r.lead_time_dias != null && <span>Prazo: {r.lead_time_dias} dias</span>}
@@ -164,15 +206,28 @@ function OrdensListPage() {
         </div>
       )}
 
-
-
       {/* KPIs */}
       <div className="grid gap-3 md:grid-cols-5 mb-4">
         <KpiCard icon={FileText} label="Total" value={kpis?.total ?? 0} color="text-zinc-700" />
-        <KpiCard icon={Clock} label="Aguardando" value={kpis?.aguardando ?? 0} color="text-amber-700" />
-        <KpiCard icon={CheckCircle2} label="Aprovadas" value={kpis?.aprovadas ?? 0} color="text-blue-700" />
+        <KpiCard
+          icon={Clock}
+          label="Aguardando"
+          value={kpis?.aguardando ?? 0}
+          color="text-amber-700"
+        />
+        <KpiCard
+          icon={CheckCircle2}
+          label="Aprovadas"
+          value={kpis?.aprovadas ?? 0}
+          color="text-blue-700"
+        />
         <KpiCard icon={Send} label="Enviadas" value={kpis?.enviadas ?? 0} color="text-indigo-700" />
-        <KpiCard icon={PackageCheck} label="Recebidas" value={kpis?.recebidas ?? 0} color="text-emerald-700" />
+        <KpiCard
+          icon={PackageCheck}
+          label="Recebidas"
+          value={kpis?.recebidas ?? 0}
+          color="text-emerald-700"
+        />
       </div>
 
       {/* Filtros */}
@@ -244,7 +299,10 @@ function OrdensListPage() {
                   {r.fornecedor_razao_social || r.fornecedor_nome_fantasia || "—"}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={cn("border", OC_STATUS_COLOR[r.status as OcStatus])}>
+                  <Badge
+                    variant="outline"
+                    className={cn("border", OC_STATUS_COLOR[r.status as OcStatus])}
+                  >
                     {OC_STATUS_LABEL[r.status as OcStatus]}
                   </Badge>
                 </TableCell>

@@ -9,8 +9,5 @@ export function flagEmoji(iso2: string | null | undefined): string {
   if (!/^[A-Z]{2}$/.test(code)) return "";
   const A = 0x41;
   const RI = 0x1f1e6;
-  return String.fromCodePoint(
-    RI + (code.charCodeAt(0) - A),
-    RI + (code.charCodeAt(1) - A),
-  );
+  return String.fromCodePoint(RI + (code.charCodeAt(0) - A), RI + (code.charCodeAt(1) - A));
 }

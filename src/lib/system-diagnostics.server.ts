@@ -2,7 +2,12 @@
 import { CAPABILITIES, type CapabilityDef } from "./system-keys";
 import { driveAuth, driveConfigured } from "./docs/drive-auth.server";
 
-export type EnvStatus = { nome: string; presente: boolean; mascara: string | null; opcional: boolean };
+export type EnvStatus = {
+  nome: string;
+  presente: boolean;
+  mascara: string | null;
+  opcional: boolean;
+};
 
 export type CapabilityStatus = {
   id: string;
@@ -84,7 +89,11 @@ async function probe(cap: CapabilityDef): Promise<{
       const r = await pingSupabaseHealth(url, key);
       return r.ok
         ? { status: "ok", detalhe: "Projeto acessível.", latencia_ms: r.ms }
-        : { status: "erro", detalhe: r.erro ?? `Resposta ${r.status} do projeto.`, latencia_ms: r.ms };
+        : {
+            status: "erro",
+            detalhe: r.erro ?? `Resposta ${r.status} do projeto.`,
+            latencia_ms: r.ms,
+          };
     }
     case "supabase_service_role": {
       const { getServiceRoleStatus } = await import("./service-role-health.server");
@@ -96,13 +105,22 @@ async function probe(cap: CapabilityDef): Promise<{
       const token = process.env.SB_MANAGEMENT_ACCESS_TOKEN;
       if (!token) return { status: "ausente", detalhe: "Token não configurado." };
       const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || process.env.SUPABASE_PROJECT_ID;
-      if (!projectRef) return { status: "erro", detalhe: "Project ref do Supabase não encontrado." };
+      if (!projectRef)
+        return { status: "erro", detalhe: "Project ref do Supabase não encontrado." };
       const r = await timedFetch(`https://api.supabase.com/v1/projects/${projectRef}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return r.ok
-        ? { status: "ok", detalhe: "Token válido — Migrations pode aplicar SQL.", latencia_ms: r.ms }
-        : { status: "erro", detalhe: r.erro ?? `Management API respondeu ${r.status}.`, latencia_ms: r.ms };
+        ? {
+            status: "ok",
+            detalhe: "Token válido — Migrations pode aplicar SQL.",
+            latencia_ms: r.ms,
+          }
+        : {
+            status: "erro",
+            detalhe: r.erro ?? `Management API respondeu ${r.status}.`,
+            latencia_ms: r.ms,
+          };
     }
     case "groq": {
       const key = process.env.GROQ_API_KEY;
@@ -112,7 +130,11 @@ async function probe(cap: CapabilityDef): Promise<{
       });
       return r.ok
         ? { status: "ok", detalhe: "Chave válida.", latencia_ms: r.ms }
-        : { status: "erro", detalhe: r.erro ?? `Provedor respondeu ${r.status}.`, latencia_ms: r.ms };
+        : {
+            status: "erro",
+            detalhe: r.erro ?? `Provedor respondeu ${r.status}.`,
+            latencia_ms: r.ms,
+          };
     }
     case "firecrawl": {
       const key = process.env.FIRECRAWL_API_KEY;
@@ -122,7 +144,11 @@ async function probe(cap: CapabilityDef): Promise<{
       });
       return r.ok
         ? { status: "ok", detalhe: "Chave válida.", latencia_ms: r.ms }
-        : { status: "erro", detalhe: r.erro ?? `Provedor respondeu ${r.status}.`, latencia_ms: r.ms };
+        : {
+            status: "erro",
+            detalhe: r.erro ?? `Provedor respondeu ${r.status}.`,
+            latencia_ms: r.ms,
+          };
     }
     case "resend": {
       const key = process.env.RESEND_API_KEY;
@@ -132,17 +158,26 @@ async function probe(cap: CapabilityDef): Promise<{
       });
       return r.ok
         ? { status: "ok", detalhe: "Chave válida.", latencia_ms: r.ms }
-        : { status: "erro", detalhe: r.erro ?? `Provedor respondeu ${r.status}.`, latencia_ms: r.ms };
+        : {
+            status: "erro",
+            detalhe: r.erro ?? `Provedor respondeu ${r.status}.`,
+            latencia_ms: r.ms,
+          };
     }
     case "google_drive": {
-      if (!driveConfigured()) return { status: "ausente", detalhe: "Conta do Drive não vinculada." };
+      if (!driveConfigured())
+        return { status: "ausente", detalhe: "Conta do Drive não vinculada." };
       const { baseUrl, headers } = await driveAuth();
       const r = await timedFetch(
         `${baseUrl}/drive/v3/about?fields=user(emailAddress,displayName)`,
         { headers },
       );
       if (!r.ok) {
-        return { status: "erro", detalhe: r.erro ?? `Conector respondeu ${r.status}.`, latencia_ms: r.ms };
+        return {
+          status: "erro",
+          detalhe: r.erro ?? `Conector respondeu ${r.status}.`,
+          latencia_ms: r.ms,
+        };
       }
       let quem = "conta vinculada";
       try {
@@ -179,7 +214,11 @@ async function statusFor(cap: CapabilityDef): Promise<CapabilityStatus> {
     return { ...base, status: "ausente", detalhe: "Configuração ausente neste ambiente." };
   }
   if (!cap.testavel) {
-    return { ...base, status: "nao_testado", detalhe: "Configurada (sem teste automático disponível)." };
+    return {
+      ...base,
+      status: "nao_testado",
+      detalhe: "Configurada (sem teste automático disponível).",
+    };
   }
   const r = await probe(cap);
   return { ...base, ...r };

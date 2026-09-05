@@ -1,4 +1,12 @@
-import { AlertTriangle, ArrowRightCircle, CheckCircle2, Clock, MessageSquare, Sparkles, User2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRightCircle,
+  CheckCircle2,
+  Clock,
+  MessageSquare,
+  Sparkles,
+  User2,
+} from "lucide-react";
 
 type Evento = {
   id: string;
@@ -35,10 +43,19 @@ function statusLabel(s: string | null | undefined) {
 }
 
 function eventoToItem(e: Evento): Item | null {
-  const base = { id: `e-${e.id}`, ts: e.at, kind: "evento" as const, tone: "neutral" as Item["tone"] };
+  const base = {
+    id: `e-${e.id}`,
+    ts: e.at,
+    kind: "evento" as const,
+    tone: "neutral" as Item["tone"],
+  };
   switch (e.tipo) {
     case "criado":
-      return { ...base, icon: <Sparkles className="h-4 w-4" />, title: `Chamado aberto por ${e.autor_nome ?? "—"}` };
+      return {
+        ...base,
+        icon: <Sparkles className="h-4 w-4" />,
+        title: `Chamado aberto por ${e.autor_nome ?? "—"}`,
+      };
     case "status_change":
       return {
         ...base,
@@ -52,8 +69,13 @@ function eventoToItem(e: Evento): Item | null {
         ...base,
         icon: <AlertTriangle className="h-4 w-4" />,
         title: `Prioridade: ${e.meta?.de ?? "—"} → ${e.meta?.para ?? "—"}`,
-        detail: [e.autor_nome ? `por ${e.autor_nome}` : null, e.meta?.motivo ? `Motivo: ${e.meta.motivo}` : null]
-          .filter(Boolean).join(" · ") || undefined,
+        detail:
+          [
+            e.autor_nome ? `por ${e.autor_nome}` : null,
+            e.meta?.motivo ? `Motivo: ${e.meta.motivo}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || undefined,
         tone: "warn",
       };
     case "atendente_change":
@@ -61,26 +83,69 @@ function eventoToItem(e: Evento): Item | null {
         ...base,
         icon: <User2 className="h-4 w-4" />,
         title: `Atendente: ${e.meta?.de_nome ?? "—"} → ${e.meta?.para_nome ?? "não atribuído"}`,
-        detail: [e.autor_nome ? `por ${e.autor_nome}` : null, e.meta?.motivo ? `Motivo: ${e.meta.motivo}` : null]
-          .filter(Boolean).join(" · ") || undefined,
+        detail:
+          [
+            e.autor_nome ? `por ${e.autor_nome}` : null,
+            e.meta?.motivo ? `Motivo: ${e.meta.motivo}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || undefined,
         tone: "info",
       };
     case "assumido":
-      return { ...base, icon: <User2 className="h-4 w-4" />, title: `${e.autor_nome ?? "Atendente"} assumiu o chamado`, tone: "info" };
+      return {
+        ...base,
+        icon: <User2 className="h-4 w-4" />,
+        title: `${e.autor_nome ?? "Atendente"} assumiu o chamado`,
+        tone: "info",
+      };
     case "resolvido":
-      return { ...base, icon: <CheckCircle2 className="h-4 w-4" />, title: `Chamado resolvido`, detail: e.autor_nome ?? undefined, tone: "success" };
+      return {
+        ...base,
+        icon: <CheckCircle2 className="h-4 w-4" />,
+        title: `Chamado resolvido`,
+        detail: e.autor_nome ?? undefined,
+        tone: "success",
+      };
     case "reaberto":
-      return { ...base, icon: <ArrowRightCircle className="h-4 w-4" />, title: `Chamado reaberto`, detail: e.autor_nome ?? undefined, tone: "warn" };
+      return {
+        ...base,
+        icon: <ArrowRightCircle className="h-4 w-4" />,
+        title: `Chamado reaberto`,
+        detail: e.autor_nome ?? undefined,
+        tone: "warn",
+      };
     case "arquivado":
-      return { ...base, icon: <ArrowRightCircle className="h-4 w-4" />, title: `Chamado arquivado`, detail: e.autor_nome ?? undefined };
+      return {
+        ...base,
+        icon: <ArrowRightCircle className="h-4 w-4" />,
+        title: `Chamado arquivado`,
+        detail: e.autor_nome ?? undefined,
+      };
     case "sla_estourado":
-      return { ...base, icon: <AlertTriangle className="h-4 w-4" />, title: `SLA de resposta estourado`, tone: "warn" };
+      return {
+        ...base,
+        icon: <AlertTriangle className="h-4 w-4" />,
+        title: `SLA de resposta estourado`,
+        tone: "warn",
+      };
     case "estagnado":
-      return { ...base, icon: <Clock className="h-4 w-4" />, title: `Chamado sinalizado como estagnado`, detail: "Aguardando resposta interna há mais de 48h", tone: "warn" };
+      return {
+        ...base,
+        icon: <Clock className="h-4 w-4" />,
+        title: `Chamado sinalizado como estagnado`,
+        detail: "Aguardando resposta interna há mais de 48h",
+        tone: "warn",
+      };
     case "comentario_interno":
       return null; // mensagem interna aparece via mensagens
     case "vinculado_equipamento":
-      return { ...base, icon: <ArrowRightCircle className="h-4 w-4" />, title: `Equipamento vinculado`, detail: e.autor_nome ?? undefined };
+      return {
+        ...base,
+        icon: <ArrowRightCircle className="h-4 w-4" />,
+        title: `Equipamento vinculado`,
+        detail: e.autor_nome ?? undefined,
+      };
     case "mensagem":
       return null; // já vem via mensagens
     default:
@@ -140,7 +205,9 @@ export function ChamadoTimeline({
           <div className="text-sm">
             <div className="font-medium">{it.title}</div>
             {it.detail ? (
-              <div className="text-muted-foreground whitespace-pre-wrap break-words">{it.detail}</div>
+              <div className="text-muted-foreground whitespace-pre-wrap break-words">
+                {it.detail}
+              </div>
             ) : null}
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground/70 mt-0.5">
               {new Date(it.ts).toLocaleString()}

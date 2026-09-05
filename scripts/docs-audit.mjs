@@ -80,7 +80,13 @@ async function listArticles() {
       const fmBody = fm ? fm[1] : "";
       const get = (k) => fmBody.match(new RegExp(`^${k}:\\s*(.+)$`, "m"))?.[1]?.trim();
       const parseList = (v) =>
-        v ? v.replace(/^\[|\]$/g, "").split(",").map((s) => s.trim().replace(/^["']|["']$/g, "")).filter(Boolean) : [];
+        v
+          ? v
+              .replace(/^\[|\]$/g, "")
+              .split(",")
+              .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+              .filter(Boolean)
+          : [];
       const slug = f.replace(/\.md$/, "");
       const body = raw.replace(/^---[\s\S]*?---\s*/, "");
       out.push({
@@ -155,27 +161,80 @@ const IGNORE_ROUTES = [
 
 /** Prefixos que caracterizam menções a rotas do app dentro dos artigos. */
 const ROUTE_PREFIXES = [
-  "/admin/", "/comercial/", "/engenharia/", "/compras/", "/qualidade/",
-  "/pos-vendas/", "/producao/", "/logistica/", "/clientes/", "/fornecedores/",
-  "/documentos/", "/know-how/", "/conta",
+  "/admin/",
+  "/comercial/",
+  "/engenharia/",
+  "/compras/",
+  "/qualidade/",
+  "/pos-vendas/",
+  "/producao/",
+  "/logistica/",
+  "/clientes/",
+  "/fornecedores/",
+  "/documentos/",
+  "/know-how/",
+  "/conta",
 ];
 
 /** Etapas do fluxo Solutek → categorias e prefixos de rota. */
 const WORKFLOW_STAGES = [
-  { id: "comercial",   label: "1. Comercial",   categories: ["comercial"],               routePrefixes: ["/comercial"] },
-  { id: "engenharia",  label: "2. Engenharia",  categories: ["engenharia"],              routePrefixes: ["/engenharia"] },
-  { id: "compras",     label: "3. Compras",     categories: ["compras"],                 routePrefixes: ["/compras"] },
-  { id: "producao",    label: "4. Produção",    categories: ["producao"],                routePrefixes: ["/producao"] },
-  { id: "qualidade",   label: "5. Qualidade",   categories: ["qualidade"],               routePrefixes: ["/qualidade"] },
-  { id: "logistica",   label: "6. Logística",   categories: ["logistica"],               routePrefixes: ["/logistica"] },
-  { id: "pos-vendas",  label: "7. Pós-vendas",  categories: ["pos-vendas"],              routePrefixes: ["/pos-vendas"] },
+  {
+    id: "comercial",
+    label: "1. Comercial",
+    categories: ["comercial"],
+    routePrefixes: ["/comercial"],
+  },
+  {
+    id: "engenharia",
+    label: "2. Engenharia",
+    categories: ["engenharia"],
+    routePrefixes: ["/engenharia"],
+  },
+  { id: "compras", label: "3. Compras", categories: ["compras"], routePrefixes: ["/compras"] },
+  { id: "producao", label: "4. Produção", categories: ["producao"], routePrefixes: ["/producao"] },
+  {
+    id: "qualidade",
+    label: "5. Qualidade",
+    categories: ["qualidade"],
+    routePrefixes: ["/qualidade"],
+  },
+  {
+    id: "logistica",
+    label: "6. Logística",
+    categories: ["logistica"],
+    routePrefixes: ["/logistica"],
+  },
+  {
+    id: "pos-vendas",
+    label: "7. Pós-vendas",
+    categories: ["pos-vendas"],
+    routePrefixes: ["/pos-vendas"],
+  },
 ];
 
 const SUPPORT_STAGE = {
   id: "suporte",
   label: "Suporte transversal",
-  categories: ["clientes-fornecedores", "documentos", "know-how", "admin", "conta", "site-publico", "importacao"],
-  routePrefixes: ["/clientes", "/fornecedores", "/importar", "/documentos", "/central-documentos", "/template-documentos", "/know-how", "/admin", "/conta"],
+  categories: [
+    "clientes-fornecedores",
+    "documentos",
+    "know-how",
+    "admin",
+    "conta",
+    "site-publico",
+    "importacao",
+  ],
+  routePrefixes: [
+    "/clientes",
+    "/fornecedores",
+    "/importar",
+    "/documentos",
+    "/central-documentos",
+    "/template-documentos",
+    "/know-how",
+    "/admin",
+    "/conta",
+  ],
 };
 
 // -------- run --------
@@ -212,8 +271,7 @@ const mapArtigoFaltando = routeMap.filter(
 const artigosLegado = [];
 for (const a of articles) {
   for (const legacy of LEGACY_HINTS) {
-    if (a.body.includes(legacy))
-      artigosLegado.push({ article: `${a.category}/${a.slug}`, legacy });
+    if (a.body.includes(legacy)) artigosLegado.push({ article: `${a.category}/${a.slug}`, legacy });
   }
 }
 
@@ -264,7 +322,9 @@ for (const a of articles) {
     if (!hit) rotasFantasma.push({ from: `${a.category}/${a.slug}`, ref });
   }
 }
-const rotasFantasmaUniq = [...new Map(rotasFantasma.map((r) => [`${r.from}|${r.ref}`, r])).values()];
+const rotasFantasmaUniq = [
+  ...new Map(rotasFantasma.map((r) => [`${r.from}|${r.ref}`, r])).values(),
+];
 
 // 10) Frontmatter incompleto
 const REQUIRED_FM = ["title", "description", "tipo", "nivel", "atualizadoEm"];
@@ -308,8 +368,7 @@ for (const a of articles) {
         join(ROOT, "public", bare),
       ];
       const ok = candidates.some((p) => existsSync(p));
-      if (!ok)
-        screenshotsQuebrados.push({ article: `${a.category}/${a.slug}`, img });
+      if (!ok) screenshotsQuebrados.push({ article: `${a.category}/${a.slug}`, img });
     }
   };
   collect(imgRe);
@@ -350,21 +409,91 @@ for (const a of articles) {
 // -------- sections --------
 
 const sections = [
-  { id: "rotas-sem-doc",          title: "Rotas ativas sem doc mapeado",              severity: "warn",  items: routesSemDoc },
-  { id: "map-rota-inexistente",   title: "Entradas do mapa apontando para rota inexistente", severity: "error", items: mapOrfaos },
-  { id: "map-artigo-inexistente", title: "Entradas do mapa apontando para artigo inexistente", severity: "error", items: mapArtigoFaltando },
-  { id: "artigos-legados",        title: "Artigos referenciando rotas legadas",       severity: "warn",  items: artigosLegado },
-  { id: "artigos-curtos",         title: `Artigos curtos (< ${MIN_CHARS} chars)`,     severity: "info",  items: artigosCurtos },
-  { id: "categorias-vazias",      title: "Categorias sem artigos",                    severity: "info",  items: catsVazias },
-  { id: "artigos-sem-mapa",       title: "Artigos sem entrada no ROUTE_DOC_MAP",      severity: "info",  items: artigosSemMapa },
-  { id: "cross-links-quebrados",  title: "Cross-links quebrados entre artigos",       severity: "error", items: crossLinksQuebrados },
-  { id: "rotas-fantasma",         title: "Menções a rotas inexistentes no app",       severity: "warn",  items: rotasFantasmaUniq },
-  { id: "frontmatter-incompleto", title: "Frontmatter incompleto",                    severity: "error", items: frontmatterIncompleto },
-  { id: "versao-defasada",        title: "app_version defasada (≥ 2 minors atrás)",   severity: "warn",  items: versaoDefasada },
-  { id: "screenshots-quebrados",  title: "Screenshots referenciados que não existem", severity: "warn",  items: screenshotsQuebrados },
-  { id: "headings-duplicados",    title: "Headings duplicados no mesmo artigo",       severity: "info",  items: headingsDuplicados },
-  { id: "rotas-sem-page-header",  title: "Rotas sem <PageHeader /> (sem botão de ajuda)", severity: "info", items: rotasSemPageHeader },
-  { id: "papeis-inconsistentes",  title: "Papéis fora do enum DocPapel",              severity: "info",  items: papeisInconsistentes },
+  {
+    id: "rotas-sem-doc",
+    title: "Rotas ativas sem doc mapeado",
+    severity: "warn",
+    items: routesSemDoc,
+  },
+  {
+    id: "map-rota-inexistente",
+    title: "Entradas do mapa apontando para rota inexistente",
+    severity: "error",
+    items: mapOrfaos,
+  },
+  {
+    id: "map-artigo-inexistente",
+    title: "Entradas do mapa apontando para artigo inexistente",
+    severity: "error",
+    items: mapArtigoFaltando,
+  },
+  {
+    id: "artigos-legados",
+    title: "Artigos referenciando rotas legadas",
+    severity: "warn",
+    items: artigosLegado,
+  },
+  {
+    id: "artigos-curtos",
+    title: `Artigos curtos (< ${MIN_CHARS} chars)`,
+    severity: "info",
+    items: artigosCurtos,
+  },
+  { id: "categorias-vazias", title: "Categorias sem artigos", severity: "info", items: catsVazias },
+  {
+    id: "artigos-sem-mapa",
+    title: "Artigos sem entrada no ROUTE_DOC_MAP",
+    severity: "info",
+    items: artigosSemMapa,
+  },
+  {
+    id: "cross-links-quebrados",
+    title: "Cross-links quebrados entre artigos",
+    severity: "error",
+    items: crossLinksQuebrados,
+  },
+  {
+    id: "rotas-fantasma",
+    title: "Menções a rotas inexistentes no app",
+    severity: "warn",
+    items: rotasFantasmaUniq,
+  },
+  {
+    id: "frontmatter-incompleto",
+    title: "Frontmatter incompleto",
+    severity: "error",
+    items: frontmatterIncompleto,
+  },
+  {
+    id: "versao-defasada",
+    title: "app_version defasada (≥ 2 minors atrás)",
+    severity: "warn",
+    items: versaoDefasada,
+  },
+  {
+    id: "screenshots-quebrados",
+    title: "Screenshots referenciados que não existem",
+    severity: "warn",
+    items: screenshotsQuebrados,
+  },
+  {
+    id: "headings-duplicados",
+    title: "Headings duplicados no mesmo artigo",
+    severity: "info",
+    items: headingsDuplicados,
+  },
+  {
+    id: "rotas-sem-page-header",
+    title: "Rotas sem <PageHeader /> (sem botão de ajuda)",
+    severity: "info",
+    items: rotasSemPageHeader,
+  },
+  {
+    id: "papeis-inconsistentes",
+    title: "Papéis fora do enum DocPapel",
+    severity: "info",
+    items: papeisInconsistentes,
+  },
 ];
 
 // -------- agregações --------
@@ -405,9 +534,17 @@ for (const cat of allCategories) {
 for (const s of sections) {
   for (const it of s.items) {
     const cat = itemCategory(s.id, it);
-    const mod = byModule[cat] ?? (byModule[cat] = {
-      category: cat, articles: 0, routes: 0, errors: 0, warnings: 0, info: 0, findings: [],
-    });
+    const mod =
+      byModule[cat] ??
+      (byModule[cat] = {
+        category: cat,
+        articles: 0,
+        routes: 0,
+        errors: 0,
+        warnings: 0,
+        info: 0,
+        findings: [],
+      });
     if (s.severity === "error") mod.errors += 1;
     else if (s.severity === "warn") mod.warnings += 1;
     else mod.info += 1;
@@ -418,8 +555,12 @@ for (const s of sections) {
 // byStage: cobertura por etapa do workflow
 function buildStage(stage) {
   const stageArticles = articles.filter((a) => stage.categories.includes(a.category));
-  const stageRoutes = routesFiltered.filter((r) => stage.routePrefixes.some((p) => r === p || r.startsWith(p + "/")));
-  const stageRouteMap = routeMap.filter((r) => stage.routePrefixes.some((p) => r.route === p || r.route.startsWith(p + "/")));
+  const stageRoutes = routesFiltered.filter((r) =>
+    stage.routePrefixes.some((p) => r === p || r.startsWith(p + "/")),
+  );
+  const stageRouteMap = routeMap.filter((r) =>
+    stage.routePrefixes.some((p) => r.route === p || r.route.startsWith(p + "/")),
+  );
   const coveredRoutes = stageRoutes.filter((r) => mapKeys.has(normalizeRouteForCompare(r)));
   const missingRoutes = stageRoutes.filter((r) => !mapKeys.has(normalizeRouteForCompare(r)));
   const byTipo = { guia: 0, conceito: 0, referencia: 0, troubleshooting: 0, indefinido: 0 };
@@ -435,7 +576,8 @@ function buildStage(stage) {
     if (s.severity !== "warn") return n;
     return n + s.items.filter((it) => stage.categories.includes(itemCategory(s.id, it))).length;
   }, 0);
-  const coverage = stageRoutes.length === 0 ? 100 : Math.round((coveredRoutes.length / stageRoutes.length) * 100);
+  const coverage =
+    stageRoutes.length === 0 ? 100 : Math.round((coveredRoutes.length / stageRoutes.length) * 100);
   return {
     id: stage.id,
     label: stage.label,
@@ -451,7 +593,7 @@ function buildStage(stage) {
     warnings: stageWarnings,
     coverage,
     anchorArticles: stageArticles
-      .filter((a) => (a.tipo === "guia" || a.tipo === "conceito"))
+      .filter((a) => a.tipo === "guia" || a.tipo === "conceito")
       .slice(0, 3)
       .map((a) => ({ category: a.category, slug: a.slug, title: a.title })),
   };
@@ -493,8 +635,12 @@ const lines = [];
 lines.push(`# Auditoria da documentação — ${generatedAt.slice(0, 10)}`);
 lines.push("");
 lines.push(`- app_version: **${appVersion}**`);
-lines.push(`- Rotas ativas: **${routes.length}** · route-map: **${routeMap.length}** · artigos: **${articles.length}**`);
-lines.push(`- Resumo: **${summary.errors}** erro(s), **${summary.warnings}** aviso(s), **${summary.info}** info`);
+lines.push(
+  `- Rotas ativas: **${routes.length}** · route-map: **${routeMap.length}** · artigos: **${articles.length}**`,
+);
+lines.push(
+  `- Resumo: **${summary.errors}** erro(s), **${summary.warnings}** aviso(s), **${summary.info}** info`,
+);
 lines.push("");
 for (const s of sections) {
   lines.push(`## ${s.title} (${s.items.length}) — ${s.severity}`);
@@ -505,13 +651,17 @@ for (const s of sections) {
 }
 lines.push(`## Cobertura por etapa`);
 for (const st of [...byStage, supportStage]) {
-  lines.push(`- **${st.label}** — ${st.coverage}% (${st.routesMapped}/${st.routes} rotas, ${st.articles} artigos, err=${st.errors} warn=${st.warnings})`);
+  lines.push(
+    `- **${st.label}** — ${st.coverage}% (${st.routesMapped}/${st.routes} rotas, ${st.articles} artigos, err=${st.errors} warn=${st.warnings})`,
+  );
 }
 lines.push("");
 lines.push(`## Por módulo`);
 for (const cat of Object.keys(byModule).sort()) {
   const m = byModule[cat];
-  lines.push(`- **${cat}** — art=${m.articles} rot=${m.routes} err=${m.errors} warn=${m.warnings} info=${m.info}`);
+  lines.push(
+    `- **${cat}** — art=${m.articles} rot=${m.routes} err=${m.errors} warn=${m.warnings} info=${m.info}`,
+  );
 }
 
 const report = lines.join("\n");

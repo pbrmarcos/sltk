@@ -2,8 +2,8 @@
 // Server-side Supabase client with service role key - bypasses RLS.
 // Use this for admin operations in server functions and server routes only.
 // For user-authenticated queries (with RLS), use the auth middleware instead.
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./types";
 
 // Sem fallback pra DEST_SUPABASE_*/STATIC_SUPABASE_*: esta é a conexão
 // privilegiada (service role). Prefira falhar alto a resolver silenciosamente
@@ -14,15 +14,17 @@ function createSupabaseAdminClient() {
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
+      ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
+      ...(!SUPABASE_SERVICE_ROLE_KEY ? ["SUPABASE_SERVICE_ROLE_KEY"] : []),
     ];
-    console.error(`[Supabase] Administrative runtime configuration unavailable (${missing.length} item(s)).`);
+    console.error(
+      `[Supabase] Administrative runtime configuration unavailable (${missing.length} item(s)).`,
+    );
     // Mensagem amigável: nunca vazar nome de variável de ambiente para a UI.
     const error = new Error(
-      'Esta ação administrativa está temporariamente indisponível porque a chave de serviço do Supabase não está configurada neste ambiente. Os demais recursos continuam funcionando normalmente.',
+      "Esta ação administrativa está temporariamente indisponível porque a chave de serviço do Supabase não está configurada neste ambiente. Os demais recursos continuam funcionando normalmente.",
     );
-    error.name = 'ServiceRoleUnavailableError';
+    error.name = "ServiceRoleUnavailableError";
     throw error;
   }
 
@@ -37,12 +39,12 @@ function createSupabaseAdminClient() {
       fetch: (input, init) => {
         const headers = new Headers(init?.headers);
         if (
-          serviceKey.startsWith('sb_') &&
-          headers.get('Authorization') === `Bearer ${serviceKey}`
+          serviceKey.startsWith("sb_") &&
+          headers.get("Authorization") === `Bearer ${serviceKey}`
         ) {
-          headers.delete('Authorization');
+          headers.delete("Authorization");
         }
-        headers.set('apikey', serviceKey);
+        headers.set("apikey", serviceKey);
         return fetch(input, { ...init, headers });
       },
     },

@@ -2,23 +2,40 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Plus, X, Save } from "lucide-react";
 import {
-  upsertEtapaTemplateItem,
-  DISCIPLINAS,
-  PRIORIDADES,
-} from "@/lib/etapa-templates.functions";
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Plus, X, Save } from "lucide-react";
+import { upsertEtapaTemplateItem, DISCIPLINAS, PRIORIDADES } from "@/lib/etapa-templates.functions";
 import { confirmDiscard } from "@/lib/unsaved-guard";
 import { useFormDraft } from "@/hooks/use-form-draft";
 
-const ROLES = ["engineer", "manager", "assembly", "production", "purchasing", "sales", "field", "admin"];
+const ROLES = [
+  "engineer",
+  "manager",
+  "assembly",
+  "production",
+  "purchasing",
+  "sales",
+  "field",
+  "admin",
+];
 
 export function EtapaDialog({
   templateId,
@@ -40,7 +57,9 @@ export function EtapaDialog({
   const [duracaoH, setDuracaoH] = useState<string>(
     item.duracao_h != null ? String(item.duracao_h) : "",
   );
-  const [responsavelRole, setResponsavelRole] = useState<string>(item.responsavel_role ?? "__none__");
+  const [responsavelRole, setResponsavelRole] = useState<string>(
+    item.responsavel_role ?? "__none__",
+  );
   const [dependeDe, setDependeDe] = useState<string>(item.depende_de ?? "__none__");
   const [entregavel, setEntregavel] = useState<string>(item.entregavel ?? "");
   const [requerAnexo, setRequerAnexo] = useState<boolean>(!!item.requer_anexo);
@@ -49,22 +68,47 @@ export function EtapaDialog({
   );
   const [newTask, setNewTask] = useState("");
   const initialDraft = {
-    titulo: item.titulo ?? "", descricao: item.descricao ?? "", prioridade: item.prioridade ?? "media",
-    disciplina: item.disciplina ?? "planejamento", duracaoH: item.duracao_h != null ? String(item.duracao_h) : "",
-    responsavelRole: item.responsavel_role ?? "__none__", dependeDe: item.depende_de ?? "__none__",
-    entregavel: item.entregavel ?? "", requerAnexo: !!item.requer_anexo,
-    checklist: Array.isArray(item.checklist) ? item.checklist : [], newTask: "",
+    titulo: item.titulo ?? "",
+    descricao: item.descricao ?? "",
+    prioridade: item.prioridade ?? "media",
+    disciplina: item.disciplina ?? "planejamento",
+    duracaoH: item.duracao_h != null ? String(item.duracao_h) : "",
+    responsavelRole: item.responsavel_role ?? "__none__",
+    dependeDe: item.depende_de ?? "__none__",
+    entregavel: item.entregavel ?? "",
+    requerAnexo: !!item.requer_anexo,
+    checklist: Array.isArray(item.checklist) ? item.checklist : [],
+    newTask: "",
   };
-  const currentDraft = { titulo, descricao, prioridade, disciplina, duracaoH, responsavelRole, dependeDe, entregavel, requerAnexo, checklist, newTask };
+  const currentDraft = {
+    titulo,
+    descricao,
+    prioridade,
+    disciplina,
+    duracaoH,
+    responsavelRole,
+    dependeDe,
+    entregavel,
+    requerAnexo,
+    checklist,
+    newTask,
+  };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `template-etapa:${templateId}:${item.id ?? "novo"}`,
     value: currentDraft,
     initialValue: initialDraft,
     onRestore: (saved) => {
-      setTitulo(saved.titulo); setDescricao(saved.descricao); setPrioridade(saved.prioridade);
-      setDisciplina(saved.disciplina); setDuracaoH(saved.duracaoH); setResponsavelRole(saved.responsavelRole);
-      setDependeDe(saved.dependeDe); setEntregavel(saved.entregavel); setRequerAnexo(saved.requerAnexo);
-      setChecklist(saved.checklist); setNewTask(saved.newTask);
+      setTitulo(saved.titulo);
+      setDescricao(saved.descricao);
+      setPrioridade(saved.prioridade);
+      setDisciplina(saved.disciplina);
+      setDuracaoH(saved.duracaoH);
+      setResponsavelRole(saved.responsavelRole);
+      setDependeDe(saved.dependeDe);
+      setEntregavel(saved.entregavel);
+      setRequerAnexo(saved.requerAnexo);
+      setChecklist(saved.checklist);
+      setNewTask(saved.newTask);
     },
   });
 
@@ -87,12 +131,19 @@ export function EtapaDialog({
           checklist,
         },
       }),
-    onSuccess: () => { clearDraft(); toast.success("Salvo."); onSaved(); },
+    onSuccess: () => {
+      clearDraft();
+      toast.success("Salvo.");
+      onSaved();
+    },
     onError: (e: any) => toast.error(e?.message ?? "Erro."),
   });
 
   function tryClose() {
-    if (confirmDiscard(isDirty)) { clearDraft(); onClose(); }
+    if (confirmDiscard(isDirty)) {
+      clearDraft();
+      onClose();
+    }
   }
 
   function addTask() {
@@ -141,18 +192,30 @@ export function EtapaDialog({
               <div>
                 <Label>Disciplina</Label>
                 <Select value={disciplina} onValueChange={setDisciplina}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {DISCIPLINAS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                    {DISCIPLINAS.map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Prioridade</Label>
                 <Select value={prioridade} onValueChange={setPrioridade}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {PRIORIDADES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    {PRIORIDADES.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -170,17 +233,25 @@ export function EtapaDialog({
               <div>
                 <Label>Responsável padrão</Label>
                 <Select value={responsavelRole} onValueChange={setResponsavelRole}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">—</SelectItem>
-                    {ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    {ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {r}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="col-span-2">
                 <Label>Depende de (etapa anterior)</Label>
                 <Select value={dependeDe} onValueChange={setDependeDe}>
-                  <SelectTrigger><SelectValue placeholder="Nenhuma dependência" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhuma dependência" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">— Nenhuma —</SelectItem>
                     {outrasEtapas
@@ -203,7 +274,10 @@ export function EtapaDialog({
             </h3>
             <div className="space-y-1.5">
               {checklist.map((t, i) => (
-                <div key={i} className="flex items-center gap-2 rounded border border-border bg-muted/20 px-2 py-1.5">
+                <div
+                  key={i}
+                  className="flex items-center gap-2 rounded border border-border bg-muted/20 px-2 py-1.5"
+                >
                   <span className="grid h-5 w-5 place-items-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
                     {i + 1}
                   </span>
@@ -242,7 +316,9 @@ export function EtapaDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={tryClose}>Cancelar</Button>
+          <Button variant="ghost" onClick={tryClose}>
+            Cancelar
+          </Button>
           <Button onClick={() => mut.mutate()} disabled={!titulo || mut.isPending}>
             <Save className="mr-1 h-4 w-4" /> Salvar
           </Button>

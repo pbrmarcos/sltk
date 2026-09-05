@@ -105,7 +105,11 @@ export function OrigensLeadTab() {
             className="max-w-sm"
           />
           <Button type="submit" disabled={criar.isPending || nova.trim().length < 2}>
-            {criar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            {criar.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
             Adicionar
           </Button>
         </form>
@@ -151,7 +155,11 @@ export function OrigensLeadTab() {
                       renomear.mutate({ id: o.id, nome: editNome.trim() });
                     }}
                   >
-                    <Input value={editNome} onChange={(e) => setEditNome(e.target.value)} className="max-w-sm" />
+                    <Input
+                      value={editNome}
+                      onChange={(e) => setEditNome(e.target.value)}
+                      className="max-w-sm"
+                    />
                     <Button type="submit" size="sm" disabled={renomear.isPending}>
                       Salvar
                     </Button>
@@ -169,7 +177,9 @@ export function OrigensLeadTab() {
                     }}
                   >
                     {o.nome}
-                    {!o.ativo && <span className="ml-2 text-xs text-[var(--text-muted)]">(inativa)</span>}
+                    {!o.ativo && (
+                      <span className="ml-2 text-xs text-[var(--text-muted)]">(inativa)</span>
+                    )}
                   </button>
                 )}
 

@@ -11,7 +11,10 @@ export function firstErrorName(errors: Record<string, unknown>, prefix = ""): st
   for (const [key, value] of Object.entries(errors ?? {})) {
     if (!value || typeof value !== "object") continue;
     const path = prefix ? `${prefix}.${key}` : key;
-    if ("message" in (value as Record<string, unknown>) && (value as { message?: unknown }).message) {
+    if (
+      "message" in (value as Record<string, unknown>) &&
+      (value as { message?: unknown }).message
+    ) {
       return path;
     }
     const nested = firstErrorName(value as Record<string, unknown>, path);
@@ -49,4 +52,3 @@ export function focusFirstError(errors: Record<string, unknown> | string[]) {
   if (!name) return;
   focusFieldByName(name);
 }
-

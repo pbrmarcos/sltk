@@ -10,7 +10,11 @@ import { SatStatusCard } from "./SatStatusCard";
 import { TarefasAgendaCard } from "./TarefasAgendaCard";
 
 const fmtBRL = (n: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(n);
 const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
 const fmtInt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
 
@@ -38,17 +42,25 @@ export function ManagerDashboard({ data, userName }: { data: DashboardData; user
     count: f.count,
     color: STAGE_COLORS[f.stage] ?? "#6366f1",
   }));
-  const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  const today = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-[12px] uppercase tracking-wider text-[var(--text-muted)]">{today}</div>
+          <div className="text-[12px] uppercase tracking-wider text-[var(--text-muted)]">
+            {today}
+          </div>
           <h1 className="mt-1 text-[26px] font-semibold tracking-tight text-[var(--text-primary)]">
             Olá, <span className="text-[var(--primary)]">{userName.split(" ")[0]}</span> 👋
           </h1>
-          <p className="text-[13px] text-[var(--text-muted)]">Visão executiva do comercial e dos processos em execução.</p>
+          <p className="text-[13px] text-[var(--text-muted)]">
+            Visão executiva do comercial e dos processos em execução.
+          </p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -68,12 +80,42 @@ export function ManagerDashboard({ data, userName }: { data: DashboardData; user
 
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <KpiCard label="Pipeline aberto" value={fmtBRL(data.kpis.pipelineValor)} hint={`${data.kpis.pipelineCount} oportunidades`} />
-        <KpiCard label="Ganho no mês" value={fmtBRL(data.kpis.ganhoMes)} delta={data.kpis.ganhoMesDelta} accent="success" />
-        <KpiCard label="Win rate (90d)" value={fmtPct(data.kpis.winRate)} delta={data.kpis.winRateDelta} deltaSuffix="pp" accent="primary" />
-        <KpiCard label="Ticket médio" value={fmtBRL(data.kpis.ticketMedio)} delta={data.kpis.ticketMedioDelta} accent="primary" />
-        <KpiCard label="Ciclo médio" value={`${data.kpis.cicloMedioDias.toFixed(0)}d`} delta={data.kpis.cicloMedioDelta} invertDelta accent="warning" />
-        <KpiCard label="Clientes ativos" value={fmtInt(data.clientesAtivos)} hint={`${data.oportunidadesAbertas} ops em aberto`} />
+        <KpiCard
+          label="Pipeline aberto"
+          value={fmtBRL(data.kpis.pipelineValor)}
+          hint={`${data.kpis.pipelineCount} oportunidades`}
+        />
+        <KpiCard
+          label="Ganho no mês"
+          value={fmtBRL(data.kpis.ganhoMes)}
+          delta={data.kpis.ganhoMesDelta}
+          accent="success"
+        />
+        <KpiCard
+          label="Win rate (90d)"
+          value={fmtPct(data.kpis.winRate)}
+          delta={data.kpis.winRateDelta}
+          deltaSuffix="pp"
+          accent="primary"
+        />
+        <KpiCard
+          label="Ticket médio"
+          value={fmtBRL(data.kpis.ticketMedio)}
+          delta={data.kpis.ticketMedioDelta}
+          accent="primary"
+        />
+        <KpiCard
+          label="Ciclo médio"
+          value={`${data.kpis.cicloMedioDias.toFixed(0)}d`}
+          delta={data.kpis.cicloMedioDelta}
+          invertDelta
+          accent="warning"
+        />
+        <KpiCard
+          label="Clientes ativos"
+          value={fmtInt(data.clientesAtivos)}
+          hint={`${data.oportunidadesAbertas} ops em aberto`}
+        />
       </div>
 
       {/* Row 2: Funnel + Revenue */}
@@ -123,7 +165,10 @@ export function ManagerDashboard({ data, userName }: { data: DashboardData; user
           title="Pós-vendas — SATs"
           hint="Status atual e últimos relatórios"
           action={
-            <Link to="/pos-vendas/sat" className="text-[11px] font-medium text-[var(--primary)] hover:underline">
+            <Link
+              to="/pos-vendas/sat"
+              className="text-[11px] font-medium text-[var(--primary)] hover:underline"
+            >
               ver todos
             </Link>
           }

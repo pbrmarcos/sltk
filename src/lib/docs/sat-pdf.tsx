@@ -19,23 +19,47 @@ const styles = (accent: string) =>
     page: { ...CHROME_PAGE_STYLE },
     coverWrap: { marginTop: 8, marginBottom: 16 },
     coverTitle: { fontSize: 24, fontFamily: TOKENS.fontBold, color: TOKENS.text },
-    coverAccentBar: { width: 56, height: 3, backgroundColor: accent, marginTop: 14, marginBottom: 18 },
+    coverAccentBar: {
+      width: 56,
+      height: 3,
+      backgroundColor: accent,
+      marginTop: 14,
+      marginBottom: 18,
+    },
     coverSubtitle: { fontSize: 11, color: TOKENS.muted },
     sectionTitle: {
-      fontSize: 12, fontFamily: TOKENS.fontBold, color: TOKENS.text,
-      marginTop: 18, marginBottom: 8, paddingBottom: 4,
-      borderBottomWidth: 1, borderBottomColor: accent, borderBottomStyle: "solid",
+      fontSize: 12,
+      fontFamily: TOKENS.fontBold,
+      color: TOKENS.text,
+      marginTop: 18,
+      marginBottom: 8,
+      paddingBottom: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: accent,
+      borderBottomStyle: "solid",
     },
     secaoTitle: {
-      fontSize: 10.5, fontFamily: TOKENS.fontBold, color: accent, marginTop: 14, marginBottom: 6,
+      fontSize: 10.5,
+      fontFamily: TOKENS.fontBold,
+      color: accent,
+      marginTop: 14,
+      marginBottom: 6,
     },
     secaoDesc: { fontSize: 8, color: TOKENS.muted, marginBottom: 6 },
     keyGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 8 },
     keyCell: { width: "50%", marginBottom: 4, paddingRight: 8 },
-    keyLabel: { fontSize: 7.5, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
+    keyLabel: {
+      fontSize: 7.5,
+      color: TOKENS.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
     keyValue: { fontSize: 9.5, color: TOKENS.text },
     itemRow: {
-      flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: TOKENS.border, borderBottomStyle: "solid",
+      flexDirection: "row",
+      borderBottomWidth: 0.5,
+      borderBottomColor: TOKENS.border,
+      borderBottomStyle: "solid",
       paddingVertical: 5,
     },
     itemRowZebra: { backgroundColor: TOKENS.zebra },
@@ -46,13 +70,35 @@ const styles = (accent: string) =>
     chipNok: { color: "#991B1B", fontFamily: TOKENS.fontBold },
     chipNa: { color: TOKENS.muted, fontFamily: TOKENS.fontBold },
     para: { marginBottom: 6 },
-    table: { borderWidth: 0.5, borderColor: TOKENS.borderStrong, borderStyle: "solid", marginBottom: 8 },
-    tHeader: { flexDirection: "row", backgroundColor: accent, color: "#FFFFFF", fontSize: 8.5, fontFamily: TOKENS.fontBold },
-    tRow: { flexDirection: "row", borderTopWidth: 0.5, borderTopColor: TOKENS.border, borderTopStyle: "solid" },
+    table: {
+      borderWidth: 0.5,
+      borderColor: TOKENS.borderStrong,
+      borderStyle: "solid",
+      marginBottom: 8,
+    },
+    tHeader: {
+      flexDirection: "row",
+      backgroundColor: accent,
+      color: "#FFFFFF",
+      fontSize: 8.5,
+      fontFamily: TOKENS.fontBold,
+    },
+    tRow: {
+      flexDirection: "row",
+      borderTopWidth: 0.5,
+      borderTopColor: TOKENS.border,
+      borderTopStyle: "solid",
+    },
     tRowZebra: { backgroundColor: TOKENS.zebra },
     tCell: { padding: 5, fontSize: 9 },
     signGrid: { flexDirection: "row", marginTop: 24, gap: 16 },
-    signBox: { flex: 1, borderTopWidth: 0.5, borderTopColor: TOKENS.text, borderTopStyle: "solid", paddingTop: 4 },
+    signBox: {
+      flex: 1,
+      borderTopWidth: 0.5,
+      borderTopColor: TOKENS.text,
+      borderTopStyle: "solid",
+      paddingTop: 4,
+    },
     signLabel: { fontSize: 8, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
     signValue: { fontSize: 9.5, fontFamily: TOKENS.fontBold },
     signImg: { height: 48, objectFit: "contain", marginBottom: 4 },
@@ -61,52 +107,105 @@ const styles = (accent: string) =>
 
 const L: Record<Idioma, Record<string, string>> = {
   pt: {
-    title: "Relatório SAT", subtitle: "Service Acceptance Test",
-    identificacao: "Identificação", codigo: "Código", local: "Local",
-    periodo: "Período", motivos: "Motivos da viagem", tecnicos: "Técnicos",
-    equipamentos: "Equipamentos", obs: "Observações", semObs: "Sem observações.",
-    semItens: "Sem itens registrados.", semSecoes: "Sem seções configuradas.",
-    anexos: "Anexos", nomeAnexo: "Arquivo", tipoAnexo: "Tipo", linkAnexo: "Link Drive",
+    title: "Relatório SAT",
+    subtitle: "Service Acceptance Test",
+    identificacao: "Identificação",
+    codigo: "Código",
+    local: "Local",
+    periodo: "Período",
+    motivos: "Motivos da viagem",
+    tecnicos: "Técnicos",
+    equipamentos: "Equipamentos",
+    obs: "Observações",
+    semObs: "Sem observações.",
+    semItens: "Sem itens registrados.",
+    semSecoes: "Sem seções configuradas.",
+    anexos: "Anexos",
+    nomeAnexo: "Arquivo",
+    tipoAnexo: "Tipo",
+    linkAnexo: "Link Drive",
     semAnexos: "Sem anexos.",
-    assinaturas: "Assinaturas", assTecnico: "Técnico", assCliente: "Cliente",
+    assinaturas: "Assinaturas",
+    assTecnico: "Técnico",
+    assCliente: "Cliente",
     naoAssinado: "Não assinado",
-    sim: "Sim", nao: "Não", na: "N/A",
-    pagina: "Página", de: "de",
+    sim: "Sim",
+    nao: "Não",
+    na: "N/A",
+    pagina: "Página",
+    de: "de",
     audit: "Documento assinado digitalmente — verificação HMAC-SHA256 disponível no portal.",
   },
   es: {
-    title: "Informe SAT", subtitle: "Service Acceptance Test",
-    identificacao: "Identificación", codigo: "Código", local: "Lugar",
-    periodo: "Período", motivos: "Motivos del viaje", tecnicos: "Técnicos",
-    equipamentos: "Equipos", obs: "Observaciones", semObs: "Sin observaciones.",
-    semItens: "Sin ítems registrados.", semSecoes: "Sin secciones configuradas.",
-    anexos: "Adjuntos", nomeAnexo: "Archivo", tipoAnexo: "Tipo", linkAnexo: "Enlace Drive",
+    title: "Informe SAT",
+    subtitle: "Service Acceptance Test",
+    identificacao: "Identificación",
+    codigo: "Código",
+    local: "Lugar",
+    periodo: "Período",
+    motivos: "Motivos del viaje",
+    tecnicos: "Técnicos",
+    equipamentos: "Equipos",
+    obs: "Observaciones",
+    semObs: "Sin observaciones.",
+    semItens: "Sin ítems registrados.",
+    semSecoes: "Sin secciones configuradas.",
+    anexos: "Adjuntos",
+    nomeAnexo: "Archivo",
+    tipoAnexo: "Tipo",
+    linkAnexo: "Enlace Drive",
     semAnexos: "Sin adjuntos.",
-    assinaturas: "Firmas", assTecnico: "Técnico", assCliente: "Cliente",
+    assinaturas: "Firmas",
+    assTecnico: "Técnico",
+    assCliente: "Cliente",
     naoAssinado: "No firmado",
-    sim: "Sí", nao: "No", na: "N/A",
-    pagina: "Página", de: "de",
+    sim: "Sí",
+    nao: "No",
+    na: "N/A",
+    pagina: "Página",
+    de: "de",
     audit: "Documento firmado digitalmente — verificación HMAC-SHA256 disponible en el portal.",
   },
   en: {
-    title: "SAT Report", subtitle: "Service Acceptance Test",
-    identificacao: "Identification", codigo: "Code", local: "Location",
-    periodo: "Period", motivos: "Trip motives", tecnicos: "Technicians",
-    equipamentos: "Equipment", obs: "Notes", semObs: "No notes.",
-    semItens: "No items recorded.", semSecoes: "No sections configured.",
-    anexos: "Attachments", nomeAnexo: "File", tipoAnexo: "Type", linkAnexo: "Drive link",
+    title: "SAT Report",
+    subtitle: "Service Acceptance Test",
+    identificacao: "Identification",
+    codigo: "Code",
+    local: "Location",
+    periodo: "Period",
+    motivos: "Trip motives",
+    tecnicos: "Technicians",
+    equipamentos: "Equipment",
+    obs: "Notes",
+    semObs: "No notes.",
+    semItens: "No items recorded.",
+    semSecoes: "No sections configured.",
+    anexos: "Attachments",
+    nomeAnexo: "File",
+    tipoAnexo: "Type",
+    linkAnexo: "Drive link",
     semAnexos: "No attachments.",
-    assinaturas: "Signatures", assTecnico: "Technician", assCliente: "Customer",
+    assinaturas: "Signatures",
+    assTecnico: "Technician",
+    assCliente: "Customer",
     naoAssinado: "Unsigned",
-    sim: "Yes", nao: "No", na: "N/A",
-    pagina: "Page", de: "of",
+    sim: "Yes",
+    nao: "No",
+    na: "N/A",
+    pagina: "Page",
+    de: "of",
     audit: "Digitally signed document — HMAC-SHA256 verification available on the portal.",
   },
 };
 
 export type SatItemTipo =
-  | "sim_nao_comentario" | "texto" | "numero" | "data"
-  | "checkbox_multi" | "parametro_operacional" | "cabecalho";
+  | "sim_nao_comentario"
+  | "texto"
+  | "numero"
+  | "data"
+  | "checkbox_multi"
+  | "parametro_operacional"
+  | "cabecalho";
 
 export type SatPdfPayload = {
   cliente: { codigo: string; razao_social: string };
@@ -146,7 +245,10 @@ export type SatPdfPayload = {
 };
 
 function renderValor(
-  tipo: SatItemTipo, valor: any, idioma: Idioma, t: Record<string, string>,
+  tipo: SatItemTipo,
+  valor: any,
+  idioma: Idioma,
+  t: Record<string, string>,
 ): { texto: string; chip?: "ok" | "nok" | "na" } {
   if (valor == null || valor === "") return { texto: "—" };
   switch (tipo) {
@@ -188,10 +290,19 @@ function extractComentario(tipo: SatItemTipo, valor: any): string | null {
 }
 
 export function SatPdf({
-  codigo, versao, idioma, data, payload, layout,
+  codigo,
+  versao,
+  idioma,
+  data,
+  payload,
+  layout,
 }: {
-  codigo: string; versao: string; idioma: Idioma; data: Date;
-  payload: SatPdfPayload; layout: DocumentoLayoutConfig;
+  codigo: string;
+  versao: string;
+  idioma: Idioma;
+  data: Date;
+  payload: SatPdfPayload;
+  layout: DocumentoLayoutConfig;
 }) {
   const s = styles(layout.accent_color || "#0F172A");
   const t = L[idioma];
@@ -219,15 +330,26 @@ export function SatPdf({
         <View style={s.coverWrap}>
           <Text style={s.coverTitle}>{t.title}</Text>
           <View style={s.coverAccentBar} />
-          <Text style={s.coverSubtitle}>{t.subtitle}{payload.processo ? ` · ${payload.processo.codigo} — ${payload.processo.titulo}` : ""}</Text>
+          <Text style={s.coverSubtitle}>
+            {t.subtitle}
+            {payload.processo ? ` · ${payload.processo.codigo} — ${payload.processo.titulo}` : ""}
+          </Text>
         </View>
 
         <Text style={s.sectionTitle}>{t.identificacao}</Text>
         <View style={s.keyGrid}>
           <KV label={t.codigo} value={payload.sat.codigo} s={s} />
           <KV label={t.local} value={payload.sat.local_endereco || "—"} s={s} />
-          <KV label={t.periodo} value={`${fmtDate(payload.sat.periodo_de)} — ${fmtDate(payload.sat.periodo_ate)}`} s={s} />
-          <KV label={t.motivos} value={(payload.sat.motivos_viagem || []).join(", ") || "—"} s={s} />
+          <KV
+            label={t.periodo}
+            value={`${fmtDate(payload.sat.periodo_de)} — ${fmtDate(payload.sat.periodo_ate)}`}
+            s={s}
+          />
+          <KV
+            label={t.motivos}
+            value={(payload.sat.motivos_viagem || []).join(", ") || "—"}
+            s={s}
+          />
         </View>
 
         <Text style={s.sectionTitle}>{t.tecnicos}</Text>
@@ -236,7 +358,12 @@ export function SatPdf({
         ) : (
           <View style={s.keyGrid}>
             {payload.tecnicos.map((tc, i) => (
-              <KV key={i} label={tc.cargo || t.assTecnico} value={`${tc.nome}${tc.email ? ` · ${tc.email}` : ""}`} s={s} />
+              <KV
+                key={i}
+                label={tc.cargo || t.assTecnico}
+                value={`${tc.nome}${tc.email ? ` · ${tc.email}` : ""}`}
+                s={s}
+              />
             ))}
           </View>
         )}
@@ -272,7 +399,11 @@ export function SatPdf({
               ) : (
                 sec.itens.map((it, i) => {
                   if (it.tipo === "cabecalho") {
-                    return <Text key={it.id} style={s.secaoTitle}>{it.label}</Text>;
+                    return (
+                      <Text key={it.id} style={s.secaoTitle}>
+                        {it.label}
+                      </Text>
+                    );
                   }
                   const r = renderValor(it.tipo, it.valor, idioma, t);
                   const com = it.comentario ?? extractComentario(it.tipo, it.valor);
@@ -280,7 +411,17 @@ export function SatPdf({
                     <View key={it.id} style={[s.itemRow, i % 2 ? s.itemRowZebra : {}]}>
                       <Text style={s.itemLabel}>{it.label}</Text>
                       <View style={s.itemValue}>
-                        <Text style={r.chip === "ok" ? s.chipOk : r.chip === "nok" ? s.chipNok : r.chip === "na" ? s.chipNa : {}}>
+                        <Text
+                          style={
+                            r.chip === "ok"
+                              ? s.chipOk
+                              : r.chip === "nok"
+                                ? s.chipNok
+                                : r.chip === "na"
+                                  ? s.chipNa
+                                  : {}
+                          }
+                        >
                           {r.texto || "—"}
                         </Text>
                         {com ? <Text style={s.itemComment}>{com}</Text> : null}
@@ -319,22 +460,21 @@ export function SatPdf({
         <Text style={s.sectionTitle}>{t.assinaturas}</Text>
         <View style={s.signGrid}>
           <View style={s.signBox}>
-            {payload.sat.assinatura_tecnico_url
-              ? <Image src={payload.sat.assinatura_tecnico_url} style={s.signImg} />
-              : null}
+            {payload.sat.assinatura_tecnico_url ? (
+              <Image src={payload.sat.assinatura_tecnico_url} style={s.signImg} />
+            ) : null}
             <Text style={s.signLabel}>{t.assTecnico}</Text>
             <Text style={s.signValue}>{payload.sat.assinatura_tecnico_nome || t.naoAssinado}</Text>
           </View>
           <View style={s.signBox}>
-            {payload.sat.assinatura_cliente_url
-              ? <Image src={payload.sat.assinatura_cliente_url} style={s.signImg} />
-              : null}
+            {payload.sat.assinatura_cliente_url ? (
+              <Image src={payload.sat.assinatura_cliente_url} style={s.signImg} />
+            ) : null}
             <Text style={s.signLabel}>{t.assCliente}</Text>
             <Text style={s.signValue}>{payload.sat.assinatura_cliente_nome || t.naoAssinado}</Text>
           </View>
         </View>
         <Text style={s.auditFoot}>{t.audit}</Text>
-
       </Page>
     </Document>
   );

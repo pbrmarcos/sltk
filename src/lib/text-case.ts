@@ -5,16 +5,35 @@
  * - Preserva separadores como "-", "/", "·" e quebras de palavra.
  */
 const STOPWORDS = new Set([
-  "de","da","do","das","dos","e","com","a","o","os","as",
-  "em","para","por","no","na","nos","nas","ao","à","às","aos",
+  "de",
+  "da",
+  "do",
+  "das",
+  "dos",
+  "e",
+  "com",
+  "a",
+  "o",
+  "os",
+  "as",
+  "em",
+  "para",
+  "por",
+  "no",
+  "na",
+  "nos",
+  "nas",
+  "ao",
+  "à",
+  "às",
+  "aos",
 ]);
 
 function titleWord(w: string): string {
   if (!w) return w;
   // Mantém acrônimos curtos em maiúsculas (BR, RFC, CNAE)
   if (/^[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{2,5}$/.test(w)) return w;
-  return w.charAt(0).toLocaleUpperCase("pt-BR") +
-    w.slice(1).toLocaleLowerCase("pt-BR");
+  return w.charAt(0).toLocaleUpperCase("pt-BR") + w.slice(1).toLocaleLowerCase("pt-BR");
 }
 
 export function titleCasePtBR(raw: string): string {

@@ -19,7 +19,9 @@ export const Route = createFileRoute("/_authenticated/ajuda/atualizacoes")({
 
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return isNaN(d.getTime()) ? iso : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  return isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function AtualizacoesPage() {
@@ -30,7 +32,9 @@ function AtualizacoesPage() {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(a);
   }
-  const versions = [...groups.keys()].sort((a, b) => (a === "—" ? 1 : b === "—" ? -1 : b.localeCompare(a, undefined, { numeric: true })));
+  const versions = [...groups.keys()].sort((a, b) =>
+    a === "—" ? 1 : b === "—" ? -1 : b.localeCompare(a, undefined, { numeric: true }),
+  );
 
   return (
     <PageContainer>
@@ -68,7 +72,10 @@ function AtualizacoesPage() {
                   {items.map((a) => {
                     const cat = getCategory(a.category);
                     return (
-                      <li key={`${a.category}-${a.slug}`} className="flex items-center justify-between gap-3 py-2 text-sm">
+                      <li
+                        key={`${a.category}-${a.slug}`}
+                        className="flex items-center justify-between gap-3 py-2 text-sm"
+                      >
                         <div className="min-w-0">
                           <Link
                             to="/ajuda/documentacao/$categoria/$slug"
@@ -77,7 +84,9 @@ function AtualizacoesPage() {
                           >
                             {a.title}
                           </Link>
-                          <p className="truncate text-xs text-[var(--text-muted)]">{a.description}</p>
+                          <p className="truncate text-xs text-[var(--text-muted)]">
+                            {a.description}
+                          </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2 text-xs text-[var(--text-muted)]">
                           <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 uppercase tracking-wide">

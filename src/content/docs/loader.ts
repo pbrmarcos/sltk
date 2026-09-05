@@ -43,9 +43,15 @@ function firstParagraph(md: string): string {
     // remove directive closing markers `:::`
     .replace(/^:{3,}\s*$/gm, "")
     .trim();
-  const paragraphs = cleaned.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const paragraphs = cleaned
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
   const para = paragraphs[0] ?? "";
-  return para.replace(/[*_`>#-]/g, "").replace(/\s+/g, " ").trim();
+  return para
+    .replace(/[*_`>#-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 const docsFiles = import.meta.glob("./articles/**/*.md", {
@@ -87,12 +93,7 @@ export const FAQS: FaqEntry[] = Object.entries(faqFiles).flatMap(([path, raw]): 
     console.warn(`[faq] frontmatter incompleto em ${path}`);
     return [];
   }
-  const id =
-    fm.id ??
-    path
-      .split("/")
-      .pop()!
-      .replace(/\.md$/, "");
+  const id = fm.id ?? path.split("/").pop()!.replace(/\.md$/, "");
   return [
     {
       id,
@@ -115,4 +116,3 @@ export function getArticle(category: string, slug: string): DocArticle | undefin
 export function getFaqsByCategory(category?: string): FaqEntry[] {
   return category ? FAQS.filter((f) => f.category === category) : FAQS;
 }
-

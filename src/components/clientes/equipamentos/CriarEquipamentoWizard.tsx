@@ -12,7 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Check, Copy, FileText, Loader2 } from "lucide-react";
@@ -24,7 +30,11 @@ import {
   criarEquipamentoDeOrcamento,
   listCandidatosClone,
 } from "@/lib/equipamento-planejamento.functions";
-import { EQUIPAMENTO_CATEGORIAS, EQUIPAMENTO_CATEGORIA_LABEL, type EquipamentoCategoria } from "@/lib/equipamentos.shared";
+import {
+  EQUIPAMENTO_CATEGORIAS,
+  EQUIPAMENTO_CATEGORIA_LABEL,
+  type EquipamentoCategoria,
+} from "@/lib/equipamentos.shared";
 import { useFormDraft } from "@/hooks/use-form-draft";
 import { confirmDiscard } from "@/lib/unsaved-guard";
 
@@ -62,21 +72,54 @@ export function CriarEquipamentoWizard({
   const [autoId, setAutoId] = useState<string>("");
   const [observacoes, setObservacoes] = useState("");
   const initialDraft = {
-    step: 1 as Step, base: "template" as Base, templateSlug: "desenvolvimento-modelo", cloneId: null as string | null,
-    modelo: defaultModelo ?? "", numeroSerie: "", tagCliente: "", categoria: "outro" as EquipamentoCategoria,
-    dataEntrega: "", valor: defaultValor ? String(defaultValor) : "", engId: "", autoId: "", observacoes: "",
+    step: 1 as Step,
+    base: "template" as Base,
+    templateSlug: "desenvolvimento-modelo",
+    cloneId: null as string | null,
+    modelo: defaultModelo ?? "",
+    numeroSerie: "",
+    tagCliente: "",
+    categoria: "outro" as EquipamentoCategoria,
+    dataEntrega: "",
+    valor: defaultValor ? String(defaultValor) : "",
+    engId: "",
+    autoId: "",
+    observacoes: "",
   };
-  const currentDraft = { step, base, templateSlug, cloneId, modelo, numeroSerie, tagCliente, categoria, dataEntrega, valor, engId, autoId, observacoes };
+  const currentDraft = {
+    step,
+    base,
+    templateSlug,
+    cloneId,
+    modelo,
+    numeroSerie,
+    tagCliente,
+    categoria,
+    dataEntrega,
+    valor,
+    engId,
+    autoId,
+    observacoes,
+  };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `equipamento:criar:${clienteId}:${oportunidadeId ?? "sem-oportunidade"}`,
     value: currentDraft,
     initialValue: initialDraft,
     enabled: open,
     onRestore: (saved) => {
-      setStep(saved.step); setBase(saved.base); setTemplateSlug(saved.templateSlug); setCloneId(saved.cloneId);
-      setModelo(saved.modelo); setNumeroSerie(saved.numeroSerie); setTagCliente(saved.tagCliente);
-      setCategoria(saved.categoria); setDataEntrega(saved.dataEntrega); setValor(saved.valor);
-      setEngId(saved.engId); setAutoId(saved.autoId); setObservacoes(saved.observacoes);
+      setStep(saved.step);
+      setBase(saved.base);
+      setTemplateSlug(saved.templateSlug);
+      setCloneId(saved.cloneId);
+      setModelo(saved.modelo);
+      setNumeroSerie(saved.numeroSerie);
+      setTagCliente(saved.tagCliente);
+      setCategoria(saved.categoria);
+      setDataEntrega(saved.dataEntrega);
+      setValor(saved.valor);
+      setEngId(saved.engId);
+      setAutoId(saved.autoId);
+      setObservacoes(saved.observacoes);
     },
   });
 
@@ -132,7 +175,11 @@ export function CriarEquipamentoWizard({
       qc.invalidateQueries({ queryKey: ["clientes", clienteId, "equipamentos"] });
       onClose();
       // redireciona para ficha do cliente na aba equipamentos
-      nav({ to: "/clientes/$codigo", params: { codigo: clienteId }, search: { tab: "equipamentos" } as any }).catch(() => null);
+      nav({
+        to: "/clientes/$codigo",
+        params: { codigo: clienteId },
+        search: { tab: "equipamentos" } as any,
+      }).catch(() => null);
       return r;
     },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao criar equipamento."),
@@ -153,7 +200,8 @@ export function CriarEquipamentoWizard({
         <DialogHeader>
           <DialogTitle>Criar equipamento do cliente</DialogTitle>
           <DialogDescription>
-            Passo {step} de 3 · A partir do orçamento aprovado, geramos o equipamento na ficha do cliente com planejamento pré-carregado.
+            Passo {step} de 3 · A partir do orçamento aprovado, geramos o equipamento na ficha do
+            cliente com planejamento pré-carregado.
           </DialogDescription>
         </DialogHeader>
 
@@ -173,14 +221,17 @@ export function CriarEquipamentoWizard({
                 onClick={() => setBase("template")}
                 className={cn(
                   "rounded-lg border p-3 text-left transition",
-                  base === "template" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40",
+                  base === "template"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-muted/40",
                 )}
               >
                 <div className="flex items-center gap-2 text-[13px] font-medium">
                   <FileText className="h-4 w-4" /> Iniciar do template
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Usa o template do modelo (25 catalogados) ou o genérico <em>Desenvolvimento Modelo</em>.
+                  Usa o template do modelo (25 catalogados) ou o genérico{" "}
+                  <em>Desenvolvimento Modelo</em>.
                 </p>
               </button>
               <button
@@ -188,7 +239,9 @@ export function CriarEquipamentoWizard({
                 onClick={() => setBase("clone")}
                 className={cn(
                   "rounded-lg border p-3 text-left transition",
-                  base === "clone" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40",
+                  base === "clone"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-muted/40",
                 )}
               >
                 <div className="flex items-center gap-2 text-[13px] font-medium">
@@ -241,7 +294,9 @@ export function CriarEquipamentoWizard({
                             type="button"
                             onClick={() => {
                               setCloneId(c.id);
-                              setTemplateSlug(c.planejamento_template_slug ?? "desenvolvimento-modelo");
+                              setTemplateSlug(
+                                c.planejamento_template_slug ?? "desenvolvimento-modelo",
+                              );
                               if (!modelo) setModelo(c.modelo);
                             }}
                             className={cn(
@@ -269,7 +324,11 @@ export function CriarEquipamentoWizard({
           <div className="grid grid-cols-2 gap-3 text-[12.5px]">
             <label className="col-span-2 space-y-1">
               <span className="text-muted-foreground">Modelo do equipamento</span>
-              <Input value={modelo} onChange={(e) => setModelo(e.target.value)} placeholder="Ex.: Envasadora Linear 1035" />
+              <Input
+                value={modelo}
+                onChange={(e) => setModelo(e.target.value)}
+                placeholder="Ex.: Envasadora Linear 1035"
+              />
             </label>
             <label className="space-y-1">
               <span className="text-muted-foreground">Nº de série</span>
@@ -281,18 +340,29 @@ export function CriarEquipamentoWizard({
             </label>
             <label className="space-y-1">
               <span className="text-muted-foreground">Categoria</span>
-              <Select value={categoria} onValueChange={(v) => setCategoria(v as EquipamentoCategoria)}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <Select
+                value={categoria}
+                onValueChange={(v) => setCategoria(v as EquipamentoCategoria)}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {EQUIPAMENTO_CATEGORIAS.map((c) => (
-                    <SelectItem key={c} value={c}>{EQUIPAMENTO_CATEGORIA_LABEL[c]}</SelectItem>
+                    <SelectItem key={c} value={c}>
+                      {EQUIPAMENTO_CATEGORIA_LABEL[c]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </label>
             <label className="space-y-1">
               <span className="text-muted-foreground">Data prevista de entrega</span>
-              <Input type="date" value={dataEntrega} onChange={(e) => setDataEntrega(e.target.value)} />
+              <Input
+                type="date"
+                value={dataEntrega}
+                onChange={(e) => setDataEntrega(e.target.value)}
+              />
             </label>
             <label className="space-y-1">
               <span className="text-muted-foreground">Valor de venda (BRL)</span>
@@ -304,30 +374,47 @@ export function CriarEquipamentoWizard({
         {step === 3 && (
           <div className="space-y-3 text-[12.5px]">
             <label className="space-y-1 block">
-              <span className="text-muted-foreground">Engenheiro responsável <span className="text-[10px]">(mecânica · montagem · campo)</span></span>
+              <span className="text-muted-foreground">
+                Engenheiro responsável{" "}
+                <span className="text-[10px]">(mecânica · montagem · campo)</span>
+              </span>
               <Select value={engId} onValueChange={setEngId}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="Selecionar…" /></SelectTrigger>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Selecionar…" />
+                </SelectTrigger>
                 <SelectContent className="max-h-[240px]">
                   {(usuarios ?? []).map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.email}</SelectItem>
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.full_name ?? u.email}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </label>
             <label className="space-y-1 block">
-              <span className="text-muted-foreground">Automação responsável <span className="text-[10px]">(elétrica · CLP · IHM)</span></span>
+              <span className="text-muted-foreground">
+                Automação responsável <span className="text-[10px]">(elétrica · CLP · IHM)</span>
+              </span>
               <Select value={autoId} onValueChange={setAutoId}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="Selecionar…" /></SelectTrigger>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Selecionar…" />
+                </SelectTrigger>
                 <SelectContent className="max-h-[240px]">
                   {(usuarios ?? []).map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.email}</SelectItem>
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.full_name ?? u.email}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </label>
             <label className="space-y-1 block">
               <span className="text-muted-foreground">Observações iniciais</span>
-              <Textarea rows={3} value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
+              <Textarea
+                rows={3}
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+              />
             </label>
           </div>
         )}
@@ -346,8 +433,17 @@ export function CriarEquipamentoWizard({
               Avançar <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           ) : (
-            <Button size="sm" disabled={createMut.isPending || !modelo.trim()} onClick={() => createMut.mutate()}>
-              {createMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />} Criar equipamento
+            <Button
+              size="sm"
+              disabled={createMut.isPending || !modelo.trim()}
+              onClick={() => createMut.mutate()}
+            >
+              {createMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Check className="h-3.5 w-3.5" />
+              )}{" "}
+              Criar equipamento
             </Button>
           )}
         </div>
@@ -356,7 +452,17 @@ export function CriarEquipamentoWizard({
   );
 }
 
-function StepDot({ n, active, done, label }: { n: number; active: boolean; done: boolean; label: string }) {
+function StepDot({
+  n,
+  active,
+  done,
+  label,
+}: {
+  n: number;
+  active: boolean;
+  done: boolean;
+  label: string;
+}) {
   return (
     <span className="flex items-center gap-1.5">
       <span

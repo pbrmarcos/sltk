@@ -177,10 +177,11 @@ export function ChecklistTiposPanel() {
       <Dialog open={!!draft} onOpenChange={(v) => !v && setDraft(null)}>
         <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{draft?.id ? "Editar tipo de Checklist" : "Novo tipo de Checklist"}</DialogTitle>
+            <DialogTitle>
+              {draft?.id ? "Editar tipo de Checklist" : "Novo tipo de Checklist"}
+            </DialogTitle>
             <DialogDescription>
-              Defina as seções e perguntas do formulário. O sales escolhe o idioma ao emitir o
-              link.
+              Defina as seções e perguntas do formulário. O sales escolhe o idioma ao emitir o link.
             </DialogDescription>
           </DialogHeader>
           {draft && (

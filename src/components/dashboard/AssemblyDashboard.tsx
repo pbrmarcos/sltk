@@ -22,10 +22,22 @@ export function AssemblyDashboard({ userName }: { userName: string }) {
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Etapas em aberto" value={isLoading ? "…" : String(d?.kpis.etapasAbertas ?? 0)} accent="primary" />
+        <KpiCard
+          label="Etapas em aberto"
+          value={isLoading ? "…" : String(d?.kpis.etapasAbertas ?? 0)}
+          accent="primary"
+        />
         <KpiCard label="Em andamento" value={isLoading ? "…" : String(d?.kpis.emAndamento ?? 0)} />
-        <KpiCard label="Concluídas (7 dias)" value={isLoading ? "…" : String(d?.kpis.concluidas7d ?? 0)} accent="success" />
-        <KpiCard label="Atrasadas" value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)} accent="danger" />
+        <KpiCard
+          label="Concluídas (7 dias)"
+          value={isLoading ? "…" : String(d?.kpis.concluidas7d ?? 0)}
+          accent="success"
+        />
+        <KpiCard
+          label="Atrasadas"
+          value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)}
+          accent="danger"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">

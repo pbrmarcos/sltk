@@ -16,7 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   buscarItensCatalogo,
   criarItemDeInsumo,
@@ -134,7 +140,9 @@ export function AlmoxLinhaCell({
     mutationFn: () => {
       const q = Number(String(qtdReserva).replace(",", ".")) * (estoque?.fator ?? 1);
       if (!(q > 0)) throw new Error("Informe uma quantidade maior que zero.");
-      return reservarFn({ data: { item_id: estoque!.item_id, projeto_id: projetoId, quantidade: q } });
+      return reservarFn({
+        data: { item_id: estoque!.item_id, projeto_id: projetoId, quantidade: q },
+      });
     },
     onSuccess: () => {
       toast.success("Estoque reservado para este projeto.");
@@ -144,7 +152,10 @@ export function AlmoxLinhaCell({
   });
 
   const cancelar = useMutation({
-    mutationFn: () => cancelarFn({ data: { reserva_id: estoque!.reserva_id!, motivo: "Cancelada pela engenharia" } }),
+    mutationFn: () =>
+      cancelarFn({
+        data: { reserva_id: estoque!.reserva_id!, motivo: "Cancelada pela engenharia" },
+      }),
     onSuccess: () => {
       toast.success("Reserva cancelada.");
       invalidar();
@@ -159,7 +170,12 @@ export function AlmoxLinhaCell({
           <span className="text-[11px] text-zinc-400">sem vínculo</span>
           {podeEditar && (
             <div className="flex gap-1">
-              <Button size="sm" variant="ghost" className="h-6 px-1.5 text-[11px]" onClick={() => setDlg("vincular")}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 px-1.5 text-[11px]"
+                onClick={() => setDlg("vincular")}
+              >
                 <Link2 className="mr-1 h-3 w-3" /> Vincular
               </Button>
               <Button
@@ -204,7 +220,9 @@ export function AlmoxLinhaCell({
           <Boxes className="mr-1 h-3 w-3" /> {fmt(estoque.disponivel)} {insumo.unidade ?? ""}
         </Badge>
         {estoque.reservado_projeto > 0 && (
-          <span className="text-[10px] text-zinc-500">reservado: {fmt(estoque.reservado_projeto)}</span>
+          <span className="text-[10px] text-zinc-500">
+            reservado: {fmt(estoque.reservado_projeto)}
+          </span>
         )}
         {podeEditar && (
           <div className="flex gap-1">
@@ -263,7 +281,11 @@ export function AlmoxLinhaCell({
 
           {dlg === "vincular" && (
             <div className="grid gap-3">
-              <Input placeholder="Buscar por código ou descrição" value={busca} onChange={(e) => setBusca(e.target.value)} />
+              <Input
+                placeholder="Buscar por código ou descrição"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
               <div className="max-h-56 overflow-y-auto rounded border">
                 {(itens as any[]).map((i) => (
                   <button
@@ -286,14 +308,20 @@ export function AlmoxLinhaCell({
                   <p className="px-2 py-3 text-xs text-zinc-500">Nenhum item encontrado.</p>
                 )}
               </div>
-              {itemSel && itemSel.unidade_estoque?.toLowerCase() !== (insumo.unidade ?? "").toLowerCase() && (
-                <div>
-                  <Label className="text-xs">
-                    Fator de conversão — quantas {itemSel.unidade_estoque} equivalem a 1 {insumo.unidade ?? "unidade"}
-                  </Label>
-                  <Input inputMode="decimal" value={fator} onChange={(e) => setFator(e.target.value)} />
-                </div>
-              )}
+              {itemSel &&
+                itemSel.unidade_estoque?.toLowerCase() !== (insumo.unidade ?? "").toLowerCase() && (
+                  <div>
+                    <Label className="text-xs">
+                      Fator de conversão — quantas {itemSel.unidade_estoque} equivalem a 1{" "}
+                      {insumo.unidade ?? "unidade"}
+                    </Label>
+                    <Input
+                      inputMode="decimal"
+                      value={fator}
+                      onChange={(e) => setFator(e.target.value)}
+                    />
+                  </div>
+                )}
             </div>
           )}
 
@@ -314,21 +342,27 @@ export function AlmoxLinhaCell({
                   </SelectContent>
                 </Select>
               </div>
-              {unidadeNova && unidadeNova.toLowerCase() !== (insumo.unidade ?? "").toLowerCase() && (
-                <div>
-                  <Label className="text-xs">
-                    Fator — quantas {unidadeNova} equivalem a 1 {insumo.unidade ?? "unidade"}
-                  </Label>
-                  <Input inputMode="decimal" value={fator} onChange={(e) => setFator(e.target.value)} />
-                </div>
-              )}
+              {unidadeNova &&
+                unidadeNova.toLowerCase() !== (insumo.unidade ?? "").toLowerCase() && (
+                  <div>
+                    <Label className="text-xs">
+                      Fator — quantas {unidadeNova} equivalem a 1 {insumo.unidade ?? "unidade"}
+                    </Label>
+                    <Input
+                      inputMode="decimal"
+                      value={fator}
+                      onChange={(e) => setFator(e.target.value)}
+                    />
+                  </div>
+                )}
               {semelhantes && semelhantes.length > 0 && (
                 <div className="rounded border border-amber-200 bg-amber-50 p-2 text-xs">
                   <p className="mb-1 font-medium text-amber-800">Itens parecidos já cadastrados:</p>
                   <ul className="space-y-0.5 text-amber-900">
                     {semelhantes.map((s) => (
                       <li key={s.id}>
-                        <span className="font-mono">{s.codigo}</span> · {s.descricao} ({s.unidade_estoque})
+                        <span className="font-mono">{s.codigo}</span> · {s.descricao} (
+                        {s.unidade_estoque})
                       </li>
                     ))}
                   </ul>
@@ -340,12 +374,16 @@ export function AlmoxLinhaCell({
           {dlg === "reservar" && (
             <div className="grid gap-3">
               <p className="text-xs text-zinc-600">
-                Disponível: {fmt(estoque?.disponivel ?? 0)} {insumo.unidade ?? ""} · necessário: {fmt(Number(insumo.quantidade))}{" "}
-                {insumo.unidade ?? ""}
+                Disponível: {fmt(estoque?.disponivel ?? 0)} {insumo.unidade ?? ""} · necessário:{" "}
+                {fmt(Number(insumo.quantidade))} {insumo.unidade ?? ""}
               </p>
               <div>
                 <Label className="text-xs">Quantidade a reservar ({insumo.unidade ?? "un"})</Label>
-                <Input inputMode="decimal" value={qtdReserva} onChange={(e) => setQtdReserva(e.target.value)} />
+                <Input
+                  inputMode="decimal"
+                  value={qtdReserva}
+                  onChange={(e) => setQtdReserva(e.target.value)}
+                />
               </div>
             </div>
           )}
@@ -360,7 +398,10 @@ export function AlmoxLinhaCell({
               </Button>
             )}
             {dlg === "criar" && (
-              <Button disabled={!unidadeNova || criar.isPending} onClick={() => criar.mutate(!!semelhantes)}>
+              <Button
+                disabled={!unidadeNova || criar.isPending}
+                onClick={() => criar.mutate(!!semelhantes)}
+              >
                 {semelhantes ? "Criar mesmo assim" : "Criar e vincular"}
               </Button>
             )}

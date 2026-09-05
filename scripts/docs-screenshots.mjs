@@ -33,20 +33,44 @@ const AUTH_TTL_MS = 1000 * 60 * 60 * 8; // 8h
 
 const TARGETS = [
   { category: "comercial", slug: "pipeline-de-oportunidades", paths: ["/comercial/pipeline"] },
-  { category: "comercial", slug: "novo-orcamento", paths: ["/comercial/orcamento", "/comercial/orcamento/novo"] },
+  {
+    category: "comercial",
+    slug: "novo-orcamento",
+    paths: ["/comercial/orcamento", "/comercial/orcamento/novo"],
+  },
   { category: "comercial", slug: "mineracao-de-leads", paths: ["/comercial/mineracao"] },
   { category: "comercial", slug: "entrevistas", paths: ["/comercial/entrevistas"] },
-  { category: "comercial", slug: "checklist-publico-e-formularios", paths: ["/comercial/checklists"] },
-  { category: "clientes-fornecedores", slug: "cadastrar-fornecedor", paths: ["/fornecedores", "/fornecedores/novo"] },
-  { category: "clientes-fornecedores", slug: "cadastrar-cliente", paths: ["/clientes", "/clientes/novo"] },
+  {
+    category: "comercial",
+    slug: "checklist-publico-e-formularios",
+    paths: ["/comercial/checklists"],
+  },
+  {
+    category: "clientes-fornecedores",
+    slug: "cadastrar-fornecedor",
+    paths: ["/fornecedores", "/fornecedores/novo"],
+  },
+  {
+    category: "clientes-fornecedores",
+    slug: "cadastrar-cliente",
+    paths: ["/clientes", "/clientes/novo"],
+  },
   { category: "clientes-fornecedores", slug: "importar-clientes-em-lote", paths: ["/importar"] },
   { category: "compras", slug: "criar-solicitacao", paths: ["/compras/solicitacao"] },
   { category: "compras", slug: "cotacao-multiplos-fornecedores", paths: ["/compras/cotacoes"] },
-  { category: "compras", slug: "emitir-e-aprovar-oc", paths: ["/compras/ordens", "/compras/ordens/nova"] },
+  {
+    category: "compras",
+    slug: "emitir-e-aprovar-oc",
+    paths: ["/compras/ordens", "/compras/ordens/nova"],
+  },
   { category: "engenharia", slug: "etapas-e-kanban", paths: ["/engenharia/etapas"] },
   { category: "engenharia", slug: "criar-etp", paths: ["/engenharia/etp"] },
   { category: "producao", slug: "kanban-montagem", paths: ["/producao/montagem"] },
-  { category: "qualidade", slug: "agendar-e-preparar-fat", paths: ["/qualidade/fat", "/qualidade/fat/novo"] },
+  {
+    category: "qualidade",
+    slug: "agendar-e-preparar-fat",
+    paths: ["/qualidade/fat", "/qualidade/fat/novo"],
+  },
   { category: "logistica", slug: "visao-geral", paths: ["/logistica/embarques"] },
   { category: "logistica", slug: "criar-embarque", paths: ["/logistica/embarques/novo"] },
   { category: "pos-vendas", slug: "atender-chamado", paths: ["/pos-vendas/chamados"] },
@@ -54,7 +78,11 @@ const TARGETS = [
   { category: "documentos", slug: "visao-geral", paths: ["/central-documentos"] },
   { category: "documentos", slug: "templates-e-versionamento", paths: ["/template-documentos"] },
   { category: "know-how", slug: "visao-geral", paths: ["/know-how"] },
-  { category: "know-how", slug: "publicar-conteudo", paths: ["/know-how/novo", "/know-how/revisar"] },
+  {
+    category: "know-how",
+    slug: "publicar-conteudo",
+    paths: ["/know-how/novo", "/know-how/revisar"],
+  },
   { category: "admin", slug: "gerenciar-usuarios", paths: ["/admin/usuarios"] },
   { category: "admin", slug: "tipos-de-checklist", paths: ["/admin/checklist-tipos"] },
   { category: "admin", slug: "sla-chamados", paths: ["/admin/sla-chamados"] },
@@ -63,7 +91,11 @@ const TARGETS = [
   { category: "admin", slug: "configuracoes", paths: ["/admin/configuracoes"] },
   { category: "admin", slug: "auditoria", paths: ["/admin/auditoria"] },
   { category: "admin", slug: "formularios-entrevista", paths: ["/admin/entrevistas"] },
-  { category: "admin", slug: "paginas-e-etapas-equipamentos", paths: ["/admin/etapas-equipamentos", "/admin/paginas-equipamentos"] },
+  {
+    category: "admin",
+    slug: "paginas-e-etapas-equipamentos",
+    paths: ["/admin/etapas-equipamentos", "/admin/paginas-equipamentos"],
+  },
   { category: "conta", slug: "editar-perfil-e-avatar", paths: ["/conta"] },
   { category: "site-publico", slug: "visao-geral", paths: ["/", "/equipamentos", "/contato"] },
 ];
@@ -97,7 +129,9 @@ async function loginWithCredentials(page, context) {
   await page.waitForTimeout(300);
   const submit = page.locator('button[type="submit"], button:has-text("Entrar")').first();
   await Promise.all([
-    page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 20000 }).catch(() => null),
+    page
+      .waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 20000 })
+      .catch(() => null),
     submit.click(),
   ]);
   const ok = !page.url().includes("/login");
@@ -187,7 +221,9 @@ for (const t of targets) {
         .evaluate(() => {
           const h1 = document.querySelector("h1");
           if (h1?.textContent?.trim()) return h1.textContent.trim();
-          const crumbs = document.querySelectorAll("nav[aria-label='breadcrumb'] a, nav[aria-label='breadcrumb'] span");
+          const crumbs = document.querySelectorAll(
+            "nav[aria-label='breadcrumb'] a, nav[aria-label='breadcrumb'] span",
+          );
           if (crumbs.length) return crumbs[crumbs.length - 1]?.textContent?.trim() ?? "";
           return "";
         })
@@ -195,7 +231,6 @@ for (const t of targets) {
       const title = (await page.title()).replace(/ — Solutek Hub$/, "").trim();
       captions[filename] = caption || title || `Tela ${i}`;
       console.error(`  ✓ ${out}`);
-
     } catch (err) {
       console.error(`  ✗ ${url} — ${err.message}`);
     }

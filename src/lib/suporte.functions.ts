@@ -117,10 +117,17 @@ export const setPrioridadeChamado = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     await assertEngineerOrHigher(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
-    const { data: atual } = await sb.from("chamados").select("prioridade").eq("id", data.chamado_id).maybeSingle();
+    const { data: atual } = await sb
+      .from("chamados")
+      .select("prioridade")
+      .eq("id", data.chamado_id)
+      .maybeSingle();
     const anterior = atual?.prioridade ?? null;
     if (anterior === data.prioridade) return { ok: true };
-    const { error } = await sb.from("chamados").update({ prioridade: data.prioridade }).eq("id", data.chamado_id);
+    const { error } = await sb
+      .from("chamados")
+      .update({ prioridade: data.prioridade })
+      .eq("id", data.chamado_id);
     if (error) throw friendlyDbError(error);
     await sb.from("chamado_eventos").insert({
       chamado_id: data.chamado_id,
@@ -154,7 +161,11 @@ export const reatribuirChamado = createServerFn({ method: "POST" })
 
     let atendente_nome: string | null = null;
     if (data.atendente_id) {
-      const { data: p } = await sb.from("profiles").select("full_name, email").eq("id", data.atendente_id).maybeSingle();
+      const { data: p } = await sb
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", data.atendente_id)
+        .maybeSingle();
       atendente_nome = (p?.full_name as string) || (p?.email as string) || "Atendente";
     }
     const { error } = await sb
@@ -184,7 +195,10 @@ export const reatribuirChamado = createServerFn({ method: "POST" })
         .eq("id", data.chamado_id)
         .maybeSingle();
       const { data: destProf } = await sb
-        .from("profiles").select("full_name, email").eq("id", data.atendente_id).maybeSingle();
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", data.atendente_id)
+        .maybeSingle();
       await safeDispatch({
         eventKey: "chamado.atribuido",
         triggeredBy: context.userId,
@@ -196,7 +210,8 @@ export const reatribuirChamado = createServerFn({ method: "POST" })
           assunto: ch?.assunto ?? "",
           titulo: ch?.assunto ?? "",
           atendente: atendente_nome ?? "",
-          destinatario_nome: destProf?.full_name ?? destProf?.email ?? atendente_nome ?? "Atendente",
+          destinatario_nome:
+            destProf?.full_name ?? destProf?.email ?? atendente_nome ?? "Atendente",
           usuario: nome,
           motivo: data.motivo?.trim() ?? "",
           data: fmtDate(),
@@ -250,12 +265,12 @@ export const listAtendentes = createServerFn({ method: "GET" })
       .in("role", ["admin", "manager", "engineer"]);
     const ids = Array.from(new Set((roles ?? []).map((r: any) => r.user_id as string)));
     if (ids.length === 0) return { atendentes: [] as { id: string; nome: string }[] };
-    const { data: profs } = await sb
-      .from("profiles")
-      .select("id, full_name, email")
-      .in("id", ids);
+    const { data: profs } = await sb.from("profiles").select("id, full_name, email").in("id", ids);
     const atendentes = (profs ?? [])
-      .map((p: any) => ({ id: p.id as string, nome: (p.full_name as string) || (p.email as string) || "Atendente" }))
+      .map((p: any) => ({
+        id: p.id as string,
+        nome: (p.full_name as string) || (p.email as string) || "Atendente",
+      }))
       .sort((a: any, b: any) => a.nome.localeCompare(b.nome));
     return { atendentes };
   });
@@ -278,12 +293,23 @@ export const getChamado = createServerFn({ method: "POST" })
     if (!chamado) throw new Error("Chamado não encontrado.");
 
     const [{ data: msgs }, { data: eventos }, equip] = await Promise.all([
-      sb.from("chamado_mensagens").select("*").eq("chamado_id", data.id).order("created_at", { ascending: true }),
-      sb.from("chamado_eventos").select("*").eq("chamado_id", data.id).order("at", { ascending: false }).limit(100),
+      sb
+        .from("chamado_mensagens")
+        .select("*")
+        .eq("chamado_id", data.id)
+        .order("created_at", { ascending: true }),
+      sb
+        .from("chamado_eventos")
+        .select("*")
+        .eq("chamado_id", data.id)
+        .order("at", { ascending: false })
+        .limit(100),
       chamado.equipamento_id
         ? sb
             .from("cliente_equipamentos")
-            .select("id, codigo, modelo, fabricante, numero_serie, cliente_id, clientes(id, razao_social, nome_fantasia)")
+            .select(
+              "id, codigo, modelo, fabricante, numero_serie, cliente_id, clientes(id, razao_social, nome_fantasia)",
+            )
             .eq("id", chamado.equipamento_id)
             .maybeSingle()
         : Promise.resolve({ data: null }),
@@ -339,7 +365,14 @@ export const responderChamado = createServerFn({ method: "POST" })
 
 const statusSchema = z.object({
   chamado_id: z.string().uuid(),
-  para: z.enum(["aberto", "em_analise", "aguardando_cliente", "resolvido", "reaberto", "arquivado"]),
+  para: z.enum([
+    "aberto",
+    "em_analise",
+    "aguardando_cliente",
+    "resolvido",
+    "reaberto",
+    "arquivado",
+  ]),
 });
 
 export const alterarStatusChamado = createServerFn({ method: "POST" })
@@ -360,21 +393,26 @@ export const alterarStatusChamado = createServerFn({ method: "POST" })
 
     // Dispara e-mail para transições relevantes
     const eventKey =
-      data.para === "resolvido" ? "chamado.resolvido"
-      : data.para === "reaberto" ? "chamado.reaberto"
-      : null;
+      data.para === "resolvido"
+        ? "chamado.resolvido"
+        : data.para === "reaberto"
+          ? "chamado.reaberto"
+          : null;
     if (eventKey) {
       const { safeDispatch, appUrl, fmtDate } = await import("./email/safe-dispatch.server");
       const { data: ch } = await sb
         .from("chamados")
-        .select("codigo, assunto, visitante_nome, visitante_email, cliente_id, clientes(razao_social, nome_fantasia)")
+        .select(
+          "codigo, assunto, visitante_nome, visitante_email, cliente_id, clientes(razao_social, nome_fantasia)",
+        )
         .eq("id", data.chamado_id)
         .maybeSingle();
       const usuario = await meuNome(sb, context.userId);
       const clienteNome =
         (ch?.clientes as any)?.nome_fantasia ||
         (ch?.clientes as any)?.razao_social ||
-        ch?.visitante_nome || "Cliente";
+        ch?.visitante_nome ||
+        "Cliente";
       await safeDispatch({
         eventKey,
         triggeredBy: context.userId,

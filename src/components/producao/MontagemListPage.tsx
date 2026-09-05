@@ -6,12 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -50,7 +45,12 @@ export function MontagemListPage() {
   const concluirMut = useMutation({
     mutationFn: (id: string) =>
       updateMontagem({
-        data: { id, status: "concluida", progresso: 100, fim_real: new Date().toISOString().slice(0, 10) },
+        data: {
+          id,
+          status: "concluida",
+          progresso: 100,
+          fim_real: new Date().toISOString().slice(0, 10),
+        },
       }),
     onSuccess: () => {
       toast.success("Montagem concluída.");
@@ -74,11 +74,7 @@ export function MontagemListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Produção" },
-          { label: "Montagem" },
-        ]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Produção" }, { label: "Montagem" }]}
         title="Montagem"
         subtitle="Acompanhamento da montagem de cada equipamento."
         actions={<Button onClick={() => setOpenNovo(true)}>Nova montagem</Button>}
@@ -102,14 +98,27 @@ export function MontagemListPage() {
         <Input
           placeholder="Buscar por equipamento ou cliente…"
           value={q}
-          onChange={(e) => { setQ(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(1);
+          }}
         />
-        <Select value={status} onValueChange={(v) => { setStatus(v as typeof status); setPage(1); }}>
-          <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+        <Select
+          value={status}
+          onValueChange={(v) => {
+            setStatus(v as typeof status);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos os status</SelectItem>
             {MONTAGEM_STATUS.map((s) => (
-              <SelectItem key={s} value={s}>{MONTAGEM_STATUS_LABEL[s]}</SelectItem>
+              <SelectItem key={s} value={s}>
+                {MONTAGEM_STATUS_LABEL[s]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -178,10 +187,20 @@ export function MontagemListPage() {
         <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>Total: {data.total}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
               Anterior
             </Button>
-            <Button variant="outline" size="sm" disabled={page * 50 >= data.total} onClick={() => setPage(page + 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page * 50 >= data.total}
+              onClick={() => setPage(page + 1)}
+            >
               Próxima
             </Button>
           </div>
@@ -260,7 +279,9 @@ function NovaMontagemDialog({
           <label className="block space-y-1">
             <span className="text-muted-foreground text-xs">Equipamento</span>
             <Select value={equipamentoId} onValueChange={setEquipamentoId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Selecione…" />
+              </SelectTrigger>
               <SelectContent className="max-h-80">
                 {(eqps ?? []).map((e: any) => (
                   <SelectItem key={e.id} value={e.id}>
@@ -282,8 +303,13 @@ function NovaMontagemDialog({
           </div>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button disabled={!equipamentoId || createMut.isPending} onClick={() => createMut.mutate()}>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={!equipamentoId || createMut.isPending}
+            onClick={() => createMut.mutate()}
+          >
             Criar
           </Button>
         </div>

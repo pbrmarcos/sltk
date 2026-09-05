@@ -119,22 +119,24 @@ export const togglePlanejamentoItem = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySupabase;
     const uid = context.userId;
-    const { data: prof } = await sb.from("profiles").select("full_name, email").eq("id", uid).maybeSingle();
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", uid)
+      .maybeSingle();
     const nome = prof?.full_name ?? prof?.email ?? "Sistema";
-    const { error } = await sb
-      .from("equipamento_planejamento_status")
-      .upsert(
-        {
-          equipamento_id: data.equipamento_id,
-          item_id: data.item_id,
-          done: data.done,
-          done_at: data.done ? new Date().toISOString() : null,
-          done_by: data.done ? uid : null,
-          done_by_nome: data.done ? nome : null,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "equipamento_id,item_id" },
-      );
+    const { error } = await sb.from("equipamento_planejamento_status").upsert(
+      {
+        equipamento_id: data.equipamento_id,
+        item_id: data.item_id,
+        done: data.done,
+        done_at: data.done ? new Date().toISOString() : null,
+        done_by: data.done ? uid : null,
+        done_by_nome: data.done ? nome : null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "equipamento_id,item_id" },
+    );
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -225,7 +227,10 @@ export const criarEquipamentoDeOrcamento = createServerFn({ method: "POST" })
           texto: `Equipamento criado no cliente: ${data.modelo}${data.base === "clone" ? " (clonado)" : " (do template)"}`,
           user_id: context.userId,
         })
-        .then(() => null, () => null);
+        .then(
+          () => null,
+          () => null,
+        );
     }
 
     return { id: row.id as string };

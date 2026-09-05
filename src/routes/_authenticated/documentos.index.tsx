@@ -8,9 +8,20 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { listDocumentos, getDocumento, getSignedUrl } from "@/lib/docs/docs.functions";
 import { toast } from "sonner";
@@ -20,18 +31,18 @@ export const Route = createFileRoute("/_authenticated/documentos/")({
 });
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  rascunho:    { label: "Rascunho",     cls: "bg-slate-100 text-slate-700 border-slate-200" },
-  emitido:     { label: "Emitido",      cls: "bg-slate-100 text-slate-700 border-slate-200" },
-  em_revisao:  { label: "Em revisão",   cls: "bg-amber-50 text-amber-800 border-amber-200" },
-  aprovado:    { label: "Aprovado",     cls: "bg-emerald-50 text-emerald-800 border-emerald-200" },
-  publicado:   { label: "Publicado",    cls: "bg-sky-50 text-sky-800 border-sky-200" },
-  arquivado:   { label: "Arquivado",    cls: "bg-rose-50 text-rose-800 border-rose-200" },
+  rascunho: { label: "Rascunho", cls: "bg-slate-100 text-slate-700 border-slate-200" },
+  emitido: { label: "Emitido", cls: "bg-slate-100 text-slate-700 border-slate-200" },
+  em_revisao: { label: "Em revisão", cls: "bg-amber-50 text-amber-800 border-amber-200" },
+  aprovado: { label: "Aprovado", cls: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+  publicado: { label: "Publicado", cls: "bg-sky-50 text-sky-800 border-sky-200" },
+  arquivado: { label: "Arquivado", cls: "bg-rose-50 text-rose-800 border-rose-200" },
 };
 
 const TIPO_META: Record<string, { label: string; cls: string }> = {
-  orcamento: { label: "Orçamento",    cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  fat:       { label: "Relatório FAT", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  sat:       { label: "Relatório SAT", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  orcamento: { label: "Orçamento", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  fat: { label: "Relatório FAT", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  sat: { label: "Relatório SAT", cls: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
 function CentralDocumentosPage() {
@@ -41,7 +52,8 @@ function CentralDocumentosPage() {
 
   const list = useQuery({
     queryKey: ["documentos", "central", tipo, q],
-    queryFn: () => listDocumentos({ data: { tipo: tipo === "all" ? undefined : tipo, q: q || undefined } }),
+    queryFn: () =>
+      listDocumentos({ data: { tipo: tipo === "all" ? undefined : tipo, q: q || undefined } }),
   });
 
   const fetchDoc = useServerFn(getDocumento);
@@ -71,10 +83,7 @@ function CentralDocumentosPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Documentos" },
-        ]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Documentos" }]}
         title="Central de Documentos"
         subtitle="Todos os documentos gerados (Orçamentos, FAT, SAT) em um único lugar, com filtros por tipo, status e cliente."
       />
@@ -90,7 +99,9 @@ function CentralDocumentosPage() {
           />
         </div>
         <Select value={tipo} onValueChange={setTipo}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tipo" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Tipo" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os tipos</SelectItem>
             <SelectItem value="orcamento">Orçamentos</SelectItem>
@@ -99,7 +110,9 @@ function CentralDocumentosPage() {
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="rascunho">Rascunho</SelectItem>
@@ -129,7 +142,11 @@ function CentralDocumentosPage() {
           </TableHeader>
           <TableBody>
             {list.isLoading ? (
-              <TableRow><TableCell colSpan={9} className="py-8 text-center text-[var(--text-muted)]">Carregando…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={9} className="py-8 text-center text-[var(--text-muted)]">
+                  Carregando…
+                </TableCell>
+              </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="py-12 text-center text-[var(--text-muted)]">
@@ -144,24 +161,44 @@ function CentralDocumentosPage() {
                 return (
                   <TableRow key={d.id}>
                     <TableCell className="font-mono text-xs">
-                      <Link to="/documentos/$id" params={{ id: d.id }} className="hover:underline">{d.codigo}</Link>
+                      <Link to="/documentos/$id" params={{ id: d.id }} className="hover:underline">
+                        {d.codigo}
+                      </Link>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className={tm.cls}>{tm.label}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={tm.cls}>
+                        {tm.label}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-sm">
                       {d.cliente_codigo ? (
-                        <Link to="/clientes/$codigo" params={{ codigo: d.cliente_codigo }} className="hover:underline">
+                        <Link
+                          to="/clientes/$codigo"
+                          params={{ codigo: d.cliente_codigo }}
+                          className="hover:underline"
+                        >
                           {d.cliente_razao || d.cliente_codigo}
                         </Link>
-                      ) : "—"}
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
-                    <TableCell className="text-sm max-w-[280px] truncate" title={d.titulo}>{d.titulo || "—"}</TableCell>
+                    <TableCell className="text-sm max-w-[280px] truncate" title={d.titulo}>
+                      {d.titulo || "—"}
+                    </TableCell>
                     <TableCell className="font-mono text-xs">v{d.versao}</TableCell>
                     <TableCell className="text-xs">
                       {(d.idiomas_gerados || []).map((l: string) => (
-                        <Badge key={l} variant="outline" className="mr-1 uppercase">{l}</Badge>
+                        <Badge key={l} variant="outline" className="mr-1 uppercase">
+                          {l}
+                        </Badge>
                       ))}
                     </TableCell>
-                    <TableCell><Badge variant="outline" className={sm.cls}>{sm.label}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={sm.cls}>
+                        {sm.label}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-xs text-[var(--text-muted)]">
                       {new Date(d.created_at).toLocaleDateString("pt-BR")}
                     </TableCell>

@@ -18,7 +18,10 @@ type NavGroup = { title: string; items: NavItem[] };
 const ADMIN_ONLY: AppRole[] = ["admin"];
 
 const GROUPS: NavGroup[] = [
-  { title: "Visão geral", items: [{ label: "Painel", to: "/admin/configuracoes", roles: ADMIN_ONLY }] },
+  {
+    title: "Visão geral",
+    items: [{ label: "Painel", to: "/admin/configuracoes", roles: ADMIN_ONLY }],
+  },
   {
     title: "Sistema",
     items: [
@@ -47,13 +50,24 @@ const GROUPS: NavGroup[] = [
     title: "Atendimento & Conteúdo",
     items: [
       { label: "E-mails automáticos", to: "/admin/emails", roles: ["admin", "manager"] },
-      { label: "Formulários recebidos", to: "/admin/formularios-recebidos", roles: ["admin", "manager"] },
-      { label: "Modelos de Formulário", to: "/admin/modelos-formulario", roles: ["admin", "manager"] },
+      {
+        label: "Formulários recebidos",
+        to: "/admin/formularios-recebidos",
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Modelos de Formulário",
+        to: "/admin/modelos-formulario",
+        roles: ["admin", "manager"],
+      },
       { label: "SLA de Chamados", to: "/admin/sla-chamados" },
       { label: "Origens de Lead", to: "/admin/origens-lead", roles: ADMIN_ONLY },
     ],
   },
-  { title: "Equipamentos", items: [{ label: "Etapas dos Equipamentos", to: "/admin/etapas-equipamentos" }] },
+  {
+    title: "Equipamentos",
+    items: [{ label: "Etapas dos Equipamentos", to: "/admin/etapas-equipamentos" }],
+  },
 ];
 
 function isActive(pathname: string, to: string): boolean {

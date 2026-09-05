@@ -84,9 +84,7 @@ export function CategoriasPicker({
     const keys = ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"];
     if (!keys.includes(e.key)) return;
     const buttons = Array.from(
-      containerRef.current?.querySelectorAll<HTMLButtonElement>(
-        "button[data-cat-tile]",
-      ) ?? [],
+      containerRef.current?.querySelectorAll<HTMLButtonElement>("button[data-cat-tile]") ?? [],
     );
     if (buttons.length === 0) return;
     const currentIdx = buttons.findIndex((b) => b === document.activeElement);

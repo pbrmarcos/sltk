@@ -16,6 +16,8 @@ export function getSupabasePublicConfig(): SupabasePublicConfig {
   return {
     url: env.SUPABASE_URL || env.VITE_SUPABASE_URL || STATIC_SUPABASE_URL,
     publishableKey:
-      env.SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY || STATIC_SUPABASE_PUBLISHABLE_KEY,
+      env.SUPABASE_PUBLISHABLE_KEY ||
+      env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      STATIC_SUPABASE_PUBLISHABLE_KEY,
   };
 }

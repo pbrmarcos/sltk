@@ -64,11 +64,18 @@ export function AgendarKickoff({
   const [pauta, setPauta] = useState(
     `Kickoff do projeto após aprovação do ETP v${versao}.\n\nPauta:\n- Escopo aprovado, premissas e exclusões\n- Cronograma macro e marcos de engenharia\n- Responsáveis (comercial, engenharia, cliente)\n- Riscos, pendências e próximos passos`,
   );
-  const initialDraft = useMemo(() => ({
-    titulo: `Kickoff de projeto — ${equipamento} (${cliente})`, data: defaultDate(), hora: "09:00",
-    duracao: "90", local: "Online (link a confirmar)", convidados: "",
-    pauta: `Kickoff do projeto após aprovação do ETP v${versao}.\n\nPauta:\n- Escopo aprovado, premissas e exclusões\n- Cronograma macro e marcos de engenharia\n- Responsáveis (comercial, engenharia, cliente)\n- Riscos, pendências e próximos passos`,
-  }), [cliente, equipamento, versao]);
+  const initialDraft = useMemo(
+    () => ({
+      titulo: `Kickoff de projeto — ${equipamento} (${cliente})`,
+      data: defaultDate(),
+      hora: "09:00",
+      duracao: "90",
+      local: "Online (link a confirmar)",
+      convidados: "",
+      pauta: `Kickoff do projeto após aprovação do ETP v${versao}.\n\nPauta:\n- Escopo aprovado, premissas e exclusões\n- Cronograma macro e marcos de engenharia\n- Responsáveis (comercial, engenharia, cliente)\n- Riscos, pendências e próximos passos`,
+    }),
+    [cliente, equipamento, versao],
+  );
   const currentDraft = { titulo, data, hora, duracao, local, convidados, pauta };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `kickoff:${cliente}:${equipamento}:${versao}`,
@@ -76,8 +83,13 @@ export function AgendarKickoff({
     initialValue: initialDraft,
     enabled: open,
     onRestore: (saved) => {
-      setTitulo(saved.titulo); setData(saved.data); setHora(saved.hora); setDuracao(saved.duracao);
-      setLocal(saved.local); setConvidados(saved.convidados); setPauta(saved.pauta);
+      setTitulo(saved.titulo);
+      setData(saved.data);
+      setHora(saved.hora);
+      setDuracao(saved.duracao);
+      setLocal(saved.local);
+      setConvidados(saved.convidados);
+      setPauta(saved.pauta);
     },
   });
 
@@ -96,7 +108,10 @@ export function AgendarKickoff({
     if (prefs.agenda_sala_padrao) setLocal(prefs.agenda_sala_padrao);
     if (prefs.agenda_convidados_padrao) {
       setConvidados((atual) => {
-        const juntos = [...splitEmails(atual), ...splitEmails(prefs.agenda_convidados_padrao ?? "")];
+        const juntos = [
+          ...splitEmails(atual),
+          ...splitEmails(prefs.agenda_convidados_padrao ?? ""),
+        ];
         return Array.from(new Set(juntos)).join(", ");
       });
     }
@@ -114,7 +129,9 @@ export function AgendarKickoff({
       durationMin: Number(duracao),
       attendees: splitEmails(convidados),
       organizerEmail:
-        (prefs?.agenda_provider === "teams" ? prefs?.agenda_teams_email : prefs?.agenda_google_email) ??
+        (prefs?.agenda_provider === "teams"
+          ? prefs?.agenda_teams_email
+          : prefs?.agenda_google_email) ??
         prefs?.agenda_google_email ??
         prefs?.agenda_teams_email ??
         undefined,
@@ -130,7 +147,13 @@ export function AgendarKickoff({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (next) setOpen(true); else requestClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setOpen(true);
+        else requestClose();
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
           <CalendarPlus className="mr-1.5 h-4 w-4" /> Agendar kickoff

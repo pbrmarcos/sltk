@@ -16,15 +16,10 @@ import { test, expect } from "@playwright/test";
  *   - E2E_INSUMO_ID (id de um projeto_insumos existente)
  */
 const skip =
-  !process.env.E2E_BASE_URL ||
-  !process.env.E2E_STORAGE_STATE ||
-  !process.env.E2E_INSUMO_ID;
+  !process.env.E2E_BASE_URL || !process.env.E2E_STORAGE_STATE || !process.env.E2E_INSUMO_ID;
 
 test.describe("Compras — Solicitações", () => {
-  test.skip(
-    skip,
-    "Defina E2E_BASE_URL, E2E_STORAGE_STATE e E2E_INSUMO_ID para rodar.",
-  );
+  test.skip(skip, "Defina E2E_BASE_URL, E2E_STORAGE_STATE e E2E_INSUMO_ID para rodar.");
 
   test("aba Auditoria renderiza timeline global", async ({ page }) => {
     await page.goto("/compras/solicitacao");
@@ -47,9 +42,7 @@ test.describe("Compras — Solicitações", () => {
     const descricao = page.getByLabel(/Descrição/i).first();
     await descricao.fill("");
     await page.getByRole("button", { name: /Salvar/i }).click();
-    await expect(
-      page.getByText(/Descrição deve ter ao menos 3 caracteres/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Descrição deve ter ao menos 3 caracteres/i)).toBeVisible();
   });
 
   test("Anexos: upload aparece com links de abrir e baixar", async ({ page }) => {

@@ -88,7 +88,10 @@ function CotacoesListPage() {
     respondidos: number;
     ordem_compra_id: string | null;
     clientes?: { codigo: string; razao_social: string } | null;
-    equipamento_projetos?: { revisao: string; cliente_equipamentos?: { codigo: string } | null } | null;
+    equipamento_projetos?: {
+      revisao: string;
+      cliente_equipamentos?: { codigo: string } | null;
+    } | null;
   }>;
 
   const total = (listQ.data?.total ?? 0) + insumos.length;
@@ -277,7 +280,8 @@ function CotacoesListPage() {
               ) : (
                 insumos.map((i) => {
                   const podeEmitirOc =
-                    (i.status === "cotado" || i.status === "pronto_aprovacao") && !i.ordem_compra_id;
+                    (i.status === "cotado" || i.status === "pronto_aprovacao") &&
+                    !i.ordem_compra_id;
                   return (
                     <TableRow key={i.id}>
                       <TableCell>
@@ -292,7 +296,9 @@ function CotacoesListPage() {
                         <div>{i.clientes?.codigo ?? "—"}</div>
                         <div className="text-zinc-500">
                           {i.equipamento_projetos?.cliente_equipamentos?.codigo ?? "—"}
-                          {i.equipamento_projetos?.revisao ? ` · Rev. ${i.equipamento_projetos.revisao}` : ""}
+                          {i.equipamento_projetos?.revisao
+                            ? ` · Rev. ${i.equipamento_projetos.revisao}`
+                            : ""}
                         </div>
                       </TableCell>
                       <TableCell>

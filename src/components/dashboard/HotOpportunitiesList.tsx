@@ -3,12 +3,23 @@ import { Flame, ChevronRight } from "lucide-react";
 import type { DashboardData } from "@/lib/dashboard.functions";
 
 const fmtBRL = (n: number | null) =>
-  n === null ? "—" : new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
-const fmtDate = (s: string | null) => s ? new Date(s).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
+  n === null
+    ? "—"
+    : new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0,
+      }).format(n);
+const fmtDate = (s: string | null) =>
+  s ? new Date(s).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
 
 export function HotOpportunitiesList({ items }: { items: DashboardData["hotOpportunities"] }) {
   if (items.length === 0) {
-    return <div className="py-8 text-center text-[12px] text-[var(--text-muted)]">Sem oportunidades em proposta ou negociação.</div>;
+    return (
+      <div className="py-8 text-center text-[12px] text-[var(--text-muted)]">
+        Sem oportunidades em proposta ou negociação.
+      </div>
+    );
   }
   return (
     <ul className="divide-y divide-[var(--bg-border)]">
@@ -25,14 +36,21 @@ export function HotOpportunitiesList({ items }: { items: DashboardData["hotOppor
                 <Flame className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[13px] font-medium text-[var(--text-primary)]">{o.titulo}</div>
+                <div className="truncate text-[13px] font-medium text-[var(--text-primary)]">
+                  {o.titulo}
+                </div>
                 <div className="truncate text-[11.5px] text-[var(--text-muted)]">
-                  {o.cliente ?? "—"} · {o.codigo ?? "—"} · {o.stage === "proposta" ? "Proposta" : "Negociação"}
+                  {o.cliente ?? "—"} · {o.codigo ?? "—"} ·{" "}
+                  {o.stage === "proposta" ? "Proposta" : "Negociação"}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[13px] font-semibold tabular-nums text-[var(--text-primary)]">{fmtBRL(o.valor)}</div>
-                <div className={`text-[11px] tabular-nums ${overdue ? "text-red-400" : "text-[var(--text-muted)]"}`}>
+                <div className="text-[13px] font-semibold tabular-nums text-[var(--text-primary)]">
+                  {fmtBRL(o.valor)}
+                </div>
+                <div
+                  className={`text-[11px] tabular-nums ${overdue ? "text-red-400" : "text-[var(--text-muted)]"}`}
+                >
                   {o.probabilidade}% · {fmtDate(o.expectedClose)}
                 </div>
               </div>

@@ -1,18 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Image,
-} from "@react-pdf/renderer";
-import type {
-  Bloco,
-  DocumentoLayoutConfig,
-  Idioma,
-  OrcamentoPayload,
-} from "./types";
+import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import type { Bloco, DocumentoLayoutConfig, Idioma, OrcamentoPayload } from "./types";
 import { formatDate, formatMoney, formatNumber } from "./formatters";
 import { moedaLabel } from "@/lib/moedas";
 import { t } from "./i18n";
@@ -59,10 +47,20 @@ const styles = (accent: string) =>
     para: { marginBottom: 6 },
     keyGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 8 },
     keyCell: { width: "50%", marginBottom: 4, paddingRight: 8 },
-    keyLabel: { fontSize: 7.5, color: TOKENS.muted, textTransform: "uppercase", letterSpacing: 0.4 },
+    keyLabel: {
+      fontSize: 7.5,
+      color: TOKENS.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
     keyValue: { fontSize: 9.5, color: TOKENS.text },
     // Tabela
-    table: { borderWidth: 0.5, borderColor: TOKENS.borderStrong, borderStyle: "solid", marginBottom: 8 },
+    table: {
+      borderWidth: 0.5,
+      borderColor: TOKENS.borderStrong,
+      borderStyle: "solid",
+      marginBottom: 8,
+    },
     tHeader: {
       flexDirection: "row",
       backgroundColor: accent,
@@ -106,12 +104,23 @@ const styles = (accent: string) =>
     eqRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
     eqImgWrap: { width: 140, alignItems: "center" },
     eqImg: { width: 140, height: 100, objectFit: "contain" },
-    eqImgCaption: { fontSize: 8, color: TOKENS.muted, marginTop: 3, textAlign: "center", lineHeight: 1.3 },
+    eqImgCaption: {
+      fontSize: 8,
+      color: TOKENS.muted,
+      marginTop: 3,
+      textAlign: "center",
+      lineHeight: 1.3,
+    },
     eqMeta: { flex: 1 },
     eqTitle: { fontSize: 11, fontFamily: TOKENS.fontBold, marginBottom: 3 },
     eqDescr: { fontSize: 9, color: TOKENS.text, lineHeight: 1.4 },
     signBox: { marginTop: 28, width: 240 },
-    signLine: { borderTopWidth: 0.5, borderTopColor: TOKENS.text, borderTopStyle: "solid", marginTop: 28 },
+    signLine: {
+      borderTopWidth: 0.5,
+      borderTopColor: TOKENS.text,
+      borderTopStyle: "solid",
+      marginTop: 28,
+    },
     signName: { fontSize: 9.5, fontFamily: TOKENS.fontBold, marginTop: 3 },
     signMeta: { fontSize: 8, color: TOKENS.muted },
     badge: {
@@ -187,7 +196,9 @@ function renderQualificacao(
           </Text>
         </View>
         <View style={s.keyCell}>
-          <Text style={s.keyLabel}>{t(idioma, "cidade")} / {t(idioma, "pais")}</Text>
+          <Text style={s.keyLabel}>
+            {t(idioma, "cidade")} / {t(idioma, "pais")}
+          </Text>
           <Text style={s.keyValue}>
             {[c.endereco_cidade, c.endereco_estado].filter(Boolean).join(" / ")}
             {c.pais ? ` — ${c.pais}` : ""}
@@ -278,7 +289,11 @@ function renderValores(
       {items.map((eq, idx) => {
         const total = eq.quantidade * eq.valor_unitario;
         return (
-          <View key={idx} style={[s.tRow, idx % 2 ? { backgroundColor: TOKENS.zebra } : {}]} wrap={false}>
+          <View
+            key={idx}
+            style={[s.tRow, idx % 2 ? { backgroundColor: TOKENS.zebra } : {}]}
+            wrap={false}
+          >
             <View style={[s.tCell, { width: "55%" }]}>
               <Text>{pickName(eq, idioma)}</Text>
             </View>
@@ -362,20 +377,37 @@ function renderCondicoesPagamento(
       {payload.pagamento.parcelas.length > 0 ? (
         <View style={s.table}>
           <View style={s.tHeader}>
-            <View style={[s.tCell, { width: "10%" }]}><Text>{t(idioma, "parcela")}</Text></View>
-            <View style={[s.tCell, { width: "20%" }]}><Text style={s.tRight}>{t(idioma, "percentual")}</Text></View>
-            <View style={[s.tCell, { width: "25%" }]}><Text style={s.tRight}>{t(idioma, "valor_parcela")}</Text></View>
-            <View style={[s.tCell, { width: "45%" }]}><Text>{t(idioma, "descricao")}</Text></View>
+            <View style={[s.tCell, { width: "10%" }]}>
+              <Text>{t(idioma, "parcela")}</Text>
+            </View>
+            <View style={[s.tCell, { width: "20%" }]}>
+              <Text style={s.tRight}>{t(idioma, "percentual")}</Text>
+            </View>
+            <View style={[s.tCell, { width: "25%" }]}>
+              <Text style={s.tRight}>{t(idioma, "valor_parcela")}</Text>
+            </View>
+            <View style={[s.tCell, { width: "45%" }]}>
+              <Text>{t(idioma, "descricao")}</Text>
+            </View>
           </View>
           {payload.pagamento.parcelas.map((p, idx) => {
             const v = (total * p.percentual) / 100;
-            const desc = idioma === "pt" ? p.descricao_pt : idioma === "es" ? p.descricao_es : p.descricao_en;
+            const desc =
+              idioma === "pt" ? p.descricao_pt : idioma === "es" ? p.descricao_es : p.descricao_en;
             return (
               <View key={idx} style={s.tRow} wrap={false}>
-                <View style={[s.tCell, { width: "10%" }]}><Text>{p.numero}</Text></View>
-                <View style={[s.tCell, { width: "20%" }]}><Text style={s.tRight}>{formatNumber(p.percentual, idioma, 2)}%</Text></View>
-                <View style={[s.tCell, { width: "25%" }]}><Text style={s.tRight}>{formatMoney(v, payload.moeda, idioma)}</Text></View>
-                <View style={[s.tCell, { width: "45%" }]}><Text>{desc || "—"}</Text></View>
+                <View style={[s.tCell, { width: "10%" }]}>
+                  <Text>{p.numero}</Text>
+                </View>
+                <View style={[s.tCell, { width: "20%" }]}>
+                  <Text style={s.tRight}>{formatNumber(p.percentual, idioma, 2)}%</Text>
+                </View>
+                <View style={[s.tCell, { width: "25%" }]}>
+                  <Text style={s.tRight}>{formatMoney(v, payload.moeda, idioma)}</Text>
+                </View>
+                <View style={[s.tCell, { width: "45%" }]}>
+                  <Text>{desc || "—"}</Text>
+                </View>
               </View>
             );
           })}
@@ -415,7 +447,8 @@ function renderPrazo(
     <View wrap={false}>
       <Text style={s.sectionTitle}>{conf?.titulo || "Prazo"}</Text>
       <Text style={s.para}>
-        <Text style={{ fontFamily: TOKENS.fontBold }}>{payload.prazo.dias}</Text> {t(idioma, "dias")} — {overrideTxt || conf?.texto || ""}
+        <Text style={{ fontFamily: TOKENS.fontBold }}>{payload.prazo.dias}</Text>{" "}
+        {t(idioma, "dias")} — {overrideTxt || conf?.texto || ""}
       </Text>
       {payload.prazo.texto_extra ? <Text style={s.para}>{payload.prazo.texto_extra}</Text> : null}
     </View>
@@ -460,7 +493,11 @@ function renderValidade(
     <View wrap={false}>
       <Text style={s.sectionTitle}>{conf?.titulo || "Validade"}</Text>
       <Text style={s.para}>
-        {t(idioma, "validade_em")} <Text style={{ fontFamily: TOKENS.fontBold }}>{payload.validade.dias} {t(idioma, "dias")}</Text>.
+        {t(idioma, "validade_em")}{" "}
+        <Text style={{ fontFamily: TOKENS.fontBold }}>
+          {payload.validade.dias} {t(idioma, "dias")}
+        </Text>
+        .
       </Text>
       {conf?.texto ? <Text style={s.para}>{conf.texto}</Text> : null}
     </View>
@@ -543,14 +580,23 @@ export type OrcamentoPdfProps = {
   layout: DocumentoLayoutConfig;
 };
 
-export function OrcamentoPdf({ codigo, versao, idioma, data, payload, blocos, layout }: OrcamentoPdfProps) {
+export function OrcamentoPdf({
+  codigo,
+  versao,
+  idioma,
+  data,
+  payload,
+  blocos,
+  layout,
+}: OrcamentoPdfProps) {
   const accent = layout.accent_color || "#0B3D91";
   const s = styles(accent);
   const dataFmt = formatDate(data, idioma);
 
-  const ordered = payload.blocos_selecionados.length > 0
-    ? payload.blocos_selecionados
-    : [...blocos].sort((a, b) => a.ordem_padrao - b.ordem_padrao).map((b) => b.codigo);
+  const ordered =
+    payload.blocos_selecionados.length > 0
+      ? payload.blocos_selecionados
+      : [...blocos].sort((a, b) => a.ordem_padrao - b.ordem_padrao).map((b) => b.codigo);
 
   return (
     <Document
@@ -578,7 +624,9 @@ export function OrcamentoPdf({ codigo, versao, idioma, data, payload, blocos, la
 
         {/* Capa simples */}
         <View style={s.coverWrap}>
-          <Text style={s.badge}>{codigo} · v{versao} · {idioma.toUpperCase()}</Text>
+          <Text style={s.badge}>
+            {codigo} · v{versao} · {idioma.toUpperCase()}
+          </Text>
           <Text style={s.coverTitle}>{t(idioma, "documento_titulo_orcamento")}</Text>
           <View style={s.coverAccentBar} />
           <Text style={s.coverSubtitle}>

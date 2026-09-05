@@ -78,12 +78,7 @@ export function TableError({
  */
 export function SkeletonLine({ className }: { className?: string }) {
   return (
-    <div
-      className={cn(
-        "h-3 w-full animate-pulse rounded bg-[var(--bg-elevated)]",
-        className,
-      )}
-    />
+    <div className={cn("h-3 w-full animate-pulse rounded bg-[var(--bg-elevated)]", className)} />
   );
 }
 
@@ -105,9 +100,7 @@ export function TableSkeleton({
       <TableHeader>
         <TableRow>
           {Array.from({ length: columns }).map((_, i) => (
-            <TableHead key={i}>
-              {headers?.[i] ?? <SkeletonLine className="h-2.5 w-20" />}
-            </TableHead>
+            <TableHead key={i}>{headers?.[i] ?? <SkeletonLine className="h-2.5 w-20" />}</TableHead>
           ))}
         </TableRow>
       </TableHeader>

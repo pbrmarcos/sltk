@@ -16,10 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Loader2, FileText, ExternalLink } from "lucide-react";
-import {
-  listSATRelatorios,
-  createSATRelatorio,
-} from "@/lib/sat-relatorios.functions";
+import { listSATRelatorios, createSATRelatorio } from "@/lib/sat-relatorios.functions";
 
 export const Route = createFileRoute("/_authenticated/pos-vendas/sat/")({
   component: SATListPage,
@@ -162,7 +159,7 @@ function SATListPage() {
                 <td className="px-4 py-2.5 text-[12px]">
                   {r.periodo_de && r.periodo_ate
                     ? `${r.periodo_de} → ${r.periodo_ate}`
-                    : r.periodo_de ?? "—"}
+                    : (r.periodo_de ?? "—")}
                 </td>
                 <td className="px-4 py-2.5">
                   <Badge className={`border ${STATUS_COLOR[r.status] ?? ""}`}>
@@ -202,7 +199,12 @@ function SATListPage() {
             {data.total} resultados — página {page} de {totalPages}
           </div>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               Anterior
             </Button>
             <Button

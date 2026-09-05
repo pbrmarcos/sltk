@@ -25,7 +25,9 @@ export const listPaginasPublicadas = createServerFn({ method: "GET" }).handler(a
   });
   const { data, error } = await sb
     .from("equipamento_pagina")
-    .select("id, tipo_id, slug, seo_title_pt, seo_description_pt, og_image_url, publicado, rfq_formulario_tipo!inner(nome_pt, familia)")
+    .select(
+      "id, tipo_id, slug, seo_title_pt, seo_description_pt, og_image_url, publicado, rfq_formulario_tipo!inner(nome_pt, familia)",
+    )
     .eq("publicado", true)
     .order("slug", { ascending: true });
   if (error) throw friendlyDbError(error);
@@ -90,7 +92,9 @@ export const adminListPaginas = createServerFn({ method: "GET" })
     await ensureAdmin(sb, context.userId);
     const { data, error } = await sb
       .from("equipamento_pagina")
-      .select("id, tipo_id, slug, publicado, seo_title_pt, og_image_url, rfq_formulario_tipo!inner(nome_pt, familia, codigo)")
+      .select(
+        "id, tipo_id, slug, publicado, seo_title_pt, og_image_url, rfq_formulario_tipo!inner(nome_pt, familia, codigo)",
+      )
       .order("slug", { ascending: true });
     if (error) throw friendlyDbError(error);
     return (data ?? []).map((r: any) => ({
@@ -141,7 +145,11 @@ export const adminUpdatePagina = createServerFn({ method: "POST" })
     z
       .object({
         pagina_id: z.string().uuid(),
-        slug: z.string().min(2).regex(/^[a-z0-9-]+$/).optional(),
+        slug: z
+          .string()
+          .min(2)
+          .regex(/^[a-z0-9-]+$/)
+          .optional(),
         seo_title_pt: z.string().nullable().optional(),
         seo_title_es: z.string().nullable().optional(),
         seo_title_en: z.string().nullable().optional(),
@@ -205,7 +213,12 @@ export const adminAddBloco = createServerFn({ method: "POST" })
     const conteudo = defaultBlocoConteudo(data.tipo_bloco as BlocoTipo, nome);
     const { data: novo, error } = await sb
       .from("equipamento_pagina_bloco")
-      .insert({ pagina_id: data.pagina_id, tipo_bloco: data.tipo_bloco, ordem, conteudo_json: conteudo })
+      .insert({
+        pagina_id: data.pagina_id,
+        tipo_bloco: data.tipo_bloco,
+        ordem,
+        conteudo_json: conteudo,
+      })
       .select("*")
       .single();
     if (error) throw friendlyDbError(error);
@@ -259,7 +272,10 @@ export const adminReordenarBlocos = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     await ensureAdmin(sb, context.userId);
     for (const { bloco_id, ordem } of data.ordem) {
-      const { error } = await sb.from("equipamento_pagina_bloco").update({ ordem }).eq("id", bloco_id);
+      const { error } = await sb
+        .from("equipamento_pagina_bloco")
+        .update({ ordem })
+        .eq("id", bloco_id);
       if (error) throw friendlyDbError(error);
     }
     return { ok: true };

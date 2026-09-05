@@ -2,10 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const truncate = (max: number) =>
-  z.preprocess(
-    (v) => (typeof v === "string" ? v.slice(0, max) : v),
-    z.string().max(max),
-  );
+  z.preprocess((v) => (typeof v === "string" ? v.slice(0, max) : v), z.string().max(max));
 
 const schema = z.object({
   incidentId: z.string().trim().min(1).max(64),
@@ -19,8 +16,7 @@ const schema = z.object({
   route: truncate(200).optional(),
 });
 
-const stripNewlines = (s: string | undefined) =>
-  (s ?? "").replace(/[\r\n]+/g, " ");
+const stripNewlines = (s: string | undefined) => (s ?? "").replace(/[\r\n]+/g, " ");
 
 export const reportClientError = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => schema.parse(input))

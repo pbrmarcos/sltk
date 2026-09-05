@@ -24,10 +24,26 @@ export function ProductionDashboard({ userName }: { userName: string }) {
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Em execução" value={isLoading ? "…" : String(d?.kpis.osExecucao ?? 0)} accent="primary" />
-        <KpiCard label="Atrasadas" value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)} accent="danger" />
-        <KpiCard label="Entregas na semana" value={isLoading ? "…" : String(d?.kpis.entregasSemana ?? 0)} accent="success" />
-        <KpiCard label="NCs abertas" value={isLoading ? "…" : String(d?.kpis.ncAbertas ?? 0)} accent="warning" />
+        <KpiCard
+          label="Em execução"
+          value={isLoading ? "…" : String(d?.kpis.osExecucao ?? 0)}
+          accent="primary"
+        />
+        <KpiCard
+          label="Atrasadas"
+          value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)}
+          accent="danger"
+        />
+        <KpiCard
+          label="Entregas na semana"
+          value={isLoading ? "…" : String(d?.kpis.entregasSemana ?? 0)}
+          accent="success"
+        />
+        <KpiCard
+          label="NCs abertas"
+          value={isLoading ? "…" : String(d?.kpis.ncAbertas ?? 0)}
+          accent="warning"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
@@ -37,7 +53,11 @@ export function ProductionDashboard({ userName }: { userName: string }) {
           tone={aderencia >= 0.9 ? "success" : aderencia >= 0.75 ? "primary" : "warning"}
           hint="Montagens concluídas dentro da previsão"
         />
-        <DashboardCard title="Montagens por situação" hint="Distribuição atual" className="xl:col-span-2">
+        <DashboardCard
+          title="Montagens por situação"
+          hint="Distribuição atual"
+          className="xl:col-span-2"
+        >
           <HeatStrip segments={d?.etapasHeat ?? []} hint="Onde estão os itens de produção." />
         </DashboardCard>
       </div>

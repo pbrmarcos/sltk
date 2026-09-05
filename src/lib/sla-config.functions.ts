@@ -31,9 +31,21 @@ export const listSlaConfig = createServerFn({ method: "GET" })
 const upsertSchema = z.object({
   origem: z.enum(ORIGENS),
   prioridade: z.enum(PRIORIDADES),
-  resposta_horas: z.number().int().min(1).max(24 * 60),
-  resolucao_horas: z.number().int().min(1).max(24 * 365),
-  estagnado_horas: z.number().int().min(1).max(24 * 365),
+  resposta_horas: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 60),
+  resolucao_horas: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 365),
+  estagnado_horas: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 365),
 });
 
 export const upsertSlaConfig = createServerFn({ method: "POST" })

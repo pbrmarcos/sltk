@@ -61,23 +61,14 @@ export class AdminGuardError extends Error {
 }
 
 /** Retorna todas as roles do usuário. */
-export async function getUserRoles(
-  supabase: Client,
-  userId: string,
-): Promise<AppRoleName[]> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+export async function getUserRoles(supabase: Client, userId: string): Promise<AppRoleName[]> {
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
   return (data ?? []).map((r) => r.role as AppRoleName);
 }
 
 /** Maior rank entre as roles do usuário (0 se nenhuma). */
-export async function getMaxRoleRank(
-  supabase: Client,
-  userId: string,
-): Promise<number> {
+export async function getMaxRoleRank(supabase: Client, userId: string): Promise<number> {
   const roles = await getUserRoles(supabase, userId);
   return roles.reduce((max, r) => Math.max(max, ROLE_RANK[r] ?? 0), 0);
 }
@@ -86,10 +77,7 @@ export async function getMaxRoleRank(
  * Rejeita usuários desabilitados/soft-deleted. Fecha a janela em que um JWT
  * ainda válido continuaria operando após um disable.
  */
-export async function assertActiveUser(
-  supabase: Client,
-  userId: string,
-): Promise<void> {
+export async function assertActiveUser(supabase: Client, userId: string): Promise<void> {
   // RPC recém-criada; types.ts é regenerado automaticamente pela integração.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.rpc as any)("is_user_active", {
@@ -128,37 +116,20 @@ export async function hasAnyRole(
   return roles.some((r) => set.has(r));
 }
 
-export async function assertAdmin(
-  supabase: Client,
-  userId: string,
-): Promise<void> {
+export async function assertAdmin(supabase: Client, userId: string): Promise<void> {
   if (!(await hasRole(supabase, userId, "admin"))) {
-    throw new AdminGuardError(
-      "not_admin",
-      "Acesso restrito a administradores.",
-    );
+    throw new AdminGuardError("not_admin", "Acesso restrito a administradores.");
   }
 }
 
-export async function assertAdminOrManager(
-  supabase: Client,
-  userId: string,
-): Promise<void> {
+export async function assertAdminOrManager(supabase: Client, userId: string): Promise<void> {
   if (!(await hasAnyRole(supabase, userId, ["admin", "manager"]))) {
-    throw new AdminGuardError(
-      "not_admin_or_manager",
-      "Acesso restrito a administração / gestão.",
-    );
+    throw new AdminGuardError("not_admin_or_manager", "Acesso restrito a administração / gestão.");
   }
 }
 
-export async function assertEngineerOrHigher(
-  supabase: Client,
-  userId: string,
-): Promise<void> {
-  if (
-    !(await hasAnyRole(supabase, userId, ["admin", "manager", "engineer"]))
-  ) {
+export async function assertEngineerOrHigher(supabase: Client, userId: string): Promise<void> {
+  if (!(await hasAnyRole(supabase, userId, ["admin", "manager", "engineer"]))) {
     throw new AdminGuardError(
       "not_admin_manager_engineer",
       "Acesso restrito ao painel administrativo.",
@@ -265,10 +236,7 @@ export async function assertCanActOn(
   }
 
   // Proteção do último admin em ações que removem privilégios.
-  if (
-    targetIsAdmin &&
-    (action === "role_change" || action === "disable" || action === "delete")
-  ) {
+  if (targetIsAdmin && (action === "role_change" || action === "disable" || action === "delete")) {
     const active = await countActiveAdmins(supabase);
     if (active <= 1) {
       throw new AdminGuardError(

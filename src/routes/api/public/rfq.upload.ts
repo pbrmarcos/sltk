@@ -22,7 +22,7 @@ const CORS = {
 
 async function getAdmin() {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   return supabaseAdmin as any;
 }
 
@@ -65,7 +65,10 @@ export const Route = createFileRoute("/api/public/rfq/upload")({
           const campoId = form.get("campo_id") ? String(form.get("campo_id")) : null;
           const file = form.get("file");
           if (!slug || !submissaoId || !(file instanceof File)) {
-            return Response.json({ ok: false, error: "Requisição inválida." }, { status: 400, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Requisição inválida." },
+              { status: 400, headers: CORS },
+            );
           }
           if (!ALLOWED.has(file.type)) {
             return Response.json(
@@ -74,7 +77,10 @@ export const Route = createFileRoute("/api/public/rfq/upload")({
             );
           }
           if (file.size > MAX_BYTES) {
-            return Response.json({ ok: false, error: "Arquivo maior que 50 MB." }, { status: 413, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Arquivo maior que 50 MB." },
+              { status: 413, headers: CORS },
+            );
           }
 
           const supa: any = await getAdmin();
@@ -85,13 +91,22 @@ export const Route = createFileRoute("/api/public/rfq/upload")({
             .maybeSingle();
           if (eLink) throw eLink;
           if (!link || link.submissao_id !== submissaoId) {
-            return Response.json({ ok: false, error: "Formulário não encontrado." }, { status: 404, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Formulário não encontrado." },
+              { status: 404, headers: CORS },
+            );
           }
           if (link.status !== "aberto") {
-            return Response.json({ ok: false, error: "Formulário indisponível." }, { status: 410, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Formulário indisponível." },
+              { status: 410, headers: CORS },
+            );
           }
           if (link.expira_em && new Date(link.expira_em).getTime() < Date.now()) {
-            return Response.json({ ok: false, error: "Formulário expirado." }, { status: 410, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Formulário expirado." },
+              { status: 410, headers: CORS },
+            );
           }
 
           const { data: cli } = await supa

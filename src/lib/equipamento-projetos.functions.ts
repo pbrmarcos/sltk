@@ -9,9 +9,7 @@ import { PROJETO_DISCIPLINAS, PROJETO_STATUS } from "@/lib/engenharia.shared";
 
 export const listProjetosByEquipamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ equipamento_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("equipamento_projetos")
@@ -26,13 +24,15 @@ export const listProjetosByEquipamento = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-
 /* ============= LIST GLOBAL (mecanico ou eletrico) ============= */
 
 const listAllInput = z.object({
   disciplina: z.enum(PROJETO_DISCIPLINAS),
   q: z.string().optional(),
-  status: z.enum(["todos", ...PROJETO_STATUS]).optional().default("todos"),
+  status: z
+    .enum(["todos", ...PROJETO_STATUS])
+    .optional()
+    .default("todos"),
   page: z.number().int().min(1).optional().default(1),
   per_page: z.number().int().min(1).max(100).optional().default(50),
 });
@@ -58,9 +58,11 @@ export const listAllProjetos = createServerFn({ method: "POST" })
         `cliente_equipamentos.modelo.ilike.${term},cliente_equipamentos.codigo.ilike.${term},clientes.razao_social.ilike.${term}`,
       );
     }
-    const { data: rows, count, error } = await q
-      .order("updated_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("updated_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
@@ -142,7 +144,6 @@ export const linkProjetoOrigem = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 /* ============= UPDATE ============= */
 
 const updateInput = z.object({
@@ -172,7 +173,9 @@ export const updateProjeto = createServerFn({ method: "POST" })
         _role: "manager",
       });
       if (!isAdmin && !isManager) {
-        throw new Error("Somente administradores ou gestores podem liberar um projeto para produção.");
+        throw new Error(
+          "Somente administradores ou gestores podem liberar um projeto para produção.",
+        );
       }
     }
 

@@ -6,10 +6,15 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getItemBySlug, enviarParaRevisao, getMediaSignedUrl, listFavoritos, toggleFavorito } from "@/lib/know-how.functions";
+import {
+  getItemBySlug,
+  enviarParaRevisao,
+  getMediaSignedUrl,
+  listFavoritos,
+  toggleFavorito,
+} from "@/lib/know-how.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-
 
 export const Route = createFileRoute("/_authenticated/know-how/$slug")({
   component: KnowHowDetail,
@@ -48,8 +53,6 @@ function KnowHowDetail() {
     },
     onError: (e: unknown) => toast.error((e as Error).message),
   });
-
-
 
   if (item.isLoading) {
     return (
@@ -108,17 +111,19 @@ function KnowHowDetail() {
             </Button>
 
             {canEdit && it.status === "rascunho" && (
-              <Button
-                size="sm"
-                onClick={() => enviar.mutate(it.id)}
-                disabled={enviar.isPending}
-              >
+              <Button size="sm" onClick={() => enviar.mutate(it.id)} disabled={enviar.isPending}>
                 <Send className="mr-1.5 h-4 w-4" />
                 Enviar para revisão
               </Button>
             )}
             {canEdit && (
-              <Button variant="outline" size="sm" onClick={() => navigate({ to: "/know-how/novo", search: { edit: it.slug } as never })}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate({ to: "/know-how/novo", search: { edit: it.slug } as never })
+                }
+              >
                 <Pencil className="mr-1.5 h-4 w-4" />
                 Editar
               </Button>
@@ -128,8 +133,12 @@ function KnowHowDetail() {
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
-        <Badge variant="outline" className="uppercase">{it.tipo}</Badge>
-        <Badge variant="outline" className={statusClass(it.status)}>{it.status}</Badge>
+        <Badge variant="outline" className="uppercase">
+          {it.tipo}
+        </Badge>
+        <Badge variant="outline" className={statusClass(it.status)}>
+          {it.status}
+        </Badge>
         <span className="text-[var(--text-muted)]">v{it.versao}</span>
         <span className="text-[var(--text-muted)]">
           · atualizado em {new Date(it.atualizado_em).toLocaleDateString("pt-BR")}
@@ -139,16 +148,17 @@ function KnowHowDetail() {
       {it.tags?.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-1">
           {it.tags.map((t) => (
-            <span key={t} className="rounded bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
+            <span
+              key={t}
+              className="rounded bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-muted)]"
+            >
               #{t}
             </span>
           ))}
         </div>
       )}
 
-      {it.midia_url && (
-        <MediaPlayer tipo={it.tipo} midia={it.midia_url} />
-      )}
+      {it.midia_url && <MediaPlayer tipo={it.tipo} midia={it.midia_url} />}
 
       {it.corpo && (
         <article className="prose prose-sm max-w-none whitespace-pre-wrap rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-6 text-sm leading-relaxed text-[var(--text-primary)]">
@@ -246,7 +256,12 @@ function MediaPlayer({ tipo, midia }: { tipo: string; midia: string }) {
   }
   return (
     <div className="mb-6 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-      <a href={url} target="_blank" rel="noreferrer" className="text-sm text-[var(--info)] hover:underline">
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="text-sm text-[var(--info)] hover:underline"
+      >
         Baixar arquivo
       </a>
     </div>

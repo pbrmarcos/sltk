@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, CheckCircle2, Gauge, Settings2, ShieldCheck, Wrench, Zap } from "lucide-react";
 import { PublicSiteShell } from "@/components/site/PublicSiteShell";
 
-
 const heroImg = "/site-images/envasadora-hero.webp";
 const close01 = "/site-images/envasadora-close-01.webp";
 const close03 = "/site-images/envasadora-close-03.webp";
@@ -20,7 +19,10 @@ export const Route = createFileRoute("/equipamentos/envasadora")({
           "Linha de envase rotativo Solutek 100 FLEX: enchimento volumétrico de líquidos, cremes e produtos viscosos com troca rápida de formato, mesa giratória e tampagem integrada.",
       },
       { property: "og:title", content: "Envasadora Rotativa 100 FLEX — Solutek" },
-      { property: "og:description", content: "Envase rotativo turn-key para líquidos, cremes e viscosos." },
+      {
+        property: "og:description",
+        content: "Envase rotativo turn-key para líquidos, cremes e viscosos.",
+      },
       { property: "og:url", content: "https://sltkamericas.com/equipamentos/envasadora" },
       { property: "og:image", content: `https://sltkamericas.com${heroImg}` },
       { name: "twitter:card", content: "summary_large_image" },
@@ -39,7 +41,7 @@ const specs: { label: string; value: string }[] = [
   { label: "Precisão", value: "±0,5% por dose" },
   { label: "Tampagem", value: "rosca, pressão ou recravação" },
   { label: "Construção", value: "AISI 304 / 316L sanitário" },
-  { label: "Controle", value: "CLP + IHM 7\" · Indústria 4.0 ready" },
+  { label: "Controle", value: 'CLP + IHM 7" · Indústria 4.0 ready' },
 ];
 
 const highlights = [
@@ -86,7 +88,6 @@ function EnvasadoraPage() {
   );
 }
 
-
 function Hero() {
   return (
     <section className="relative isolate overflow-hidden bg-slate-950 text-white">
@@ -107,9 +108,9 @@ function Hero() {
             Envase rotativo de alta precisão para indústrias que não param.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">
-            A 100 FLEX é a plataforma turn-key da Solutek para envase de líquidos, cremes e produtos viscosos —
-            mesa giratória de alimentação, enchimento volumétrico servo-acionado e tampagem integrada em
-            uma única célula compacta.
+            A 100 FLEX é a plataforma turn-key da Solutek para envase de líquidos, cremes e produtos
+            viscosos — mesa giratória de alimentação, enchimento volumétrico servo-acionado e
+            tampagem integrada em uma única célula compacta.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
@@ -128,7 +129,11 @@ function Hero() {
         </div>
         <div className="relative">
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl">
-            <img src={heroImg} alt="Envasadora Rotativa 100 FLEX" className="h-full w-full object-contain" />
+            <img
+              src={heroImg}
+              alt="Envasadora Rotativa 100 FLEX"
+              className="h-full w-full object-contain"
+            />
           </div>
         </div>
       </div>
@@ -151,7 +156,8 @@ function Intro() {
             Projetada para indústrias farmacêuticas, cosméticas, químicas e alimentícias, a 100 FLEX
             executa alimentação, enchimento e tampagem em sincronia, dispensando linhas auxiliares e
             reduzindo footprint. A arquitetura rotativa garante cadência estável e repetibilidade,
-            enquanto os bicos modulares permitem trabalhar com produtos de comportamentos reológicos distintos.
+            enquanto os bicos modulares permitem trabalhar com produtos de comportamentos reológicos
+            distintos.
           </p>
           <ul className="mt-6 space-y-2 text-sm text-slate-700">
             {[
@@ -168,7 +174,11 @@ function Intro() {
           </ul>
         </div>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-          <img src={mesaImg} alt="Mesa giratória de alimentação" className="h-full w-full object-contain" />
+          <img
+            src={mesaImg}
+            alt="Mesa giratória de alimentação"
+            className="h-full w-full object-contain"
+          />
         </div>
       </div>
     </section>
@@ -186,8 +196,8 @@ function Specs() {
           Configuração técnica padrão.
         </h2>
         <p className="mt-3 max-w-2xl text-sm text-slate-600">
-          Personalizamos cada projeto de acordo com o seu produto, formato e cadência. Os valores abaixo
-          são a base da Série 100 FLEX.
+          Personalizamos cada projeto de acordo com o seu produto, formato e cadência. Os valores
+          abaixo são a base da Série 100 FLEX.
         </p>
         <div className="mt-10 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
           {specs.map((s) => (
@@ -218,7 +228,8 @@ function Highlights() {
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-600">
               Cada componente foi escolhido para maximizar OEE: servomotores Sew/Lenze, bombas
-              dosadoras Mouvex, sensores Sick e CLP padrão de mercado. Sem dependência de fornecedor exclusivo.
+              dosadoras Mouvex, sensores Sick e CLP padrão de mercado. Sem dependência de fornecedor
+              exclusivo.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -260,9 +271,16 @@ function Gallery() {
               className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
             >
               <div className="aspect-[4/5] overflow-hidden">
-                <img src={it.src} alt={it.label} loading="lazy" className="h-full w-full object-cover" />
+                <img
+                  src={it.src}
+                  alt={it.label}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
               </div>
-              <figcaption className="px-5 py-3 text-sm font-medium text-slate-700">{it.label}</figcaption>
+              <figcaption className="px-5 py-3 text-sm font-medium text-slate-700">
+                {it.label}
+              </figcaption>
             </figure>
           ))}
         </div>
@@ -327,4 +345,3 @@ function CTA() {
     </section>
   );
 }
-

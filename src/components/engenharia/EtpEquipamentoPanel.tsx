@@ -70,10 +70,7 @@ export function EtpEquipamentoPanel({ equipamentoId }: { equipamentoId: string }
                     <Search className="mr-1.5 h-4 w-4" /> Buscar ETP
                   </Button>
                 </DialogTrigger>
-                <BuscarEtpDialog
-                  equipamentoId={equipamentoId}
-                  onDone={() => setBuscaOpen(false)}
-                />
+                <BuscarEtpDialog equipamentoId={equipamentoId} onDone={() => setBuscaOpen(false)} />
               </Dialog>
               <Button size="sm" onClick={() => criar.mutate()} disabled={criar.isPending}>
                 {criar.isPending ? (
@@ -122,19 +119,12 @@ export function EtpEquipamentoPanel({ equipamentoId }: { equipamentoId: string }
   );
 }
 
-function BuscarEtpDialog({
-  equipamentoId,
-  onDone,
-}: {
-  equipamentoId: string;
-  onDone: () => void;
-}) {
+function BuscarEtpDialog({ equipamentoId, onDone }: { equipamentoId: string; onDone: () => void }) {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const buscaQ = useQuery({
     queryKey: ["etp-busca", q, equipamentoId],
-    queryFn: () =>
-      buscarEtpsParaVincular({ data: { q, excluir_equipamento_id: equipamentoId } }),
+    queryFn: () => buscarEtpsParaVincular({ data: { q, excluir_equipamento_id: equipamentoId } }),
   });
 
   const vincular = useMutation({

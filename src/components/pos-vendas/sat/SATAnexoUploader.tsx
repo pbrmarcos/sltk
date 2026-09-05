@@ -4,11 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Paperclip, Camera, Loader2, X, FileText } from "lucide-react";
-import {
-  uploadSATAnexo,
-  deleteSATAnexo,
-  type SATAnexo,
-} from "@/lib/sat-relatorios.functions";
+import { uploadSATAnexo, deleteSATAnexo, type SATAnexo } from "@/lib/sat-relatorios.functions";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 async function fileToBase64(file: File): Promise<string> {
@@ -112,11 +108,7 @@ export function SATAnexoUploader({
           onClick={() => fileRef.current?.click()}
           disabled={busy}
         >
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Paperclip className="h-4 w-4" />
-          )}
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
           <span className="ml-1">Anexar</span>
         </Button>
         <Button

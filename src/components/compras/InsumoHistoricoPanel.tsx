@@ -18,10 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import {
-  listInsumoAtividades,
-  addInsumoComentario,
-} from "@/lib/insumo-anexos.functions";
+import { listInsumoAtividades, addInsumoComentario } from "@/lib/insumo-anexos.functions";
 
 type Props = { insumoId: string };
 type FilterKey = "todos" | "status" | "campos" | "arquivos";
@@ -33,13 +30,37 @@ type TipoMap = {
 };
 
 const TIPOS: Record<string, TipoMap> = {
-  criado: { icon: Sparkles, color: "text-emerald-600 bg-emerald-50 border-emerald-200", label: "Criado" },
+  criado: {
+    icon: Sparkles,
+    color: "text-emerald-600 bg-emerald-50 border-emerald-200",
+    label: "Criado",
+  },
   editado: { icon: Pencil, color: "text-blue-600 bg-blue-50 border-blue-200", label: "Editado" },
-  status_alterado: { icon: RefreshCw, color: "text-amber-600 bg-amber-50 border-amber-200", label: "Status" },
-  anexo_adicionado: { icon: FilePlus2, color: "text-purple-600 bg-purple-50 border-purple-200", label: "Anexo" },
-  anexo_removido: { icon: FileMinus2, color: "text-red-600 bg-red-50 border-red-200", label: "Removido" },
-  orcamento_recebido: { icon: DollarSign, color: "text-emerald-700 bg-emerald-50 border-emerald-200", label: "Orçamento" },
-  comentario: { icon: MessageCircle, color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]", label: "Comentário" },
+  status_alterado: {
+    icon: RefreshCw,
+    color: "text-amber-600 bg-amber-50 border-amber-200",
+    label: "Status",
+  },
+  anexo_adicionado: {
+    icon: FilePlus2,
+    color: "text-purple-600 bg-purple-50 border-purple-200",
+    label: "Anexo",
+  },
+  anexo_removido: {
+    icon: FileMinus2,
+    color: "text-red-600 bg-red-50 border-red-200",
+    label: "Removido",
+  },
+  orcamento_recebido: {
+    icon: DollarSign,
+    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    label: "Orçamento",
+  },
+  comentario: {
+    icon: MessageCircle,
+    color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
+    label: "Comentário",
+  },
 };
 
 const FIELD_LABEL: Record<string, string> = {
@@ -60,7 +81,11 @@ const FILTER_TIPOS: Record<FilterKey, (t: string) => boolean> = {
   todos: () => true,
   status: (t) => t === "status_alterado",
   campos: (t) => t === "editado" || t === "criado",
-  arquivos: (t) => t === "anexo_adicionado" || t === "anexo_removido" || t === "orcamento_recebido" || t === "comentario",
+  arquivos: (t) =>
+    t === "anexo_adicionado" ||
+    t === "anexo_removido" ||
+    t === "orcamento_recebido" ||
+    t === "comentario",
 };
 
 export function InsumoHistoricoPanel({ insumoId }: Props) {
@@ -144,12 +169,20 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
             setComentario(e.target.value);
             if (erroComentario) setErroComentario(null);
           }}
-          className={cn("text-xs bg-[var(--bg-surface)]", erroComentario && "border-red-400 focus-visible:ring-red-300")}
+          className={cn(
+            "text-xs bg-[var(--bg-surface)]",
+            erroComentario && "border-red-400 focus-visible:ring-red-300",
+          )}
           aria-invalid={!!erroComentario}
           maxLength={2000}
         />
         <div className="flex items-center justify-between">
-          <span className={cn("text-[11px]", erroComentario ? "text-red-600" : "text-[var(--text-muted)]")}>
+          <span
+            className={cn(
+              "text-[11px]",
+              erroComentario ? "text-red-600" : "text-[var(--text-muted)]",
+            )}
+          >
             {erroComentario ?? `${comentario.length}/2000`}
           </span>
           <Button size="sm" onClick={enviar} disabled={enviando}>
@@ -176,7 +209,9 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
             <span
               className={cn(
                 "rounded-full px-1.5 text-[10px]",
-                filter === f.key ? "bg-[var(--bg-surface)]/20" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]",
+                filter === f.key
+                  ? "bg-[var(--bg-surface)]/20"
+                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)]",
               )}
             >
               {counts[f.key]}
@@ -209,7 +244,8 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
             {rows.map((r) => {
               const cfg = TIPOS[r.tipo] ?? {
                 icon: History,
-                color: "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
+                color:
+                  "text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--bg-border)]",
                 label: r.tipo,
               };
               const Icon = cfg.icon;
@@ -254,9 +290,7 @@ export function InsumoHistoricoPanel({ insumoId }: Props) {
                                 {String(a ?? "—")}
                               </span>
                               <span className="mx-1 text-[var(--text-muted)]">→</span>
-                              <span className="text-emerald-700">
-                                {String(b ?? "—")}
-                              </span>
+                              <span className="text-emerald-700">{String(b ?? "—")}</span>
                             </div>
                           );
                         })}

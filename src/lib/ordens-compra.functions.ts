@@ -15,7 +15,11 @@ async function canEdit(supabase: any, uid: string): Promise<boolean> {
 }
 
 async function getUserName(supabase: any, uid: string): Promise<string> {
-  const { data } = await supabase.from("profiles").select("nome, email").eq("id", uid).maybeSingle();
+  const { data } = await supabase
+    .from("profiles")
+    .select("nome, email")
+    .eq("id", uid)
+    .maybeSingle();
   return data?.nome || data?.email || "Usuário";
 }
 
@@ -24,7 +28,11 @@ async function logHistorico(
   ocId: string,
   uid: string,
   acao: string,
-  extra: { status_anterior?: string; status_novo?: string; detalhes?: Record<string, unknown> } = {},
+  extra: {
+    status_anterior?: string;
+    status_novo?: string;
+    detalhes?: Record<string, unknown>;
+  } = {},
 ) {
   const nome = await getUserName(supabase, uid);
   await supabase.from("ordem_compra_historico").insert({
@@ -44,7 +52,10 @@ export const listOrdensCompra = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z
       .object({
-        status: z.enum(["todos", ...OC_STATUS]).optional().default("todos"),
+        status: z
+          .enum(["todos", ...OC_STATUS])
+          .optional()
+          .default("todos"),
         q: z.string().optional(),
         tipo: z.enum(["todos", "normal", "terceiros"]).optional().default("todos"),
         page: z.number().int().min(1).optional().default(1),
@@ -66,12 +77,16 @@ export const listOrdensCompra = createServerFn({ method: "POST" })
     if (data.tipo !== "todos") q = q.eq("tipo", data.tipo);
     if (data.q?.trim()) {
       const t = `%${data.q.trim()}%`;
-      q = q.or(`numero.ilike.${t},fornecedor_razao_social.ilike.${t},fornecedor_nome_fantasia.ilike.${t}`);
+      q = q.or(
+        `numero.ilike.${t},fornecedor_razao_social.ilike.${t},fornecedor_nome_fantasia.ilike.${t}`,
+      );
     }
     const from = (data.page - 1) * data.per_page;
-    const { data: rows, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, from + data.per_page - 1);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, from + data.per_page - 1);
     if (error) throw friendlyDbError(error);
     return { rows: rows ?? [], total: count ?? 0 };
   });
@@ -207,11 +222,16 @@ export const createOrdemCompra = createServerFn({ method: "POST" })
       fornecedor_uf: f?.endereco_estado_provincia ?? null,
       fornecedor_cep: f?.endereco_cep ?? null,
       fornecedor_pais: f?.pais ?? null,
-      fornecedor_telefone: f?.telefone_ddi && f?.telefone_numero ? `+${f.telefone_ddi} ${f.telefone_numero}` : null,
+      fornecedor_telefone:
+        f?.telefone_ddi && f?.telefone_numero ? `+${f.telefone_ddi} ${f.telefone_numero}` : null,
       fornecedor_email: f?.email_corporativo ?? null,
     };
 
-    const { data: oc, error } = await sb.from("ordens_compra").insert(insert).select("id, numero").single();
+    const { data: oc, error } = await sb
+      .from("ordens_compra")
+      .insert(insert)
+      .select("id, numero")
+      .single();
     if (error) throw friendlyDbError(error);
 
     await logHistorico(sb, oc.id, uid, "OC criada", { status_novo: "rascunho" });
@@ -242,7 +262,9 @@ export const createOrdemDeCotacao = createServerFn({ method: "POST" })
       .eq("cotacao_id", data.cotacao_id);
 
     if (!escolhas || escolhas.length === 0)
-      throw new Error("Esta cotação não tem vencedores escolhidos. Selecione os vencedores primeiro.");
+      throw new Error(
+        "Esta cotação não tem vencedores escolhidos. Selecione os vencedores primeiro.",
+      );
 
     // Agrupa por fornecedor
     type Row = {
@@ -419,7 +441,9 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
         .limit(1)
         .maybeSingle();
       if (orc?.valor != null) valorUnitInicial = Number(orc.valor) || 0;
-    } catch { /* opcional */ }
+    } catch {
+      /* opcional */
+    }
 
     const created = await createOrdemCompra({
       data: {
@@ -446,9 +470,15 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
       .update({ status: "em_compra", updated_by: uid })
       .eq("id", insumo.id);
 
-    await logHistorico(sb, created.id, uid, "OC gerada a partir do checklist do insumo (com aprovação)", {
-      detalhes: { insumo_id: insumo.id, descricao: insumo.descricao, aprovacao_id: aprov.id },
-    });
+    await logHistorico(
+      sb,
+      created.id,
+      uid,
+      "OC gerada a partir do checklist do insumo (com aprovação)",
+      {
+        detalhes: { insumo_id: insumo.id, descricao: insumo.descricao, aprovacao_id: aprov.id },
+      },
+    );
 
     // Emite PDFs trilíngues e salva no Drive (não bloqueia a criação).
     try {
@@ -461,7 +491,6 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
 
     return { id: created.id as string, numero: created.numero as string };
   });
-
 
 /* ============ UPDATE header ============ */
 export const updateOrdemCompra = createServerFn({ method: "POST" })
@@ -516,7 +545,11 @@ export const updateOrdemCompra = createServerFn({ method: "POST" })
     const uid = context.userId;
     if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
 
-    const { data: cur } = await sb.from("ordens_compra").select("status").eq("id", data.id).single();
+    const { data: cur } = await sb
+      .from("ordens_compra")
+      .select("status")
+      .eq("id", data.id)
+      .single();
     if (cur && ["aprovada", "enviada", "recebida", "recebida_parcial"].includes(cur.status)) {
       throw new Error("OC já aprovada/enviada não pode ser editada. Cancele ou crie revisão.");
     }
@@ -527,7 +560,9 @@ export const updateOrdemCompra = createServerFn({ method: "POST" })
     if (data.patch.valor_frete !== undefined) {
       await sb.rpc("oc_recalc_totais", { oc_id: data.id });
     }
-    await logHistorico(sb, data.id, uid, "Cabeçalho atualizado", { detalhes: data.patch as Record<string, unknown> });
+    await logHistorico(sb, data.id, uid, "Cabeçalho atualizado", {
+      detalhes: data.patch as Record<string, unknown>,
+    });
     return { ok: true };
   });
 
@@ -599,7 +634,11 @@ export const setOcStatus = createServerFn({ method: "POST" })
     const uid = context.userId;
     if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
 
-    const { data: cur } = await sb.from("ordens_compra").select("status").eq("id", data.id).single();
+    const { data: cur } = await sb
+      .from("ordens_compra")
+      .select("status")
+      .eq("id", data.id)
+      .single();
     if (!cur) throw new Error("OC não encontrada");
 
     // Validar wizard ao sair de rascunho
@@ -631,18 +670,24 @@ export const setOcStatus = createServerFn({ method: "POST" })
     // Disparo de e-mail (assíncrono; falhas não bloqueiam a operação)
     try {
       const eventKey =
-        data.status === "aprovada" ? "oc.aprovada"
-        : data.status === "enviada" ? "oc.enviada"
-        : data.status === "cancelada" ? "oc.cancelada"
-        : null;
+        data.status === "aprovada"
+          ? "oc.aprovada"
+          : data.status === "enviada"
+            ? "oc.enviada"
+            : data.status === "cancelada"
+              ? "oc.cancelada"
+              : null;
       if (eventKey) {
         const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+        const supabaseAdmin = await getCriticalClient();
         const { dispatchEmail } = await import("@/lib/email/dispatch.server");
         const { data: oc } = await supabaseAdmin
           .from("ordens_compra")
-          .select("numero, valor_total, moeda, fornecedor_id, fornecedor_razao_social, fornecedor_nome_fantasia")
-          .eq("id", data.id).maybeSingle();
+          .select(
+            "numero, valor_total, moeda, fornecedor_id, fornecedor_razao_social, fornecedor_nome_fantasia",
+          )
+          .eq("id", data.id)
+          .maybeSingle();
         const usuario = await getUserName(sb, uid);
         await dispatchEmail(supabaseAdmin, {
           eventKey,
@@ -653,7 +698,9 @@ export const setOcStatus = createServerFn({ method: "POST" })
           vars: {
             codigo: oc?.numero ?? "",
             titulo: oc?.numero ?? "",
-            valor: oc ? `${oc.moeda ?? ""} ${Number(oc.valor_total ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "",
+            valor: oc
+              ? `${oc.moeda ?? ""} ${Number(oc.valor_total ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+              : "",
             fornecedor: oc?.fornecedor_nome_fantasia || oc?.fornecedor_razao_social || "",
             usuario,
             motivo: data.observacao ?? "",

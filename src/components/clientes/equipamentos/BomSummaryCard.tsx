@@ -82,7 +82,10 @@ export function BomSummaryCard({ equipamentoId }: { equipamentoId: string }) {
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Custo estimado</div>
           <div className="text-[15px] font-semibold">
-            {Number(data.custoTotal).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+            {Number(data.custoTotal).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
           </div>
         </div>
       </div>

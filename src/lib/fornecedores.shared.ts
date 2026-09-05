@@ -1,12 +1,7 @@
 import { z } from "zod";
 
 export const FORNECEDOR_RANKINGS = ["A", "B", "C"] as const;
-export const FORNECEDOR_STATUS = [
-  "ativo",
-  "em_avaliacao",
-  "inativo",
-  "bloqueado",
-] as const;
+export const FORNECEDOR_STATUS = ["ativo", "em_avaliacao", "inativo", "bloqueado"] as const;
 
 export type FornecedorRanking = (typeof FORNECEDOR_RANKINGS)[number];
 export type FornecedorStatus = (typeof FORNECEDOR_STATUS)[number];
@@ -46,16 +41,7 @@ export const INCOTERMS = [
 
 export const MOEDAS = ["USD", "CNY", "EUR", "BRL", "GBP", "JPY"] as const;
 
-export const TAX_ID_TIPOS = [
-  "CNPJ",
-  "EIN",
-  "USCC",
-  "VAT",
-  "RUC",
-  "RUT",
-  "RFC",
-  "OTHER",
-] as const;
+export const TAX_ID_TIPOS = ["CNPJ", "EIN", "USCC", "VAT", "RUC", "RUT", "RFC", "OTHER"] as const;
 
 export const CERTIFICACOES_SUGERIDAS = [
   "ISO 9001",
@@ -78,8 +64,7 @@ export const CERTIFICACOES_SUGERIDAS = [
   "CSA",
 ] as const;
 
-const emptyToNull = (v: unknown) =>
-  v === "" || v === undefined ? null : v;
+const emptyToNull = (v: unknown) => (v === "" || v === undefined ? null : v);
 
 export const fornecedorInputSchema = z.object({
   nome: z.string().min(2, "Nome obrigatório").max(200),
@@ -88,12 +73,7 @@ export const fornecedorInputSchema = z.object({
   cidade: z.string().max(120).optional().nullable(),
   endereco: z.string().max(500).optional().nullable(),
   site: z.string().max(300).optional().nullable(),
-  email_corporativo: z
-    .string()
-    .email("E-mail inválido")
-    .optional()
-    .nullable()
-    .or(z.literal("")),
+  email_corporativo: z.string().email("E-mail inválido").optional().nullable().or(z.literal("")),
   telefone_ddi: z.string().max(6).optional().nullable(),
   telefone_numero: z.string().max(40).optional().nullable(),
   idioma: z.string().max(8).optional().nullable(),
@@ -107,21 +87,33 @@ export const fornecedorInputSchema = z.object({
   // ===== Identidade legal =====
   tax_id: z.string().max(60).optional().nullable(),
   tax_id_tipo: z.string().max(20).optional().nullable(),
-  incorporation_year: z.preprocess(emptyToNull, z.number().int().min(1800).max(2100).optional().nullable()),
+  incorporation_year: z.preprocess(
+    emptyToNull,
+    z.number().int().min(1800).max(2100).optional().nullable(),
+  ),
   legal_name_local: z.string().max(200).optional().nullable(),
 
   // ===== Comercial =====
   moeda_padrao: z.string().max(8).optional().nullable(),
   incoterm_padrao: z.string().max(8).optional().nullable(),
   porto_origem: z.string().max(120).optional().nullable(),
-  lead_time_dias: z.preprocess(emptyToNull, z.number().int().min(0).max(1000).optional().nullable()),
+  lead_time_dias: z.preprocess(
+    emptyToNull,
+    z.number().int().min(0).max(1000).optional().nullable(),
+  ),
   moq: z.preprocess(emptyToNull, z.number().int().min(0).max(10_000_000).optional().nullable()),
   payment_terms: z.string().max(120).optional().nullable(),
-  condicao_pagamento_dias: z.preprocess(emptyToNull, z.number().int().min(0).max(720).optional().nullable()),
+  condicao_pagamento_dias: z.preprocess(
+    emptyToNull,
+    z.number().int().min(0).max(720).optional().nullable(),
+  ),
 
   // ===== Capacidade & qualidade =====
   funcionarios_faixa: z.string().max(60).optional().nullable(),
-  fabrica_area_m2: z.preprocess(emptyToNull, z.number().int().min(0).max(10_000_000).optional().nullable()),
+  fabrica_area_m2: z.preprocess(
+    emptyToNull,
+    z.number().int().min(0).max(10_000_000).optional().nullable(),
+  ),
   capacidade_mensal: z.string().max(120).optional().nullable(),
   certificacoes: z.array(z.string().max(60)).default([]),
   auditado_em: z.string().max(20).optional().nullable(),

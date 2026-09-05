@@ -145,12 +145,12 @@ function SubmissaoDetalhe({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-        <GerarEtpDialog submissaoId={s.id} clienteId={s.cliente_id} />
-        <Button asChild size="sm">
-          <Link to="/comercial/orcamento/novo">
-            Criar orçamento <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
-        </Button>
+          <GerarEtpDialog submissaoId={s.id} clienteId={s.cliente_id} />
+          <Button asChild size="sm">
+            <Link to="/comercial/orcamento/novo">
+              Criar orçamento <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -169,10 +169,7 @@ function SubmissaoDetalhe({
                 else if (Array.isArray(v)) display = v.join(", ") || "—";
                 else display = String(v);
                 return (
-                  <div
-                    key={c.id}
-                    className="rounded-md border border-border bg-muted/20 px-3 py-2"
-                  >
+                  <div key={c.id} className="rounded-md border border-border bg-muted/20 px-3 py-2">
                     <dt className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {pickLabel(c.label, idioma)}
                     </dt>

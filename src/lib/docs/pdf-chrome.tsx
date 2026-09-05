@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Header e rodapé compartilhados pelos PDFs gerados (Orçamento, FAT, SAT).
  * Mantém o layout enxuto: 64pt no topo / 48pt na base.
@@ -52,7 +51,12 @@ const chromeStyles = (accent: string, logoHeight: number, logoGap: number) =>
       backgroundColor: "#FFFFFF",
     },
 
-    headerLogo: { height: logoHeight, width: "auto", maxWidth: logoHeight * 3.5, objectFit: "contain" },
+    headerLogo: {
+      height: logoHeight,
+      width: "auto",
+      maxWidth: logoHeight * 3.5,
+      objectFit: "contain",
+    },
     headerEmpresaCol: { flexDirection: "column" },
     headerEmpresa: { fontSize: 10, fontFamily: TOKENS.fontBold, color: accent },
     headerSub: { fontSize: 7, color: TOKENS.muted, marginTop: 1 },
@@ -75,8 +79,21 @@ const chromeStyles = (accent: string, logoHeight: number, logoGap: number) =>
       fontSize: 7,
       color: TOKENS.muted,
     },
-    footerLeft: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1, maxWidth: "32%" },
-    footerCenter: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1, maxWidth: "44%", justifyContent: "center" },
+    footerLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      flexShrink: 1,
+      maxWidth: "32%",
+    },
+    footerCenter: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      flexShrink: 1,
+      maxWidth: "44%",
+      justifyContent: "center",
+    },
     footerRight: { flexShrink: 0, maxWidth: "24%", textAlign: "right" },
     footerStrong: { fontFamily: TOKENS.fontBold, color: TOKENS.text },
   });
@@ -154,20 +171,24 @@ export function PdfFooter({
   return (
     <View style={s.footer} fixed>
       <View style={s.footerLeft}>
-        {empresa ? <Text style={s.footerStrong}>{empresa}</Text> : <Text style={s.footerStrong}>{truncate(titulo, 40)}</Text>}
+        {empresa ? (
+          <Text style={s.footerStrong}>{empresa}</Text>
+        ) : (
+          <Text style={s.footerStrong}>{truncate(titulo, 40)}</Text>
+        )}
         {endereco ? <Text>· {endereco}</Text> : <Text>· v{versao}</Text>}
       </View>
       <View style={s.footerCenter}>
         {tag ? <Text style={s.footerStrong}>{tag}</Text> : null}
         {tag ? <Text>·</Text> : null}
-        <Text>{L.resp}: {truncate(responsavel, 28) || "—"}</Text>
+        <Text>
+          {L.resp}: {truncate(responsavel, 28) || "—"}
+        </Text>
         {extra ? <Text>· {extra}</Text> : null}
       </View>
       <Text
         style={s.footerRight}
-        render={({ pageNumber, totalPages }) =>
-          `${L.pagina} ${pageNumber} ${L.de} ${totalPages}`
-        }
+        render={({ pageNumber, totalPages }) => `${L.pagina} ${pageNumber} ${L.de} ${totalPages}`}
       />
     </View>
   );

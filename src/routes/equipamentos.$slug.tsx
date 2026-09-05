@@ -54,7 +54,9 @@ export const Route = createFileRoute("/equipamentos/$slug")({
     <PublicSiteShell variant="solid">
       <div className="mx-auto max-w-2xl px-5 py-24 text-center text-slate-700">
         <h1 className="text-3xl font-semibold text-slate-900">Ocorreu um erro</h1>
-        <p className="mt-3 text-sm">Não foi possível carregar esta página. Tente novamente em instantes.</p>
+        <p className="mt-3 text-sm">
+          Não foi possível carregar esta página. Tente novamente em instantes.
+        </p>
       </div>
     </PublicSiteShell>
   ),
@@ -62,8 +64,13 @@ export const Route = createFileRoute("/equipamentos/$slug")({
     <PublicSiteShell variant="solid">
       <div className="mx-auto max-w-2xl px-5 py-24 text-center text-slate-700">
         <h1 className="text-3xl font-semibold text-slate-900">Página não encontrada</h1>
-        <p className="mt-3 text-sm">O equipamento buscado não foi encontrado ou ainda não foi publicado.</p>
-        <a href="/equipamentos" className="mt-6 inline-block rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white">
+        <p className="mt-3 text-sm">
+          O equipamento buscado não foi encontrado ou ainda não foi publicado.
+        </p>
+        <a
+          href="/equipamentos"
+          className="mt-6 inline-block rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white"
+        >
           Ver todos os equipamentos
         </a>
       </div>

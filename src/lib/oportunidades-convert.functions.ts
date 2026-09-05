@@ -34,14 +34,15 @@ export type EmpresaOpp = {
 
 export const listOportunidadesByEmpresa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { cliente_id?: string | null; empresa_lead?: string | null; source_id?: string }) =>
-    z
-      .object({
-        cliente_id: z.string().uuid().nullable().optional(),
-        empresa_lead: z.string().max(200).nullable().optional(),
-        source_id: z.string().uuid().optional(),
-      })
-      .parse(data ?? {}),
+  .inputValidator(
+    (data: { cliente_id?: string | null; empresa_lead?: string | null; source_id?: string }) =>
+      z
+        .object({
+          cliente_id: z.string().uuid().nullable().optional(),
+          empresa_lead: z.string().max(200).nullable().optional(),
+          source_id: z.string().uuid().optional(),
+        })
+        .parse(data ?? {}),
   )
   .handler(async ({ data, context }): Promise<EmpresaOpp[]> => {
     let q = context.supabase
@@ -64,7 +65,9 @@ export const listOportunidadesByEmpresa = createServerFn({ method: "POST" })
       return [];
     }
 
-    const { data: rows, error } = await q.order("stage_entered_at", { ascending: false }).limit(100);
+    const { data: rows, error } = await q
+      .order("stage_entered_at", { ascending: false })
+      .limit(100);
     if (error) throw friendlyDbError(error);
     return (rows ?? []).map((r) => ({
       id: r.id,

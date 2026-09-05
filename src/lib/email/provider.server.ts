@@ -9,7 +9,10 @@
  * apenas registra no log sem quebrar o envio de e-mail.
  */
 
-import { getGoogleAccessToken, serviceAccountConfigured } from "@/lib/google-service-account.server";
+import {
+  getGoogleAccessToken,
+  serviceAccountConfigured,
+} from "@/lib/google-service-account.server";
 
 const SENDER_EMAIL = "system@sltkamericas.com";
 const SENDER_NAME = "Solutek";
@@ -39,7 +42,11 @@ export interface SendMailInput {
 
 export type SendResult =
   | { ok: true; messageId: string }
-  | { ok: false; reason: "provider_not_configured" | "auth_failed" | "send_failed"; detail?: string };
+  | {
+      ok: false;
+      reason: "provider_not_configured" | "auth_failed" | "send_failed";
+      detail?: string;
+    };
 
 export async function sendMail(input: SendMailInput): Promise<SendResult> {
   const creds = readResendCreds();
@@ -96,7 +103,9 @@ export async function insertCalendarEvent(
   }
   if (!access_token) return { ok: false, reason: "provider_not_configured" };
 
-  const end = new Date(new Date(input.startISO).getTime() + input.durationMin * 60_000).toISOString();
+  const end = new Date(
+    new Date(input.startISO).getTime() + input.durationMin * 60_000,
+  ).toISOString();
   const res = await fetch(
     "https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=none",
     {

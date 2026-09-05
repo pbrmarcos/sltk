@@ -41,7 +41,6 @@ export interface DocFrontmatter {
   app_version?: string; // versão do app em que este artigo foi revisado
 }
 
-
 export interface DocArticle extends DocFrontmatter {
   body: string;
   excerpt: string; // first paragraph plain text
@@ -63,21 +62,70 @@ export interface CategoryMeta {
 }
 
 export const CATEGORIES: CategoryMeta[] = [
-  { id: "conta", label: "Conta & primeiros passos", description: "Login, perfil, senha, navegação e papéis.", order: 1 },
-  { id: "comercial", label: "Comercial", description: "Pipeline, oportunidades, orçamentos e RFQ.", order: 2 },
-  { id: "clientes-fornecedores", label: "Clientes & Fornecedores", description: "Cadastros, homologação e importação.", order: 3 },
-  { id: "engenharia", label: "Engenharia", description: "ETP, projeto mecânico/elétrico, Planejamento (etapas + H/H).", order: 4 },
-  { id: "compras", label: "Compras", description: "Solicitação, cotações e ordens de compra.", order: 5 },
+  {
+    id: "conta",
+    label: "Conta & primeiros passos",
+    description: "Login, perfil, senha, navegação e papéis.",
+    order: 1,
+  },
+  {
+    id: "comercial",
+    label: "Comercial",
+    description: "Pipeline, oportunidades, orçamentos e RFQ.",
+    order: 2,
+  },
+  {
+    id: "clientes-fornecedores",
+    label: "Clientes & Fornecedores",
+    description: "Cadastros, homologação e importação.",
+    order: 3,
+  },
+  {
+    id: "engenharia",
+    label: "Engenharia",
+    description: "ETP, projeto mecânico/elétrico, Planejamento (etapas + H/H).",
+    order: 4,
+  },
+  {
+    id: "compras",
+    label: "Compras",
+    description: "Solicitação, cotações e ordens de compra.",
+    order: 5,
+  },
   { id: "qualidade", label: "Qualidade", description: "Revisões e FAT.", order: 6 },
   { id: "producao", label: "Produção", description: "Montagem e kanban de etapas.", order: 7 },
-  { id: "logistica", label: "Logística", description: "Embarques, transporte e status de entrega.", order: 8 },
+  {
+    id: "logistica",
+    label: "Logística",
+    description: "Embarques, transporte e status de entrega.",
+    order: 8,
+  },
   { id: "pos-vendas", label: "Pós-vendas", description: "SAT e chamados com SLA.", order: 9 },
-  { id: "documentos", label: "Documentos", description: "Central, editor de blocos e templates.", order: 10 },
-  { id: "know-how", label: "Know-how", description: "Biblioteca interna, trilhas e certificações.", order: 11 },
-  { id: "admin", label: "Administração", description: "Usuários, permissões, auditoria, RFQ, SLA e páginas dos equipamentos.", order: 12 },
-  { id: "site-publico", label: "Site público", description: "Home, catálogo e captação (RFQ/contato).", order: 13 },
+  {
+    id: "documentos",
+    label: "Documentos",
+    description: "Central, editor de blocos e templates.",
+    order: 10,
+  },
+  {
+    id: "know-how",
+    label: "Know-how",
+    description: "Biblioteca interna, trilhas e certificações.",
+    order: 11,
+  },
+  {
+    id: "admin",
+    label: "Administração",
+    description: "Usuários, permissões, auditoria, RFQ, SLA e páginas dos equipamentos.",
+    order: 12,
+  },
+  {
+    id: "site-publico",
+    label: "Site público",
+    description: "Home, catálogo e captação (RFQ/contato).",
+    order: 13,
+  },
 ];
-
 
 export function getCategory(id: string): CategoryMeta | undefined {
   const normalized = id === "administracao" ? "admin" : id;

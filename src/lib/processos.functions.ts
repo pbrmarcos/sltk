@@ -31,13 +31,7 @@ export const PIPELINE_BY_TIPO = {
     "Embarque",
     "Pós-venda",
   ],
-  atendimento: [
-    "Solicitação",
-    "Análise",
-    "Registro",
-    "Resolução",
-    "Encerrado",
-  ],
+  atendimento: ["Solicitação", "Análise", "Registro", "Resolução", "Encerrado"],
   instalacao: [
     "Solicitação",
     "Preparação",
@@ -120,10 +114,7 @@ const lostCategorySchema = z.enum(LOST_CATEGORIES);
 type ProcessoRow = Database["public"]["Tables"]["processos"]["Row"];
 type Sb = SupabaseClient<Database>;
 
-async function enrichRows(
-  supabase: Sb,
-  rows: ProcessoRow[],
-): Promise<ProcessoLite[]> {
+async function enrichRows(supabase: Sb, rows: ProcessoRow[]): Promise<ProcessoLite[]> {
   if (rows.length === 0) return [];
   const clienteIds = Array.from(new Set(rows.map((r) => r.cliente_id)));
   const pilarIds = Array.from(new Set(rows.map((r) => r.pilar_id)));
@@ -164,12 +155,12 @@ async function enrichRows(
     previsao: r.previsao,
     lost_at: r.lost_at,
     lost_by: r.lost_by,
-    lost_by_nome: r.lost_by ? proMap.get(r.lost_by) ?? null : null,
+    lost_by_nome: r.lost_by ? (proMap.get(r.lost_by) ?? null) : null,
     lost_reason: r.lost_reason,
     lost_category: (r.lost_category as LostCategory | null) ?? null,
     restored_at: r.restored_at,
     restored_by: r.restored_by,
-    restored_by_nome: r.restored_by ? proMap.get(r.restored_by) ?? null : null,
+    restored_by_nome: r.restored_by ? (proMap.get(r.restored_by) ?? null) : null,
     lost_count: r.lost_count ?? 0,
   }));
 }
@@ -178,10 +169,19 @@ async function enrichRows(
 
 const listInput = z.object({
   q: z.string().max(120).optional().default(""),
-  stage: z.union([stageSchema, z.literal("todos")]).optional().default("todos"),
-  risco: z.union([riscoSchema, z.literal("todos")]).optional().default("todos"),
+  stage: z
+    .union([stageSchema, z.literal("todos")])
+    .optional()
+    .default("todos"),
+  risco: z
+    .union([riscoSchema, z.literal("todos")])
+    .optional()
+    .default("todos"),
   pilarId: z.string().uuid().or(z.literal("todos")).optional().default("todos"),
-  tipo: z.union([tipoSchema, z.literal("todos")]).optional().default("todos"),
+  tipo: z
+    .union([tipoSchema, z.literal("todos")])
+    .optional()
+    .default("todos"),
   incluirArquivados: z.boolean().optional().default(false),
   apenasArquivados: z.boolean().optional().default(false),
 });
@@ -190,10 +190,7 @@ export const listProcessos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => listInput.parse(input ?? {}))
   .handler(async ({ data, context }) => {
-    let q = context.supabase
-      .from("processos")
-      .select("*")
-      .is("deleted_at", null);
+    let q = context.supabase.from("processos").select("*").is("deleted_at", null);
     if (data.apenasArquivados) {
       q = q.not("lost_at", "is", null);
     } else if (!data.incluirArquivados) {
@@ -205,9 +202,7 @@ export const listProcessos = createServerFn({ method: "POST" })
     if (data.pilarId !== "todos") q = q.eq("pilar_id", data.pilarId);
     if (data.q.trim()) {
       const s = data.q.trim().replace(/[%,()]/g, "");
-      q = q.or(
-        [`titulo.ilike.%${s}%`, `codigo.ilike.%${s}%`].join(","),
-      );
+      q = q.or([`titulo.ilike.%${s}%`, `codigo.ilike.%${s}%`].join(","));
     }
     const { data: rows, error } = await q.order("codigo", { ascending: false }).limit(500);
     if (error) throw friendlyDbError(error);
@@ -231,10 +226,7 @@ export const getProcessoDetalhe = createServerFn({ method: "POST" })
     if (error) throw friendlyDbError(error);
     if (!row) throw new Error("Processo não encontrado");
 
-    const [enriched] = await enrichRows(
-      context.supabase as unknown as Sb,
-      [row as ProcessoRow],
-    );
+    const [enriched] = await enrichRows(context.supabase as unknown as Sb, [row as ProcessoRow]);
 
     const [{ data: eventos }, { data: tarefas }, { data: emails }] = await Promise.all([
       context.supabase
@@ -275,7 +267,11 @@ const createInput = z.object({
   stage: stageSchema.default("Lead"),
   risco: riscoSchema.default("Médio"),
   valor: z.number().nullable().optional(),
-  previsao: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  previsao: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
 });
 
 export const createProcesso = createServerFn({ method: "POST" })
@@ -360,8 +356,6 @@ export const criarProcessoDeModelo = createServerFn({ method: "POST" })
     // 3) Não clonamos eventos: mensagens, audit e stage_change são específicos
     //    do processo original. O log de criação abaixo já sinaliza a origem.
 
-
-
     // 4) Log de criação a partir de modelo
     const { data: ref } = await context.supabase
       .from("processos")
@@ -395,23 +389,23 @@ export const listarModelosProcesso = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) throw friendlyDbError(error);
-    return (rows ?? []).map((r: {
-      id: string;
-      codigo: string;
-      titulo: string;
-      stage: string;
-      cliente_id: string;
-      clientes: { nome_fantasia: string | null; razao_social: string | null } | null;
-    }) => ({
-      id: r.id,
-      codigo: r.codigo,
-      titulo: r.titulo,
-      stage: r.stage,
-      cliente_nome: r.clientes?.nome_fantasia ?? r.clientes?.razao_social ?? "—",
-    }));
+    return (rows ?? []).map(
+      (r: {
+        id: string;
+        codigo: string;
+        titulo: string;
+        stage: string;
+        cliente_id: string;
+        clientes: { nome_fantasia: string | null; razao_social: string | null } | null;
+      }) => ({
+        id: r.id,
+        codigo: r.codigo,
+        titulo: r.titulo,
+        stage: r.stage,
+        cliente_nome: r.clientes?.nome_fantasia ?? r.clientes?.razao_social ?? "—",
+      }),
+    );
   });
-
-
 
 /* ===================== moveProcesso ===================== */
 
@@ -447,9 +441,7 @@ export const moveProcesso = createServerFn({ method: "POST" })
       const doneSet = new Set((done ?? []).map((d) => d.template_id));
       const pendentes = required.filter((r) => !doneSet.has(r.id));
       if (pendentes.length > 0) {
-        throw new Error(
-          `Checklist pendente: ${pendentes.map((p) => p.label).join(", ")}`,
-        );
+        throw new Error(`Checklist pendente: ${pendentes.map((p) => p.label).join(", ")}`);
       }
     }
 
@@ -511,7 +503,9 @@ export const listChecklist = createServerFn({ method: "POST" })
 
     const { data: sts } = await context.supabase
       .from("processo_checklist_status")
-      .select("id, template_id, done, done_at, done_by, last_action_by_nome, last_action_at, last_comentario")
+      .select(
+        "id, template_id, done, done_at, done_by, last_action_by_nome, last_action_at, last_comentario",
+      )
       .eq("processo_id", data.id);
     const stMap = new Map((sts ?? []).map((s) => [s.template_id, s]));
 
@@ -563,19 +557,17 @@ export const toggleChecklistItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => toggleInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("processo_checklist_status")
-      .upsert(
-        {
-          processo_id: data.processo_id,
-          template_id: data.template_id,
-          done: data.done,
-          done_at: data.done ? new Date().toISOString() : null,
-          done_by: data.done ? context.userId : null,
-          observacao: data.comentario ?? null,
-        } as never,
-        { onConflict: "processo_id,template_id" },
-      );
+    const { error } = await context.supabase.from("processo_checklist_status").upsert(
+      {
+        processo_id: data.processo_id,
+        template_id: data.template_id,
+        done: data.done,
+        done_at: data.done ? new Date().toISOString() : null,
+        done_by: data.done ? context.userId : null,
+        observacao: data.comentario ?? null,
+      } as never,
+      { onConflict: "processo_id,template_id" },
+    );
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -626,7 +618,7 @@ export const listPilares = createServerFn({ method: "GET" })
 const STAGE_SLA_DAYS: Record<PipelineStage, number> = {
   Lead: 3,
   ETP: 7,
-  "Orçamento": 7,
+  Orçamento: 7,
   OC: 5,
   "Eng. Mecânica": 30,
   "Eng. Elétrica": 30,
@@ -699,20 +691,11 @@ async function assertCanArchive(
   processoId: string,
 ): Promise<void> {
   const [{ data: proc }, { data: roles }] = await Promise.all([
-    context.supabase
-      .from("processos")
-      .select("pilar_id")
-      .eq("id", processoId)
-      .maybeSingle(),
-    context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId),
+    context.supabase.from("processos").select("pilar_id").eq("id", processoId).maybeSingle(),
+    context.supabase.from("user_roles").select("role").eq("user_id", context.userId),
   ]);
   if (!proc) throw new Error("Processo não encontrado.");
-  const isPrivileged = (roles ?? []).some(
-    (r) => r.role === "admin" || r.role === "manager",
-  );
+  const isPrivileged = (roles ?? []).some((r) => r.role === "admin" || r.role === "manager");
   if (!isPrivileged && proc.pilar_id !== context.userId) {
     throw new Error("Apenas o pilar, manager ou admin pode arquivar/restaurar.");
   }

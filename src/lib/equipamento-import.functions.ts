@@ -7,15 +7,33 @@ import ExcelJS from "exceljs";
 
 type AnySb = any;
 
-const DISCIPLINAS_IMPORT = ["engenharia", "automacao", "planejamento", "producao", "qualidade"] as const;
+const DISCIPLINAS_IMPORT = [
+  "engenharia",
+  "automacao",
+  "planejamento",
+  "producao",
+  "qualidade",
+] as const;
 type DiscImport = (typeof DISCIPLINAS_IMPORT)[number];
 
 const STATUS = ["nao_iniciado", "em_progresso", "bloqueado", "concluido"] as const;
 const PRIOS = ["baixa", "media", "alta", "urgente"] as const;
 
-const ETAPAS_COLS = ["codigo", "ordem", "titulo", "descricao", "status", "prioridade", "data_vencimento", "responsavel_nome"];
+const ETAPAS_COLS = [
+  "codigo",
+  "ordem",
+  "titulo",
+  "descricao",
+  "status",
+  "prioridade",
+  "data_vencimento",
+  "responsavel_nome",
+];
 
-async function assertEmPlanejamento(sb: AnySb, equipamentoId: string): Promise<{ codigo: string | null; modelo: string }> {
+async function assertEmPlanejamento(
+  sb: AnySb,
+  equipamentoId: string,
+): Promise<{ codigo: string | null; modelo: string }> {
   const { data, error } = await sb
     .from("cliente_equipamentos")
     .select("status, codigo, modelo")
@@ -34,14 +52,18 @@ async function userNome(sb: AnySb, uid: string) {
   return data?.full_name ?? data?.email ?? "Usuário";
 }
 
-async function log(sb: AnySb, uid: string, entry: {
-  equipamento_id: string;
-  tipo: string;
-  disciplina?: string | null;
-  descricao: string;
-  diff?: unknown;
-  arquivo_nome?: string | null;
-}) {
+async function log(
+  sb: AnySb,
+  uid: string,
+  entry: {
+    equipamento_id: string;
+    tipo: string;
+    disciplina?: string | null;
+    descricao: string;
+    diff?: unknown;
+    arquivo_nome?: string | null;
+  },
+) {
   const nome = await userNome(sb, uid);
   await sb.from("equipamento_import_historico").insert({
     equipamento_id: entry.equipamento_id,
@@ -59,10 +81,12 @@ async function log(sb: AnySb, uid: string, entry: {
 export const exportEquipamentoDisciplinaXlsx = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      equipamentoId: z.string().uuid(),
-      disciplina: z.enum(DISCIPLINAS_IMPORT),
-    }).parse(i),
+    z
+      .object({
+        equipamentoId: z.string().uuid(),
+        disciplina: z.enum(DISCIPLINAS_IMPORT),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
@@ -70,7 +94,9 @@ export const exportEquipamentoDisciplinaXlsx = createServerFn({ method: "POST" }
 
     const { data: rows, error } = await sb
       .from("equipamento_disciplina_etapas")
-      .select("codigo, ordem, titulo, descricao, status, prioridade, data_vencimento, responsavel_nome")
+      .select(
+        "codigo, ordem, titulo, descricao, status, prioridade, data_vencimento, responsavel_nome",
+      )
       .eq("equipamento_id", data.equipamentoId)
       .eq("disciplina", data.disciplina)
       .is("deleted_at", null)
@@ -94,7 +120,7 @@ export const exportEquipamentoDisciplinaXlsx = createServerFn({ method: "POST" }
     const nMax = Math.max(500, (rows?.length ?? 0) + 100);
     const addList = (col: string, values: readonly string[]) => {
       const range = `${col}2:${col}${nMax}`;
-      ((ws as any).dataValidations).add(range, {
+      (ws as any).dataValidations.add(range, {
         type: "list",
         allowBlank: true,
         formulae: [`"${values.join(",")}"`],
@@ -153,13 +179,15 @@ const rowSchema = z.object({
 export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      equipamentoId: z.string().uuid(),
-      disciplina: z.enum(DISCIPLINAS_IMPORT),
-      rows: z.array(rowSchema).max(500),
-      arquivoNome: z.string().max(200).nullable().optional(),
-      dryRun: z.boolean().default(false),
-    }).parse(i),
+    z
+      .object({
+        equipamentoId: z.string().uuid(),
+        disciplina: z.enum(DISCIPLINAS_IMPORT),
+        rows: z.array(rowSchema).max(500),
+        arquivoNome: z.string().max(200).nullable().optional(),
+        dryRun: z.boolean().default(false),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
@@ -168,7 +196,9 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
 
     const { data: existing, error: exErr } = await sb
       .from("equipamento_disciplina_etapas")
-      .select("id, codigo, ordem, titulo, descricao, status, prioridade, data_vencimento, responsavel_nome")
+      .select(
+        "id, codigo, ordem, titulo, descricao, status, prioridade, data_vencimento, responsavel_nome",
+      )
       .eq("equipamento_id", data.equipamentoId)
       .eq("disciplina", data.disciplina)
       .is("deleted_at", null);
@@ -209,7 +239,9 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
     }
 
     // etapas existentes que não vieram na planilha → removidas (soft delete)
-    const removed = (existing ?? []).filter((r: any) => r.codigo && !data.rows.some((row) => row.codigo?.trim() === r.codigo));
+    const removed = (existing ?? []).filter(
+      (r: any) => r.codigo && !data.rows.some((row) => row.codigo?.trim() === r.codigo),
+    );
 
     const diff = {
       added: added.map((a) => ({ codigo: a.codigo, titulo: a.payload.titulo })),
@@ -229,21 +261,19 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
       if (error) throw friendlyDbError(error);
     }
     for (const a of added) {
-      const { error } = await sb
-        .from("equipamento_disciplina_etapas")
-        .insert({
-          equipamento_id: data.equipamentoId,
-          disciplina: data.disciplina,
-          titulo: a.payload.titulo,
-          descricao: a.payload.descricao,
-          status: a.payload.status,
-          prioridade: a.payload.prioridade,
-          data_vencimento: a.payload.data_vencimento,
-          responsavel_nome: a.payload.responsavel_nome,
-          ordem: a.payload.ordem,
-          created_by: context.userId,
-          updated_by: context.userId,
-        });
+      const { error } = await sb.from("equipamento_disciplina_etapas").insert({
+        equipamento_id: data.equipamentoId,
+        disciplina: data.disciplina,
+        titulo: a.payload.titulo,
+        descricao: a.payload.descricao,
+        status: a.payload.status,
+        prioridade: a.payload.prioridade,
+        data_vencimento: a.payload.data_vencimento,
+        responsavel_nome: a.payload.responsavel_nome,
+        ordem: a.payload.ordem,
+        created_by: context.userId,
+        updated_by: context.userId,
+      });
       if (error) throw friendlyDbError(error);
     }
     for (const r of removed) {
@@ -271,12 +301,14 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
 export const logEdicaoManualEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      equipamentoId: z.string().uuid(),
-      disciplina: z.string().max(40).nullable().optional(),
-      descricao: z.string().min(1).max(500),
-      diff: z.record(z.string(), z.any()).optional(),
-    }).parse(i),
+    z
+      .object({
+        equipamentoId: z.string().uuid(),
+        disciplina: z.string().max(40).nullable().optional(),
+        descricao: z.string().min(1).max(500),
+        diff: z.record(z.string(), z.any()).optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
@@ -295,12 +327,14 @@ export const logEdicaoManualEtapa = createServerFn({ method: "POST" })
 export const listHistoricoEquipamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      equipamentoId: z.string().uuid(),
-      disciplina: z.string().nullable().optional(),
-      tipo: z.string().nullable().optional(),
-      limit: z.number().int().min(1).max(500).default(200),
-    }).parse(i),
+    z
+      .object({
+        equipamentoId: z.string().uuid(),
+        disciplina: z.string().nullable().optional(),
+        tipo: z.string().nullable().optional(),
+        limit: z.number().int().min(1).max(500).default(200),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;

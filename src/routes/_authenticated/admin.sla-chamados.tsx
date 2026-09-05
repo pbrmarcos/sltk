@@ -121,7 +121,9 @@ function SlaChamadosPage() {
                                 min={1}
                                 className="h-8 w-24"
                                 value={p.resposta_horas}
-                                onChange={(e) => setField(r, "resposta_horas", Number(e.target.value))}
+                                onChange={(e) =>
+                                  setField(r, "resposta_horas", Number(e.target.value))
+                                }
                               />
                             </td>
                             <td className="py-2 pr-3">
@@ -130,7 +132,9 @@ function SlaChamadosPage() {
                                 min={1}
                                 className="h-8 w-24"
                                 value={p.resolucao_horas}
-                                onChange={(e) => setField(r, "resolucao_horas", Number(e.target.value))}
+                                onChange={(e) =>
+                                  setField(r, "resolucao_horas", Number(e.target.value))
+                                }
                               />
                             </td>
                             <td className="py-2 pr-3">
@@ -139,7 +143,9 @@ function SlaChamadosPage() {
                                 min={1}
                                 className="h-8 w-24"
                                 value={p.estagnado_horas}
-                                onChange={(e) => setField(r, "estagnado_horas", Number(e.target.value))}
+                                onChange={(e) =>
+                                  setField(r, "estagnado_horas", Number(e.target.value))
+                                }
                               />
                             </td>
                             <td className="py-2 pr-3 text-right">

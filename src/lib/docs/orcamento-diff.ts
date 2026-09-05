@@ -45,7 +45,8 @@ function parcelasEqual(a: Parcela[], b: Parcela[]): boolean {
       x.descricao_pt !== y.descricao_pt ||
       x.descricao_es !== y.descricao_es ||
       x.descricao_en !== y.descricao_en
-    ) return false;
+    )
+      return false;
   }
   return true;
 }
@@ -65,10 +66,7 @@ function arrEqUnordered(a: string[], b: string[]): boolean {
   return sa.every((v, i) => v === sb[i]);
 }
 
-export function diffOrcamentoPayload(
-  prev: OrcamentoPayload,
-  next: OrcamentoPayload,
-): DiffResult {
+export function diffOrcamentoPayload(prev: OrcamentoPayload, next: OrcamentoPayload): DiffResult {
   const changes: string[] = [];
   let major = false;
   let minor = false;
@@ -77,7 +75,9 @@ export function diffOrcamentoPayload(
   // MAJOR — cliente trocado ou conjunto de blocos selecionados alterado
   if (prev.cliente?.id !== next.cliente?.id) {
     major = true;
-    changes.push(`Cliente alterado (${prev.cliente?.razao_social ?? "—"} → ${next.cliente?.razao_social ?? "—"})`);
+    changes.push(
+      `Cliente alterado (${prev.cliente?.razao_social ?? "—"} → ${next.cliente?.razao_social ?? "—"})`,
+    );
   }
   if (!arrEqUnordered(prev.blocos_selecionados ?? [], next.blocos_selecionados ?? [])) {
     major = true;
@@ -91,7 +91,9 @@ export function diffOrcamentoPayload(
   }
   if (prev.frete?.incoterm !== next.frete?.incoterm) {
     minor = true;
-    changes.push(`Incoterm alterado (${prev.frete?.incoterm ?? "—"} → ${next.frete?.incoterm ?? "—"})`);
+    changes.push(
+      `Incoterm alterado (${prev.frete?.incoterm ?? "—"} → ${next.frete?.incoterm ?? "—"})`,
+    );
   }
   if (parcelasProductish(prev.pagamento?.parcelas ?? [], next.pagamento?.parcelas ?? [])) {
     minor = true;
@@ -118,7 +120,9 @@ export function diffOrcamentoPayload(
   // PATCH — textos e condições secundárias
   if (prev.prazo?.dias !== next.prazo?.dias) {
     patch = true;
-    changes.push(`Prazo de entrega alterado (${prev.prazo?.dias ?? "—"} → ${next.prazo?.dias ?? "—"} dias)`);
+    changes.push(
+      `Prazo de entrega alterado (${prev.prazo?.dias ?? "—"} → ${next.prazo?.dias ?? "—"} dias)`,
+    );
   }
   if ((prev.prazo?.texto_extra ?? "") !== (next.prazo?.texto_extra ?? "")) {
     patch = true;
@@ -130,7 +134,9 @@ export function diffOrcamentoPayload(
   }
   if (prev.validade?.dias !== next.validade?.dias) {
     patch = true;
-    changes.push(`Validade da oferta alterada (${prev.validade?.dias ?? "—"} → ${next.validade?.dias ?? "—"} dias)`);
+    changes.push(
+      `Validade da oferta alterada (${prev.validade?.dias ?? "—"} → ${next.validade?.dias ?? "—"} dias)`,
+    );
   }
   if ((prev.pagamento?.forma ?? "") !== (next.pagamento?.forma ?? "")) {
     patch = true;
@@ -147,7 +153,11 @@ export function diffOrcamentoPayload(
   for (const k of keys) {
     const a = pov[k] ?? {};
     const b = nov[k] ?? {};
-    if ((a.pt ?? "") !== (b.pt ?? "") || (a.es ?? "") !== (b.es ?? "") || (a.en ?? "") !== (b.en ?? "")) {
+    if (
+      (a.pt ?? "") !== (b.pt ?? "") ||
+      (a.es ?? "") !== (b.es ?? "") ||
+      (a.en ?? "") !== (b.en ?? "")
+    ) {
       patch = true;
       changes.push(`Texto do bloco "${k}" alterado`);
     }

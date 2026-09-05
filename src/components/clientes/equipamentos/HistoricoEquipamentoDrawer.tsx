@@ -1,20 +1,64 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { listHistoricoEquipamento } from "@/lib/equipamento-import.functions";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { History, FileSpreadsheet, Pencil, Trash2, Plus, ArrowUpDown, Download } from "lucide-react";
+import {
+  History,
+  FileSpreadsheet,
+  Pencil,
+  Trash2,
+  Plus,
+  ArrowUpDown,
+  Download,
+} from "lucide-react";
 
 const TIPO_META: Record<string, { label: string; icon: any; tone: string }> = {
-  import_excel: { label: "Import Excel", icon: FileSpreadsheet, tone: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" },
-  export_excel: { label: "Download Excel", icon: Download, tone: "bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300" },
-  edicao_manual: { label: "Edição", icon: Pencil, tone: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300" },
-  exclusao: { label: "Exclusão", icon: Trash2, tone: "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300" },
-  criacao: { label: "Criação", icon: Plus, tone: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300" },
-  reordenacao: { label: "Reordem", icon: ArrowUpDown, tone: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200" },
+  import_excel: {
+    label: "Import Excel",
+    icon: FileSpreadsheet,
+    tone: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
+  },
+  export_excel: {
+    label: "Download Excel",
+    icon: Download,
+    tone: "bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300",
+  },
+  edicao_manual: {
+    label: "Edição",
+    icon: Pencil,
+    tone: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+  },
+  exclusao: {
+    label: "Exclusão",
+    icon: Trash2,
+    tone: "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300",
+  },
+  criacao: {
+    label: "Criação",
+    icon: Plus,
+    tone: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300",
+  },
+  reordenacao: {
+    label: "Reordem",
+    icon: ArrowUpDown,
+    tone: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200",
+  },
 };
 
 export function HistoricoEquipamentoDrawer({
@@ -50,31 +94,44 @@ export function HistoricoEquipamentoDrawer({
           <SheetTitle className="flex items-center gap-2">
             <History className="h-4 w-4" /> Histórico do equipamento
           </SheetTitle>
-          <SheetDescription>Importações, edições e alterações registradas por usuário.</SheetDescription>
+          <SheetDescription>
+            Importações, edições e alterações registradas por usuário.
+          </SheetDescription>
         </SheetHeader>
 
         <div className="mt-3 flex gap-2">
           <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos os tipos</SelectItem>
               {Object.entries(TIPO_META).map(([k, m]) => (
-                <SelectItem key={k} value={k}>{m.label}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {m.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={filtroDisc} onValueChange={setFiltroDisc}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas disciplinas</SelectItem>
               {["engenharia", "automacao", "planejamento", "producao", "qualidade"].map((d) => (
-                <SelectItem key={d} value={d}>{d}</SelectItem>
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="mt-4 space-y-2 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 200px)" }}>
+        <div
+          className="mt-4 space-y-2 overflow-y-auto pr-1"
+          style={{ maxHeight: "calc(100vh - 200px)" }}
+        >
           {isLoading && <p className="text-xs text-muted-foreground">Carregando...</p>}
           {!isLoading && rows.length === 0 && (
             <p className="text-xs italic text-muted-foreground">Sem registros ainda.</p>
@@ -89,7 +146,9 @@ export function HistoricoEquipamentoDrawer({
                     <Icon className="mr-1 h-3 w-3" /> {meta.label}
                   </Badge>
                   {r.disciplina && (
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px]">{r.disciplina}</span>
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px]">
+                      {r.disciplina}
+                    </span>
                   )}
                   <span className="ml-auto text-[10px] text-muted-foreground">
                     {formatDistanceToNow(new Date(r.created_at), { addSuffix: true, locale: ptBR })}

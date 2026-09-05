@@ -28,8 +28,8 @@ export async function enrichBrasilApi(cnpj: string): Promise<EnrichedCliente | n
       typeof j.capital_social === "number"
         ? j.capital_social
         : j.capital_social
-        ? Number(j.capital_social)
-        : undefined,
+          ? Number(j.capital_social)
+          : undefined,
     porte: j.porte || undefined,
     cnae_principal: j.cnae_fiscal
       ? `${j.cnae_fiscal} — ${j.cnae_fiscal_descricao ?? ""}`.trim()
@@ -81,7 +81,11 @@ export async function enrichReceitaWs(cnpj: string): Promise<EnrichedCliente | n
       : undefined,
     natureza_juridica_descricao: j.natureza_juridica || undefined,
     capital_social: j.capital_social
-      ? Number(String(j.capital_social).replace(/[^0-9.,-]/g, "").replace(",", "."))
+      ? Number(
+          String(j.capital_social)
+            .replace(/[^0-9.,-]/g, "")
+            .replace(",", "."),
+        )
       : undefined,
     endereco_logradouro: j.logradouro || undefined,
     endereco_numero: j.numero || undefined,

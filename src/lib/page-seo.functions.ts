@@ -71,9 +71,7 @@ export const scanPageSeo = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = admin as any;
     const now = new Date().toISOString();
-    const { data: existing, error: exErr } = await sb
-      .from("page_seo")
-      .select("route_path");
+    const { data: existing, error: exErr } = await sb.from("page_seo").select("route_path");
     if (exErr) throw friendlyDbError(exErr);
     const have = new Set(((existing ?? []) as { route_path: string }[]).map((r) => r.route_path));
     const toInsert = PUBLIC_ROUTES.filter((r) => !have.has(r.path)).map((r) => ({

@@ -17,7 +17,11 @@ const PERIODS = [
 
 export function DashboardShell({ userName, roleLabel, subtitle, actions, children }: Props) {
   const [period, setPeriod] = React.useState("30d");
-  const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  const today = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
   const first = userName.split(" ")[0];
   return (
     <div className="space-y-6">

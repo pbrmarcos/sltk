@@ -47,7 +47,9 @@ function DocumentacaoPage() {
                 className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow)]"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.label}</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">
+                    {c.label}
+                  </span>
                   <span className="shrink-0 rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
                     {count} {count === 1 ? "artigo" : "artigos"}
                   </span>

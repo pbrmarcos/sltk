@@ -10,9 +10,23 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { TableEmpty } from "@/components/data/TableStates";
-import { Activity, ClipboardList, PackageCheck, RefreshCw, Search, TriangleAlert } from "lucide-react";
+import {
+  Activity,
+  ClipboardList,
+  PackageCheck,
+  RefreshCw,
+  Search,
+  TriangleAlert,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getOcPainel, listOcsPainel } from "@/lib/almoxarifado.functions";
 
@@ -22,10 +36,14 @@ export const Route = createFileRoute("/_authenticated/compras/almoxarifado/orden
       { title: "Ordens de compra — saldo e movimentos | Solutek Hub" },
       {
         name: "description",
-        content: "Acompanhe em tempo real o que falta receber de cada ordem de compra e o custo médio dos itens.",
+        content:
+          "Acompanhe em tempo real o que falta receber de cada ordem de compra e o custo médio dos itens.",
       },
       { property: "og:title", content: "Ordens de compra — saldo e movimentos" },
-      { property: "og:description", content: "Pendências de recebimento e custo médio por item, em tempo real." },
+      {
+        property: "og:description",
+        content: "Pendências de recebimento e custo médio por item, em tempo real.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -130,7 +148,11 @@ function OcsPainelPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi icon={ClipboardList} label="Ordens listadas" value={String(kpis?.ocs ?? 0)} />
         <Kpi icon={TriangleAlert} label="Com pendência" value={String(kpis?.pendentes ?? 0)} />
-        <Kpi icon={PackageCheck} label="Totalmente recebidas" value={String(kpis?.completas ?? 0)} />
+        <Kpi
+          icon={PackageCheck}
+          label="Totalmente recebidas"
+          value={String(kpis?.completas ?? 0)}
+        />
         <Kpi icon={Activity} label="Quantidade a receber" value={fmtQtd(kpis?.qtd_falta)} />
       </div>
 
@@ -213,7 +235,8 @@ function OcsPainelPage() {
           {!det ? (
             <Card>
               <CardContent className="p-6 text-sm text-muted-foreground">
-                Selecione uma ordem de compra para ver os itens, o que falta receber e o custo médio.
+                Selecione uma ordem de compra para ver os itens, o que falta receber e o custo
+                médio.
               </CardContent>
             </Card>
           ) : (
@@ -352,16 +375,24 @@ function OcsPainelPage() {
                       ) : (
                         det.movimentos.map((m: any) => (
                           <TableRow key={m.id}>
-                            <TableCell className="whitespace-nowrap text-xs">{fmtDataHora(m.created_at)}</TableCell>
+                            <TableCell className="whitespace-nowrap text-xs">
+                              {fmtDataHora(m.created_at)}
+                            </TableCell>
                             <TableCell className="text-xs">
                               {m.item_codigo} · {m.item_descricao}
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline">{TIPO_LABEL[m.tipo] ?? m.tipo}</Badge>
                             </TableCell>
-                            <TableCell className="text-right tabular-nums">{fmtQtd(m.quantidade)}</TableCell>
-                            <TableCell className="text-right tabular-nums">{fmtMoeda(m.custo_unitario)}</TableCell>
-                            <TableCell className="text-right tabular-nums">{fmtMoeda(m.custo_medio_apos)}</TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {fmtQtd(m.quantidade)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {fmtMoeda(m.custo_unitario)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {fmtMoeda(m.custo_medio_apos)}
+                            </TableCell>
                             <TableCell className="text-xs">{m.local_codigo}</TableCell>
                             <TableCell className="text-xs">{m.autor}</TableCell>
                           </TableRow>
@@ -407,7 +438,9 @@ function Metric({ label, value, destaque }: { label: string; value: string; dest
   return (
     <div>
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`font-semibold tabular-nums ${destaque ? "text-destructive" : ""}`}>{value}</div>
+      <div className={`font-semibold tabular-nums ${destaque ? "text-destructive" : ""}`}>
+        {value}
+      </div>
     </div>
   );
 }

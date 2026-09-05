@@ -10,11 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type ComboOption = { id: string; nome: string };
 
@@ -44,7 +40,12 @@ export function ComboboxAdd({
   const selected = options.find((o) => o.id === value);
   const trimmed = query.trim();
   const norm = (s: string) =>
-    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+    s
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
   const exactExists = options.some((o) => norm(o.nome) === norm(trimmed));
   const showCreate = canCreate && onCreate && trimmed.length >= 2 && !exactExists;
 
@@ -120,7 +121,12 @@ export function ComboboxAdd({
                     setOpen(false);
                   }}
                 >
-                  <Check className={cn("mr-2 h-3.5 w-3.5", value === opt.id ? "opacity-100" : "opacity-0")} />
+                  <Check
+                    className={cn(
+                      "mr-2 h-3.5 w-3.5",
+                      value === opt.id ? "opacity-100" : "opacity-0",
+                    )}
+                  />
                   {opt.nome}
                 </CommandItem>
               ))}

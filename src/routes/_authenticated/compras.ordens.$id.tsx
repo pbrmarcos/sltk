@@ -43,13 +43,19 @@ import {
   removeItemOc,
   setOcStatus,
 } from "@/lib/ordens-compra.functions";
-import {
-  OC_STATUS_COLOR,
-  OC_STATUS_LABEL,
-  type OcStatus,
-} from "@/lib/ordens-compra.shared";
+import { OC_STATUS_COLOR, OC_STATUS_LABEL, type OcStatus } from "@/lib/ordens-compra.shared";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Plus, Printer, Trash2, Wand2, Save, CheckCircle2, Send, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  Plus,
+  Printer,
+  Trash2,
+  Wand2,
+  Save,
+  CheckCircle2,
+  Send,
+  XCircle,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/compras/ordens/$id")({
   component: OrdemDetailPage,
@@ -83,8 +89,7 @@ function OrdemDetailPage() {
   const [editingItem, setEditingItem] = useState<any | null>(null);
 
   if (q.isLoading) return <div className="p-8">Carregando...</div>;
-  if (q.error || !q.data)
-    return <div className="p-8 text-destructive">Erro ao carregar OC</div>;
+  if (q.error || !q.data) return <div className="p-8 text-destructive">Erro ao carregar OC</div>;
 
   const { oc, itens, historico, faltantes } = q.data;
   const editavel = ["rascunho", "aguardando_aprovacao"].includes(oc.status);
@@ -154,12 +159,17 @@ function OrdemDetailPage() {
           {OC_STATUS_LABEL[oc.status as OcStatus]}
         </Badge>
         {oc.cotacao_id && (
-          <Link to="/compras/cotacoes/$id" params={{ id: oc.cotacao_id }} className="text-xs underline">
+          <Link
+            to="/compras/cotacoes/$id"
+            params={{ id: oc.cotacao_id }}
+            className="text-xs underline"
+          >
             Ver cotação origem
           </Link>
         )}
         <span className="text-sm text-muted-foreground ml-auto">
-          Valor total: <strong className="text-foreground">{fmtBRL(Number(oc.valor_total), oc.moeda)}</strong>
+          Valor total:{" "}
+          <strong className="text-foreground">{fmtBRL(Number(oc.valor_total), oc.moeda)}</strong>
         </span>
       </div>
 
@@ -232,7 +242,9 @@ function OrdemDetailPage() {
                     <TableCell className="max-w-[400px] truncate">{it.descricao}</TableCell>
                     <TableCell>{it.unidade}</TableCell>
                     <TableCell className="text-right">{Number(it.quantidade).toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{fmtBRL(Number(it.valor_unitario), oc.moeda)}</TableCell>
+                    <TableCell className="text-right">
+                      {fmtBRL(Number(it.valor_unitario), oc.moeda)}
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {fmtBRL(Number(it.valor_total ?? 0), oc.moeda)}
                     </TableCell>
@@ -290,7 +302,8 @@ function OrdemDetailPage() {
           {oc.tipo !== "terceiros" ? (
             <Alert>
               <AlertDescription>
-                Esta OC não é do tipo "Terceiros". Para gerar uma OC pass-through, crie uma nova selecionando o tipo "Terceiros".
+                Esta OC não é do tipo "Terceiros". Para gerar uma OC pass-through, crie uma nova
+                selecionando o tipo "Terceiros".
               </AlertDescription>
             </Alert>
           ) : (
@@ -300,8 +313,20 @@ function OrdemDetailPage() {
                   <CardTitle className="text-base">Cliente final (destino do repasse)</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-3 md:grid-cols-2">
-                  <TextField label="Razão social" defaultValue={oc.cliente_final_razao_social} field="cliente_final_razao_social" onSave={saveHeader} readonly={!editavel} />
-                  <TextField label="CNPJ" defaultValue={oc.cliente_final_cnpj} field="cliente_final_cnpj" onSave={saveHeader} readonly={!editavel} />
+                  <TextField
+                    label="Razão social"
+                    defaultValue={oc.cliente_final_razao_social}
+                    field="cliente_final_razao_social"
+                    onSave={saveHeader}
+                    readonly={!editavel}
+                  />
+                  <TextField
+                    label="CNPJ"
+                    defaultValue={oc.cliente_final_cnpj}
+                    field="cliente_final_cnpj"
+                    onSave={saveHeader}
+                    readonly={!editavel}
+                  />
                 </CardContent>
               </Card>
 
@@ -323,7 +348,9 @@ function OrdemDetailPage() {
                         if (!pct || !editavel) return;
                         await Promise.all(
                           itens
-                            .filter((it: any) => it.markup_pct == null && it.valor_repasse_unit == null)
+                            .filter(
+                              (it: any) => it.markup_pct == null && it.valor_repasse_unit == null,
+                            )
                             .map((it: any) =>
                               upsertItemFn({
                                 data: {
@@ -379,19 +406,40 @@ function OrdemDetailPage() {
                                 }
                               }}
                             >
-                              <TableCell className="max-w-[300px] truncate">{it.descricao}</TableCell>
-                              <TableCell className="text-right">{fmtBRL(Number(it.valor_unitario), oc.moeda)}</TableCell>
-                              <TableCell className="text-right">{it.markup_pct != null ? `${Number(it.markup_pct).toFixed(2)}%` : "—"}</TableCell>
+                              <TableCell className="max-w-[300px] truncate">
+                                {it.descricao}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {fmtBRL(Number(it.valor_unitario), oc.moeda)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {it.markup_pct != null
+                                  ? `${Number(it.markup_pct).toFixed(2)}%`
+                                  : "—"}
+                              </TableCell>
                               <TableCell className="text-right">
                                 {it.valor_repasse_unit != null
                                   ? fmtBRL(Number(it.valor_repasse_unit), oc.moeda)
                                   : it.markup_pct != null
-                                    ? fmtBRL(Number(it.valor_unitario) * (1 + Number(it.markup_pct) / 100), oc.moeda)
+                                    ? fmtBRL(
+                                        Number(it.valor_unitario) *
+                                          (1 + Number(it.markup_pct) / 100),
+                                        oc.moeda,
+                                      )
                                     : "—"}
                               </TableCell>
-                              <TableCell className="text-right">{Number(it.quantidade).toFixed(2)}</TableCell>
-                              <TableCell className="text-right font-medium">{fmtBRL(repasseTot, oc.moeda)}</TableCell>
-                              <TableCell className={cn("text-right", margem < 0 ? "text-destructive" : "text-emerald-600")}>
+                              <TableCell className="text-right">
+                                {Number(it.quantidade).toFixed(2)}
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                {fmtBRL(repasseTot, oc.moeda)}
+                              </TableCell>
+                              <TableCell
+                                className={cn(
+                                  "text-right",
+                                  margem < 0 ? "text-destructive" : "text-emerald-600",
+                                )}
+                              >
                                 {fmtBRL(margem, oc.moeda)}
                               </TableCell>
                             </TableRow>
@@ -399,7 +447,10 @@ function OrdemDetailPage() {
                         })}
                         {itens.length === 0 && (
                           <TableRow>
-                            <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
+                            <TableCell
+                              colSpan={7}
+                              className="text-center text-muted-foreground py-6"
+                            >
                               Adicione itens na aba "Itens" para configurar o repasse.
                             </TableCell>
                           </TableRow>
@@ -414,7 +465,9 @@ function OrdemDetailPage() {
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-xs text-muted-foreground">Custo total (fornecedor)</div>
-                    <div className="text-2xl font-semibold mt-1">{fmtBRL(Number(oc.valor_total), oc.moeda)}</div>
+                    <div className="text-2xl font-semibold mt-1">
+                      {fmtBRL(Number(oc.valor_total), oc.moeda)}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -438,7 +491,7 @@ function OrdemDetailPage() {
                     </div>
                     <div className="text-[11px] text-muted-foreground mt-1">
                       {Number(oc.valor_total) > 0
-                        ? `${(((Number(oc.margem_bruta ?? 0)) / Number(oc.valor_total)) * 100).toFixed(1)}% sobre custo`
+                        ? `${((Number(oc.margem_bruta ?? 0) / Number(oc.valor_total)) * 100).toFixed(1)}% sobre custo`
                         : ""}
                     </div>
                   </CardContent>
@@ -448,12 +501,14 @@ function OrdemDetailPage() {
           )}
         </TabsContent>
 
-
         {/* ============ HISTÓRICO ============ */}
         <TabsContent value="hist">
           <div className="space-y-2">
             {historico.map((h: any) => (
-              <div key={h.id} className="rounded-md border bg-card p-3 text-sm flex justify-between gap-4">
+              <div
+                key={h.id}
+                className="rounded-md border bg-card p-3 text-sm flex justify-between gap-4"
+              >
                 <div>
                   <div className="font-medium">{h.acao}</div>
                   <div className="text-xs text-muted-foreground">
@@ -466,7 +521,10 @@ function OrdemDetailPage() {
                   )}
                 </div>
                 {h.status_novo && (
-                  <Badge variant="outline" className={cn("border shrink-0", OC_STATUS_COLOR[h.status_novo as OcStatus])}>
+                  <Badge
+                    variant="outline"
+                    className={cn("border shrink-0", OC_STATUS_COLOR[h.status_novo as OcStatus])}
+                  >
                     {OC_STATUS_LABEL[h.status_novo as OcStatus] ?? h.status_novo}
                   </Badge>
                 )}
@@ -553,17 +611,71 @@ function DadosForm({
           <CardTitle className="text-base">Comprador</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <TextField label="Razão social" defaultValue={oc.comprador_razao_social} field="comprador_razao_social" onSave={onSave} readonly={readonly} />
-          <TextField label="CNPJ" defaultValue={oc.comprador_cnpj} field="comprador_cnpj" onSave={onSave} readonly={readonly} />
-          <TextField label="Inscr. Estadual" defaultValue={oc.comprador_ie} field="comprador_ie" onSave={onSave} readonly={readonly} />
-          <TextField label="Endereço" defaultValue={oc.comprador_endereco} field="comprador_endereco" onSave={onSave} readonly={readonly} />
+          <TextField
+            label="Razão social"
+            defaultValue={oc.comprador_razao_social}
+            field="comprador_razao_social"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="CNPJ"
+            defaultValue={oc.comprador_cnpj}
+            field="comprador_cnpj"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="Inscr. Estadual"
+            defaultValue={oc.comprador_ie}
+            field="comprador_ie"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="Endereço"
+            defaultValue={oc.comprador_endereco}
+            field="comprador_endereco"
+            onSave={onSave}
+            readonly={readonly}
+          />
           <div className="grid grid-cols-3 gap-2">
-            <TextField label="Cidade" defaultValue={oc.comprador_cidade} field="comprador_cidade" onSave={onSave} readonly={readonly} />
-            <TextField label="UF" defaultValue={oc.comprador_uf} field="comprador_uf" onSave={onSave} readonly={readonly} />
-            <TextField label="CEP" defaultValue={oc.comprador_cep} field="comprador_cep" onSave={onSave} readonly={readonly} />
+            <TextField
+              label="Cidade"
+              defaultValue={oc.comprador_cidade}
+              field="comprador_cidade"
+              onSave={onSave}
+              readonly={readonly}
+            />
+            <TextField
+              label="UF"
+              defaultValue={oc.comprador_uf}
+              field="comprador_uf"
+              onSave={onSave}
+              readonly={readonly}
+            />
+            <TextField
+              label="CEP"
+              defaultValue={oc.comprador_cep}
+              field="comprador_cep"
+              onSave={onSave}
+              readonly={readonly}
+            />
           </div>
-          <TextField label="Telefone" defaultValue={oc.comprador_telefone} field="comprador_telefone" onSave={onSave} readonly={readonly} />
-          <TextField label="E-mail" defaultValue={oc.comprador_email} field="comprador_email" onSave={onSave} readonly={readonly} />
+          <TextField
+            label="Telefone"
+            defaultValue={oc.comprador_telefone}
+            field="comprador_telefone"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="E-mail"
+            defaultValue={oc.comprador_email}
+            field="comprador_email"
+            onSave={onSave}
+            readonly={readonly}
+          />
         </CardContent>
       </Card>
 
@@ -572,18 +684,78 @@ function DadosForm({
           <CardTitle className="text-base">Fornecedor</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <TextField label="Razão social" defaultValue={oc.fornecedor_razao_social} field="fornecedor_razao_social" onSave={onSave} readonly={readonly} />
-          <TextField label="CNPJ / Tax ID" defaultValue={oc.fornecedor_cnpj} field="fornecedor_cnpj" onSave={onSave} readonly={readonly} />
-          <TextField label="Inscr. Estadual" defaultValue={oc.fornecedor_ie} field="fornecedor_ie" onSave={onSave} readonly={readonly} />
-          <TextField label="Endereço" defaultValue={oc.fornecedor_endereco} field="fornecedor_endereco" onSave={onSave} readonly={readonly} />
+          <TextField
+            label="Razão social"
+            defaultValue={oc.fornecedor_razao_social}
+            field="fornecedor_razao_social"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="CNPJ / Tax ID"
+            defaultValue={oc.fornecedor_cnpj}
+            field="fornecedor_cnpj"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="Inscr. Estadual"
+            defaultValue={oc.fornecedor_ie}
+            field="fornecedor_ie"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="Endereço"
+            defaultValue={oc.fornecedor_endereco}
+            field="fornecedor_endereco"
+            onSave={onSave}
+            readonly={readonly}
+          />
           <div className="grid grid-cols-3 gap-2">
-            <TextField label="Cidade" defaultValue={oc.fornecedor_cidade} field="fornecedor_cidade" onSave={onSave} readonly={readonly} />
-            <TextField label="UF" defaultValue={oc.fornecedor_uf} field="fornecedor_uf" onSave={onSave} readonly={readonly} />
-            <TextField label="CEP" defaultValue={oc.fornecedor_cep} field="fornecedor_cep" onSave={onSave} readonly={readonly} />
+            <TextField
+              label="Cidade"
+              defaultValue={oc.fornecedor_cidade}
+              field="fornecedor_cidade"
+              onSave={onSave}
+              readonly={readonly}
+            />
+            <TextField
+              label="UF"
+              defaultValue={oc.fornecedor_uf}
+              field="fornecedor_uf"
+              onSave={onSave}
+              readonly={readonly}
+            />
+            <TextField
+              label="CEP"
+              defaultValue={oc.fornecedor_cep}
+              field="fornecedor_cep"
+              onSave={onSave}
+              readonly={readonly}
+            />
           </div>
-          <TextField label="Telefone" defaultValue={oc.fornecedor_telefone} field="fornecedor_telefone" onSave={onSave} readonly={readonly} />
-          <TextField label="E-mail" defaultValue={oc.fornecedor_email} field="fornecedor_email" onSave={onSave} readonly={readonly} />
-          <TextField label="Contato" defaultValue={oc.fornecedor_contato} field="fornecedor_contato" onSave={onSave} readonly={readonly} />
+          <TextField
+            label="Telefone"
+            defaultValue={oc.fornecedor_telefone}
+            field="fornecedor_telefone"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="E-mail"
+            defaultValue={oc.fornecedor_email}
+            field="fornecedor_email"
+            onSave={onSave}
+            readonly={readonly}
+          />
+          <TextField
+            label="Contato"
+            defaultValue={oc.fornecedor_contato}
+            field="fornecedor_contato"
+            onSave={onSave}
+            readonly={readonly}
+          />
         </CardContent>
       </Card>
 
@@ -600,7 +772,11 @@ function DadosForm({
             />
           </Field>
           <Field label="Incoterm">
-            <Input defaultValue={oc.incoterm ?? ""} disabled={readonly} onBlur={(e) => onSave({ incoterm: e.target.value })} />
+            <Input
+              defaultValue={oc.incoterm ?? ""}
+              disabled={readonly}
+              onBlur={(e) => onSave({ incoterm: e.target.value })}
+            />
           </Field>
           <Field label="Moeda">
             <Select
@@ -629,7 +805,11 @@ function DadosForm({
             />
           </Field>
           <Field label="Transportadora">
-            <Input defaultValue={oc.transportadora ?? ""} disabled={readonly} onBlur={(e) => onSave({ transportadora: e.target.value })} />
+            <Input
+              defaultValue={oc.transportadora ?? ""}
+              disabled={readonly}
+              onBlur={(e) => onSave({ transportadora: e.target.value })}
+            />
           </Field>
           <Field label="Valor do frete">
             <Input
@@ -785,7 +965,9 @@ function ItemDialog({
           valor_icms_st: Number(f.valor_icms_st || 0),
           markup_pct: f.markup_pct !== "" && f.markup_pct != null ? Number(f.markup_pct) : null,
           valor_repasse_unit:
-            f.valor_repasse_unit !== "" && f.valor_repasse_unit != null ? Number(f.valor_repasse_unit) : null,
+            f.valor_repasse_unit !== "" && f.valor_repasse_unit != null
+              ? Number(f.valor_repasse_unit)
+              : null,
           data_entrega: f.data_entrega || null,
           observacoes: f.observacoes || null,
         },
@@ -812,33 +994,72 @@ function ItemDialog({
         </DialogHeader>
         <div className="grid gap-3 md:grid-cols-2">
           <Field label="Código do produto">
-            <Input defaultValue={item?.codigo_produto ?? ""} onChange={(e) => setF((p) => ({ ...p, codigo_produto: e.target.value }))} />
+            <Input
+              defaultValue={item?.codigo_produto ?? ""}
+              onChange={(e) => setF((p) => ({ ...p, codigo_produto: e.target.value }))}
+            />
           </Field>
           <Field label="Unidade">
-            <Input defaultValue={item?.unidade ?? "UN"} onChange={(e) => setF((p) => ({ ...p, unidade: e.target.value }))} />
+            <Input
+              defaultValue={item?.unidade ?? "UN"}
+              onChange={(e) => setF((p) => ({ ...p, unidade: e.target.value }))}
+            />
           </Field>
           <div className="md:col-span-2">
             <Field label="Descrição *">
-              <Textarea rows={2} defaultValue={item?.descricao ?? ""} onChange={(e) => setF((p) => ({ ...p, descricao: e.target.value }))} />
+              <Textarea
+                rows={2}
+                defaultValue={item?.descricao ?? ""}
+                onChange={(e) => setF((p) => ({ ...p, descricao: e.target.value }))}
+              />
             </Field>
           </div>
           <Field label="Quantidade *">
-            <Input type="number" step="0.01" defaultValue={item?.quantidade ?? 1} onChange={(e) => setF((p) => ({ ...p, quantidade: e.target.value }))} />
+            <Input
+              type="number"
+              step="0.01"
+              defaultValue={item?.quantidade ?? 1}
+              onChange={(e) => setF((p) => ({ ...p, quantidade: e.target.value }))}
+            />
           </Field>
           <Field label={`Valor unitário (${moeda}) *`}>
-            <Input type="number" step="0.0001" defaultValue={item?.valor_unitario ?? 0} onChange={(e) => setF((p) => ({ ...p, valor_unitario: e.target.value }))} />
+            <Input
+              type="number"
+              step="0.0001"
+              defaultValue={item?.valor_unitario ?? 0}
+              onChange={(e) => setF((p) => ({ ...p, valor_unitario: e.target.value }))}
+            />
           </Field>
           <Field label="Desconto">
-            <Input type="number" step="0.01" defaultValue={item?.valor_desconto ?? 0} onChange={(e) => setF((p) => ({ ...p, valor_desconto: e.target.value }))} />
+            <Input
+              type="number"
+              step="0.01"
+              defaultValue={item?.valor_desconto ?? 0}
+              onChange={(e) => setF((p) => ({ ...p, valor_desconto: e.target.value }))}
+            />
           </Field>
           <Field label="IPI (R$)">
-            <Input type="number" step="0.01" defaultValue={item?.valor_ipi ?? 0} onChange={(e) => setF((p) => ({ ...p, valor_ipi: e.target.value }))} />
+            <Input
+              type="number"
+              step="0.01"
+              defaultValue={item?.valor_ipi ?? 0}
+              onChange={(e) => setF((p) => ({ ...p, valor_ipi: e.target.value }))}
+            />
           </Field>
           <Field label="ICMS-ST (R$)">
-            <Input type="number" step="0.01" defaultValue={item?.valor_icms_st ?? 0} onChange={(e) => setF((p) => ({ ...p, valor_icms_st: e.target.value }))} />
+            <Input
+              type="number"
+              step="0.01"
+              defaultValue={item?.valor_icms_st ?? 0}
+              onChange={(e) => setF((p) => ({ ...p, valor_icms_st: e.target.value }))}
+            />
           </Field>
           <Field label="Data de entrega">
-            <Input type="date" defaultValue={item?.data_entrega ?? ""} onChange={(e) => setF((p) => ({ ...p, data_entrega: e.target.value }))} />
+            <Input
+              type="date"
+              defaultValue={item?.data_entrega ?? ""}
+              onChange={(e) => setF((p) => ({ ...p, data_entrega: e.target.value }))}
+            />
           </Field>
           {isTerceiros && (
             <>
@@ -867,8 +1088,12 @@ function ItemDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave}><Save className="h-4 w-4" /> Salvar</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSave}>
+            <Save className="h-4 w-4" /> Salvar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

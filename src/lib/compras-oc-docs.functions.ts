@@ -34,9 +34,7 @@ async function loadLayout(sb: any): Promise<DocumentoLayoutConfig> {
 
 export const gerarDocumentoOc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ ordem_compra_id: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ ordem_compra_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
@@ -67,7 +65,9 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
     if (insumoId) {
       const { data: ins } = await sb
         .from("projeto_insumos")
-        .select("id, created_at, clientes(codigo), equipamento_projetos(cliente_equipamentos(codigo))")
+        .select(
+          "id, created_at, clientes(codigo), equipamento_projetos(cliente_equipamentos(codigo))",
+        )
         .eq("id", insumoId)
         .maybeSingle();
       if (ins) {
@@ -162,7 +162,12 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
     const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
-    const results: Array<{ idioma: Idioma; drive_view_url?: string | null; file_name?: string; error?: string }> = [];
+    const results: Array<{
+      idioma: Idioma;
+      drive_view_url?: string | null;
+      file_name?: string;
+      error?: string;
+    }> = [];
 
     for (const idioma of IDIOMAS) {
       const buffer = await renderToBuffer(

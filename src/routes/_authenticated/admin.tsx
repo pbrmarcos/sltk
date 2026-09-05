@@ -25,7 +25,10 @@ function AdminLayout() {
     if (loading || roleLoading) return;
     if (!allowed) {
       try {
-        if (typeof window !== "undefined" && window.sessionStorage.getItem(DENIED_FLAG_KEY) !== pathname) {
+        if (
+          typeof window !== "undefined" &&
+          window.sessionStorage.getItem(DENIED_FLAG_KEY) !== pathname
+        ) {
           window.sessionStorage.setItem(DENIED_FLAG_KEY, pathname);
           void logAdminAccessDenied({ data: { path: pathname, reason: `role:${role ?? "none"}` } });
         }
@@ -79,8 +82,8 @@ function AdminLayout() {
           <ShieldAlert className="mx-auto mb-3 h-8 w-8 text-destructive" />
           <h1 className="text-lg font-semibold">Acesso restrito</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Este painel é reservado a administradores, gestores e engenharia.
-            Você será redirecionado.
+            Este painel é reservado a administradores, gestores e engenharia. Você será
+            redirecionado.
           </p>
         </div>
       </PageContainer>

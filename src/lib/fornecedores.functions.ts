@@ -36,9 +36,7 @@ const listInput = z.object({
   funcionarios_faixa: z.string().max(40).optional().default("todos"),
   lead_time_max: z.number().int().min(0).max(1000).optional().nullable(),
   page: z.number().int().min(1).default(1),
-  pageSize: z
-    .union([z.literal(25), z.literal(50), z.literal(100)])
-    .default(25),
+  pageSize: z.union([z.literal(25), z.literal(50), z.literal(100)]).default(25),
 });
 
 export const listFornecedores = createServerFn({ method: "GET" })
@@ -51,10 +49,9 @@ export const listFornecedores = createServerFn({ method: "GET" })
 
     let query = supabase
       .from("fornecedores")
-      .select(
-        "id, codigo, nome, nome_fantasia, pais, cidade, status, ranking, tags, updated_at",
-        { count: "exact" },
-      )
+      .select("id, codigo, nome, nome_fantasia, pais, cidade, status, ranking, tags, updated_at", {
+        count: "exact",
+      })
       .is("deleted_at", null)
       .order("updated_at", { ascending: false })
       .range(from, to);
@@ -89,31 +86,46 @@ export const listFornecedores = createServerFn({ method: "GET" })
     if (data.status !== "todos") query = query.eq("status", data.status);
     if (data.ranking !== "todos") query = query.eq("ranking", data.ranking);
     if (data.incoterm !== "todos")
-      query = (query as never as { eq: (c: string, v: string) => typeof query })
-        .eq("incoterm_padrao", data.incoterm);
+      query = (query as never as { eq: (c: string, v: string) => typeof query }).eq(
+        "incoterm_padrao",
+        data.incoterm,
+      );
     if (data.moeda !== "todos")
-      query = (query as never as { eq: (c: string, v: string) => typeof query })
-        .eq("moeda_padrao", data.moeda);
+      query = (query as never as { eq: (c: string, v: string) => typeof query }).eq(
+        "moeda_padrao",
+        data.moeda,
+      );
     if (data.funcionarios_faixa !== "todos")
-      query = (query as never as { eq: (c: string, v: string) => typeof query })
-        .eq("funcionarios_faixa", data.funcionarios_faixa);
+      query = (query as never as { eq: (c: string, v: string) => typeof query }).eq(
+        "funcionarios_faixa",
+        data.funcionarios_faixa,
+      );
     if (typeof data.lead_time_max === "number")
-      query = (query as never as { lte: (c: string, v: number) => typeof query })
-        .lte("lead_time_dias", data.lead_time_max);
+      query = (query as never as { lte: (c: string, v: number) => typeof query }).lte(
+        "lead_time_dias",
+        data.lead_time_max,
+      );
 
     if (data.tags.length > 0) query = query.overlaps("tags", data.tags);
     if (data.palavras_chave.length > 0)
-      query = (query as never as {
-        overlaps: (c: string, v: string[]) => typeof query;
-      }).overlaps("palavras_chave", data.palavras_chave);
+      query = (
+        query as never as {
+          overlaps: (c: string, v: string[]) => typeof query;
+        }
+      ).overlaps("palavras_chave", data.palavras_chave);
     if (data.certificacoes.length > 0)
-      query = (query as never as {
-        overlaps: (c: string, v: string[]) => typeof query;
-      }).overlaps("certificacoes", data.certificacoes);
+      query = (
+        query as never as {
+          overlaps: (c: string, v: string[]) => typeof query;
+        }
+      ).overlaps("certificacoes", data.certificacoes);
 
-    const slugs = data.categorias.length > 0
-      ? data.categorias
-      : data.categoria !== "todos" ? [data.categoria] : [];
+    const slugs =
+      data.categorias.length > 0
+        ? data.categorias
+        : data.categoria !== "todos"
+          ? [data.categoria]
+          : [];
     if (slugs.length > 0) {
       const { data: links, error: linkErr } = await supabase
         .from("fornecedor_categoria_link")
@@ -280,8 +292,7 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
     const { supabase } = context;
     await assertPurchasingRole(supabase, context.userId);
     const { categorias, ...rest } = data.patch;
-    const nn = (v: unknown) =>
-      v === "" || v === undefined ? null : v;
+    const nn = (v: unknown) => (v === "" || v === undefined ? null : v);
     const normalized = {
       ...rest,
       email_corporativo: nn(rest.email_corporativo),
@@ -352,14 +363,12 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
       .eq("fornecedor_id", id);
     if (delErr) throw friendlyDbError(delErr);
     if (categorias.length > 0) {
-      const { error: insErr } = await supabase
-        .from("fornecedor_categoria_link")
-        .insert(
-          categorias.map((slug) => ({
-            fornecedor_id: id!,
-            categoria_slug: slug,
-          })),
-        );
+      const { error: insErr } = await supabase.from("fornecedor_categoria_link").insert(
+        categorias.map((slug) => ({
+          fornecedor_id: id!,
+          categoria_slug: slug,
+        })),
+      );
       if (insErr) throw friendlyDbError(insErr);
     }
 
@@ -422,10 +431,7 @@ export const removeContatoFornecedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("fornecedor_contatos")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("fornecedor_contatos").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
   });
@@ -519,9 +525,7 @@ export const removeAnexoFornecedor = createServerFn({ method: "POST" })
 
 export const getAnexoSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({ id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { data: row, error } = await supabase
@@ -608,7 +612,6 @@ type WebEnrichment = {
   palavras_chave?: string[] | null;
 };
 
-
 type ScanFailure = {
   message: string;
   status?: number;
@@ -619,7 +622,6 @@ type ScanFailure = {
 };
 // Alias mantido para compatibilidade externa do tipo (UI antiga).
 export type GeminiFailure = ScanFailure;
-
 
 const scanInput = z.object({
   imagens: z
@@ -634,7 +636,6 @@ const scanInput = z.object({
   contexto: z.string().max(300).optional(),
   enriquecer_web: z.boolean().optional().default(true),
 });
-
 
 const SCAN_PROMPT = `Você é um assistente que extrai dados de cartões de visita, folders e catálogos de fornecedores industriais (principalmente China, EUA, Europa, Brasil).
 Analise as imagens enviadas e devolva APENAS um JSON válido (sem markdown, sem comentários) no formato:
@@ -698,16 +699,11 @@ async function listGroqModels(apiKey: string): Promise<string[]> {
 }
 
 /** Retorna o primeiro candidato liberado na chave, ou null se nenhum estiver disponível. */
-async function pickGroqModel(
-  apiKey: string,
-  candidates: string[],
-): Promise<string | null> {
+async function pickGroqModel(apiKey: string, candidates: string[]): Promise<string | null> {
   const available = await listGroqModels(apiKey);
   if (!available.length) return candidates[0] ?? null;
   return candidates.find((c) => available.includes(c)) ?? null;
 }
-
-
 
 function hasCJK(s: string | null | undefined): boolean {
   if (!s) return false;
@@ -742,7 +738,9 @@ function buildScanFailure(status: number, body: string, model = "de visão"): Sc
   let code: string | undefined;
   let providerMessage = body.slice(0, 240);
   try {
-    const parsed = JSON.parse(body) as { error?: { type?: string; code?: string; message?: string } };
+    const parsed = JSON.parse(body) as {
+      error?: { type?: string; code?: string; message?: string };
+    };
     code = parsed.error?.code ?? parsed.error?.type;
     providerMessage = parsed.error?.message ?? providerMessage;
   } catch {
@@ -802,15 +800,17 @@ async function logGeminiScan(row: {
   try {
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
-    const { data, error } = await (supabaseAdmin as unknown as {
-      from: (t: string) => {
-        insert: (v: unknown) => {
-          select: (c: string) => {
-            single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+    const { data, error } = await (
+      supabaseAdmin as unknown as {
+        from: (t: string) => {
+          insert: (v: unknown) => {
+            select: (c: string) => {
+              single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+            };
           };
         };
-      };
-    })
+      }
+    )
       .from("gemini_scan_log")
       .insert({ endpoint: "scan_fornecedor", created_at, ...row })
       .select("id")
@@ -900,7 +900,8 @@ export const scanFornecedorDocs = createServerFn({ method: "POST" })
         request_context: data.contexto ?? null,
       });
       const error: ScanFailure = {
-        message: "Leitura por IA indisponível — configure a conta Groq em Configurações › Chaves & Diagnóstico.",
+        message:
+          "Leitura por IA indisponível — configure a conta Groq em Configurações › Chaves & Diagnóstico.",
         code: "MISSING_GROQ_API_KEY",
         logged_at: log.created_at,
         log_id: log.id ?? undefined,
@@ -914,9 +915,7 @@ export const scanFornecedorDocs = createServerFn({ method: "POST" })
       };
     }
 
-    const userContent: Array<Record<string, unknown>> = [
-      { type: "text", text: SCAN_PROMPT },
-    ];
+    const userContent: Array<Record<string, unknown>> = [{ type: "text", text: SCAN_PROMPT }];
     if (data.contexto) {
       userContent.push({ type: "text", text: `Contexto: ${data.contexto}` });
     }
@@ -1007,9 +1006,7 @@ export const scanFornecedorDocs = createServerFn({ method: "POST" })
 
     // ===== Tradução automática (CJK → PT) =====
     const needsTranslation =
-      hasCJK(extracted.endereco) ||
-      hasCJK(extracted.cidade) ||
-      hasCJK(extracted.nome_fantasia);
+      hasCJK(extracted.endereco) || hasCJK(extracted.cidade) || hasCJK(extracted.nome_fantasia);
     if (needsTranslation) {
       const translated = await groqJson<{
         endereco_pt?: string;
@@ -1046,7 +1043,11 @@ nome_fantasia: ${extracted.nome_fantasia ?? ""}`,
       .from("fornecedor_categorias_catalog")
       .select("slug, nome_pt, nome_en")
       .eq("ativo", true);
-    const catalogo = (catalogoRows ?? []) as Array<{ slug: string; nome_pt: string; nome_en: string | null }>;
+    const catalogo = (catalogoRows ?? []) as Array<{
+      slug: string;
+      nome_pt: string;
+      nome_en: string | null;
+    }>;
     const catalogoStr = catalogo
       .map((c) => `${c.slug}=${c.nome_pt}${c.nome_en ? ` / ${c.nome_en}` : ""}`)
       .join(", ");
@@ -1131,8 +1132,6 @@ ${markdown.slice(0, 12000)}`;
       }
     }
 
-
-
     await logGeminiScan({
       user_id: userId,
       user_email: userEmail,
@@ -1172,22 +1171,35 @@ export const listGeminiScanLogs = createServerFn({ method: "GET" })
   .inputValidator((d) => logsInput.parse(d))
   .handler(async ({ data, context }): Promise<{ rows: GeminiScanLogRow[]; available: boolean }> => {
     const { supabase } = context;
-    const base = (supabase as unknown as {
-      from: (t: string) => {
-        select: (c: string) => {
-          eq: (col: string, val: unknown) => {
-            order: (col: string, opts: { ascending: boolean }) => {
+    const base = (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (c: string) => {
+            eq: (
+              col: string,
+              val: unknown,
+            ) => {
+              order: (
+                col: string,
+                opts: { ascending: boolean },
+              ) => {
+                limit: (n: number) => Promise<{ data: GeminiScanLogRow[] | null; error: unknown }>;
+              };
+            };
+            order: (
+              col: string,
+              opts: { ascending: boolean },
+            ) => {
               limit: (n: number) => Promise<{ data: GeminiScanLogRow[] | null; error: unknown }>;
             };
           };
-          order: (col: string, opts: { ascending: boolean }) => {
-            limit: (n: number) => Promise<{ data: GeminiScanLogRow[] | null; error: unknown }>;
-          };
         };
-      };
-    }).from("gemini_scan_log").select(
-      "id, created_at, user_email, ok, status, code, message, provider_message, duration_ms, imagens_count",
-    );
+      }
+    )
+      .from("gemini_scan_log")
+      .select(
+        "id, created_at, user_email, ok, status, code, message, provider_message, duration_ms, imagens_count",
+      );
     const result = data.only_failures
       ? await base.eq("ok", false).order("created_at", { ascending: false }).limit(data.limit)
       : await base.order("created_at", { ascending: false }).limit(data.limit);
@@ -1226,7 +1238,13 @@ function extFromMime(mime: string): string {
 }
 
 function sanitizeFolderName(s: string): string {
-  return s.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) || "fornecedor";
+  return (
+    s
+      .replace(/[\\/:*?"<>|]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 80) || "fornecedor"
+  );
 }
 
 export const uploadScanToDrive = createServerFn({ method: "POST" })
@@ -1246,7 +1264,8 @@ export const uploadScanToDrive = createServerFn({ method: "POST" })
     if (!driveConfigured()) {
       return {
         ok: false as const,
-        error: "Google Drive indisponível — a integração não está configurada. Você pode seguir sem o arquivamento automático.",
+        error:
+          "Google Drive indisponível — a integração não está configurada. Você pode seguir sem o arquivamento automático.",
         uploaded: [] as Array<{ id: string; url: string; nome: string }>,
       };
     }
@@ -1290,7 +1309,6 @@ export const uploadScanToDrive = createServerFn({ method: "POST" })
     return { ok: true as const, uploaded, folder_id: parentId, folder_url: driveFolderUrl };
   });
 
-
 /* =============================================================
  * Submissões (histórico de scans + enriquecimento) por fornecedor
  * ============================================================= */
@@ -1308,13 +1326,7 @@ const linkSubmissaoInput = z.object({
   error: z.string().optional().nullable(),
 });
 
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [k: string]: JsonValue }
-  | JsonValue[];
+type JsonValue = string | number | boolean | null | { [k: string]: JsonValue } | JsonValue[];
 
 export type ScanSubmissaoRow = {
   id: string;
@@ -1331,7 +1343,6 @@ export type ScanSubmissaoRow = {
   created_at: string;
   created_by_email: string | null;
 };
-
 
 export const linkScanSubmissao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -1362,7 +1373,10 @@ export const linkScanSubmissao = createServerFn({ method: "POST" })
         from: (t: string) => {
           insert: (v: unknown) => {
             select: (c: string) => {
-              single: () => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+              single: () => Promise<{
+                data: { id: string } | null;
+                error: { message: string } | null;
+              }>;
             };
           };
         };
@@ -1385,9 +1399,18 @@ export const listScanSubmissoes = createServerFn({ method: "GET" })
       supabase as unknown as {
         from: (t: string) => {
           select: (c: string) => {
-            eq: (col: string, val: unknown) => {
-              order: (col: string, opts: { ascending: boolean }) => {
-                limit: (n: number) => Promise<{ data: ScanSubmissaoRow[] | null; error: { message: string } | null }>;
+            eq: (
+              col: string,
+              val: unknown,
+            ) => {
+              order: (
+                col: string,
+                opts: { ascending: boolean },
+              ) => {
+                limit: (n: number) => Promise<{
+                  data: ScanSubmissaoRow[] | null;
+                  error: { message: string } | null;
+                }>;
               };
             };
           };
@@ -1438,7 +1461,11 @@ export const reenriquecerFornecedor = createServerFn({ method: "POST" })
       .from("fornecedor_categorias_catalog")
       .select("slug, nome_pt, nome_en")
       .eq("ativo", true);
-    const catalogo = (catalogoRows ?? []) as Array<{ slug: string; nome_pt: string; nome_en: string | null }>;
+    const catalogo = (catalogoRows ?? []) as Array<{
+      slug: string;
+      nome_pt: string;
+      nome_en: string | null;
+    }>;
     const catalogoStr = catalogo
       .map((c) => `${c.slug}=${c.nome_pt}${c.nome_en ? ` / ${c.nome_en}` : ""}`)
       .join(", ");
@@ -1516,11 +1543,14 @@ ${markdown.slice(0, 12000)}`;
 
       // Merge: só preenche se o campo atual estiver vazio.
       const fRow = f as unknown as Record<string, unknown>;
-      const keep = <T,>(curr: T, val: T | undefined | null): T => {
+      const keep = <T>(curr: T, val: T | undefined | null): T => {
         const isEmpty = curr === null || curr === undefined || curr === "";
         return isEmpty && val !== undefined && val !== null && val !== "" ? val : curr;
       };
-      const mergeArr = (curr: string[] | null | undefined, val: string[] | null | undefined): string[] => {
+      const mergeArr = (
+        curr: string[] | null | undefined,
+        val: string[] | null | undefined,
+      ): string[] => {
         const a = Array.isArray(curr) ? curr : [];
         const b = Array.isArray(val) ? val : [];
         return Array.from(new Set([...a, ...b]));
@@ -1529,25 +1559,43 @@ ${markdown.slice(0, 12000)}`;
         observacoes: ((f.observacoes ?? "") + tagReenrich).slice(0, 8000),
         tax_id: keep(fRow.tax_id as string | null, web.tax_id ?? null),
         tax_id_tipo: keep(fRow.tax_id_tipo as string | null, web.tax_id_tipo ?? null),
-        legal_name_local: keep(fRow.legal_name_local as string | null, web.legal_name_local ?? null),
+        legal_name_local: keep(
+          fRow.legal_name_local as string | null,
+          web.legal_name_local ?? null,
+        ),
         moeda_padrao: keep(fRow.moeda_padrao as string | null, web.moeda_padrao ?? null),
         incoterm_padrao: keep(fRow.incoterm_padrao as string | null, web.incoterm_padrao ?? null),
         porto_origem: keep(fRow.porto_origem as string | null, web.porto_origem ?? null),
         lead_time_dias: keep(fRow.lead_time_dias as number | null, web.lead_time_dias ?? null),
         moq: keep(fRow.moq as number | null, web.moq ?? null),
         payment_terms: keep(fRow.payment_terms as string | null, web.payment_terms ?? null),
-        funcionarios_faixa: keep(fRow.funcionarios_faixa as string | null, web.funcionarios_faixa ?? null),
+        funcionarios_faixa: keep(
+          fRow.funcionarios_faixa as string | null,
+          web.funcionarios_faixa ?? null,
+        ),
         fabrica_area_m2: keep(fRow.fabrica_area_m2 as number | null, web.fabrica_area_m2 ?? null),
-        capacidade_mensal: keep(fRow.capacidade_mensal as string | null, web.capacidade_mensal ?? null),
+        capacidade_mensal: keep(
+          fRow.capacidade_mensal as string | null,
+          web.capacidade_mensal ?? null,
+        ),
         whatsapp_corp: keep(fRow.whatsapp_corp as string | null, web.whatsapp_corp ?? null),
         wechat_corp: keep(fRow.wechat_corp as string | null, web.wechat_corp ?? null),
         linkedin_url: keep(fRow.linkedin_url as string | null, web.linkedin_url ?? null),
         alibaba_url: keep(fRow.alibaba_url as string | null, web.alibaba_url ?? null),
-        made_in_china_url: keep(fRow.made_in_china_url as string | null, web.made_in_china_url ?? null),
-        endereco_estado_provincia: keep(fRow.endereco_estado_provincia as string | null, web.endereco_estado_provincia ?? null),
+        made_in_china_url: keep(
+          fRow.made_in_china_url as string | null,
+          web.made_in_china_url ?? null,
+        ),
+        endereco_estado_provincia: keep(
+          fRow.endereco_estado_provincia as string | null,
+          web.endereco_estado_provincia ?? null,
+        ),
         fuso_horario: keep(fRow.fuso_horario as string | null, web.fuso_horario ?? null),
         certificacoes: mergeArr(fRow.certificacoes as string[] | null, web.certificacoes ?? null),
-        palavras_chave: mergeArr(fRow.palavras_chave as string[] | null, web.palavras_chave ?? null),
+        palavras_chave: mergeArr(
+          fRow.palavras_chave as string[] | null,
+          web.palavras_chave ?? null,
+        ),
       };
       await supabase
         .from("fornecedores")
@@ -1569,7 +1617,6 @@ ${markdown.slice(0, 12000)}`;
         }
       }
     }
-
 
     // Grava no histórico
     try {
@@ -1600,8 +1647,3 @@ ${markdown.slice(0, 12000)}`;
 
     return { ok: true as const, web };
   });
-
-
-
-
-

@@ -9,8 +9,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createEmbarque, listProjetosDisponiveis, listTransportadoras } from "@/lib/logistica.functions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  createEmbarque,
+  listProjetosDisponiveis,
+  listTransportadoras,
+} from "@/lib/logistica.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -108,13 +118,16 @@ function NovoEmbarque() {
             </SelectContent>
           </Select>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Ideal: projetos com FAT já homologado. A liberação final acontece ao marcar como embarcado.
+            Ideal: projetos com FAT já homologado. A liberação final acontece ao marcar como
+            embarcado.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Transportadora</Label>
+            <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+              Transportadora
+            </Label>
             <Select value={transportadoraId} onValueChange={setTransportadoraId}>
               <SelectTrigger>
                 <SelectValue placeholder="A definir" />
@@ -130,8 +143,14 @@ function NovoEmbarque() {
             </Select>
           </div>
           <div>
-            <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Previsão de saída</Label>
-            <Input type="date" value={previsaoSaida} onChange={(e) => setPrevisaoSaida(e.target.value)} />
+            <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+              Previsão de saída
+            </Label>
+            <Input
+              type="date"
+              value={previsaoSaida}
+              onChange={(e) => setPrevisaoSaida(e.target.value)}
+            />
           </div>
         </div>
 
@@ -146,7 +165,9 @@ function NovoEmbarque() {
         </div>
 
         <div>
-          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Observações</Label>
+          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+            Observações
+          </Label>
           <Textarea
             rows={4}
             value={observacoes}

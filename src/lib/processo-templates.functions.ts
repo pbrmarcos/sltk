@@ -105,10 +105,7 @@ export type TemplateDetalhe = {
 async function resolveUserNames(supabase: any, ids: (string | null | undefined)[]) {
   const unique = Array.from(new Set(ids.filter((x): x is string => !!x)));
   if (unique.length === 0) return {} as Record<string, string>;
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("id", unique);
+  const { data } = await supabase.from("profiles").select("id, full_name, email").in("id", unique);
   const map: Record<string, string> = {};
   for (const r of data ?? []) {
     map[r.id] = r.full_name || r.email || "—";
@@ -131,13 +128,12 @@ async function snapshotTemplate(
   userId: string,
   motivo: string | null,
 ) {
-  const [{ data: t }, { data: itens }, { data: tarefas }, { data: eventos }] =
-    await Promise.all([
-      supabase.from("processo_templates").select("*").eq("id", templateId).maybeSingle(),
-      supabase.from("processo_template_checklist_itens").select("*").eq("template_id", templateId),
-      supabase.from("processo_template_tarefas").select("*").eq("template_id", templateId),
-      supabase.from("processo_template_eventos").select("*").eq("template_id", templateId),
-    ]);
+  const [{ data: t }, { data: itens }, { data: tarefas }, { data: eventos }] = await Promise.all([
+    supabase.from("processo_templates").select("*").eq("id", templateId).maybeSingle(),
+    supabase.from("processo_template_checklist_itens").select("*").eq("template_id", templateId),
+    supabase.from("processo_template_tarefas").select("*").eq("template_id", templateId),
+    supabase.from("processo_template_eventos").select("*").eq("template_id", templateId),
+  ]);
   if (!t) return;
   const { data: maxRow } = await supabase
     .from("processo_template_versoes")
@@ -223,7 +219,7 @@ export const listTemplates = createServerFn({ method: "GET" })
       descricao: r.descricao,
       tipo: r.tipo as ProcessoTipo,
       ativo: r.ativo,
-      rfq_tipo_id: ((r as unknown as { rfq_tipo_id: string | null }).rfq_tipo_id) ?? null,
+      rfq_tipo_id: (r as unknown as { rfq_tipo_id: string | null }).rfq_tipo_id ?? null,
       itens_count: count(itens.data as never, r.id),
       tarefas_count: count(tarefas.data as never, r.id),
       eventos_count: count(eventos.data as never, r.id),
@@ -232,8 +228,12 @@ export const listTemplates = createServerFn({ method: "GET" })
       deleted_at: r.deleted_at ?? null,
       created_by: r.created_by ?? null,
       updated_by: r.updated_by ?? null,
-      created_by_nome: r.created_by ? (names as Record<string, string>)[r.created_by] ?? null : null,
-      updated_by_nome: r.updated_by ? (names as Record<string, string>)[r.updated_by] ?? null : null,
+      created_by_nome: r.created_by
+        ? ((names as Record<string, string>)[r.created_by] ?? null)
+        : null,
+      updated_by_nome: r.updated_by
+        ? ((names as Record<string, string>)[r.updated_by] ?? null)
+        : null,
     }));
   });
 
@@ -241,9 +241,7 @@ export const listTemplates = createServerFn({ method: "GET" })
 
 export const getTemplate = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }): Promise<TemplateDetalhe> => {
     const { data: t, error } = await context.supabase
       .from("processo_templates")
@@ -278,14 +276,18 @@ export const getTemplate = createServerFn({ method: "GET" })
         descricao: t.descricao,
         tipo: t.tipo as ProcessoTipo,
         ativo: t.ativo,
-        rfq_tipo_id: ((t as unknown as { rfq_tipo_id: string | null }).rfq_tipo_id) ?? null,
+        rfq_tipo_id: (t as unknown as { rfq_tipo_id: string | null }).rfq_tipo_id ?? null,
         created_at: t.created_at,
         updated_at: t.updated_at,
         deleted_at: t.deleted_at ?? null,
         created_by: t.created_by ?? null,
         updated_by: t.updated_by ?? null,
-        created_by_nome: t.created_by ? (names as Record<string, string>)[t.created_by] ?? null : null,
-        updated_by_nome: t.updated_by ? (names as Record<string, string>)[t.updated_by] ?? null : null,
+        created_by_nome: t.created_by
+          ? ((names as Record<string, string>)[t.created_by] ?? null)
+          : null,
+        updated_by_nome: t.updated_by
+          ? ((names as Record<string, string>)[t.updated_by] ?? null)
+          : null,
       },
       itens: (itens ?? []).map((i) => ({
         id: i.id,
@@ -332,9 +334,14 @@ export const upsertTemplate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
     const nome = capitalize(data.nome);
-    const descricao = data.descricao ? capitalize(data.descricao) : data.descricao ?? null;
+    const descricao = data.descricao ? capitalize(data.descricao) : (data.descricao ?? null);
     if (data.id) {
-      await snapshotTemplate(context.supabase, data.id, context.userId, "Antes de editar dados gerais");
+      await snapshotTemplate(
+        context.supabase,
+        data.id,
+        context.userId,
+        "Antes de editar dados gerais",
+      );
       const patch: Record<string, unknown> = {
         nome,
         descricao,
@@ -371,9 +378,7 @@ export const upsertTemplate = createServerFn({ method: "POST" })
 
 export const deleteTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
     await snapshotTemplate(context.supabase, data.id, context.userId, "Antes de arquivar");
@@ -394,7 +399,11 @@ export const restoreTemplate = createServerFn({ method: "POST" })
     await assertCanManage(context.supabase, context.userId);
     const { error } = await context.supabase
       .from("processo_templates")
-      .update({ deleted_at: null, updated_by: context.userId, updated_at: new Date().toISOString() } as never)
+      .update({
+        deleted_at: null,
+        updated_by: context.userId,
+        updated_at: new Date().toISOString(),
+      } as never)
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
     await snapshotTemplate(context.supabase, data.id, context.userId, "Restaurado do arquivo");
@@ -429,7 +438,10 @@ export const duplicateTemplate = createServerFn({ method: "POST" })
     const newId = ins.id as string;
 
     const [{ data: itens }, { data: tarefas }, { data: eventos }] = await Promise.all([
-      context.supabase.from("processo_template_checklist_itens").select("*").eq("template_id", data.id),
+      context.supabase
+        .from("processo_template_checklist_itens")
+        .select("*")
+        .eq("template_id", data.id),
       context.supabase.from("processo_template_tarefas").select("*").eq("template_id", data.id),
       context.supabase.from("processo_template_eventos").select("*").eq("template_id", data.id),
     ]);
@@ -502,7 +514,9 @@ export const listTemplateVersoes = createServerFn({ method: "GET" })
 export const salvarVersaoTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ template_id: z.string().uuid(), motivo: z.string().trim().min(1).max(200) }).parse(input),
+    z
+      .object({ template_id: z.string().uuid(), motivo: z.string().trim().min(1).max(200) })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
@@ -549,7 +563,10 @@ export const restaurarVersaoTemplate = createServerFn({ method: "POST" })
 
     // wipe children and reinsert
     await Promise.all([
-      context.supabase.from("processo_template_checklist_itens").delete().eq("template_id", templateId),
+      context.supabase
+        .from("processo_template_checklist_itens")
+        .delete()
+        .eq("template_id", templateId),
       context.supabase.from("processo_template_tarefas").delete().eq("template_id", templateId),
       context.supabase.from("processo_template_eventos").delete().eq("template_id", templateId),
     ]);
@@ -611,7 +628,12 @@ export const upsertTemplateItem = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => itemInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
-    await snapshotTemplate(context.supabase, data.template_id, context.userId, data.id ? "Antes de editar item" : "Antes de adicionar item");
+    await snapshotTemplate(
+      context.supabase,
+      data.template_id,
+      context.userId,
+      data.id ? "Antes de editar item" : "Antes de adicionar item",
+    );
     const payload = {
       template_id: data.template_id,
       secao: capitalize(data.secao),
@@ -643,14 +665,21 @@ export const upsertTemplateItem = createServerFn({ method: "POST" })
 
 export const deleteTemplateItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
     const { data: row } = await context.supabase
-      .from("processo_template_checklist_itens").select("template_id").eq("id", data.id).maybeSingle();
-    if (row?.template_id) await snapshotTemplate(context.supabase, row.template_id, context.userId, "Antes de remover item");
+      .from("processo_template_checklist_itens")
+      .select("template_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (row?.template_id)
+      await snapshotTemplate(
+        context.supabase,
+        row.template_id,
+        context.userId,
+        "Antes de remover item",
+      );
     const { error } = await context.supabase
       .from("processo_template_checklist_itens")
       .delete()
@@ -674,7 +703,12 @@ export const upsertTemplateTarefa = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => tarefaInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
-    await snapshotTemplate(context.supabase, data.template_id, context.userId, data.id ? "Antes de editar tarefa" : "Antes de adicionar tarefa");
+    await snapshotTemplate(
+      context.supabase,
+      data.template_id,
+      context.userId,
+      data.id ? "Antes de editar tarefa" : "Antes de adicionar tarefa",
+    );
     const payload = {
       template_id: data.template_id,
       ordem: data.ordem,
@@ -704,14 +738,21 @@ export const upsertTemplateTarefa = createServerFn({ method: "POST" })
 
 export const deleteTemplateTarefa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
     const { data: row } = await context.supabase
-      .from("processo_template_tarefas").select("template_id").eq("id", data.id).maybeSingle();
-    if (row?.template_id) await snapshotTemplate(context.supabase, row.template_id, context.userId, "Antes de remover tarefa");
+      .from("processo_template_tarefas")
+      .select("template_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (row?.template_id)
+      await snapshotTemplate(
+        context.supabase,
+        row.template_id,
+        context.userId,
+        "Antes de remover tarefa",
+      );
     const { error } = await context.supabase
       .from("processo_template_tarefas")
       .delete()
@@ -734,7 +775,12 @@ export const upsertTemplateEvento = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => eventoInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
-    await snapshotTemplate(context.supabase, data.template_id, context.userId, data.id ? "Antes de editar evento" : "Antes de adicionar evento");
+    await snapshotTemplate(
+      context.supabase,
+      data.template_id,
+      context.userId,
+      data.id ? "Antes de editar evento" : "Antes de adicionar evento",
+    );
     const payload = {
       template_id: data.template_id,
       ordem: data.ordem,
@@ -763,14 +809,21 @@ export const upsertTemplateEvento = createServerFn({ method: "POST" })
 
 export const deleteTemplateEvento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertCanManage(context.supabase, context.userId);
     const { data: row } = await context.supabase
-      .from("processo_template_eventos").select("template_id").eq("id", data.id).maybeSingle();
-    if (row?.template_id) await snapshotTemplate(context.supabase, row.template_id, context.userId, "Antes de remover evento");
+      .from("processo_template_eventos")
+      .select("template_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (row?.template_id)
+      await snapshotTemplate(
+        context.supabase,
+        row.template_id,
+        context.userId,
+        "Antes de remover evento",
+      );
     const { error } = await context.supabase
       .from("processo_template_eventos")
       .delete()
@@ -789,7 +842,10 @@ const reorderInput = z.object({
 
 async function reorderTable(
   supabase: any,
-  table: "processo_template_checklist_itens" | "processo_template_tarefas" | "processo_template_eventos",
+  table:
+    | "processo_template_checklist_itens"
+    | "processo_template_tarefas"
+    | "processo_template_eventos",
   templateId: string,
   orderedIds: string[],
   userId: string,
@@ -811,21 +867,39 @@ export const reorderTemplateItens = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => reorderInput.parse(i))
   .handler(({ data, context }) =>
-    reorderTable(context.supabase, "processo_template_checklist_itens", data.template_id, data.ordered_ids, context.userId),
+    reorderTable(
+      context.supabase,
+      "processo_template_checklist_itens",
+      data.template_id,
+      data.ordered_ids,
+      context.userId,
+    ),
   );
 
 export const reorderTemplateTarefas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => reorderInput.parse(i))
   .handler(({ data, context }) =>
-    reorderTable(context.supabase, "processo_template_tarefas", data.template_id, data.ordered_ids, context.userId),
+    reorderTable(
+      context.supabase,
+      "processo_template_tarefas",
+      data.template_id,
+      data.ordered_ids,
+      context.userId,
+    ),
   );
 
 export const reorderTemplateEventos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => reorderInput.parse(i))
   .handler(({ data, context }) =>
-    reorderTable(context.supabase, "processo_template_eventos", data.template_id, data.ordered_ids, context.userId),
+    reorderTable(
+      context.supabase,
+      "processo_template_eventos",
+      data.template_id,
+      data.ordered_ids,
+      context.userId,
+    ),
   );
 
 /* ===================== aplicar template a um processo ===================== */
@@ -833,9 +907,7 @@ export const reorderTemplateEventos = createServerFn({ method: "POST" })
 export const aplicarTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({ processo_id: z.string().uuid(), template_id: z.string().uuid() })
-      .parse(input),
+    z.object({ processo_id: z.string().uuid(), template_id: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }) => {
     // Carrega processo
@@ -888,9 +960,7 @@ export const aplicarTemplate = createServerFn({ method: "POST" })
         pilar_id: p.pilar_id,
         status: "aberta" as const,
       }));
-      const { error } = await context.supabase
-        .from("processo_tarefas")
-        .insert(rows as never);
+      const { error } = await context.supabase.from("processo_tarefas").insert(rows as never);
       if (error) throw friendlyDbError(error);
       tarefasCriadas = rows.length;
     }
@@ -902,9 +972,7 @@ export const aplicarTemplate = createServerFn({ method: "POST" })
         kind: "note" as const,
         text: `[${e.tipo}] ${e.titulo} (D+${e.dias_apos_inicio})`,
       }));
-      const { error } = await context.supabase
-        .from("processo_eventos")
-        .insert(rows as never);
+      const { error } = await context.supabase.from("processo_eventos").insert(rows as never);
       if (error) throw friendlyDbError(error);
       eventosCriados = rows.length;
     }

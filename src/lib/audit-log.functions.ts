@@ -25,7 +25,10 @@ const ACTIONS = ["INSERT", "UPDATE", "DELETE", "ACCESS"] as const;
 const listInput = z.object({
   search: z.string().max(120).optional().default(""),
   user_id: z.string().uuid().nullable().optional().default(null),
-  action: z.union([z.enum(ACTIONS), z.literal("all")]).optional().default("all"),
+  action: z
+    .union([z.enum(ACTIONS), z.literal("all")])
+    .optional()
+    .default("all"),
   table_name: z.string().max(120).optional().default(""),
   from: z.string().datetime().nullable().optional().default(null),
   to: z.string().datetime().nullable().optional().default(null),
@@ -54,16 +57,16 @@ export const listAuditLog = createServerFn({ method: "POST" })
     if (data.to) q = q.lte("created_at", data.to);
     if (data.search.trim()) {
       const s = data.search.trim().replace(/[%,]/g, "");
-      q = q.or(
-        `table_name.ilike.%${s}%,record_id.ilike.%${s}%,field_changed.ilike.%${s}%`,
-      );
+      q = q.or(`table_name.ilike.%${s}%,record_id.ilike.%${s}%,field_changed.ilike.%${s}%`);
     }
 
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const { data: rows, count, error } = await q
-      .order("created_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("created_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
 
     const userIds = Array.from(

@@ -80,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [queryClient, navigate],
   );
 
-
   // Initial session + listener
   const lastUserIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -124,7 +123,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sub.subscription.unsubscribe();
     };
   }, [queryClient]);
-
 
   // 8h fixed-session timer
   useEffect(() => {
@@ -181,7 +179,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("user_id", userId!);
       if (error) throw error;
       const roles = ((data ?? []) as { role: AppRole }[]).map((row) => row.role);
-      const priority: AppRole[] = ["admin", "manager", "engineer", "production", "purchasing", "assembly", "field", "sales"];
+      const priority: AppRole[] = [
+        "admin",
+        "manager",
+        "engineer",
+        "production",
+        "purchasing",
+        "assembly",
+        "field",
+        "sales",
+      ];
       return priority.find((candidate) => roles.includes(candidate)) ?? null;
     },
   });
@@ -212,7 +219,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
 
 export function useAuth() {
   const ctx = useContext(AuthContext);

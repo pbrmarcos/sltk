@@ -21,8 +21,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { TableEmpty } from "@/components/data/TableStates";
 import { Boxes, Package, PackageCheck, Plus, Search, TriangleAlert } from "lucide-react";
 import {
@@ -39,7 +52,10 @@ export const Route = createFileRoute("/_authenticated/compras/almoxarifado/")({
   head: () => ({
     meta: [
       { title: "Almoxarifado — Solutek Hub" },
-      { name: "description", content: "Saldo de estoque, catálogo de itens e recebimento de ordens de compra." },
+      {
+        name: "description",
+        content: "Saldo de estoque, catálogo de itens e recebimento de ordens de compra.",
+      },
       { property: "og:title", content: "Almoxarifado — Solutek Hub" },
       { property: "og:description", content: "Saldo, catálogo e recebimento do almoxarifado." },
       { property: "og:type", content: "website" },
@@ -59,7 +75,11 @@ function AlmoxarifadoPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Compras" }, { label: "Almoxarifado" }]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Compras" },
+          { label: "Almoxarifado" },
+        ]}
         title="Almoxarifado"
         subtitle="Saldo por item, catálogo e entradas por ordem de compra."
         actions={
@@ -99,7 +119,8 @@ function EstoqueTab() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["almox-estoque", q, abaixo, comSaldo],
-    queryFn: () => listFn({ data: { q, somente_abaixo_minimo: abaixo, somente_com_saldo: comSaldo } }),
+    queryFn: () =>
+      listFn({ data: { q, somente_abaixo_minimo: abaixo, somente_com_saldo: comSaldo } }),
     placeholderData: keepPreviousData,
   });
 
@@ -111,7 +132,11 @@ function EstoqueTab() {
       <div className="grid gap-3 sm:grid-cols-4">
         <Kpi label="Itens ativos" value={String(kpis?.itens ?? 0)} icon={Package} />
         <Kpi label="Com saldo" value={String(kpis?.com_saldo ?? 0)} icon={Boxes} />
-        <Kpi label="Abaixo do mínimo" value={String(kpis?.abaixo_minimo ?? 0)} icon={TriangleAlert} />
+        <Kpi
+          label="Abaixo do mínimo"
+          value={String(kpis?.abaixo_minimo ?? 0)}
+          icon={TriangleAlert}
+        />
         <Kpi label="Valor em estoque" value={fmtBRL(kpis?.valor)} icon={Package} />
       </div>
 
@@ -129,7 +154,8 @@ function EstoqueTab() {
           <Checkbox checked={abaixo} onCheckedChange={(v) => setAbaixo(!!v)} /> Abaixo do mínimo
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={comSaldo} onCheckedChange={(v) => setComSaldo(!!v)} /> Somente com saldo
+          <Checkbox checked={comSaldo} onCheckedChange={(v) => setComSaldo(!!v)} /> Somente com
+          saldo
         </label>
         <Button onClick={() => setNovoAberto(true)}>
           <Plus className="mr-2 h-4 w-4" /> Novo item
@@ -171,7 +197,11 @@ function EstoqueTab() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Link to="/compras/almoxarifado/$id" params={{ id: r.item_id }} className="hover:underline">
+                    <Link
+                      to="/compras/almoxarifado/$id"
+                      params={{ id: r.item_id }}
+                      className="hover:underline"
+                    >
                       {r.descricao}
                     </Link>
                     {r.abaixo_minimo && (
@@ -214,13 +244,23 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
 
 /* ---------------------------------------------------------------- */
 
-function NovoItemDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function NovoItemDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const qc = useQueryClient();
   const cadFn = useServerFn(listAlmoxCadastros);
   const salvarFn = useServerFn(salvarAlmoxItem);
   const similaresFn = useServerFn(buscarItensSemelhantes);
 
-  const { data: cad } = useQuery({ queryKey: ["almox-cadastros"], queryFn: () => cadFn(), staleTime: 300_000 });
+  const { data: cad } = useQuery({
+    queryKey: ["almox-cadastros"],
+    queryFn: () => cadFn(),
+    staleTime: 300_000,
+  });
   const [form, setForm] = useState({
     descricao: "",
     unidade_estoque: "UN",
@@ -318,7 +358,10 @@ function NovoItemDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
             </div>
             <div>
               <Label>Part number</Label>
-              <Input value={form.part_number} onChange={(e) => set("part_number", e.target.value)} />
+              <Input
+                value={form.part_number}
+                onChange={(e) => set("part_number", e.target.value)}
+              />
             </div>
             <div>
               <Label>Código do fabricante</Label>
@@ -338,7 +381,9 @@ function NovoItemDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
           </div>
           {similares.length > 0 && (
             <div className="rounded-md border border-[var(--bg-border)] bg-[var(--bg-elevated)] p-3 text-xs">
-              <p className="mb-1 font-medium">Itens semelhantes já cadastrados — confirme antes de duplicar:</p>
+              <p className="mb-1 font-medium">
+                Itens semelhantes já cadastrados — confirme antes de duplicar:
+              </p>
               <ul className="list-disc pl-4">
                 {similares.map((s) => (
                   <li key={s.id}>
@@ -353,7 +398,10 @@ function NovoItemDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending || form.descricao.trim().length < 3}>
+          <Button
+            onClick={() => salvar.mutate()}
+            disabled={salvar.isPending || form.descricao.trim().length < 3}
+          >
             {confirmado && similares.length ? "Cadastrar mesmo assim" : "Cadastrar"}
           </Button>
         </DialogFooter>
@@ -375,10 +423,16 @@ function RecebimentoTab() {
   const [ocId, setOcId] = useState<string>("");
   const [nf, setNf] = useState("");
   const [obs, setObs] = useState("");
-  const [linhas, setLinhas] = useState<Record<string, { item_id: string; qtd: string; custo: string }>>({});
+  const [linhas, setLinhas] = useState<
+    Record<string, { item_id: string; qtd: string; custo: string }>
+  >({});
 
   const { data: ocs = [] } = useQuery({ queryKey: ["almox-ocs"], queryFn: () => ocsFn() });
-  const { data: cad } = useQuery({ queryKey: ["almox-cadastros"], queryFn: () => cadFn(), staleTime: 300_000 });
+  const { data: cad } = useQuery({
+    queryKey: ["almox-cadastros"],
+    queryFn: () => cadFn(),
+    staleTime: 300_000,
+  });
   const { data: catalogo } = useQuery({
     queryKey: ["almox-catalogo-simples"],
     queryFn: () => estoqueFn({ data: { per_page: 200 } }),
@@ -406,7 +460,8 @@ function RecebimentoTab() {
           quantidade: Number(v.qtd),
           custo_unitario: Number(v.custo) || 0,
         }));
-      if (!payload.length) throw new Error("Informe item de almoxarifado e quantidade em ao menos uma linha.");
+      if (!payload.length)
+        throw new Error("Informe item de almoxarifado e quantidade em ao menos uma linha.");
       return receberFn({
         data: {
           ordem_compra_id: ocId,
@@ -419,7 +474,9 @@ function RecebimentoTab() {
     },
     onSuccess: (r: any) => {
       toast[r?.repetido ? "info" : "success"](
-        r?.repetido ? "Este recebimento já havia sido registrado." : "Recebimento registrado no estoque.",
+        r?.repetido
+          ? "Este recebimento já havia sido registrado."
+          : "Recebimento registrado no estoque.",
       );
       setLinhas({});
       setNf("");
@@ -476,7 +533,11 @@ function RecebimentoTab() {
               </TableHeader>
               <TableBody>
                 {((det?.itens ?? []) as any[]).map((it) => {
-                  const l = linhas[it.id] ?? { item_id: "", qtd: "", custo: String(it.valor_unitario ?? 0) };
+                  const l = linhas[it.id] ?? {
+                    item_id: "",
+                    qtd: "",
+                    custo: String(it.valor_unitario ?? 0),
+                  };
                   const upd = (patch: Partial<typeof l>) =>
                     setLinhas((s) => ({ ...s, [it.id]: { ...l, ...patch } }));
                   return (
@@ -484,7 +545,9 @@ function RecebimentoTab() {
                       <TableCell className="max-w-[280px] truncate">{it.descricao}</TableCell>
                       <TableCell className="text-right">{fmtQtd(it.quantidade)}</TableCell>
                       <TableCell className="text-right">{fmtQtd(it.quantidade_recebida)}</TableCell>
-                      <TableCell className="text-right font-medium">{fmtQtd(it.quantidade_pendente)}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {fmtQtd(it.quantidade_pendente)}
+                      </TableCell>
                       <TableCell>
                         <Select value={l.item_id} onValueChange={(v) => upd({ item_id: v })}>
                           <SelectTrigger className="h-8 text-xs">

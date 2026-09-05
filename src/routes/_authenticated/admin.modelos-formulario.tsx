@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_authenticated/admin/modelos-formulario")
   head: () => ({
     meta: [
       { title: "Modelos de Formulário — Admin | SLTK" },
-      { name: "description", content: "Gerencie os tipos de Checklist (RFQ) e os segmentos de Entrevista." },
+      {
+        name: "description",
+        content: "Gerencie os tipos de Checklist (RFQ) e os segmentos de Entrevista.",
+      },
     ],
   }),
 });
@@ -36,7 +39,9 @@ function ModelosFormularioPage() {
         <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-12 text-center">
           <ShieldAlert className="h-10 w-10 text-[var(--danger)]" />
           <h2 className="text-lg font-semibold">Acesso restrito</h2>
-          <p className="text-sm text-[var(--text-muted)]">Esta área é exclusiva para administradores e gestores.</p>
+          <p className="text-sm text-[var(--text-muted)]">
+            Esta área é exclusiva para administradores e gestores.
+          </p>
         </div>
       </PageContainer>
     );
@@ -78,7 +83,11 @@ function ModelosFormularioPanel({
         subtitle="Schemas usados nos formulários públicos: tipos de Checklist (RFQ) e segmentos de Entrevista."
       />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as "entrevista" | "checklist")} className="w-full">
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as "entrevista" | "checklist")}
+        className="w-full"
+      >
         <TabsList>
           <TabsTrigger value="entrevista">Entrevista</TabsTrigger>
           {isAdmin && <TabsTrigger value="checklist">Checklist</TabsTrigger>}

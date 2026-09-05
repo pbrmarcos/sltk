@@ -1,11 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useRef } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 import {
   ArrowLeft,
@@ -126,7 +121,10 @@ function FornecedorDetailPage() {
   const [form, setForm] = useState<FornecedorInput>(() => toForm(f, detail.data.categorias));
   const [novaNota, setNovaNota] = useState("");
   const [contatoOpen, setContatoOpen] = useState(false);
-  const [contatoEdit, setContatoEdit] = useState<{ id?: string; patch: ContatoFornecedorInput } | null>(null);
+  const [contatoEdit, setContatoEdit] = useState<{
+    id?: string;
+    patch: ContatoFornecedorInput;
+  } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -186,8 +184,7 @@ function FornecedorDetailPage() {
   });
 
   const removeContato = useMutation({
-    mutationFn: (cid: string) =>
-      removeContatoFornecedor({ data: { id: cid } }),
+    mutationFn: (cid: string) => removeContatoFornecedor({ data: { id: cid } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["fornecedor", id] }),
   });
 
@@ -217,7 +214,6 @@ function FornecedorDetailPage() {
     onError: (e) => toast.error((e as Error).message),
   });
 
-
   async function downloadAnexo(aid: string) {
     try {
       const { url, nome } = await getAnexoSignedUrl({ data: { id: aid } });
@@ -240,13 +236,11 @@ function FornecedorDetailPage() {
         const ext = file.name.split(".").pop() ?? "bin";
         const safe = file.name.replace(/[^\w.\-]+/g, "_");
         const path = `${id}/${Date.now()}_${safe}`;
-        const { error: upErr } = await supabase.storage
-          .from("fornecedores")
-          .upload(path, file, {
-            cacheControl: "3600",
-            upsert: false,
-            contentType: file.type || undefined,
-          });
+        const { error: upErr } = await supabase.storage.from("fornecedores").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type || undefined,
+        });
         if (upErr) throw upErr;
         await registerAnexoFornecedor({
           data: {
@@ -335,7 +329,11 @@ function FornecedorDetailPage() {
                           onSelect={() => {
                             const w = window.open(url, "_blank", "noopener,noreferrer");
                             if (!w) {
-                              try { (window.top ?? window).location.href = url; } catch { window.location.href = url; }
+                              try {
+                                (window.top ?? window).location.href = url;
+                              } catch {
+                                window.location.href = url;
+                              }
                             }
                           }}
                         >
@@ -345,7 +343,10 @@ function FornecedorDetailPage() {
                     })()}
                     <DropdownMenuItem
                       disabled={reenrich.isPending}
-                      onSelect={(e) => { e.preventDefault(); reenrich.mutate(); }}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        reenrich.mutate();
+                      }}
                     >
                       {reenrich.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -389,9 +390,7 @@ function FornecedorDetailPage() {
                   <Label>Nome fantasia</Label>
                   <Input
                     value={form.nome_fantasia ?? ""}
-                    onChange={(e) =>
-                      setForm({ ...form, nome_fantasia: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
                   />
                 </div>
                 <div>
@@ -406,27 +405,21 @@ function FornecedorDetailPage() {
                   <Input
                     value={form.pais}
                     maxLength={3}
-                    onChange={(e) =>
-                      setForm({ ...form, pais: e.target.value.toUpperCase() })
-                    }
+                    onChange={(e) => setForm({ ...form, pais: e.target.value.toUpperCase() })}
                   />
                 </div>
                 <div>
                   <Label>Cidade</Label>
                   <Input
                     value={form.cidade ?? ""}
-                    onChange={(e) =>
-                      setForm({ ...form, cidade: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, cidade: e.target.value })}
                   />
                 </div>
                 <div className="md:col-span-2">
                   <Label>Endereço</Label>
                   <Input
                     value={form.endereco ?? ""}
-                    onChange={(e) =>
-                      setForm({ ...form, endereco: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, endereco: e.target.value })}
                   />
                 </div>
               </div>
@@ -446,19 +439,13 @@ function FornecedorDetailPage() {
                     "—"
                   )}
                 </InfoRow>
-                <InfoRow
-                  icon={<MapPin className="h-3.5 w-3.5" />}
-                  label="Localização"
-                >
+                <InfoRow icon={<MapPin className="h-3.5 w-3.5" />} label="Localização">
                   <span className="inline-flex items-center gap-1.5">
                     <Flag code={f.pais} className="h-3 w-4.5" />
                     {[f.cidade, f.pais].filter(Boolean).join(" · ") || "—"}
                   </span>
                 </InfoRow>
-                <InfoRow
-                  icon={<Mail className="h-3.5 w-3.5" />}
-                  label="E-mail"
-                >
+                <InfoRow icon={<Mail className="h-3.5 w-3.5" />} label="E-mail">
                   {f.email_corporativo ? (
                     <a
                       href={`mailto:${f.email_corporativo}`}
@@ -501,16 +488,11 @@ function FornecedorDetailPage() {
               </Button>
             </div>
             {detail.data.contatos.length === 0 ? (
-              <p className="text-[12.5px] text-[var(--text-muted)]">
-                Nenhum contato cadastrado.
-              </p>
+              <p className="text-[12.5px] text-[var(--text-muted)]">Nenhum contato cadastrado.</p>
             ) : (
               <ul className="divide-y divide-[var(--bg-border)]">
                 {detail.data.contatos.map((c) => (
-                  <li
-                    key={c.id}
-                    className="flex items-start justify-between gap-3 py-2.5"
-                  >
+                  <li key={c.id} className="flex items-start justify-between gap-3 py-2.5">
                     <div>
                       <div className="text-[13px] font-medium text-[var(--text-primary)]">
                         {c.nome}{" "}
@@ -520,9 +502,7 @@ function FornecedorDetailPage() {
                           </Badge>
                         ) : null}
                       </div>
-                      <div className="text-[11.5px] text-[var(--text-muted)]">
-                        {c.cargo ?? "—"}
-                      </div>
+                      <div className="text-[11.5px] text-[var(--text-muted)]">{c.cargo ?? "—"}</div>
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11.5px] text-[var(--text-secondary)]">
                         {c.email ? <span>{c.email}</span> : null}
                         {c.telefone_numero ? (
@@ -561,8 +541,7 @@ function FornecedorDetailPage() {
                         size="icon"
                         variant="ghost"
                         onClick={() => {
-                          if (confirm("Remover contato?"))
-                            removeContato.mutate(c.id);
+                          if (confirm("Remover contato?")) removeContato.mutate(c.id);
                         }}
                       >
                         <Trash2 className="h-3.5 w-3.5 text-rose-600" />
@@ -588,7 +567,6 @@ function FornecedorDetailPage() {
               <TabsTrigger value="obs">Observações</TabsTrigger>
             </TabsList>
 
-
             <TabsContent value="anexos" className="mt-4">
               <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
                 <div className="mb-3 flex items-center justify-between">
@@ -603,12 +581,7 @@ function FornecedorDetailPage() {
                       className="hidden"
                       onChange={(e) => onUpload(e.target.files)}
                     />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      asChild
-                      disabled={uploading}
-                    >
+                    <Button size="sm" variant="outline" asChild disabled={uploading}>
                       <span className="cursor-pointer">
                         {uploading ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -621,16 +594,11 @@ function FornecedorDetailPage() {
                   </label>
                 </div>
                 {detail.data.anexos.length === 0 ? (
-                  <p className="text-[12.5px] text-[var(--text-muted)]">
-                    Nenhum anexo.
-                  </p>
+                  <p className="text-[12.5px] text-[var(--text-muted)]">Nenhum anexo.</p>
                 ) : (
                   <ul className="divide-y divide-[var(--bg-border)]">
                     {detail.data.anexos.map((a) => (
-                      <li
-                        key={a.id}
-                        className="flex items-center justify-between py-2"
-                      >
+                      <li key={a.id} className="flex items-center justify-between py-2">
                         <div>
                           <div className="text-[12.5px] text-[var(--text-primary)]">
                             {a.nome_original}
@@ -640,19 +608,14 @@ function FornecedorDetailPage() {
                           </div>
                         </div>
                         <div className="flex gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => downloadAnexo(a.id)}
-                          >
+                          <Button size="icon" variant="ghost" onClick={() => downloadAnexo(a.id)}>
                             <Download className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => {
-                              if (confirm("Remover anexo?"))
-                                removeAnexo.mutate(a.id);
+                              if (confirm("Remover anexo?")) removeAnexo.mutate(a.id);
                             }}
                           >
                             <Trash2 className="h-3.5 w-3.5 text-rose-600" />
@@ -683,9 +646,7 @@ function FornecedorDetailPage() {
                 </div>
                 <ul className="mt-4 space-y-3">
                   {detail.data.notas.length === 0 ? (
-                    <p className="text-[12.5px] text-[var(--text-muted)]">
-                      Nenhuma nota ainda.
-                    </p>
+                    <p className="text-[12.5px] text-[var(--text-muted)]">Nenhuma nota ainda.</p>
                   ) : (
                     detail.data.notas.map((n) => (
                       <li
@@ -694,9 +655,7 @@ function FornecedorDetailPage() {
                       >
                         <div className="mb-1 flex items-center justify-between text-[11px] text-[var(--text-muted)]">
                           <span>{n.user_nome ?? "Usuário"}</span>
-                          <span>
-                            {new Date(n.created_at).toLocaleString("pt-BR")}
-                          </span>
+                          <span>{new Date(n.created_at).toLocaleString("pt-BR")}</span>
                         </div>
                         <div className="whitespace-pre-wrap text-[13px] text-[var(--text-primary)]">
                           {n.texto}
@@ -713,15 +672,12 @@ function FornecedorDetailPage() {
             </TabsContent>
 
             <TabsContent value="obs" className="mt-4">
-
               <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
                 {editing ? (
                   <Textarea
                     rows={6}
                     value={form.observacoes ?? ""}
-                    onChange={(e) =>
-                      setForm({ ...form, observacoes: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
                   />
                 ) : (
                   <p className="whitespace-pre-wrap text-[13px] text-[var(--text-secondary)]">
@@ -842,9 +798,7 @@ function FornecedorDetailPage() {
                 })}
               </div>
             ) : detail.data.categorias.length === 0 ? (
-              <p className="text-[12.5px] text-[var(--text-muted)]">
-                Sem categorias.
-              </p>
+              <p className="text-[12.5px] text-[var(--text-muted)]">Sem categorias.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {detail.data.categorias.map((slug) => {
@@ -873,8 +827,7 @@ function FornecedorDetailPage() {
             values={
               editing
                 ? (form.palavras_chave ?? [])
-                : ((f as unknown as { palavras_chave?: string[] | null })
-                    .palavras_chave ?? [])
+                : ((f as unknown as { palavras_chave?: string[] | null }).palavras_chave ?? [])
             }
             onChange={(v) => setForm((p) => ({ ...p, palavras_chave: v }))}
             placeholder="ex.: válvula, inox 304, fundição"
@@ -886,19 +839,13 @@ function FornecedorDetailPage() {
             values={
               editing
                 ? (form.certificacoes ?? [])
-                : ((f as unknown as { certificacoes?: string[] | null })
-                    .certificacoes ?? [])
+                : ((f as unknown as { certificacoes?: string[] | null }).certificacoes ?? [])
             }
             onChange={(v) => setForm((p) => ({ ...p, certificacoes: v }))}
             placeholder="ex.: ISO 9001, CE, RoHS"
           />
 
-          <CommercialCard
-            editing={editing}
-            form={form}
-            f={f}
-            setForm={setForm}
-          />
+          <CommercialCard editing={editing} form={form} f={f} setForm={setForm} />
         </aside>
       </div>
 
@@ -912,9 +859,7 @@ function FornecedorDetailPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {contatoEdit?.id ? "Editar contato" : "Novo contato"}
-            </DialogTitle>
+            <DialogTitle>{contatoEdit?.id ? "Editar contato" : "Novo contato"}</DialogTitle>
           </DialogHeader>
           {contatoEdit ? (
             <div className="grid gap-3 md:grid-cols-2">
@@ -1030,13 +975,8 @@ function FornecedorDetailPage() {
             <Button variant="outline" onClick={() => setContatoOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              onClick={() => saveContato.mutate()}
-              disabled={saveContato.isPending}
-            >
-              {saveContato.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : null}
+            <Button onClick={() => saveContato.mutate()} disabled={saveContato.isPending}>
+              {saveContato.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Salvar
             </Button>
           </DialogFooter>
@@ -1074,7 +1014,7 @@ function toForm(
   const s = (k: string) => (x[k] as string | null | undefined) ?? "";
   const n = (k: string) =>
     (x[k] as number | null | undefined) ?? (null as unknown as number | null);
-  const arr = (k: string) => ((x[k] as string[] | null | undefined) ?? []);
+  const arr = (k: string) => (x[k] as string[] | null | undefined) ?? [];
   return {
     nome: f.nome,
     nome_fantasia: f.nome_fantasia ?? "",
@@ -1175,7 +1115,9 @@ function SubmissoesPanel({ rows, loading }: { rows: ScanSubmissaoRow[]; loading:
       {rows.map((r) => {
         const ext = (r.extracted ?? null) as null | Record<string, unknown>;
         const enr = (r.enrichment ?? null) as null | Record<string, unknown>;
-        const files = Array.isArray(r.drive_files) ? (r.drive_files as Array<{ id: string; url: string; nome: string }>) : [];
+        const files = Array.isArray(r.drive_files)
+          ? (r.drive_files as Array<{ id: string; url: string; nome: string }>)
+          : [];
         const folderUrl = r.drive_folder_id
           ? `https://drive.google.com/drive/folders/${r.drive_folder_id}`
           : null;
@@ -1198,7 +1140,9 @@ function SubmissoesPanel({ rows, loading }: { rows: ScanSubmissaoRow[]; loading:
                   {new Date(r.created_at).toLocaleString("pt-BR")}
                 </span>
                 {r.created_by_email && (
-                  <span className="text-[11.5px] text-[var(--text-muted)]">· {r.created_by_email}</span>
+                  <span className="text-[11.5px] text-[var(--text-muted)]">
+                    · {r.created_by_email}
+                  </span>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -1216,7 +1160,11 @@ function SubmissoesPanel({ rows, loading }: { rows: ScanSubmissaoRow[]; loading:
                       const w = window.open(folderUrl, "_blank", "noopener,noreferrer");
                       if (!w) {
                         e.preventDefault();
-                        try { (window.top ?? window).location.href = folderUrl; } catch { window.location.href = folderUrl; }
+                        try {
+                          (window.top ?? window).location.href = folderUrl;
+                        } catch {
+                          window.location.href = folderUrl;
+                        }
                       }
                     }}
                     className="inline-flex items-center gap-1 text-[11.5px] text-blue-700 hover:underline"
@@ -1317,11 +1265,7 @@ function SidebarChipsEditor({
       </h3>
       <div className="flex flex-wrap gap-1">
         {values.map((t) => (
-          <Badge
-            key={t}
-            variant="outline"
-            className="text-[10.5px] gap-1 pr-1"
-          >
+          <Badge key={t} variant="outline" className="text-[10.5px] gap-1 pr-1">
             {t}
             {editing && (
               <button
@@ -1336,9 +1280,7 @@ function SidebarChipsEditor({
           </Badge>
         ))}
         {editing && values.length === 0 && (
-          <span className="text-[11.5px] text-[var(--text-muted)]">
-            nenhum ainda
-          </span>
+          <span className="text-[11.5px] text-[var(--text-muted)]">nenhum ainda</span>
         )}
       </div>
       {editing && (
@@ -1421,9 +1363,7 @@ function CommercialCard({
       {editing ? (
         <div className="grid grid-cols-2 gap-2">
           {fields.map((fd) => {
-            const v = (form as unknown as Record<string, unknown>)[
-              fd.key as string
-            ];
+            const v = (form as unknown as Record<string, unknown>)[fd.key as string];
             return (
               <div key={fd.key as string} className="col-span-1">
                 <Label className="text-[11px]">{fd.label}</Label>
@@ -1431,11 +1371,7 @@ function CommercialCard({
                   className="h-7 text-[12px]"
                   type={fd.type ?? "text"}
                   placeholder={fd.placeholder}
-                  value={
-                    v === null || v === undefined
-                      ? ""
-                      : (v as string | number).toString()
-                  }
+                  value={v === null || v === undefined ? "" : (v as string | number).toString()}
                   onChange={(e) =>
                     setForm((p) => ({
                       ...p,
@@ -1457,8 +1393,7 @@ function CommercialCard({
           {fields.map((fd) => {
             const v = x[fd.key as string];
             if (v === null || v === undefined || v === "") return null;
-            const isLink =
-              typeof v === "string" && /^https?:\/\//.test(v);
+            const isLink = typeof v === "string" && /^https?:\/\//.test(v);
             return (
               <div key={fd.key as string}>
                 <dt className="text-[10.5px] uppercase tracking-wide text-[var(--text-muted)]">

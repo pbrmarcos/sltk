@@ -15,7 +15,9 @@ export const listEtapaAnexos = createServerFn({ method: "POST" })
     const sb = context.supabase as AnySb;
     const { data: rows, error } = await sb
       .from("equipamento_etapa_anexos")
-      .select("id, nome_arquivo, mime, tamanho_bytes, storage_path, descricao, created_by, created_at")
+      .select(
+        "id, nome_arquivo, mime, tamanho_bytes, storage_path, descricao, created_by, created_at",
+      )
       .eq("etapa_id", data.etapa_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });

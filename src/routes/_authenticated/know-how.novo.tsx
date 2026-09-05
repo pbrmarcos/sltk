@@ -9,8 +9,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { listColecoes, createItem, updateItem, getItemBySlug, KH_TIPOS, KH_MEDIA_BUCKET, type KhTipo } from "@/lib/know-how.functions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  listColecoes,
+  createItem,
+  updateItem,
+  getItemBySlug,
+  KH_TIPOS,
+  KH_MEDIA_BUCKET,
+  type KhTipo,
+} from "@/lib/know-how.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -83,7 +97,12 @@ function KnowHowNovo() {
   }, [existente.data, hydrated]);
 
   const MAX_MB = 500;
-  const acceptAttr = tipo === "video" ? "video/mp4,video/webm,video/quicktime" : tipo === "pdf" ? "application/pdf" : "*/*";
+  const acceptAttr =
+    tipo === "video"
+      ? "video/mp4,video/webm,video/quicktime"
+      : tipo === "pdf"
+        ? "application/pdf"
+        : "*/*";
 
   async function handleFile(f: File) {
     if (!f) return;
@@ -145,7 +164,7 @@ function KnowHowNovo() {
             papeis_alvo: papeis,
           },
         });
-        return { slug: (edit as string) };
+        return { slug: edit as string };
       }
       return createFn({
         data: {
@@ -208,10 +227,14 @@ function KnowHowNovo() {
           <div>
             <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Coleção</Label>
             <Select value={colecaoId} onValueChange={setColecaoId}>
-              <SelectTrigger><SelectValue placeholder="Escolha…" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Escolha…" />
+              </SelectTrigger>
               <SelectContent>
                 {(colecoes.data ?? []).map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nome}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -219,10 +242,14 @@ function KnowHowNovo() {
           <div>
             <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Tipo</Label>
             <Select value={tipo} onValueChange={(v) => setTipo(v as KhTipo)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {KH_TIPOS.map((t) => (
-                  <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
+                  <SelectItem key={t} value={t} className="capitalize">
+                    {t}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -255,7 +282,13 @@ function KnowHowNovo() {
         {tipo !== "artigo" && (
           <div className="space-y-2">
             <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
-              Mídia ({tipo === "video" ? "vídeo MP4/WebM/MOV até 500 MB" : tipo === "pdf" ? "arquivo PDF" : "arquivo"})
+              Mídia (
+              {tipo === "video"
+                ? "vídeo MP4/WebM/MOV até 500 MB"
+                : tipo === "pdf"
+                  ? "arquivo PDF"
+                  : "arquivo"}
+              )
             </Label>
 
             {(tipo === "video" || tipo === "pdf") && (
@@ -264,7 +297,9 @@ function KnowHowNovo() {
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{midiaFileName ?? midiaUrl}</p>
-                      <p className="text-xs text-[var(--text-muted)]">Enviado para o storage privado</p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Enviado para o storage privado
+                      </p>
                     </div>
                     <Button type="button" variant="ghost" size="sm" onClick={clearMidia}>
                       <X className="mr-1 h-4 w-4" /> Remover
@@ -314,12 +349,20 @@ function KnowHowNovo() {
         )}
 
         <div>
-          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Tags (separadas por vírgula)</Label>
-          <Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="envasadora, eletrica, solda" />
+          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+            Tags (separadas por vírgula)
+          </Label>
+          <Input
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="envasadora, eletrica, solda"
+          />
         </div>
 
         <div>
-          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">Papéis-alvo</Label>
+          <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
+            Papéis-alvo
+          </Label>
           <div className="flex flex-wrap gap-2">
             {PAPEIS.map((p) => {
               const on = papeis.includes(p);
@@ -348,7 +391,10 @@ function KnowHowNovo() {
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button onClick={() => mut.mutate()} disabled={mut.isPending || uploading || (isEdit && !editId)}>
+          <Button
+            onClick={() => mut.mutate()}
+            disabled={mut.isPending || uploading || (isEdit && !editId)}
+          >
             <Save className="mr-1.5 h-4 w-4" />
             {isEdit ? "Salvar alterações" : "Salvar rascunho"}
           </Button>

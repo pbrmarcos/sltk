@@ -12,7 +12,11 @@ export function RfqTooltip({ children }: { children: React.ReactNode }) {
       <TooltipTrigger asChild className="cursor-help">
         {children}
       </TooltipTrigger>
-      <TooltipContent side="top" align="center" className="max-w-xs whitespace-pre-line leading-snug">
+      <TooltipContent
+        side="top"
+        align="center"
+        className="max-w-xs whitespace-pre-line leading-snug"
+      >
         {RFQ_TOOLTIP_TEXT}
       </TooltipContent>
     </Tooltip>

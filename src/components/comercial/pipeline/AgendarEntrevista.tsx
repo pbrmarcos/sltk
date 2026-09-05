@@ -66,7 +66,10 @@ export function AgendarEntrevista({
     if (prefs.agenda_sala_padrao) setLocal(prefs.agenda_sala_padrao);
     if (prefs.agenda_convidados_padrao) {
       setConvidados((atual) => {
-        const juntos = [...splitEmails(atual), ...splitEmails(prefs.agenda_convidados_padrao ?? "")];
+        const juntos = [
+          ...splitEmails(atual),
+          ...splitEmails(prefs.agenda_convidados_padrao ?? ""),
+        ];
         return Array.from(new Set(juntos)).join(", ");
       });
     }
@@ -84,7 +87,9 @@ export function AgendarEntrevista({
       durationMin: Number(duracao),
       attendees: splitEmails(convidados),
       organizerEmail:
-        (prefs?.agenda_provider === "teams" ? prefs?.agenda_teams_email : prefs?.agenda_google_email) ??
+        (prefs?.agenda_provider === "teams"
+          ? prefs?.agenda_teams_email
+          : prefs?.agenda_google_email) ??
         prefs?.agenda_google_email ??
         prefs?.agenda_teams_email ??
         undefined,
@@ -140,10 +145,14 @@ export function AgendarEntrevista({
           <div>
             <Label className="text-xs">Duração</Label>
             <Select value={duracao} onValueChange={setDuracao}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {DURACOES.map((d) => (
-                  <SelectItem key={d} value={String(d)}>{d} min</SelectItem>
+                  <SelectItem key={d} value={String(d)}>
+                    {d} min
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -163,14 +172,25 @@ export function AgendarEntrevista({
         </div>
         <div className="sm:col-span-2">
           <Label className="text-xs">Pauta / descrição</Label>
-          <Textarea value={pauta} onChange={(e) => setPauta(e.target.value)} rows={5} maxLength={3000} />
+          <Textarea
+            value={pauta}
+            onChange={(e) => setPauta(e.target.value)}
+            rows={5}
+            maxLength={3000}
+          />
         </div>
       </div>
 
       <div className="rounded-lg border bg-muted/40 p-3 text-[12px] text-muted-foreground">
-        {evento
-          ? <>Reunião em <strong className="text-foreground">{fmt(evento.start)}</strong> até <strong className="text-foreground">{fmt(eventEnd(evento))}</strong>. O convite abre na conta que você já usa no navegador.</>
-          : "Informe uma data e hora válidas para gerar o convite."}
+        {evento ? (
+          <>
+            Reunião em <strong className="text-foreground">{fmt(evento.start)}</strong> até{" "}
+            <strong className="text-foreground">{fmt(eventEnd(evento))}</strong>. O convite abre na
+            conta que você já usa no navegador.
+          </>
+        ) : (
+          "Informe uma data e hora válidas para gerar o convite."
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -190,13 +210,28 @@ export function AgendarEntrevista({
         >
           <CalendarPlus className="mr-1.5 h-3.5 w-3.5" /> Teams / Outlook (trabalho)
         </Button>
-        <Button size="sm" variant="outline" disabled={!evento} onClick={() => evento && abrir(buildOutlookUrl(evento, "web"))}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!evento}
+          onClick={() => evento && abrir(buildOutlookUrl(evento, "web"))}
+        >
           <CalendarPlus className="mr-1.5 h-3.5 w-3.5" /> Outlook.com
         </Button>
-        <Button size="sm" variant="outline" disabled={!evento} onClick={() => evento && downloadIcs(evento, `${opp.codigo}-entrevista.ics`)}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!evento}
+          onClick={() => evento && downloadIcs(evento, `${opp.codigo}-entrevista.ics`)}
+        >
           <Download className="mr-1.5 h-3.5 w-3.5" /> Baixar .ics
         </Button>
-        <Button size="sm" variant="outline" disabled={!evento || !splitEmails(convidados).length} onClick={mailto}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!evento || !splitEmails(convidados).length}
+          onClick={mailto}
+        >
           <Mail className="mr-1.5 h-3.5 w-3.5" /> Enviar por e-mail
         </Button>
         <Button

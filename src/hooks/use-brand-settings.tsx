@@ -57,7 +57,6 @@ const DEFAULTS: Omit<BrandSettings, "id" | "updated_at" | "updated_by"> = {
   social_youtube: null,
 };
 
-
 type Ctx = {
   settings: BrandSettings | null;
   defaults: typeof DEFAULTS;
@@ -93,7 +92,6 @@ const PUBLIC_BRAND_COLUMNS = [
   "social_youtube",
   "updated_at",
 ].join(", ");
-
 
 function normalizeSettings(data: Partial<BrandSettings> | null): BrandSettings | null {
   if (!data?.id) return null;
@@ -148,7 +146,9 @@ export function BrandSettingsProvider({ children }: { children: React.ReactNode 
   }, [data]);
 
   return (
-    <BrandContext.Provider value={{ settings: data ?? null, defaults: DEFAULTS, isLoading: authLoading || isLoading }}>
+    <BrandContext.Provider
+      value={{ settings: data ?? null, defaults: DEFAULTS, isLoading: authLoading || isLoading }}
+    >
       {children}
     </BrandContext.Provider>
   );

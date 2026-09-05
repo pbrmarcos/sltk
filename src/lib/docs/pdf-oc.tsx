@@ -8,7 +8,13 @@ import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { CHROME_PAGE_STYLE, PdfFooter, PdfHeader } from "./pdf-chrome";
 import type { DocumentoLayoutConfig, Idioma } from "./types";
 
-const TOKENS = { fontBody: "Helvetica", fontBold: "Helvetica-Bold", text: "#111827", muted: "#6B7280", border: "#E5E7EB" };
+const TOKENS = {
+  fontBody: "Helvetica",
+  fontBold: "Helvetica-Bold",
+  text: "#111827",
+  muted: "#6B7280",
+  border: "#E5E7EB",
+};
 
 const DOC_TITLE: Record<Idioma, string> = {
   pt: "Ordem de Compra",
@@ -222,9 +228,22 @@ export type OcPdfProps = {
 
 export function OcPdf(props: OcPdfProps) {
   const {
-    idioma, layout, codigo, versao, tag, emissao,
-    fornecedor, moeda, incoterm, condicao_pagamento, entrega_prevista, observacoes,
-    responsavel, aprovador, itens, valor_frete = 0,
+    idioma,
+    layout,
+    codigo,
+    versao,
+    tag,
+    emissao,
+    fornecedor,
+    moeda,
+    incoterm,
+    condicao_pagamento,
+    entrega_prevista,
+    observacoes,
+    responsavel,
+    aprovador,
+    itens,
+    valor_frete = 0,
   } = props;
   const accent = layout.accent_color || "#0B3D91";
   const s = styles(accent);
@@ -237,20 +256,42 @@ export function OcPdf(props: OcPdfProps) {
   const total = subtotal + frete;
 
   return (
-    <Document title={`${codigo} ${idioma.toUpperCase()}`} author={layout.empresa_nome} creator={layout.empresa_nome}>
+    <Document
+      title={`${codigo} ${idioma.toUpperCase()}`}
+      author={layout.empresa_nome}
+      creator={layout.empresa_nome}
+    >
       <Page size="A4" style={s.page}>
-        <PdfHeader layout={layout} titulo={titulo} codigo={codigo} versao={versao} idioma={idioma} dataFmt={dataFmt} />
-        <PdfFooter layout={layout} titulo={titulo} versao={versao} responsavel={responsavel} idioma={idioma} tag={tag} />
+        <PdfHeader
+          layout={layout}
+          titulo={titulo}
+          codigo={codigo}
+          versao={versao}
+          idioma={idioma}
+          dataFmt={dataFmt}
+        />
+        <PdfFooter
+          layout={layout}
+          titulo={titulo}
+          versao={versao}
+          responsavel={responsavel}
+          idioma={idioma}
+          tag={tag}
+        />
 
         <Text style={s.title}>{titulo}</Text>
         <View style={s.accentBar} />
-        <Text style={s.subline}>{codigo} · {tag} · {dataFmt}</Text>
+        <Text style={s.subline}>
+          {codigo} · {tag} · {dataFmt}
+        </Text>
 
         {/* Fornecedor + Condições */}
         <View style={[s.section, s.twoCols]}>
           <View style={s.col}>
             <Text style={s.sectionTitle}>{t.fornecedor}</Text>
-            <Text style={[s.value, s.strong]}>{fornecedor.nome_fantasia || fornecedor.razao_social}</Text>
+            <Text style={[s.value, s.strong]}>
+              {fornecedor.nome_fantasia || fornecedor.razao_social}
+            </Text>
             {fornecedor.nome_fantasia && fornecedor.razao_social !== fornecedor.nome_fantasia ? (
               <Text style={s.value}>{fornecedor.razao_social}</Text>
             ) : null}
@@ -259,7 +300,11 @@ export function OcPdf(props: OcPdfProps) {
             <Text style={s.value}>
               {[fornecedor.cidade, fornecedor.uf, fornecedor.pais].filter(Boolean).join(" · ")}
             </Text>
-            {fornecedor.contato ? <Text style={s.value}>{t.contato}: {fornecedor.contato}</Text> : null}
+            {fornecedor.contato ? (
+              <Text style={s.value}>
+                {t.contato}: {fornecedor.contato}
+              </Text>
+            ) : null}
             {fornecedor.telefone ? <Text style={s.value}>{fornecedor.telefone}</Text> : null}
             {fornecedor.email ? <Text style={s.value}>{fornecedor.email}</Text> : null}
           </View>
@@ -290,7 +335,9 @@ export function OcPdf(props: OcPdfProps) {
               <Text style={s.cQtd}>{it.quantidade}</Text>
               <Text style={s.cUn}>{it.unidade}</Text>
               <Text style={s.cUnit}>{fmtMoney(it.valor_unitario, moeda, idioma)}</Text>
-              <Text style={s.cTot}>{fmtMoney(it.valor_unitario * it.quantidade, moeda, idioma)}</Text>
+              <Text style={s.cTot}>
+                {fmtMoney(it.valor_unitario * it.quantidade, moeda, idioma)}
+              </Text>
             </View>
           ))}
         </View>
@@ -323,11 +370,15 @@ export function OcPdf(props: OcPdfProps) {
 
         <View style={s.assinBox}>
           <View style={s.assinCol}>
-            <Text style={{ color: TOKENS.text, fontFamily: TOKENS.fontBold }}>{responsavel || "—"}</Text>
+            <Text style={{ color: TOKENS.text, fontFamily: TOKENS.fontBold }}>
+              {responsavel || "—"}
+            </Text>
             <Text>{t.comprador}</Text>
           </View>
           <View style={s.assinCol}>
-            <Text style={{ color: TOKENS.text, fontFamily: TOKENS.fontBold }}>{aprovador || "—"}</Text>
+            <Text style={{ color: TOKENS.text, fontFamily: TOKENS.fontBold }}>
+              {aprovador || "—"}
+            </Text>
             <Text>{t.aprovador}</Text>
           </View>
         </View>

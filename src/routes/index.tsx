@@ -62,13 +62,15 @@ function LandingPage() {
   );
 }
 
-
 /* ============================ Hero ============================ */
 
 function Hero() {
   const { t } = useLandingI18n();
   return (
-    <section id="inicio" className="relative isolate min-h-[680px] overflow-hidden md:min-h-[760px]">
+    <section
+      id="inicio"
+      className="relative isolate min-h-[680px] overflow-hidden md:min-h-[760px]"
+    >
       {/* Background image */}
       <div className="absolute inset-0 -z-10">
         <img
@@ -220,7 +222,10 @@ function About() {
             <ul className="mt-7 space-y-3">
               {t.about.bullets.map((b) => (
                 <li key={b} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 flex-none text-blue-600" strokeWidth={2} />
+                  <CheckCircle2
+                    className="mt-0.5 h-5 w-5 flex-none text-blue-600"
+                    strokeWidth={2}
+                  />
                   <span className="text-[14.5px] text-slate-700">{b}</span>
                 </li>
               ))}
@@ -236,7 +241,14 @@ function About() {
 
 function Clients() {
   const { t } = useLandingI18n();
-  const names = ["LIFEGUARD", "LILY'S FLOWERS", "CLIMB THE MOUNTAIN", "IDEABOX", "GOLDEN", "BULLSEYE"];
+  const names = [
+    "LIFEGUARD",
+    "LILY'S FLOWERS",
+    "CLIMB THE MOUNTAIN",
+    "IDEABOX",
+    "GOLDEN",
+    "BULLSEYE",
+  ];
   return (
     <section className="border-y border-slate-200 bg-white py-14">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10">
@@ -324,7 +336,10 @@ function Equipment() {
         {isLoading ? (
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+              <div
+                key={i}
+                className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white"
+              />
             ))}
           </div>
         ) : items.length === 0 ? (
@@ -394,7 +409,6 @@ function Equipment() {
   );
 }
 
-
 /* ============================ CTA Banner ============================ */
 
 function CtaBanner() {
@@ -446,4 +460,3 @@ function CtaBanner() {
     </section>
   );
 }
-

@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  getServiceRoleStatus,
-  resetServiceRoleCache,
-} from "./service-role-health.server";
+import { getServiceRoleStatus, resetServiceRoleCache } from "./service-role-health.server";
 import {
   getAdminClient,
   getDataClient,
@@ -17,11 +14,7 @@ import {
 /* Ambiente simulado                                                          */
 /* -------------------------------------------------------------------------- */
 
-const ENV_KEYS = [
-  "SUPABASE_URL",
-  "VITE_SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-] as const;
+const ENV_KEYS = ["SUPABASE_URL", "VITE_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 let saved: Record<string, string | undefined> = {};
 
@@ -82,7 +75,10 @@ describe("service role health", () => {
 
   it("detecta chave rejeitada pelo Supabase (401)", async () => {
     setEnv({ SUPABASE_URL: "https://demo.supabase.co", SUPABASE_SERVICE_ROLE_KEY: VALID_JWT });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 401 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 401 })),
+    );
     const status = await getServiceRoleStatus();
     expect(status.ok).toBe(false);
     if (!status.ok) expect(status.reason).toBe("invalid");
@@ -90,7 +86,10 @@ describe("service role health", () => {
 
   it("aceita chave válida", async () => {
     setEnv({ SUPABASE_URL: "https://demo.supabase.co", SUPABASE_SERVICE_ROLE_KEY: VALID_JWT });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 200 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("{}", { status: 200 })),
+    );
     const status = await getServiceRoleStatus();
     expect(status.ok).toBe(true);
   });
@@ -128,13 +127,19 @@ describe("ações não críticas com service role ausente/inválida", () => {
 
   it("getDataClient cai no client RLS quando a chave é inválida (401)", async () => {
     setEnv({ SUPABASE_URL: "https://demo.supabase.co", SUPABASE_SERVICE_ROLE_KEY: VALID_JWT });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 401 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 401 })),
+    );
     const rls = makeRlsClient();
     expect(await getDataClient(rls)).toBe(rls);
   });
 
   it("getDataClient cai no client RLS quando a chave é malformada", async () => {
-    setEnv({ SUPABASE_URL: "https://demo.supabase.co", SUPABASE_SERVICE_ROLE_KEY: "sb_publishable_x" });
+    setEnv({
+      SUPABASE_URL: "https://demo.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_publishable_x",
+    });
     const rls = makeRlsClient();
     expect(await getDataClient(rls)).toBe(rls);
   });
@@ -166,7 +171,10 @@ describe("ações críticas com service role ausente/inválida", () => {
 
   it("withCriticalServiceRole bloqueia também com chave inválida", async () => {
     setEnv({ SUPABASE_URL: "https://demo.supabase.co", SUPABASE_SERVICE_ROLE_KEY: VALID_JWT });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 403 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 403 })),
+    );
     const result = await withCriticalServiceRole("sync-drive", vi.fn());
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.reason).toBe("invalid");

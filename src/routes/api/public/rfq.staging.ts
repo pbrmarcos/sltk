@@ -9,7 +9,7 @@ const schema = z.object({ slug: z.string().min(3).max(96) });
 
 async function getAdmin() {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+  const supabaseAdmin = await getCriticalClient();
   return supabaseAdmin as any;
 }
 
@@ -28,7 +28,10 @@ export const Route = createFileRoute("/api/public/rfq/staging")({
           const body = await request.json().catch(() => ({}));
           const parsed = schema.safeParse(body);
           if (!parsed.success) {
-            return Response.json({ ok: false, error: "Dados inválidos." }, { status: 400, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Dados inválidos." },
+              { status: 400, headers: CORS },
+            );
           }
           const supa: any = await getAdmin();
           const { data: link, error: eLink } = await supa
@@ -37,10 +40,21 @@ export const Route = createFileRoute("/api/public/rfq/staging")({
             .eq("slug", parsed.data.slug)
             .maybeSingle();
           if (eLink) throw eLink;
-          if (!link) return Response.json({ ok: false, error: "Formulário não encontrado." }, { status: 404, headers: CORS });
-          if (link.status !== "aberto") return Response.json({ ok: false, error: "Formulário indisponível." }, { status: 410, headers: CORS });
+          if (!link)
+            return Response.json(
+              { ok: false, error: "Formulário não encontrado." },
+              { status: 404, headers: CORS },
+            );
+          if (link.status !== "aberto")
+            return Response.json(
+              { ok: false, error: "Formulário indisponível." },
+              { status: 410, headers: CORS },
+            );
           if (link.expira_em && new Date(link.expira_em).getTime() < Date.now()) {
-            return Response.json({ ok: false, error: "Formulário expirado." }, { status: 410, headers: CORS });
+            return Response.json(
+              { ok: false, error: "Formulário expirado." },
+              { status: 410, headers: CORS },
+            );
           }
 
           if (link.submissao_id) {
@@ -60,10 +74,7 @@ export const Route = createFileRoute("/api/public/rfq/staging")({
             .single();
           if (eSub) throw eSub;
 
-          await supa
-            .from("rfq_formulario_link")
-            .update({ submissao_id: sub.id })
-            .eq("id", link.id);
+          await supa.from("rfq_formulario_link").update({ submissao_id: sub.id }).eq("id", link.id);
 
           return Response.json({ ok: true, submissao_id: sub.id }, { headers: CORS });
         } catch (err) {

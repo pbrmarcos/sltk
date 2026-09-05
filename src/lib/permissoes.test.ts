@@ -73,12 +73,42 @@ describe("PERMISSION_RULES", () => {
   });
 
   it("toda violação devolve uma 'suggestion' coerente (alternativa válida mais próxima)", () => {
-    const cases: Array<{ role: AppRoleName; modules: Partial<Record<AppModule, boolean>>; expectAction: "enable" | "disable"; expectModule: AppModule }> = [
-      { role: "sales", modules: { processos: true }, expectAction: "enable", expectModule: "dashboard" },
-      { role: "engineer", modules: { dashboard: true, qualidade: true }, expectAction: "enable", expectModule: "processos" },
-      { role: "sales", modules: { dashboard: true, comercial: true }, expectAction: "enable", expectModule: "clientes" },
-      { role: "sales", modules: { dashboard: true, pos_vendas: true }, expectAction: "enable", expectModule: "clientes" },
-      { role: "sales", modules: { dashboard: true, admin: true }, expectAction: "disable", expectModule: "admin" },
+    const cases: Array<{
+      role: AppRoleName;
+      modules: Partial<Record<AppModule, boolean>>;
+      expectAction: "enable" | "disable";
+      expectModule: AppModule;
+    }> = [
+      {
+        role: "sales",
+        modules: { processos: true },
+        expectAction: "enable",
+        expectModule: "dashboard",
+      },
+      {
+        role: "engineer",
+        modules: { dashboard: true, qualidade: true },
+        expectAction: "enable",
+        expectModule: "processos",
+      },
+      {
+        role: "sales",
+        modules: { dashboard: true, comercial: true },
+        expectAction: "enable",
+        expectModule: "clientes",
+      },
+      {
+        role: "sales",
+        modules: { dashboard: true, pos_vendas: true },
+        expectAction: "enable",
+        expectModule: "clientes",
+      },
+      {
+        role: "sales",
+        modules: { dashboard: true, admin: true },
+        expectAction: "disable",
+        expectModule: "admin",
+      },
     ];
     for (const c of cases) {
       const v = validatePermissionMatrix(c.role, c.modules);

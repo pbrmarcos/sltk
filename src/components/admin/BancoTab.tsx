@@ -49,16 +49,17 @@ function ConnectionCard({ data, primary }: { data: Conn; primary?: boolean }) {
       </div>
 
       {!configured ? (
-        <p className="text-sm text-[var(--text-muted)]">
-          Nenhuma URL definida para esta conexão.
-        </p>
+        <p className="text-sm text-[var(--text-muted)]">Nenhuma URL definida para esta conexão.</p>
       ) : (
         <dl className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-y-3 gap-x-4 text-sm">
           <dt className="text-[var(--text-muted)]">Project ID / ref</dt>
           <dd className="font-mono flex items-center gap-2">
             <span>{data.projectId ?? "—"}</span>
             {data.projectId && (
-              <button onClick={() => copy(data.projectId, "Project ID")} className="text-[var(--text-muted)] hover:text-[var(--accent)]">
+              <button
+                onClick={() => copy(data.projectId, "Project ID")}
+                className="text-[var(--text-muted)] hover:text-[var(--accent)]"
+              >
                 <Copy className="h-3.5 w-3.5" />
               </button>
             )}
@@ -67,7 +68,10 @@ function ConnectionCard({ data, primary }: { data: Conn; primary?: boolean }) {
           <dt className="text-[var(--text-muted)]">URL</dt>
           <dd className="font-mono break-all flex items-center gap-2">
             <span>{data.url}</span>
-            <button onClick={() => copy(data.url, "URL")} className="text-[var(--text-muted)] hover:text-[var(--accent)]">
+            <button
+              onClick={() => copy(data.url, "URL")}
+              className="text-[var(--text-muted)] hover:text-[var(--accent)]"
+            >
               <Copy className="h-3.5 w-3.5" />
             </button>
           </dd>
@@ -78,7 +82,9 @@ function ConnectionCard({ data, primary }: { data: Conn; primary?: boolean }) {
           <dt className="text-[var(--text-muted)]">Service role key</dt>
           <dd>
             {data.hasServiceRole ? (
-              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">configurada</Badge>
+              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                configurada
+              </Badge>
             ) : (
               <Badge variant="outline">ausente</Badge>
             )}
@@ -86,7 +92,8 @@ function ConnectionCard({ data, primary }: { data: Conn; primary?: boolean }) {
 
           <dt className="text-[var(--text-muted)]">Health check</dt>
           <dd>
-            HTTP {data.ping.status || "—"} {data.ping.ok ? "(ok)" : data.ping.error ? `— ${data.ping.error}` : ""}
+            HTTP {data.ping.status || "—"}{" "}
+            {data.ping.ok ? "(ok)" : data.ping.error ? `— ${data.ping.error}` : ""}
           </dd>
 
           {data.dashboardUrl && (
@@ -142,9 +149,9 @@ export function BancoTab() {
 
       {data && (
         <p className="text-xs text-[var(--text-muted)]">
-          Verificado em {new Date(data.checkedAt).toLocaleString("pt-BR")}. Se o status estiver "Offline / pausado",
-          provavelmente o projeto correspondente está em pausa no painel do Supabase — basta abrir o dashboard e
-          clicar em "Restore project".
+          Verificado em {new Date(data.checkedAt).toLocaleString("pt-BR")}. Se o status estiver
+          "Offline / pausado", provavelmente o projeto correspondente está em pausa no painel do
+          Supabase — basta abrir o dashboard e clicar em "Restore project".
         </p>
       )}
     </div>

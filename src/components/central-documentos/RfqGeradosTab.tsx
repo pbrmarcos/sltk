@@ -145,12 +145,7 @@ export function RfqGeradosTab() {
                   })}
                   <td className="px-3 py-2 text-right">
                     {g.drive_folder_url ? (
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 px-2 text-zinc-600"
-                      >
+                      <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-zinc-600">
                         <a href={g.drive_folder_url} target="_blank" rel="noopener noreferrer">
                           <FileDown className="mr-1 h-3 w-3" />
                           Drive

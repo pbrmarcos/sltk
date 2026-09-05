@@ -24,7 +24,7 @@ export const logAuditFn = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     try {
       const { getCriticalClient } = await import("@/lib/supabase-client.server");
-    const supabaseAdmin = await getCriticalClient();
+      const supabaseAdmin = await getCriticalClient();
       const rows: AuditInsert[] = data.entries.map((e) => ({
         user_id: context.userId,
         table_name: e.table_name,

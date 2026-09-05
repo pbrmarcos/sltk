@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,12 +70,19 @@ export function ShareLinkDialog({ open, onOpenChange, tipo, relatorioId, relator
   const email = `mailto:?subject=${encodeURIComponent(`Relatório ${tipo.toUpperCase()} ${relatorioCodigo ?? ""}`)}&body=${encodeURIComponent(msg)}`;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) requestClose(); else onOpenChange(true); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) requestClose();
+        else onOpenChange(true);
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Link de preenchimento em campo</DialogTitle>
           <DialogDescription>
-            Gere um link assinado para o técnico em campo preencher pelo tablet/celular, sem precisar de login.
+            Gere um link assinado para o técnico em campo preencher pelo tablet/celular, sem
+            precisar de login.
           </DialogDescription>
         </DialogHeader>
 
@@ -81,7 +95,9 @@ export function ShareLinkDialog({ open, onOpenChange, tipo, relatorioId, relator
               min={1}
               max={720}
               value={ttlHours}
-              onChange={(e) => setTtlHours(Math.max(1, Math.min(720, Number(e.target.value) || 72)))}
+              onChange={(e) =>
+                setTtlHours(Math.max(1, Math.min(720, Number(e.target.value) || 72)))
+              }
               disabled={loading || !!link}
             />
           </div>
@@ -133,7 +149,9 @@ export function ShareLinkDialog({ open, onOpenChange, tipo, relatorioId, relator
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={requestClose}>Fechar</Button>
+          <Button variant="ghost" onClick={requestClose}>
+            Fechar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

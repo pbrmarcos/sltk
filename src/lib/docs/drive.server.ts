@@ -74,10 +74,10 @@ export async function uploadFile(opts: {
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\n` +
-    `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
-    `${JSON.stringify(meta)}\r\n` +
-    `--${boundary}\r\n` +
-    `Content-Type: ${meta.mimeType}\r\n\r\n`,
+      `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+      `${JSON.stringify(meta)}\r\n` +
+      `--${boundary}\r\n` +
+      `Content-Type: ${meta.mimeType}\r\n\r\n`,
   );
   const tail = enc.encode(`\r\n--${boundary}--\r\n`);
   const body = new Uint8Array(head.byteLength + opts.bytes.byteLength + tail.byteLength);
@@ -99,7 +99,7 @@ export async function uploadFile(opts: {
     const t = await r.text().catch(() => "");
     throw new Error(`Drive upload ${r.status}: ${t.slice(0, 300)}`);
   }
-  const j = await r.json() as { id: string; webViewLink?: string };
+  const j = (await r.json()) as { id: string; webViewLink?: string };
   return { id: j.id, webViewLink: j.webViewLink || `https://drive.google.com/file/d/${j.id}/view` };
 }
 

@@ -40,7 +40,10 @@ export function SeoFieldsCard({
     <div className={className ?? "grid gap-4 sm:grid-cols-2"}>
       <div className="space-y-1.5 sm:col-span-2">
         <Label htmlFor={titleId} className="text-xs">
-          Título (SEO) <span className="ml-1 text-[10px] text-[var(--text-muted)]">{title.length}/{titleMaxLength}</span>
+          Título (SEO){" "}
+          <span className="ml-1 text-[10px] text-[var(--text-muted)]">
+            {title.length}/{titleMaxLength}
+          </span>
         </Label>
         <Input
           id={titleId}
@@ -53,7 +56,10 @@ export function SeoFieldsCard({
 
       <div className="space-y-1.5 sm:col-span-2">
         <Label htmlFor={descriptionId} className="text-xs">
-          Descrição (SEO) <span className="ml-1 text-[10px] text-[var(--text-muted)]">{description.length}/{descriptionMaxLength}</span>
+          Descrição (SEO){" "}
+          <span className="ml-1 text-[10px] text-[var(--text-muted)]">
+            {description.length}/{descriptionMaxLength}
+          </span>
         </Label>
         <Textarea
           id={descriptionId}
@@ -77,7 +83,11 @@ export function SeoFieldsCard({
             placeholder="https://.../imagem.png"
           />
           {showOgImagePreview && ogImage && (
-            <img src={ogImage} alt="Prévia da imagem de compartilhamento" className="mt-2 max-h-40 rounded-md border border-[var(--bg-border)]" />
+            <img
+              src={ogImage}
+              alt="Prévia da imagem de compartilhamento"
+              className="mt-2 max-h-40 rounded-md border border-[var(--bg-border)]"
+            />
           )}
         </div>
       )}

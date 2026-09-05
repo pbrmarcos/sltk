@@ -36,9 +36,7 @@ const CAPTIONS = {
     "Wizard de novo orçamento — seleção de equipamento e cliente",
   ],
   "comercial/pipeline-de-oportunidades": ["Kanban de oportunidades por estágio comercial"],
-  "compras/cotacao-multiplos-fornecedores": [
-    "Cotação com múltiplos fornecedores lado a lado",
-  ],
+  "compras/cotacao-multiplos-fornecedores": ["Cotação com múltiplos fornecedores lado a lado"],
   "compras/criar-solicitacao": ["Formulário de nova solicitação de compra"],
   "compras/emitir-e-aprovar-oc": [
     "Lista de ordens de compra com fila de aprovação",

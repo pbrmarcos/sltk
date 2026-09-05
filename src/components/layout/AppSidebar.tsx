@@ -32,12 +32,7 @@ import { ROLE_LABEL, useAuth, type AppRole } from "@/hooks/use-auth";
 import { useBrandSettingsOptional } from "@/hooks/use-brand-settings";
 import { useMyModules } from "@/hooks/use-my-modules";
 import type { AppModule } from "@/lib/permissoes.functions";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SidebarSearch } from "@/components/layout/SidebarSearch";
 import { NotificationsBell } from "@/components/layout/NotificationsBell";
 import { usePendenciasSidebar } from "@/hooks/use-pendencias";
@@ -61,7 +56,15 @@ type Section = { title: string; items: Item[]; adminOnly?: boolean; module?: App
 const SECTIONS: Section[] = [
   {
     title: "Visão geral",
-    items: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard, exact: true, module: "dashboard" }],
+    items: [
+      {
+        label: "Dashboard",
+        to: "/dashboard",
+        icon: LayoutDashboard,
+        exact: true,
+        module: "dashboard",
+      },
+    ],
   },
   {
     title: "Comercial",
@@ -193,7 +196,6 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-
     title: "Qualidade",
     items: [
       {
@@ -336,7 +338,6 @@ const SECTIONS: Section[] = [
       },
     ],
   },
-
 ];
 
 const linkRowClasses =
@@ -548,7 +549,7 @@ function ChildList({
           >
             <span className="min-w-0 truncate">{c.label}</span>
             {(() => {
-              const p = c.to ? pendMap[c.to] ?? 0 : 0;
+              const p = c.to ? (pendMap[c.to] ?? 0) : 0;
               const details = c.to ? pendDetailsMap[c.to] : undefined;
               return p > 0 ? (
                 <Tooltip>
@@ -651,7 +652,6 @@ export function AppSidebarContent({
       ...s,
       items: role === "admin" ? s.items : s.items.filter(itemVisible),
     }));
-
   }, [role, roleLoading, myModules, modulesLoading]);
 
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
@@ -706,236 +706,259 @@ export function AppSidebarContent({
   const roleLabel = role ? ROLE_LABEL[role] : "Sem perfil";
 
   return (
-   <TooltipProvider delayDuration={150}>
-    <div className="flex h-full w-full flex-col bg-[var(--sidebar)] text-[var(--sidebar-foreground)]">
-      <div className={cn(
-        "flex items-center border-b border-[var(--sidebar-border)] h-16",
-        collapsed ? "flex-col justify-center gap-1 px-1" : "gap-2.5 px-3",
-      )}>
+    <TooltipProvider delayDuration={150}>
+      <div className="flex h-full w-full flex-col bg-[var(--sidebar)] text-[var(--sidebar-foreground)]">
         <div
           className={cn(
-            "flex items-center justify-center rounded-md overflow-hidden",
-            collapsed ? "h-7 w-7 justify-start" : "h-12 px-1 flex-1",
+            "flex items-center border-b border-[var(--sidebar-border)] h-16",
+            collapsed ? "flex-col justify-center gap-1 px-1" : "gap-2.5 px-3",
           )}
         >
-          {brandLogo ? (
-            <img
-              src={brandLogo}
-              alt={brandName}
-              className={cn(
-                "object-contain",
-                collapsed ? "h-7 w-7" : "h-10 w-auto",
-              )}
-            />
-          ) : (
-            <span
-              className={cn(
-                "font-mono uppercase tracking-[0.2em] text-white/85",
-                collapsed ? "text-[10px]" : "text-xs",
-              )}
-            >
-              {collapsed ? "S" : brandName}
-            </span>
-          )}
-        </div>
-        {showToggle && (
-          <button
-            type="button"
-            onClick={onToggleCollapsed}
-            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-            title={collapsed ? "Expandir menu" : "Recolher menu"}
+          <div
             className={cn(
-              "grid place-items-center rounded text-[var(--sidebar-foreground)]/70 hover:bg-white/10 hover:text-white",
-              collapsed ? "h-6 w-6" : "h-7 w-7",
+              "flex items-center justify-center rounded-md overflow-hidden",
+              collapsed ? "h-7 w-7 justify-start" : "h-12 px-1 flex-1",
             )}
           >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-          </button>
-        )}
-      </div>
+            {brandLogo ? (
+              <img
+                src={brandLogo}
+                alt={brandName}
+                className={cn("object-contain", collapsed ? "h-7 w-7" : "h-10 w-auto")}
+              />
+            ) : (
+              <span
+                className={cn(
+                  "font-mono uppercase tracking-[0.2em] text-white/85",
+                  collapsed ? "text-[10px]" : "text-xs",
+                )}
+              >
+                {collapsed ? "S" : brandName}
+              </span>
+            )}
+          </div>
+          {showToggle && (
+            <button
+              type="button"
+              onClick={onToggleCollapsed}
+              aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+              title={collapsed ? "Expandir menu" : "Recolher menu"}
+              className={cn(
+                "grid place-items-center rounded text-[var(--sidebar-foreground)]/70 hover:bg-white/10 hover:text-white",
+                collapsed ? "h-6 w-6" : "h-7 w-7",
+              )}
+            >
+              {collapsed ? (
+                <PanelLeftOpen className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </button>
+          )}
+        </div>
 
-      <div className={cn("border-b border-[var(--sidebar-border)] py-3", collapsed ? "px-2" : "px-3")}>
-        {(() => {
-          const podeCliente = role === "admin" || myModules.has("clientes");
-          const base =
-            "flex w-full items-center justify-center rounded-md bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] transition-opacity";
-          const enabled = "hover:opacity-90";
-          const disabled = "opacity-45 cursor-not-allowed pointer-events-none";
-          const tip = podeCliente
-            ? "Novo cliente"
-            : "Você não tem permissão para o módulo Clientes. Solicite acesso ao administrador.";
-          const inner = collapsed ? (
-            <Plus className="h-4 w-4" />
-          ) : (
-            <>
-              <Plus className="h-3.5 w-3.5" />
-              Novo cliente
-            </>
-          );
-          const cls = cn(
-            base,
-            collapsed ? "p-2" : "gap-1.5 px-2.5 py-2 text-[11.5px] font-semibold",
-            podeCliente ? enabled : disabled,
-          );
-          return (
+        <div
+          className={cn(
+            "border-b border-[var(--sidebar-border)] py-3",
+            collapsed ? "px-2" : "px-3",
+          )}
+        >
+          {(() => {
+            const podeCliente = role === "admin" || myModules.has("clientes");
+            const base =
+              "flex w-full items-center justify-center rounded-md bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] transition-opacity";
+            const enabled = "hover:opacity-90";
+            const disabled = "opacity-45 cursor-not-allowed pointer-events-none";
+            const tip = podeCliente
+              ? "Novo cliente"
+              : "Você não tem permissão para o módulo Clientes. Solicite acesso ao administrador.";
+            const inner = collapsed ? (
+              <Plus className="h-4 w-4" />
+            ) : (
+              <>
+                <Plus className="h-3.5 w-3.5" />
+                Novo cliente
+              </>
+            );
+            const cls = cn(
+              base,
+              collapsed ? "p-2" : "gap-1.5 px-2.5 py-2 text-[11.5px] font-semibold",
+              podeCliente ? enabled : disabled,
+            );
+            return (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="block w-full">
+                    {podeCliente ? (
+                      <Link to="/clientes/novo" onClick={onNavigate} className={cls}>
+                        {inner}
+                      </Link>
+                    ) : (
+                      <span aria-disabled className={cls}>
+                        {inner}
+                      </span>
+                    )}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="right">{tip}</TooltipContent>
+              </Tooltip>
+            );
+          })()}
+          <div className="mt-2">
+            <SidebarSearch
+              collapsed={collapsed}
+              navItems={visibleSections.flatMap((s) =>
+                s.items.map((it) => ({ label: it.label, to: it.to, section: s.title })),
+              )}
+            />
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-2">
+          {!role && !roleLoading && !collapsed && (
+            <div className="mx-3 mb-3 rounded-md border border-[var(--sidebar-border)] bg-white/5 p-2.5 text-[10px] leading-snug text-[var(--sidebar-foreground)]/70">
+              Seu usuário ainda não tem perfil atribuído. Solicite a um administrador o acesso aos
+              módulos.
+            </div>
+          )}
+          {visibleSections.map((s) => (
+            <div key={s.title} className="mb-2">
+              {!collapsed && (
+                <div className="px-4 pb-1 pt-1.5 text-[9px] font-semibold uppercase tracking-wider text-[var(--sidebar-foreground)]/50">
+                  {s.title}
+                </div>
+              )}
+              <div className="flex flex-col">
+                {s.items.map((it) => {
+                  const hasChildren = !!it.children?.length;
+                  const open = !!openMap[it.to];
+                  const isActive = pathname === it.to || pathname.startsWith(it.to + "/");
+                  const directPend = pendMap[it.to] ?? 0;
+                  const childPend = hasChildren
+                    ? it.children!.reduce((acc, c) => acc + (c.to ? (pendMap[c.to] ?? 0) : 0), 0)
+                    : 0;
+                  const pendCount = directPend + childPend;
+                  return (
+                    <div key={it.to}>
+                      {hasChildren ? (
+                        <ParentRow
+                          item={it}
+                          open={open}
+                          onToggle={() => setOpenMap((p) => ({ ...p, [it.to]: !p[it.to] }))}
+                          collapsed={collapsed}
+                          active={isActive}
+                          pendCount={pendCount}
+                          pendDetails={itemDetails(it)}
+                        />
+                      ) : (
+                        <LeafRow
+                          item={it}
+                          onNavigate={onNavigate}
+                          collapsed={collapsed}
+                          pendCount={pendCount}
+                          pendDetails={itemDetails(it)}
+                        />
+                      )}
+                      {hasChildren && open && !collapsed && (
+                        <ChildList
+                          children={it.children!}
+                          onNavigate={onNavigate}
+                          pendMap={pendMap}
+                          pendDetailsMap={pendDetailsMap}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        <div
+          className={cn(
+            "flex items-center border-t border-[var(--sidebar-border)] p-3",
+            collapsed ? "flex-col gap-2" : "gap-2",
+          )}
+        >
+          {collapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="block w-full">
-                  {podeCliente ? (
-                    <Link to="/clientes/novo" onClick={onNavigate} className={cls}>
-                      {inner}
-                    </Link>
+                <Link
+                  to="/conta"
+                  onClick={onNavigate}
+                  className="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-[var(--sidebar-primary)] text-[10px] font-bold text-[var(--sidebar-primary-foreground)] hover:opacity-90"
+                  aria-label="Minha conta"
+                >
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={displayName}
+                      className="h-8 w-8 object-cover"
+                    />
                   ) : (
-                    <span aria-disabled className={cls}>
-                      {inner}
-                    </span>
+                    initials
                   )}
-                </span>
+                </Link>
               </TooltipTrigger>
-              <TooltipContent side="right">{tip}</TooltipContent>
+              <TooltipContent side="right">
+                {displayName} · {roleLabel}
+              </TooltipContent>
             </Tooltip>
-          );
-        })()}
-        <div className="mt-2">
-          <SidebarSearch
-            collapsed={collapsed}
-            navItems={visibleSections.flatMap((s) =>
-              s.items.map((it) => ({ label: it.label, to: it.to, section: s.title })),
-            )}
-          />
-        </div>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto py-2">
-        {!role && !roleLoading && !collapsed && (
-          <div className="mx-3 mb-3 rounded-md border border-[var(--sidebar-border)] bg-white/5 p-2.5 text-[10px] leading-snug text-[var(--sidebar-foreground)]/70">
-            Seu usuário ainda não tem perfil atribuído. Solicite a um administrador o acesso aos módulos.
-          </div>
-        )}
-        {visibleSections.map((s) => (
-          <div key={s.title} className="mb-2">
-            {!collapsed && (
-              <div className="px-4 pb-1 pt-1.5 text-[9px] font-semibold uppercase tracking-wider text-[var(--sidebar-foreground)]/50">
-                {s.title}
-              </div>
-            )}
-            <div className="flex flex-col">
-              {s.items.map((it) => {
-                const hasChildren = !!it.children?.length;
-                const open = !!openMap[it.to];
-                const isActive = pathname === it.to || pathname.startsWith(it.to + "/");
-                const directPend = pendMap[it.to] ?? 0;
-                const childPend = hasChildren
-                  ? it.children!.reduce((acc, c) => acc + (c.to ? pendMap[c.to] ?? 0 : 0), 0)
-                  : 0;
-                const pendCount = directPend + childPend;
-                return (
-                  <div key={it.to}>
-                    {hasChildren ? (
-                      <ParentRow
-                        item={it}
-                        open={open}
-                        onToggle={() => setOpenMap((p) => ({ ...p, [it.to]: !p[it.to] }))}
-                        collapsed={collapsed}
-                        active={isActive}
-                        pendCount={pendCount}
-                        pendDetails={itemDetails(it)}
-                      />
-                    ) : (
-                      <LeafRow
-                        item={it}
-                        onNavigate={onNavigate}
-                        collapsed={collapsed}
-                        pendCount={pendCount}
-                        pendDetails={itemDetails(it)}
-                      />
-                    )}
-                    {hasChildren && open && !collapsed && (
-                      <ChildList
-                        children={it.children!}
-                        onNavigate={onNavigate}
-                        pendMap={pendMap}
-                        pendDetailsMap={pendDetailsMap}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      <div className={cn(
-        "flex items-center border-t border-[var(--sidebar-border)] p-3",
-        collapsed ? "flex-col gap-2" : "gap-2",
-      )}>
-        {collapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                to="/conta"
-                onClick={onNavigate}
-                className="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-[var(--sidebar-primary)] text-[10px] font-bold text-[var(--sidebar-primary-foreground)] hover:opacity-90"
-                aria-label="Minha conta"
-              >
+          ) : (
+            <Link
+              to="/conta"
+              onClick={onNavigate}
+              className="flex min-w-0 flex-1 items-center gap-2 rounded hover:bg-white/5 p-1 -m-1"
+              title="Minha conta"
+            >
+              <div className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--sidebar-primary)] text-[10px] font-bold text-[var(--sidebar-primary-foreground)]">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={displayName} className="h-8 w-8 object-cover" />
+                  <img
+                    src={profile.avatar_url}
+                    alt={displayName}
+                    className="h-8 w-8 object-cover"
+                  />
                 ) : (
                   initials
                 )}
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              {displayName} · {roleLabel}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <Link
-            to="/conta"
-            onClick={onNavigate}
-            className="flex min-w-0 flex-1 items-center gap-2 rounded hover:bg-white/5 p-1 -m-1"
-            title="Minha conta"
-          >
-            <div className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--sidebar-primary)] text-[10px] font-bold text-[var(--sidebar-primary-foreground)]">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={displayName} className="h-8 w-8 object-cover" />
-              ) : (
-                initials
-              )}
-            </div>
-            <div className="min-w-0 flex-1 leading-tight">
-              <div className="truncate text-[11.5px] font-medium text-[var(--sidebar-foreground)]">{displayName}</div>
-              <div className="truncate text-[10px] text-[var(--sidebar-foreground)]/60">{roleLabel}</div>
-            </div>
-          </Link>
-        )}
-        <NotificationsBell collapsed={collapsed} />
-        {collapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                aria-label="Sair"
-                onClick={() => void signOut()}
-                className="grid h-8 w-8 place-items-center rounded text-[var(--sidebar-foreground)]/70 hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Sair</TooltipContent>
-          </Tooltip>
-        ) : (
-          <button
-            title="Sair"
-            onClick={() => void signOut()}
-            className="grid h-8 w-8 place-items-center rounded text-[var(--sidebar-foreground)]/70 hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        )}
+              </div>
+              <div className="min-w-0 flex-1 leading-tight">
+                <div className="truncate text-[11.5px] font-medium text-[var(--sidebar-foreground)]">
+                  {displayName}
+                </div>
+                <div className="truncate text-[10px] text-[var(--sidebar-foreground)]/60">
+                  {roleLabel}
+                </div>
+              </div>
+            </Link>
+          )}
+          <NotificationsBell collapsed={collapsed} />
+          {collapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  aria-label="Sair"
+                  onClick={() => void signOut()}
+                  className="grid h-8 w-8 place-items-center rounded text-[var(--sidebar-foreground)]/70 hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Sair</TooltipContent>
+            </Tooltip>
+          ) : (
+            <button
+              title="Sair"
+              onClick={() => void signOut()}
+              className="grid h-8 w-8 place-items-center rounded text-[var(--sidebar-foreground)]/70 hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-   </TooltipProvider>
+    </TooltipProvider>
   );
 }
 

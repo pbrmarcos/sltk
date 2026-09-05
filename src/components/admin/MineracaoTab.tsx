@@ -34,7 +34,12 @@ function errMsg(e: unknown): string {
   if (e instanceof Error && e.message) return e.message;
   if (typeof e === "string") return e;
   const anyE = e as { message?: string; error?: string; statusText?: string } | null;
-  return anyE?.message || anyE?.error || anyE?.statusText || "Não foi possível concluir a operação. Tente novamente.";
+  return (
+    anyE?.message ||
+    anyE?.error ||
+    anyE?.statusText ||
+    "Não foi possível concluir a operação. Tente novamente."
+  );
 }
 
 export function MineracaoTab() {
@@ -134,7 +139,11 @@ export function MineracaoTab() {
           </Field>
           <Field
             label="Senha"
-            hint={data?.senha_definida ? "Já existe uma senha salva. Preencha apenas para trocar." : "Nenhuma senha salva ainda."}
+            hint={
+              data?.senha_definida
+                ? "Já existe uma senha salva. Preencha apenas para trocar."
+                : "Nenhuma senha salva ainda."
+            }
           >
             <Input
               type="password"
@@ -144,8 +153,16 @@ export function MineracaoTab() {
               autoComplete="new-password"
             />
           </Field>
-          <Field label="Intervalo entre consultas (ms)" hint="Mínimo exigido pelo provedor: 500 ms.">
-            <Input type="number" min={500} value={form["delay_ms"] ?? ""} onChange={set("delay_ms")} />
+          <Field
+            label="Intervalo entre consultas (ms)"
+            hint="Mínimo exigido pelo provedor: 500 ms."
+          >
+            <Input
+              type="number"
+              min={500}
+              value={form["delay_ms"] ?? ""}
+              onChange={set("delay_ms")}
+            />
           </Field>
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -175,7 +192,11 @@ export function MineracaoTab() {
         </header>
         <div className="grid gap-4 md:grid-cols-3">
           <Field label="Bases (países)">
-            <Input type="number" value={form["limite_bases"] ?? ""} onChange={set("limite_bases")} />
+            <Input
+              type="number"
+              value={form["limite_bases"] ?? ""}
+              onChange={set("limite_bases")}
+            />
           </Field>
           <Field label="Bases premium">
             <Input
@@ -185,10 +206,18 @@ export function MineracaoTab() {
             />
           </Field>
           <Field label="Rubros / NCM (4 dígitos)">
-            <Input type="number" value={form["limite_rubros"] ?? ""} onChange={set("limite_rubros")} />
+            <Input
+              type="number"
+              value={form["limite_rubros"] ?? ""}
+              onChange={set("limite_rubros")}
+            />
           </Field>
           <Field label="Empresas">
-            <Input type="number" value={form["limite_empresas"] ?? ""} onChange={set("limite_empresas")} />
+            <Input
+              type="number"
+              value={form["limite_empresas"] ?? ""}
+              onChange={set("limite_empresas")}
+            />
           </Field>
           <Field label="Consultas por dia">
             <Input

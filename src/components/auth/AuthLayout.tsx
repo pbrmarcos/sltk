@@ -75,17 +75,23 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
             backgroundImage:
               "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
             backgroundSize: "56px 56px",
-            maskImage:
-              "radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%)",
+            maskImage: "radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%)",
           }}
         />
 
         {/* Top bar */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex h-28 w-72 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] px-2.5 backdrop-blur-sm transition hover:bg-white/[0.08]">
+            <Link
+              to="/"
+              className="flex h-28 w-72 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] px-2.5 backdrop-blur-sm transition hover:bg-white/[0.08]"
+            >
               {darkPanelLogo ? (
-                <img src={darkPanelLogo} alt="SLTK Americas" className="h-full w-full object-contain" />
+                <img
+                  src={darkPanelLogo}
+                  alt="SLTK Americas"
+                  className="h-full w-full object-contain"
+                />
               ) : (
                 wordmark
               )}
@@ -110,21 +116,20 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
               Engenharia industrial
             </span>
             <h2 className="text-[2.6rem] font-semibold leading-[1.05] tracking-tight xl:text-[3.25rem]">
-              Soluções industriais<br />
+              Soluções industriais
+              <br />
               <span
                 className="bg-clip-text text-transparent"
                 style={{
-                  backgroundImage:
-                    "linear-gradient(135deg, #ffffff 0%, #cbd5ff 55%, #7c8ae0 100%)",
+                  backgroundImage: "linear-gradient(135deg, #ffffff 0%, #cbd5ff 55%, #7c8ae0 100%)",
                 }}
               >
                 que movem as Américas.
               </span>
             </h2>
             <p className="max-w-md text-[15px] leading-relaxed text-white/65">
-              A SLTK Americas projeta, fabrica e mantém equipamentos industriais
-              de alta performance — do comercial à assistência técnica em campo,
-              com presença em toda a América Latina.
+              A SLTK Americas projeta, fabrica e mantém equipamentos industriais de alta performance
+              — do comercial à assistência técnica em campo, com presença em toda a América Latina.
             </p>
           </div>
 
@@ -173,9 +178,16 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 
         {/* Mobile/tablet header */}
         <div className="mb-10 flex items-center justify-between lg:hidden">
-          <Link to="/" className="flex h-24 w-64 items-center justify-center transition hover:opacity-80">
+          <Link
+            to="/"
+            className="flex h-24 w-64 items-center justify-center transition hover:opacity-80"
+          >
             {lightPanelLogo ? (
-              <img src={lightPanelLogo} alt="SLTK Americas" className="h-full w-full object-contain" />
+              <img
+                src={lightPanelLogo}
+                alt="SLTK Americas"
+                className="h-full w-full object-contain"
+              />
             ) : (
               wordmarkLight
             )}

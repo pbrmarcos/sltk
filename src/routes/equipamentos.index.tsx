@@ -23,7 +23,8 @@ export const Route = createFileRoute("/equipamentos/")({
       { property: "og:title", content: "Equipamentos industriais — Solutek" },
       {
         property: "og:description",
-        content: "Projetos sob medida de engenharia para empacotamento, envase, paletização e mais.",
+        content:
+          "Projetos sob medida de engenharia para empacotamento, envase, paletização e mais.",
       },
       { property: "og:url", content: "https://sltkamericas.com/equipamentos" },
     ],
@@ -54,11 +55,15 @@ function EquipamentosIndex() {
           }}
         />
         <div className="mx-auto max-w-[1280px] px-5 md:px-10">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-300">CATÁLOGO</span>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">Equipamentos industriais Solutek</h1>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-300">
+            CATÁLOGO
+          </span>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
+            Equipamentos industriais Solutek
+          </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300">
-            Projetos de engenharia dedicados: empacotamento, envase, paletização, inspeção, etiquetagem e linhas completas —
-            todos sob medida para a sua produção.
+            Projetos de engenharia dedicados: empacotamento, envase, paletização, inspeção,
+            etiquetagem e linhas completas — todos sob medida para a sua produção.
           </p>
         </div>
       </section>
@@ -79,7 +84,12 @@ function EquipamentosIndex() {
                 >
                   {e.og_image_url ? (
                     <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-                      <img src={e.og_image_url} alt={e.nome_pt} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                      <img
+                        src={e.og_image_url}
+                        alt={e.nome_pt}
+                        className="h-full w-full object-cover transition group-hover:scale-105"
+                        loading="lazy"
+                      />
                     </div>
                   ) : (
                     <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 text-blue-400">

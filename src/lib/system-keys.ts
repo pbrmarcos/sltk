@@ -2,13 +2,7 @@
 // Client-safe: NÃO lê process.env — apenas descreve o que existe.
 // O status real vem de `src/lib/system-diagnostics.functions.ts`.
 
-export type CapabilityArea =
-  | "banco"
-  | "ia"
-  | "documentos"
-  | "email"
-  | "fiscal"
-  | "assinatura";
+export type CapabilityArea = "banco" | "ia" | "documentos" | "email" | "fiscal" | "assinatura";
 
 export const AREA_LABEL: Record<CapabilityArea, string> = {
   banco: "Banco de dados",
@@ -52,7 +46,8 @@ export const CAPABILITIES: CapabilityDef[] = [
     id: "supabase_service_role",
     label: "Acesso administrativo (service role)",
     descricao: "Permite ações privilegiadas: criar usuários, tokens públicos e rotinas sem sessão.",
-    impacto: "Sem isso as telas continuam funcionando por RLS, mas ações administrativas ficam bloqueadas.",
+    impacto:
+      "Sem isso as telas continuam funcionando por RLS, mas ações administrativas ficam bloqueadas.",
     area: "banco",
     criticidade: "critica",
     envs: ["SUPABASE_SERVICE_ROLE_KEY"],
@@ -62,7 +57,8 @@ export const CAPABILITIES: CapabilityDef[] = [
     id: "sb_management",
     label: "Migrations (Supabase Management API)",
     descricao: "Token usado pela tela de Migrations para executar SQL diretamente em produção.",
-    impacto: "A tela de Migrations não consegue aplicar nem listar o estado real das migrations pendentes.",
+    impacto:
+      "A tela de Migrations não consegue aplicar nem listar o estado real das migrations pendentes.",
     area: "banco",
     criticidade: "critica",
     envs: ["SB_MANAGEMENT_ACCESS_TOKEN"],
@@ -101,8 +97,10 @@ export const CAPABILITIES: CapabilityDef[] = [
   {
     id: "google_drive",
     label: "Google Drive",
-    descricao: "Arquiva automaticamente PDFs de orçamentos, entrevistas e relatórios nas pastas do Drive, via conta de serviço.",
-    impacto: "Documentos continuam sendo gerados e baixados normalmente, mas não são arquivados no Drive.",
+    descricao:
+      "Arquiva automaticamente PDFs de orçamentos, entrevistas e relatórios nas pastas do Drive, via conta de serviço.",
+    impacto:
+      "Documentos continuam sendo gerados e baixados normalmente, mas não são arquivados no Drive.",
     area: "documentos",
     criticidade: "importante",
     envs: ["GOOGLE_SERVICE_ACCOUNT_EMAIL", "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"],

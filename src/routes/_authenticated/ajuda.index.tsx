@@ -55,9 +55,7 @@ function AjudaIndex() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-[var(--text-primary)]">FAQ</div>
-            <p className="text-xs text-[var(--text-muted)]">
-              {FAQS.length} perguntas frequentes.
-            </p>
+            <p className="text-xs text-[var(--text-muted)]">{FAQS.length} perguntas frequentes.</p>
           </div>
           <ArrowRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
         </Link>

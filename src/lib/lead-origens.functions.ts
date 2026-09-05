@@ -27,7 +27,11 @@ export function normalizeOrigem(nome: string) {
     .trim();
 }
 
-async function assertRole(supabase: SupabaseClient<Database>, userId: string, allowed: readonly string[]) {
+async function assertRole(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  allowed: readonly string[],
+) {
   const ok = await hasAnyRole(supabase, userId, allowed as AppRoleName[]);
   if (!ok) throw new Error("Acesso restrito.");
   return supabase;
@@ -83,7 +87,10 @@ export const createLeadOrigem = createServerFn({ method: "POST" })
     );
     if (existente) {
       if (!existente.ativo) {
-        await db.from("lead_origens").update({ ativo: true, updated_by: context.userId }).eq("id", existente.id);
+        await db
+          .from("lead_origens")
+          .update({ ativo: true, updated_by: context.userId })
+          .eq("id", existente.id);
       }
       return { id: existente.id, nome: existente.nome };
     }

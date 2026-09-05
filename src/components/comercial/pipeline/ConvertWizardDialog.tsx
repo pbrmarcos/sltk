@@ -62,7 +62,6 @@ import {
 import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
 import { focusFirstError, focusFieldByName } from "@/lib/form-errors";
 
-
 type Step = 1 | 2 | 3;
 type Mode = "search" | "create";
 type Action = "win" | "keep" | "lose";
@@ -75,7 +74,11 @@ type OppPlan = {
 
 function fmtBRL(v: number | null): string {
   if (!v) return "—";
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(v);
 }
 
 const STAGE_TONE: Record<string, string> = {
@@ -110,7 +113,9 @@ export function ConvertWizardDialog({
   const searchClientesQ = useQuery({
     queryKey: ["wizard-clientes-search", searchQ],
     queryFn: () =>
-      listClientesFn({ data: { q: searchQ, status: "todos", pais: "todos", page: 1, pageSize: 25 } }),
+      listClientesFn({
+        data: { q: searchQ, status: "todos", pais: "todos", page: 1, pageSize: 25 },
+      }),
     enabled: open && step === 1 && mode === "search" && searchQ.trim().length >= 2,
   });
 
@@ -129,14 +134,15 @@ export function ConvertWizardDialog({
   const clearFieldError = (name: string) =>
     setFieldErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
 
-
   const enrichFn = useServerFn(enrichDocumento);
   const enrichMut = useMutation({
     mutationFn: () => enrichFn({ data: { pais, documento: normalizeDocumento(documento) } }),
     onSuccess: (res) => {
-      const envelope = res as
-        | { ok: boolean; data?: Record<string, unknown>; error?: string }
-        | null;
+      const envelope = res as {
+        ok: boolean;
+        data?: Record<string, unknown>;
+        error?: string;
+      } | null;
       if (!envelope || envelope.ok === false) {
         toast.message("Sem dados encontrados", {
           description: envelope?.error ?? "Preencha manualmente.",
@@ -232,7 +238,9 @@ export function ConvertWizardDialog({
       segmento_id: null,
       lead_origem_id: null,
       key_account: false,
-      observacoes: source ? `Convertido da oportunidade ${source.codigo} — ${source.titulo}.` : null,
+      observacoes: source
+        ? `Convertido da oportunidade ${source.codigo} — ${source.titulo}.`
+        : null,
       site: null,
       email_corporativo: email.trim() || null,
       telefone_corporativo_ddi: null,
@@ -285,7 +293,7 @@ export function ConvertWizardDialog({
       listEmpresaFn({
         data: {
           cliente_id: clienteId,
-          empresa_lead: clienteId ? null : source?.empresa_lead ?? null,
+          empresa_lead: clienteId ? null : (source?.empresa_lead ?? null),
           source_id: source?.id,
         },
       }),
@@ -366,14 +374,15 @@ export function ConvertWizardDialog({
       oppIdemKey.current = crypto.randomUUID();
       setNovaOppTitulo("");
       toast.success(
-        r.reused ? "Oportunidade já criada — reaproveitada." : "Oportunidade criada e vinculada ao cliente.",
+        r.reused
+          ? "Oportunidade já criada — reaproveitada."
+          : "Oportunidade criada e vinculada ao cliente.",
       );
       await empresaQ.refetch();
       qc.invalidateQueries({ queryKey: ["pipeline"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
 
   const counts = useMemo(() => {
     let win = 0,
@@ -420,7 +429,9 @@ export function ConvertWizardDialog({
       });
     },
     onSuccess: (r) => {
-      toast.success(`Cliente ${r.cliente_codigo} ativado. ${r.processos.length} processo(s) criado(s).`);
+      toast.success(
+        `Cliente ${r.cliente_codigo} ativado. ${r.processos.length} processo(s) criado(s).`,
+      );
       qc.invalidateQueries({ queryKey: ["oportunidades", "pipeline"] });
       qc.invalidateQueries({ queryKey: ["clientes"] });
       if (clienteId) {
@@ -580,9 +591,7 @@ export function ConvertWizardDialog({
                       onClick={() => {
                         setClienteId(c.id);
                         setClienteLabel(`${c.codigo} — ${c.razao_social}`);
-                        setClienteLifecycle(
-                          (c.lifecycle_stage as ClienteLifecycle | null) ?? null,
-                        );
+                        setClienteLifecycle((c.lifecycle_stage as ClienteLifecycle | null) ?? null);
                         setStep(2);
                       }}
                       className={cn(
@@ -636,11 +645,36 @@ export function ConvertWizardDialog({
                   <div className="text-xs font-semibold">Dados que serão transferidos do lead</div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
                     {[
-                      { campo: razaoSocialLabel(pais), origem: "Empresa do lead", valor: razaoSocial, alvo: "razao_social" },
-                      { campo: "Documento fiscal", origem: "Preenchido aqui", valor: documento, alvo: "documento_fiscal_numero" },
-                      { campo: "Contato principal", origem: "Nome do lead", valor: contatoNome, alvo: "contato_nome" },
-                      { campo: "Email", origem: "Email do lead", valor: email || contatoEmail, alvo: null },
-                      { campo: "Telefone", origem: "Telefone do lead", valor: telefone, alvo: null },
+                      {
+                        campo: razaoSocialLabel(pais),
+                        origem: "Empresa do lead",
+                        valor: razaoSocial,
+                        alvo: "razao_social",
+                      },
+                      {
+                        campo: "Documento fiscal",
+                        origem: "Preenchido aqui",
+                        valor: documento,
+                        alvo: "documento_fiscal_numero",
+                      },
+                      {
+                        campo: "Contato principal",
+                        origem: "Nome do lead",
+                        valor: contatoNome,
+                        alvo: "contato_nome",
+                      },
+                      {
+                        campo: "Email",
+                        origem: "Email do lead",
+                        valor: email || contatoEmail,
+                        alvo: null,
+                      },
+                      {
+                        campo: "Telefone",
+                        origem: "Telefone do lead",
+                        valor: telefone,
+                        alvo: null,
+                      },
                     ].map((l) => {
                       const faltando = !l.valor.trim() && !!l.alvo;
                       return (
@@ -803,11 +837,11 @@ export function ConvertWizardDialog({
                   </div>
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  Você poderá completar endereço, sócios e dados fiscais depois em <strong>Clientes</strong>.
+                  Você poderá completar endereço, sócios e dados fiscais depois em{" "}
+                  <strong>Clientes</strong>.
                 </div>
               </div>
             )}
-
           </div>
         )}
 
@@ -834,10 +868,12 @@ export function ConvertWizardDialog({
                 {(empresaQ.data ?? []).length === 0 && (
                   <div className="p-5 space-y-3 text-xs">
                     <div className="text-muted-foreground">
-                      <strong className="text-foreground">Nenhuma oportunidade vinculada a este cliente.</strong>
+                      <strong className="text-foreground">
+                        Nenhuma oportunidade vinculada a este cliente.
+                      </strong>
                       <p className="mt-1">
-                        Isso acontece quando as oportunidades da empresa ainda estão no lead
-                        (sem cliente vinculado) ou quando já foram convertidas antes. Crie uma
+                        Isso acontece quando as oportunidades da empresa ainda estão no lead (sem
+                        cliente vinculado) ou quando já foram convertidas antes. Crie uma
                         oportunidade para este cliente para seguir com a conversão.
                       </p>
                     </div>
@@ -863,7 +899,8 @@ export function ConvertWizardDialog({
                     </div>
                     <p className="text-[11px] text-muted-foreground">
                       Para reaproveitar uma oportunidade existente, feche este assistente, abra o
-                      card no pipeline e vincule a empresa ao cliente <strong>{clienteLabel}</strong>.
+                      card no pipeline e vincule a empresa ao cliente{" "}
+                      <strong>{clienteLabel}</strong>.
                     </p>
                   </div>
                 )}
@@ -949,14 +986,20 @@ export function ConvertWizardDialog({
                               ))}
                             </SelectContent>
                           </Select>
-                          {o.id === source?.id && sugestaoQ.data?.template_id && sugestaoQ.data.template_id === plan.template_id && (
-                            <div className="col-span-full pl-[148px] -mt-1">
-                              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                                <Sparkles className="w-3 h-3 mr-1" />
-                                Sugerido pelo Checklist ({sugestaoQ.data.rfq_tipo_nome ?? "máquina vinculada"})
-                              </Badge>
-                            </div>
-                          )}
+                          {o.id === source?.id &&
+                            sugestaoQ.data?.template_id &&
+                            sugestaoQ.data.template_id === plan.template_id && (
+                              <div className="col-span-full pl-[148px] -mt-1">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]"
+                                >
+                                  <Sparkles className="w-3 h-3 mr-1" />
+                                  Sugerido pelo Checklist (
+                                  {sugestaoQ.data.rfq_tipo_nome ?? "máquina vinculada"})
+                                </Badge>
+                              </div>
+                            )}
                         </div>
                       )}
 
@@ -979,7 +1022,10 @@ export function ConvertWizardDialog({
             )}
 
             <div className="flex gap-2 text-xs">
-              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+              <Badge
+                variant="outline"
+                className="bg-emerald-50 text-emerald-700 border-emerald-200"
+              >
                 Ganhar: {counts.win}
               </Badge>
               <Badge variant="outline" className="bg-slate-50 text-slate-700">
@@ -999,7 +1045,9 @@ export function ConvertWizardDialog({
               <div className="font-medium text-emerald-900">Cliente</div>
               <div>{clienteLabel}</div>
               <div className="text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
-                <span>Status será garantido como <strong>ativo</strong>.</span>
+                <span>
+                  Status será garantido como <strong>ativo</strong>.
+                </span>
                 {counts.win > 0 && (
                   <span className="inline-flex items-center gap-1">
                     Status do cliente:

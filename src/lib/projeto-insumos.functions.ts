@@ -13,7 +13,10 @@ import {
 // usamos um cast estrutural para a SDK não bloquear a chamada.
 type SB = {
   from: (t: string) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  rpc?: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  rpc?: (
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
 
 const SELECT_COLS =
@@ -67,7 +70,12 @@ export type InsumoRow = {
   cliente_equipamentos?: { id: string; codigo: string | null; modelo: string } | null;
   clientes?: { codigo: string; razao_social: string } | null;
   fornecedor_categorias_catalog?: { nome_pt: string } | null;
-  fornecedor_sugerido?: { id: string; codigo: string | null; nome: string; nome_fantasia: string | null } | null;
+  fornecedor_sugerido?: {
+    id: string;
+    codigo: string | null;
+    nome: string;
+    nome_fantasia: string | null;
+  } | null;
 };
 
 /* ============ LIST ============ */
@@ -78,8 +86,14 @@ const listInput = z.object({
   equipamento_id: z.string().uuid().optional(),
   origem: z.enum(["todos", "eqp", "projeto"]).optional().default("todos"),
   disciplina: z.string().optional(),
-  status: z.enum(["todos", ...INSUMO_STATUS]).optional().default("todos"),
-  criticidade: z.enum(["todos", ...INSUMO_CRITICIDADE]).optional().default("todos"),
+  status: z
+    .enum(["todos", ...INSUMO_STATUS])
+    .optional()
+    .default("todos"),
+  criticidade: z
+    .enum(["todos", ...INSUMO_CRITICIDADE])
+    .optional()
+    .default("todos"),
   q: z.string().optional(),
   page: z.number().int().min(1).optional().default(1),
   per_page: z.number().int().min(1).max(200).optional().default(50),
@@ -112,7 +126,11 @@ export const listInsumos = createServerFn({ method: "POST" })
     }
     const from = (data.page - 1) * data.per_page;
     const to = from + data.per_page - 1;
-    const { data: rows, count, error } = await q
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q
       .order("criticidade", { ascending: false })
       .order("necessidade_em", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })
@@ -452,7 +470,10 @@ export const listInsumosRfq = createServerFn({ method: "POST" })
       necessidade_em: string | null;
       updated_at: string;
       clientes?: { codigo: string; razao_social: string } | null;
-      equipamento_projetos?: { revisao: string; cliente_equipamentos?: { codigo: string } | null } | null;
+      equipamento_projetos?: {
+        revisao: string;
+        cliente_equipamentos?: { codigo: string } | null;
+      } | null;
     }>;
 
     const ids = list.map((r) => r.id);
@@ -472,7 +493,11 @@ export const listInsumosRfq = createServerFn({ method: "POST" })
         .from("insumo_rfq_envios")
         .select("insumo_id, data_resposta, status")
         .in("insumo_id", ids);
-      for (const r of (env ?? []) as Array<{ insumo_id: string; data_resposta: string | null; status: string }>) {
+      for (const r of (env ?? []) as Array<{
+        insumo_id: string;
+        data_resposta: string | null;
+        status: string;
+      }>) {
         const e = (envios[r.insumo_id] ??= { total: 0, respondidos: 0 });
         e.total += 1;
         if (r.data_resposta || r.status === "respondido") e.respondidos += 1;
@@ -508,7 +533,9 @@ export const listInsumosAguardandoOC = createServerFn({ method: "GET" })
     // Aprovações mais recentes por insumo
     const { data: aprovs, error: eA } = await sb
       .from("insumo_aprovacoes_oc")
-      .select("id, insumo_id, decisao, decidido_em, decidido_por, fornecedor_id_sugerido, created_at")
+      .select(
+        "id, insumo_id, decisao, decidido_em, decidido_por, fornecedor_id_sugerido, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(500);
     if (eA) throw friendlyDbError(eA);
@@ -562,7 +589,10 @@ export const listInsumosAguardandoOC = createServerFn({ method: "GET" })
     }
 
     // Orçamento vencedor: pegar valor/moeda mais recente do fornecedor sugerido por insumo.
-    const orcMap = new Map<string, { valor: number | null; moeda: string | null; lead_time_dias: number | null }>();
+    const orcMap = new Map<
+      string,
+      { valor: number | null; moeda: string | null; lead_time_dias: number | null }
+    >();
     for (const p of pendentes) {
       if (!p.fornecedor_id_sugerido) continue;
       const { data: orc } = await sb
@@ -594,7 +624,7 @@ export const listInsumosAguardandoOC = createServerFn({ method: "GET" })
           decidido_em: a.decidido_em,
           fornecedor_id_sugerido: a.fornecedor_id_sugerido as string | null,
           fornecedor_sugerido_nome: a.fornecedor_id_sugerido
-            ? fornMap.get(a.fornecedor_id_sugerido) ?? null
+            ? (fornMap.get(a.fornecedor_id_sugerido) ?? null)
             : null,
           valor_previsto: orc?.valor ?? null,
           moeda_prevista: orc?.moeda ?? null,
@@ -653,13 +683,25 @@ async function _userNome(sb: SB, uid: string): Promise<string> {
   const p = data as { full_name?: string; email?: string } | null;
   return p?.full_name ?? p?.email ?? "Usuário";
 }
-async function _logInsumoHist(sb: SB, uid: string, entry: {
-  projeto_id: string;
-  tipo: "import_excel" | "export_excel" | "edicao_manual" | "exclusao" | "criacao" | "envio_aprovacao" | "estoque_alterado" | "liberado_producao";
-  descricao: string;
-  diff?: unknown;
-  arquivo_nome?: string | null;
-}): Promise<void> {
+async function _logInsumoHist(
+  sb: SB,
+  uid: string,
+  entry: {
+    projeto_id: string;
+    tipo:
+      | "import_excel"
+      | "export_excel"
+      | "edicao_manual"
+      | "exclusao"
+      | "criacao"
+      | "envio_aprovacao"
+      | "estoque_alterado"
+      | "liberado_producao";
+    descricao: string;
+    diff?: unknown;
+    arquivo_nome?: string | null;
+  },
+): Promise<void> {
   const nome = await _userNome(sb, uid);
   await sb.from("projeto_insumo_historico").insert({
     projeto_id: entry.projeto_id,
@@ -676,11 +718,13 @@ async function _logInsumoHist(sb: SB, uid: string, entry: {
 export const listHistoricoInsumos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      projeto_id: z.string().uuid(),
-      tipo: z.string().nullable().optional(),
-      limit: z.number().int().min(1).max(500).default(200),
-    }).parse(i),
+    z
+      .object({
+        projeto_id: z.string().uuid(),
+        tipo: z.string().nullable().optional(),
+        limit: z.number().int().min(1).max(500).default(200),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
@@ -700,10 +744,12 @@ export const listHistoricoInsumos = createServerFn({ method: "POST" })
 export const atualizarEstoqueInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      qtd_estoque: z.number().min(0),
-    }).parse(i),
+    z
+      .object({
+        id: z.string().uuid(),
+        qtd_estoque: z.number().min(0),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
@@ -712,7 +758,13 @@ export const atualizarEstoqueInsumo = createServerFn({ method: "POST" })
       .select("id, descricao, projeto_id, qtd_estoque, quantidade")
       .eq("id", data.id)
       .maybeSingle();
-    const c = cur as { id: string; descricao: string; projeto_id: string; qtd_estoque: number; quantidade: number } | null;
+    const c = cur as {
+      id: string;
+      descricao: string;
+      projeto_id: string;
+      qtd_estoque: number;
+      quantidade: number;
+    } | null;
     if (!c) throw new Error("Insumo não encontrado");
     const antes = Number(c.qtd_estoque ?? 0);
     const depois = Number(data.qtd_estoque);
@@ -735,10 +787,12 @@ export const atualizarEstoqueInsumo = createServerFn({ method: "POST" })
 export const enviarInsumosParaAprovacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      ids: z.array(z.string().uuid()).min(1).max(200),
-      nota: z.string().max(2000).nullable().optional(),
-    }).parse(i),
+    z
+      .object({
+        ids: z.array(z.string().uuid()).min(1).max(200),
+        nota: z.string().max(2000).nullable().optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
@@ -749,10 +803,16 @@ export const enviarInsumosParaAprovacao = createServerFn({ method: "POST" })
       .select("id, descricao, projeto_id, status, qtd_estoque, quantidade, fornecedor_sugerido_id")
       .in("id", data.ids)
       .is("deleted_at", null);
-    const insumos = (rows as Array<{
-      id: string; descricao: string; projeto_id: string; status: string;
-      qtd_estoque: number; quantidade: number; fornecedor_sugerido_id: string | null;
-    }>) ?? [];
+    const insumos =
+      (rows as Array<{
+        id: string;
+        descricao: string;
+        projeto_id: string;
+        status: string;
+        qtd_estoque: number;
+        quantidade: number;
+        fornecedor_sugerido_id: string | null;
+      }>) ?? [];
 
     if (insumos.length === 0) throw new Error("Nenhum insumo encontrado para a seleção.");
     const projeto_id = insumos[0].projeto_id;
@@ -819,9 +879,7 @@ export const enviarInsumosParaAprovacao = createServerFn({ method: "POST" })
 /* ============ RESUMO PRÉ-LIBERAÇÃO P/ PRODUÇÃO ============ */
 export const resumoLiberacaoProducao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ equipamento_id: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
 
@@ -836,7 +894,14 @@ export const resumoLiberacaoProducao = createServerFn({ method: "POST" })
       .select("id, disciplina, status, progresso, fase")
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null);
-    const projetos = (projs as Array<{ id: string; disciplina: string; status: string; progresso: number; fase: string }>) ?? [];
+    const projetos =
+      (projs as Array<{
+        id: string;
+        disciplina: string;
+        status: string;
+        progresso: number;
+        fase: string;
+      }>) ?? [];
 
     // Etapas por disciplina
     const { data: etapas } = await sb
@@ -846,7 +911,12 @@ export const resumoLiberacaoProducao = createServerFn({ method: "POST" })
       .is("deleted_at", null);
     const etapasByDisc: Record<string, Record<string, number>> = {};
     for (const e of (etapas as Array<{ disciplina: string; status: string }>) ?? []) {
-      etapasByDisc[e.disciplina] ??= { concluido: 0, em_progresso: 0, bloqueado: 0, nao_iniciado: 0 };
+      etapasByDisc[e.disciplina] ??= {
+        concluido: 0,
+        em_progresso: 0,
+        bloqueado: 0,
+        nao_iniciado: 0,
+      };
       etapasByDisc[e.disciplina][e.status] = (etapasByDisc[e.disciplina][e.status] ?? 0) + 1;
     }
 
@@ -856,7 +926,14 @@ export const resumoLiberacaoProducao = createServerFn({ method: "POST" })
       .select("id, status, quantidade, qtd_estoque, custo_estimado_unit")
       .eq("equipamento_id", data.equipamento_id)
       .is("deleted_at", null);
-    const insumos = (ins as Array<{ id: string; status: string; quantidade: number; qtd_estoque: number; custo_estimado_unit: number | null }>) ?? [];
+    const insumos =
+      (ins as Array<{
+        id: string;
+        status: string;
+        quantidade: number;
+        qtd_estoque: number;
+        custo_estimado_unit: number | null;
+      }>) ?? [];
 
     const insumosStatus: Record<string, number> = {};
     let totalEstimado = 0;
@@ -906,9 +983,7 @@ export const resumoLiberacaoProducao = createServerFn({ method: "POST" })
 /* ============ EXPORT XLSX DOS INSUMOS ============ */
 export const exportInsumosXlsx = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ projeto_id: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ projeto_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { default: ExcelJS } = await import("exceljs");
     const sb = context.supabase as unknown as SB;
@@ -922,16 +997,28 @@ export const exportInsumosXlsx = createServerFn({ method: "POST" })
 
     const { data: rows } = await sb
       .from("projeto_insumos")
-      .select("codigo_interno, sub_conjunto, disciplina, descricao, fabricante_sugerido, part_number, quantidade, unidade, qtd_estoque, criticidade, custo_estimado_unit, necessidade_em, observacoes")
+      .select(
+        "codigo_interno, sub_conjunto, disciplina, descricao, fabricante_sugerido, part_number, quantidade, unidade, qtd_estoque, criticidade, custo_estimado_unit, necessidade_em, observacoes",
+      )
       .eq("projeto_id", data.projeto_id)
       .is("deleted_at", null)
       .order("sub_conjunto", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true });
 
     const cols = [
-      "codigo_interno", "sub_conjunto", "disciplina", "descricao",
-      "fabricante_sugerido", "part_number", "quantidade", "unidade",
-      "qtd_estoque", "criticidade", "custo_estimado_unit", "necessidade_em", "observacoes",
+      "codigo_interno",
+      "sub_conjunto",
+      "disciplina",
+      "descricao",
+      "fabricante_sugerido",
+      "part_number",
+      "quantidade",
+      "unidade",
+      "qtd_estoque",
+      "criticidade",
+      "custo_estimado_unit",
+      "necessidade_em",
+      "observacoes",
     ];
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Insumos");
@@ -944,8 +1031,12 @@ export const exportInsumosXlsx = createServerFn({ method: "POST" })
     const nMax = Math.max(500, ((rows as unknown[])?.length ?? 0) + 100);
     const addList = (col: string, values: readonly string[]) => {
       const range = `${col}2:${col}${nMax}`;
-      (ws as unknown as { dataValidations: { add: (r: string, v: unknown) => void } }).dataValidations.add(range, {
-        type: "list", allowBlank: true, formulae: [`"${values.join(",")}"`],
+      (
+        ws as unknown as { dataValidations: { add: (r: string, v: unknown) => void } }
+      ).dataValidations.add(range, {
+        type: "list",
+        allowBlank: true,
+        formulae: [`"${values.join(",")}"`],
       });
     };
     addList("C", ["mecanico", "eletrico", "automacao", "montagem", "outro"]);
@@ -995,12 +1086,14 @@ const _insumoImportRow = z.object({
 export const applyInsumosExcel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      projeto_id: z.string().uuid(),
-      rows: z.array(_insumoImportRow).max(500),
-      arquivoNome: z.string().max(200).nullable().optional(),
-      dryRun: z.boolean().default(false),
-    }).parse(i),
+    z
+      .object({
+        projeto_id: z.string().uuid(),
+        rows: z.array(_insumoImportRow).max(500),
+        arquivoNome: z.string().max(200).nullable().optional(),
+        dryRun: z.boolean().default(false),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
@@ -1010,25 +1103,34 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
       .select("id, equipamento_id, cliente_id, status")
       .eq("id", data.projeto_id)
       .maybeSingle();
-    const p = proj as { id: string; equipamento_id: string; cliente_id: string; status: string } | null;
+    const p = proj as {
+      id: string;
+      equipamento_id: string;
+      cliente_id: string;
+      status: string;
+    } | null;
     if (!p) throw new Error("Projeto não encontrado");
 
     const { data: existing } = await sb
       .from("projeto_insumos")
-      .select("id, codigo_interno, sub_conjunto, disciplina, descricao, fabricante_sugerido, part_number, quantidade, unidade, qtd_estoque, criticidade, custo_estimado_unit, necessidade_em, observacoes")
+      .select(
+        "id, codigo_interno, sub_conjunto, disciplina, descricao, fabricante_sugerido, part_number, quantidade, unidade, qtd_estoque, criticidade, custo_estimado_unit, necessidade_em, observacoes",
+      )
       .eq("projeto_id", data.projeto_id)
       .is("deleted_at", null);
     const byCode = new Map<string, any>();
-    for (const r of (existing as any[]) ?? []) if (r.codigo_interno) byCode.set(r.codigo_interno, r);
+    for (const r of (existing as any[]) ?? [])
+      if (r.codigo_interno) byCode.set(r.codigo_interno, r);
 
     const added: any[] = [];
     const updated: any[] = [];
     const seen = new Set<string>();
 
-    const normDisc = (d: string) => (["mecanico", "eletrico", "automacao", "montagem", "outro"].includes(d) ? d : "outro");
+    const normDisc = (d: string) =>
+      ["mecanico", "eletrico", "automacao", "montagem", "outro"].includes(d) ? d : "outro";
     const normCrit = (c: string | null | undefined) => {
       const v = (c ?? "").trim().toLowerCase();
-      return (["baixa", "media", "alta", "critica"].includes(v) ? v : "media");
+      return ["baixa", "media", "alta", "critica"].includes(v) ? v : "media";
     };
 
     for (const r of data.rows) {
@@ -1067,19 +1169,28 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
     }
 
     const removed = ((existing as any[]) ?? []).filter(
-      (r: any) => r.codigo_interno && !data.rows.some((row) => row.codigo_interno?.trim() === r.codigo_interno),
+      (r: any) =>
+        r.codigo_interno &&
+        !data.rows.some((row) => row.codigo_interno?.trim() === r.codigo_interno),
     );
 
     const diff = {
       added: added.map((a) => ({ titulo: a.payload.descricao, codigo: a.codigo })),
-      updated: updated.map((u) => ({ codigo: u.codigo, changed: u.changed, titulo: u.payload.descricao })),
+      updated: updated.map((u) => ({
+        codigo: u.codigo,
+        changed: u.changed,
+        titulo: u.payload.descricao,
+      })),
       removed: removed.map((r: any) => ({ titulo: r.descricao, codigo: r.codigo_interno })),
     };
 
     if (data.dryRun) return { ok: true, diff };
 
     for (const u of updated) {
-      const { error } = await sb.from("projeto_insumos").update({ ...u.payload, updated_by: context.userId }).eq("id", u.id);
+      const { error } = await sb
+        .from("projeto_insumos")
+        .update({ ...u.payload, updated_by: context.userId })
+        .eq("id", u.id);
       if (error) throw friendlyDbError(error);
     }
     for (const a of added) {
@@ -1117,12 +1228,14 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
 export const liberarEquipamentoProducao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      equipamento_id: z.string().uuid(),
-      observacoes: z.string().max(2000).nullable().optional(),
-      inicio_previsto: z.string().nullable().optional(),
-      fim_previsto: z.string().nullable().optional(),
-    }).parse(i),
+    z
+      .object({
+        equipamento_id: z.string().uuid(),
+        observacoes: z.string().max(2000).nullable().optional(),
+        inicio_previsto: z.string().nullable().optional(),
+        fim_previsto: z.string().nullable().optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
@@ -1130,7 +1243,8 @@ export const liberarEquipamentoProducao = createServerFn({ method: "POST" })
 
     const { data: isAdmin } = await sb.rpc!("has_role", { _user_id: uid, _role: "admin" });
     const { data: isManager } = await sb.rpc!("has_role", { _user_id: uid, _role: "manager" });
-    if (!isAdmin && !isManager) throw new Error("Somente admin/gestor podem liberar para produção.");
+    if (!isAdmin && !isManager)
+      throw new Error("Somente admin/gestor podem liberar para produção.");
 
     const { data: projetos } = await sb
       .from("equipamento_projetos")
@@ -1159,7 +1273,10 @@ export const liberarEquipamentoProducao = createServerFn({ method: "POST" })
           projeto_id: p.id,
           tipo: "liberado_producao",
           descricao: `Equipamento liberado para produção${data.observacoes ? ` — ${data.observacoes}` : ""}`,
-          diff: { inicio_previsto: data.inicio_previsto ?? null, fim_previsto: data.fim_previsto ?? null },
+          diff: {
+            inicio_previsto: data.inicio_previsto ?? null,
+            fim_previsto: data.fim_previsto ?? null,
+          },
         });
       }
     }
@@ -1174,14 +1291,16 @@ export const liberarEquipamentoProducao = createServerFn({ method: "POST" })
         .maybeSingle();
       const fp = firstProj as { montagem_id: string } | null;
       if (fp?.montagem_id) {
-        await sb.from("equipamento_montagens").update({
-          inicio_previsto: data.inicio_previsto ?? undefined,
-          fim_previsto: data.fim_previsto ?? undefined,
-          updated_by: uid,
-        }).eq("id", fp.montagem_id);
+        await sb
+          .from("equipamento_montagens")
+          .update({
+            inicio_previsto: data.inicio_previsto ?? undefined,
+            fim_previsto: data.fim_previsto ?? undefined,
+            updated_by: uid,
+          })
+          .eq("id", fp.montagem_id);
       }
     }
 
     return { ok: true, liberados: liberadosIds.length };
   });
-

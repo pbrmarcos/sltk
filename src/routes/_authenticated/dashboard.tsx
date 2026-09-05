@@ -29,7 +29,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
         <div className="rounded-[var(--radius-lg)] border border-red-500/30 bg-red-500/5 p-6 text-[13px] text-red-300">
           <div className="font-semibold">Falha ao carregar o dashboard</div>
           <div className="mt-1 opacity-80">{msg || "Erro desconhecido."}</div>
-          <button onClick={() => reset()} className="mt-3 rounded-md border border-red-500/40 px-3 py-1.5 text-[12px] hover:bg-red-500/10">
+          <button
+            onClick={() => reset()}
+            className="mt-3 rounded-md border border-red-500/40 px-3 py-1.5 text-[12px] hover:bg-red-500/10"
+          >
             Tentar novamente
           </button>
         </div>

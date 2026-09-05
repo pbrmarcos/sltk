@@ -23,7 +23,6 @@ import {
 import {
   atualizarRestricoes,
   buscaAnterior,
-
   buscarOperacoes,
   converterLeadEmOportunidade,
   descobrirBaseImportacao,
@@ -47,11 +46,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  continenteDe,
-  continenteDeQualquer,
-  ordemContinente,
-} from "@/lib/mineracao/continentes";
+import { continenteDe, continenteDeQualquer, ordemContinente } from "@/lib/mineracao/continentes";
 
 /** Agrupa opções de país por continente, na ordem de relevância comercial. */
 function agruparPorContinente<T extends { valor: string; rotulo: string; pais: string }>(
@@ -73,9 +68,6 @@ function agruparPorContinente<T extends { valor: string; rotulo: string; pais: s
 }
 import { exportarResultadosXlsx } from "@/lib/mineracao/exportar";
 
-
-
-
 export const Route = createFileRoute("/_authenticated/comercial/mineracao")({
   component: MineracaoPage,
   head: () => ({
@@ -89,7 +81,8 @@ export const Route = createFileRoute("/_authenticated/comercial/mineracao")({
       { property: "og:title", content: "Mineração de leads — Solutek Hub" },
       {
         property: "og:description",
-        content: "Prospecção por NCM, empresa e contraparte, com conversão em suspects do pipeline.",
+        content:
+          "Prospecção por NCM, empresa e contraparte, com conversão em suspects do pipeline.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -126,7 +119,6 @@ const MODOS = [
 function rotuloModo(m: unknown) {
   return m === "rota" ? "Rota comercial" : m === "pares" ? "Empresa → contraparte" : "Empresas";
 }
-
 
 const usd = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -182,13 +174,10 @@ function parseNcm(texto: string): { rubros: string[]; invalidos: string[] } {
 }
 
 function mesesEntre(inicio: string, fim: string) {
-  return (
-    (new Date(fim).getTime() - new Date(inicio).getTime()) / (1000 * 60 * 60 * 24 * 30.5)
-  );
+  return (new Date(fim).getTime() - new Date(inicio).getTime()) / (1000 * 60 * 60 * 24 * 30.5);
 }
 
 function Meter({ label, used, limit }: { label: string; used: number; limit: number }) {
-
   const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
   const color = pct >= 100 ? "var(--danger)" : pct >= 80 ? "var(--warning)" : "var(--info)";
   return (
@@ -244,7 +233,6 @@ function ListaConsultada({ titulo, itens }: { titulo: string; itens: string[] })
   );
 }
 
-
 function Kpi({ label, valor }: { label: string; valor: string }) {
   return (
     <div className="rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] px-3 py-2">
@@ -288,7 +276,6 @@ function MineracaoPage() {
   const atualizadoEm = status.data?.atualizado_em ?? null;
   const online = restricoes !== null;
 
-
   const bases = useQuery({
     queryKey: ["mineracao-bases"],
     queryFn: () => fetchBases({ data: {} }),
@@ -311,7 +298,6 @@ function MineracaoPage() {
     onError: (e: Error) => toast.error(e.message || "Não foi possível enviar o pedido."),
   });
 
-
   const sincronizarMut = useMutation({
     mutationFn: async () => {
       const paises = await fetchPaises();
@@ -320,7 +306,9 @@ function MineracaoPage() {
       const lote = 4;
       for (let i = 0; i < paises.length; i += lote) {
         const chunk = paises.slice(i, i + lote);
-        setSyncProgresso(`Sincronizando ${Math.min(i + lote, paises.length)} de ${paises.length} países…`);
+        setSyncProgresso(
+          `Sincronizando ${Math.min(i + lote, paises.length)} de ${paises.length} países…`,
+        );
         const r = await sincronizar({ data: { paises: chunk } });
         bases += r.bases;
         erros.push(...r.erros);
@@ -338,12 +326,10 @@ function MineracaoPage() {
     onSettled: () => setSyncProgresso(null),
   });
 
-
   const campanhas = useQuery({
     queryKey: ["mineracao-campanhas"],
     queryFn: () => fetchCampanhas(),
   });
-
 
   const presets = React.useMemo(presetsPeriodo, []);
 
@@ -564,17 +550,19 @@ function MineracaoPage() {
 
   const totalFiltradas = gruposBases.reduce((s, [, l]) => s + l.length, 0);
 
-
-
   const { rubros, invalidos } = React.useMemo(() => parseNcm(ncm), [ncm]);
 
-  const removerRubro = (r: string) =>
-    setNcm(rubros.filter((x) => x !== r).join(", "));
+  const removerRubro = (r: string) => setNcm(rubros.filter((x) => x !== r).join(", "));
 
   const presetAtivo = presets.find((p) => p.inicio === startDate && p.fim === endDate)?.label;
 
   const meses = mesesEntre(startDate, endDate);
-  const periodoInvalido = meses < 0 ? "A data final precisa ser posterior à inicial." : meses > 12 ? "O período não pode passar de 12 meses." : null;
+  const periodoInvalido =
+    meses < 0
+      ? "A data final precisa ser posterior à inicial."
+      : meses > 12
+        ? "O período não pode passar de 12 meses."
+        : null;
 
   const nomeOrigem = (origens.data ?? []).find((o) => o.key === paisOrigem)?.value;
 
@@ -593,11 +581,10 @@ function MineracaoPage() {
                 ? "Informe ao menos um NCM."
                 : periodoInvalido;
 
-
-
   const resultados = useQuery({
     queryKey: ["mineracao-resultados", campanhaId, busca],
-    queryFn: () => fetchResultados({ data: { campanha_id: campanhaId!, busca: busca || undefined } }),
+    queryFn: () =>
+      fetchResultados({ data: { campanha_id: campanhaId!, busca: busca || undefined } }),
     enabled: Boolean(campanhaId),
   });
 
@@ -686,8 +673,6 @@ function MineracaoPage() {
     buscarMut.mutate();
   };
 
-
-
   const notaMut = useMutation({
     mutationFn: (v: { resultado_id: string; anotacao: string }) => salvarNota({ data: v }),
     onSuccess: () => {
@@ -758,7 +743,6 @@ function MineracaoPage() {
     }
   };
 
-
   return (
     <PageContainer>
       <PageHeader
@@ -771,7 +755,10 @@ function MineracaoPage() {
       {/* Status + medidores (dados reais do GET /restrictions, atualizados sob demanda) */}
       <div className="mb-5 space-y-3">
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 py-3">
-          <Radio className="h-4 w-4" style={{ color: online ? "var(--success)" : "var(--text-muted)" }} />
+          <Radio
+            className="h-4 w-4"
+            style={{ color: online ? "var(--success)" : "var(--text-muted)" }}
+          />
           <span className="text-[13px] font-semibold text-[var(--text-primary)]">
             {status.isLoading
               ? "Carregando consumo salvo…"
@@ -839,10 +826,7 @@ function MineracaoPage() {
                 Ver o que já foi consultado
               </summary>
               <div className="mt-3 grid gap-3 lg:grid-cols-3">
-                <ListaConsultada
-                  titulo="Países / bases já usados"
-                  itens={restricoes.bases.lista}
-                />
+                <ListaConsultada titulo="Países / bases já usados" itens={restricoes.bases.lista} />
                 <ListaConsultada titulo="NCMs já consultados" itens={restricoes.rubros.lista} />
                 <ListaConsultada
                   titulo="Empresas já indexadas"
@@ -883,465 +867,471 @@ function MineracaoPage() {
 
       {/* Consulta */}
       {aba === "buscar" && (
-      <section className="mb-5 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-        {/* Modo de consulta — cada card diz o que a consulta devolve na prática */}
-        <div className="mb-4">
-          <span className="text-[12px] text-[var(--text-muted)]">Tipo de consulta</span>
-          <div className="mt-2 grid gap-2 md:grid-cols-3">
-            {MODOS.map((m) => {
-              const Icone = m.icone;
-              const ativo = modo === m.id;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setModo(m.id)}
-                  className={`group relative rounded-md border p-3 text-left transition ${
-                    ativo
-                      ? "border-[var(--info)] bg-[var(--bg-base)]"
-                      : "border-[var(--bg-border)] hover:border-[var(--info)]"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[var(--text-primary)]">
-                    <Icone className="h-4 w-4 text-[var(--text-muted)]" />
-                    {m.titulo}
-                    {m.id === "rota" && (
-                      <span className="rounded-full border border-[var(--bg-border)] px-1.5 text-[10.5px] font-normal text-[var(--text-muted)]">
-                        recomendado
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-[11.5px] leading-snug text-[var(--text-muted)]">
-                    {m.descricao}
-                  </p>
-                  <div className="mt-2 rounded border border-dashed border-[var(--bg-border)] bg-[var(--bg-base)] px-2 py-1 text-[11px] text-[var(--text-muted)]">
-                    <span className="text-[10.5px] uppercase tracking-wide">Exemplo</span>
-                    <div className="truncate text-[var(--text-primary)]">{m.exemplo}</div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-
-        {modo === "rota" && (
-          <div className="mb-4 grid gap-4 rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] p-3 md:grid-cols-3">
-            <div className="space-y-1.5">
-              <Label className="text-[12.5px]">País de destino (quem comprou)</Label>
-              <select
-                value={paisDestino}
-                onChange={(e) => {
-                  setPaisDestino(e.target.value);
-                  setPaisOrigem("");
-                }}
-                className="h-9 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2 text-[13px] text-[var(--text-primary)]"
-              >
-                <option value="">
-                  {bases.isLoading ? "Carregando países…" : "Selecione o destino"}
-                </option>
-                {paisesDestino.map((g) => (
-                  <optgroup key={g.continente} label={g.continente}>
-                    {g.itens.map((p) => (
-                      <option key={p.valor} value={p.valor}>
-                        {p.rotulo}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              {rotaBase.data && (
-                <p className="text-[11.5px] text-[var(--text-muted)]">
-                  Base: {rotaBase.data.title} · limite{" "}
-                  {(rotaBase.data.queryLimit || 0).toLocaleString("pt-BR")} operações
-                </p>
-              )}
-              {rotaBase.isError && (
-                <p className="text-[11.5px] text-[var(--danger)]">
-                  {(rotaBase.error as Error).message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[12.5px]">Filtrar país de origem</Label>
-              <Input
-                value={origemBusca}
-                onChange={(e) => setOrigemBusca(e.target.value)}
-                placeholder="Ex.: Argentina"
-                className="h-9"
-                disabled={!rotaBase.data}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[12.5px]">País de origem (quem vendeu)</Label>
-              <select
-                value={paisOrigem}
-                onChange={(e) => setPaisOrigem(e.target.value)}
-                disabled={!rotaBase.data || origens.isLoading}
-                className="h-9 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2 text-[13px] text-[var(--text-primary)]"
-              >
-                <option value="">
-                  {!rotaBase.data
-                    ? "Escolha o destino primeiro"
-                    : origens.isLoading
-                      ? "Carregando países…"
-                      : origens.isError
-                        ? "Não foi possível carregar"
-                        : "Selecione a origem"}
-                </option>
-                {agruparPorContinente(
-                  (origens.data ?? []).map((o) => ({
-                    valor: o.key,
-                    rotulo: o.value,
-                    pais: o.value,
-                  })),
-                ).map((g) => (
-                  <optgroup key={g.continente} label={g.continente}>
-                    {g.itens.map((o) => (
-                      <option key={o.valor} value={o.valor}>
-                        {o.rotulo}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
-
-
-        {/* Sincronização das bases (manual — consome cota da Penta, restrita à administração) */}
-        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] px-3 py-2">
-          <span className="text-[12px] text-[var(--text-muted)]">
-            {syncProgresso
-              ? syncProgresso
-              : sync.data?.ultima_sincronizacao
-              ? `Bases sincronizadas: ${sync.data.total} · última sincronização em ${new Date(sync.data.ultima_sincronizacao).toLocaleString("pt-BR")}`
-              : podeSincronizar
-                ? "As bases ainda não foram sincronizadas — clique em “Sincronizar bases” para carregar a lista de países e bases."
-                : "As bases ainda não foram sincronizadas — peça a atualização à administração."}
-          </span>
-          <div className="flex-1" />
-          {podeSincronizar ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => sincronizarMut.mutate()}
-              disabled={sincronizarMut.isPending}
-            >
-              {sincronizarMut.isPending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-3.5 w-3.5" />
-              )}
-              Sincronizar bases
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => solicitarSyncMut.mutate()}
-              disabled={solicitarSyncMut.isPending || solicitarSyncMut.isSuccess}
-            >
-              {solicitarSyncMut.isPending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Send className="h-3.5 w-3.5" />
-              )}
-              {solicitarSyncMut.isSuccess ? "Pedido enviado" : "Solicitar sincronização"}
-            </Button>
-          )}
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-4">
-
-          <div className={`space-y-1.5 md:col-span-2 ${modo === "rota" ? "hidden" : ""}`}>
-
-            <div className="flex items-center justify-between gap-2">
-              <Label className="text-[12.5px]">Base de dados</Label>
-              {bases.data && (
-                <span className="text-[11px] text-[var(--text-muted)]">
-                  {baseBusca.trim()
-                    ? `${totalFiltradas} de ${bases.data.length} base(s)`
-                    : `${bases.data.length} base(s) disponíveis`}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <Input
-                value={baseBusca}
-                onChange={(e) => setBaseBusca(e.target.value)}
-                placeholder="Filtrar por país, sigla ou tipo… (ex.: Brasil import, AR export)"
-                className="h-9 pr-16"
-              />
-              {baseBusca && (
-                <button
-                  type="button"
-                  onClick={() => setBaseBusca("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[11.5px] text-[var(--text-muted)] underline hover:no-underline"
-                >
-                  limpar
-                </button>
-              )}
-            </div>
-            <select
-              value={baseKey}
-              onChange={(e) => setBaseKey(e.target.value)}
-              disabled={bases.isLoading}
-              className="h-9 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] px-2 text-[13px] text-[var(--text-primary)]"
-            >
-              <option value="">
-                {bases.isLoading
-                  ? "Carregando bases…"
-                  : bases.isError
-                    ? "Não foi possível carregar as bases"
-                    : gruposBases.length === 0
-                      ? "Nenhuma base encontrada para esse filtro"
-                      : "Selecione uma base"}
-              </option>
-              {gruposBases.map(([pais, lista]) => (
-                <optgroup key={pais} label={pais}>
-                  {lista.map((b) => (
-                    <option
-                      key={`${b.keyCountry}|${b.keyOperation}|${b.keyVersion}`}
-                      value={`${b.keyCountry}|${b.keyOperation}|${b.keyVersion}`}
-                      disabled={b.underMaintenance || !b.active}
-                    >
-                      {b.title}
-                      {b.underMaintenance ? " (em manutenção)" : ""}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            {baseManual && (
-              <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-[var(--text-muted)]">
-                <span className="rounded-full border border-[var(--bg-border)] px-2 py-0.5 text-[var(--text-secondary)]">
-                  {baseManual.pais} · {baseManual.title}
-                </span>
-                {baseManual.queryLimit > 0 && (
-                  <span>limite da base: {baseManual.queryLimit.toLocaleString("pt-BR")} operações</span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setBaseKey("")}
-                  className="underline hover:no-underline"
-                >
-                  trocar
-                </button>
-              </div>
-            )}
-
-            {bases.isError && (
-              <div className="flex items-center gap-2 text-[11.5px] text-[var(--danger)]">
-                <span>
-                  {online
-                    ? "As bases não puderam ser carregadas agora."
-                    : "Serviço de consulta indisponível — verifique as credenciais em Configurações › Mineração."}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => void bases.refetch()}
-                  className="underline hover:no-underline"
-                >
-                  tentar de novo
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-[12.5px]">Início</Label>
-            <Input
-              type="date"
-              className="h-9 w-full"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-[12.5px]">Fim</Label>
-            <Input
-              type="date"
-              className="h-9 w-full"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-
-
-          {/* Presets de período / anos */}
-          <div className="md:col-span-4">
-            <div className="flex flex-wrap gap-1.5">
-              {presets.map((p) => (
-                <button
-                  key={p.label}
-                  type="button"
-                  onClick={() => {
-                    setStartDate(p.inicio);
-                    setEndDate(p.fim);
-                  }}
-                  className={`rounded-full border px-3 py-1 text-[12px] transition-colors ${
-                    presetAtivo === p.label
-                      ? "border-[var(--info)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
-                      : "border-[var(--bg-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            {periodoInvalido && (
-              <p className="mt-1.5 text-[11.5px] text-[var(--danger)]">{periodoInvalido}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5 md:col-span-4">
-            <Label className="text-[12.5px]">NCM</Label>
-            <Input
-              value={ncm}
-              onChange={(e) => setNcm(e.target.value)}
-              placeholder="Cole como quiser: 8422, 8438.10, 1006.30.21 — usamos os 4 primeiros dígitos"
-            />
-            {rubros.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-0.5">
-                {rubros.map((r) => (
+        <section className="mb-5 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
+          {/* Modo de consulta — cada card diz o que a consulta devolve na prática */}
+          <div className="mb-4">
+            <span className="text-[12px] text-[var(--text-muted)]">Tipo de consulta</span>
+            <div className="mt-2 grid gap-2 md:grid-cols-3">
+              {MODOS.map((m) => {
+                const Icone = m.icone;
+                const ativo = modo === m.id;
+                return (
                   <button
-                    key={r}
+                    key={m.id}
                     type="button"
-                    onClick={() => removerRubro(r)}
-                    title="Remover este NCM"
-                    className="rounded-full border border-[var(--bg-border)] bg-[var(--bg-base)] px-2.5 py-0.5 text-[11.5px] text-[var(--text-primary)] hover:border-[var(--danger)] hover:text-[var(--danger)]"
+                    onClick={() => setModo(m.id)}
+                    className={`group relative rounded-md border p-3 text-left transition ${
+                      ativo
+                        ? "border-[var(--info)] bg-[var(--bg-base)]"
+                        : "border-[var(--bg-border)] hover:border-[var(--info)]"
+                    }`}
                   >
-                    {r} ×
+                    <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[var(--text-primary)]">
+                      <Icone className="h-4 w-4 text-[var(--text-muted)]" />
+                      {m.titulo}
+                      {m.id === "rota" && (
+                        <span className="rounded-full border border-[var(--bg-border)] px-1.5 text-[10.5px] font-normal text-[var(--text-muted)]">
+                          recomendado
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-[11.5px] leading-snug text-[var(--text-muted)]">
+                      {m.descricao}
+                    </p>
+                    <div className="mt-2 rounded border border-dashed border-[var(--bg-border)] bg-[var(--bg-base)] px-2 py-1 text-[11px] text-[var(--text-muted)]">
+                      <span className="text-[10.5px] uppercase tracking-wide">Exemplo</span>
+                      <div className="truncate text-[var(--text-primary)]">{m.exemplo}</div>
+                    </div>
                   </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setNcm("")}
-                  className="px-1 text-[11.5px] text-[var(--text-muted)] underline hover:no-underline"
-                >
-                  limpar
-                </button>
-              </div>
-            )}
-            <p className="text-[11.5px] text-[var(--text-muted)]">
-              {rubros.length} rubro(s) de 4 dígitos · período máximo de 12 meses ·{" "}
-              {baseSel
-                ? `limite da base: ${baseSel.queryLimit.toLocaleString("pt-BR")} operações`
-                : "selecione a base"}
-            </p>
-            {invalidos.length > 0 && (
-              <p className="text-[11.5px] text-[var(--warning)]">
-                Ignorado(s) por ter menos de 4 dígitos: {invalidos.join(", ")}
-              </p>
-            )}
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-
-        {/* Filtros avançados: consulta entre duas empresas */}
-        <div className="mt-4 border-t border-[var(--bg-border)] pt-3">
-          <button
-            type="button"
-            onClick={() => setAvancado((v) => !v)}
-            className="flex items-center gap-1.5 text-[12.5px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            Filtros de empresa e contraparte
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${avancado ? "rotate-180" : ""}`} />
-          </button>
-          {avancado && (
-            <div className="mt-3 grid gap-4 md:grid-cols-4">
+          {modo === "rota" && (
+            <div className="mb-4 grid gap-4 rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] p-3 md:grid-cols-3">
               <div className="space-y-1.5">
-                <Label className="text-[12.5px]">Empresa local contém</Label>
+                <Label className="text-[12.5px]">País de destino (quem comprou)</Label>
+                <select
+                  value={paisDestino}
+                  onChange={(e) => {
+                    setPaisDestino(e.target.value);
+                    setPaisOrigem("");
+                  }}
+                  className="h-9 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2 text-[13px] text-[var(--text-primary)]"
+                >
+                  <option value="">
+                    {bases.isLoading ? "Carregando países…" : "Selecione o destino"}
+                  </option>
+                  {paisesDestino.map((g) => (
+                    <optgroup key={g.continente} label={g.continente}>
+                      {g.itens.map((p) => (
+                        <option key={p.valor} value={p.valor}>
+                          {p.rotulo}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                {rotaBase.data && (
+                  <p className="text-[11.5px] text-[var(--text-muted)]">
+                    Base: {rotaBase.data.title} · limite{" "}
+                    {(rotaBase.data.queryLimit || 0).toLocaleString("pt-BR")} operações
+                  </p>
+                )}
+                {rotaBase.isError && (
+                  <p className="text-[11.5px] text-[var(--danger)]">
+                    {(rotaBase.error as Error).message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[12.5px]">Filtrar país de origem</Label>
                 <Input
-                  value={filtroEmpresa}
-                  onChange={(e) => setFiltroEmpresa(e.target.value)}
-                  placeholder="Ex.: NESTLE"
+                  value={origemBusca}
+                  onChange={(e) => setOrigemBusca(e.target.value)}
+                  placeholder="Ex.: Argentina"
+                  className="h-9"
+                  disabled={!rotaBase.data}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[12.5px]">Contraparte no exterior contém</Label>
-                <Input
-                  value={filtroContraparte}
-                  onChange={(e) => setFiltroContraparte(e.target.value)}
-                  placeholder="Ex.: BOSCH"
-                />
+                <Label className="text-[12.5px]">País de origem (quem vendeu)</Label>
+                <select
+                  value={paisOrigem}
+                  onChange={(e) => setPaisOrigem(e.target.value)}
+                  disabled={!rotaBase.data || origens.isLoading}
+                  className="h-9 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2 text-[13px] text-[var(--text-primary)]"
+                >
+                  <option value="">
+                    {!rotaBase.data
+                      ? "Escolha o destino primeiro"
+                      : origens.isLoading
+                        ? "Carregando países…"
+                        : origens.isError
+                          ? "Não foi possível carregar"
+                          : "Selecione a origem"}
+                  </option>
+                  {agruparPorContinente(
+                    (origens.data ?? []).map((o) => ({
+                      valor: o.key,
+                      rotulo: o.value,
+                      pais: o.value,
+                    })),
+                  ).map((g) => (
+                    <optgroup key={g.continente} label={g.continente}>
+                      {g.itens.map((o) => (
+                        <option key={o.valor} value={o.valor}>
+                          {o.rotulo}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-[12.5px]">Mín. de operações</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={minOperacoes}
-                  onChange={(e) => setMinOperacoes(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[12.5px]">Valor mínimo (USD)</Label>
-                <Input type="number" min={0} value={minValor} onChange={(e) => setMinValor(e.target.value)} />
-              </div>
-              <p className="md:col-span-4 text-[11.5px] text-[var(--text-muted)]">
-                Preencha os dois campos de nome para isolar as transações entre duas empresas específicas.
-              </p>
             </div>
           )}
-        </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button onClick={() => void iniciarBusca()} disabled={!podeBuscar || checando}>
-            {buscarMut.isPending || checando ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="h-4 w-4" />
-            )}
-            Buscar transações
-          </Button>
-          {impedimento && (
-            <span className="text-[12px] text-[var(--text-muted)]">{impedimento}</span>
-          )}
-        </div>
-
-        {repetida && (
-          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-[var(--info)] bg-[var(--bg-base)] p-2.5 text-[12px] text-[var(--text-primary)]">
-            <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "var(--info)" }} />
-            <span>
-              Última busca com estes mesmos filtros feita em{" "}
-              {new Date(repetida.created_at).toLocaleString("pt-BR")} · {repetida.total_empresas}{" "}
-              resultado(s) salvos.
+          {/* Sincronização das bases (manual — consome cota da Penta, restrita à administração) */}
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] px-3 py-2">
+            <span className="text-[12px] text-[var(--text-muted)]">
+              {syncProgresso
+                ? syncProgresso
+                : sync.data?.ultima_sincronizacao
+                  ? `Bases sincronizadas: ${sync.data.total} · última sincronização em ${new Date(sync.data.ultima_sincronizacao).toLocaleString("pt-BR")}`
+                  : podeSincronizar
+                    ? "As bases ainda não foram sincronizadas — clique em “Sincronizar bases” para carregar a lista de países e bases."
+                    : "As bases ainda não foram sincronizadas — peça a atualização à administração."}
             </span>
             <div className="flex-1" />
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setCampanhaId(repetida.campanha_id);
-                setSelecionados([]);
-                setRepetida(null);
-              }}
-            >
-              Ver resultado salvo
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                setRepetida(null);
-                buscarMut.mutate();
-              }}
-            >
-              Buscar de novo na API
-            </Button>
+            {podeSincronizar ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sincronizarMut.mutate()}
+                disabled={sincronizarMut.isPending}
+              >
+                {sincronizarMut.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3.5 w-3.5" />
+                )}
+                Sincronizar bases
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => solicitarSyncMut.mutate()}
+                disabled={solicitarSyncMut.isPending || solicitarSyncMut.isSuccess}
+              >
+                {solicitarSyncMut.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
+                {solicitarSyncMut.isSuccess ? "Pedido enviado" : "Solicitar sincronização"}
+              </Button>
+            )}
           </div>
-        )}
 
-        {aviso && (
-          <div className="mt-3 flex items-start gap-2 rounded-md border border-[var(--warning)] bg-[var(--bg-base)] p-2.5 text-[12px] text-[var(--text-primary)]">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--warning)" }} />
-            <span>{aviso}</span>
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className={`space-y-1.5 md:col-span-2 ${modo === "rota" ? "hidden" : ""}`}>
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-[12.5px]">Base de dados</Label>
+                {bases.data && (
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    {baseBusca.trim()
+                      ? `${totalFiltradas} de ${bases.data.length} base(s)`
+                      : `${bases.data.length} base(s) disponíveis`}
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <Input
+                  value={baseBusca}
+                  onChange={(e) => setBaseBusca(e.target.value)}
+                  placeholder="Filtrar por país, sigla ou tipo… (ex.: Brasil import, AR export)"
+                  className="h-9 pr-16"
+                />
+                {baseBusca && (
+                  <button
+                    type="button"
+                    onClick={() => setBaseBusca("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[11.5px] text-[var(--text-muted)] underline hover:no-underline"
+                  >
+                    limpar
+                  </button>
+                )}
+              </div>
+              <select
+                value={baseKey}
+                onChange={(e) => setBaseKey(e.target.value)}
+                disabled={bases.isLoading}
+                className="h-9 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-base)] px-2 text-[13px] text-[var(--text-primary)]"
+              >
+                <option value="">
+                  {bases.isLoading
+                    ? "Carregando bases…"
+                    : bases.isError
+                      ? "Não foi possível carregar as bases"
+                      : gruposBases.length === 0
+                        ? "Nenhuma base encontrada para esse filtro"
+                        : "Selecione uma base"}
+                </option>
+                {gruposBases.map(([pais, lista]) => (
+                  <optgroup key={pais} label={pais}>
+                    {lista.map((b) => (
+                      <option
+                        key={`${b.keyCountry}|${b.keyOperation}|${b.keyVersion}`}
+                        value={`${b.keyCountry}|${b.keyOperation}|${b.keyVersion}`}
+                        disabled={b.underMaintenance || !b.active}
+                      >
+                        {b.title}
+                        {b.underMaintenance ? " (em manutenção)" : ""}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              {baseManual && (
+                <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-[var(--text-muted)]">
+                  <span className="rounded-full border border-[var(--bg-border)] px-2 py-0.5 text-[var(--text-secondary)]">
+                    {baseManual.pais} · {baseManual.title}
+                  </span>
+                  {baseManual.queryLimit > 0 && (
+                    <span>
+                      limite da base: {baseManual.queryLimit.toLocaleString("pt-BR")} operações
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setBaseKey("")}
+                    className="underline hover:no-underline"
+                  >
+                    trocar
+                  </button>
+                </div>
+              )}
+
+              {bases.isError && (
+                <div className="flex items-center gap-2 text-[11.5px] text-[var(--danger)]">
+                  <span>
+                    {online
+                      ? "As bases não puderam ser carregadas agora."
+                      : "Serviço de consulta indisponível — verifique as credenciais em Configurações › Mineração."}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void bases.refetch()}
+                    className="underline hover:no-underline"
+                  >
+                    tentar de novo
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12.5px]">Início</Label>
+              <Input
+                type="date"
+                className="h-9 w-full"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12.5px]">Fim</Label>
+              <Input
+                type="date"
+                className="h-9 w-full"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+
+            {/* Presets de período / anos */}
+            <div className="md:col-span-4">
+              <div className="flex flex-wrap gap-1.5">
+                {presets.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => {
+                      setStartDate(p.inicio);
+                      setEndDate(p.fim);
+                    }}
+                    className={`rounded-full border px-3 py-1 text-[12px] transition-colors ${
+                      presetAtivo === p.label
+                        ? "border-[var(--info)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
+                        : "border-[var(--bg-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              {periodoInvalido && (
+                <p className="mt-1.5 text-[11.5px] text-[var(--danger)]">{periodoInvalido}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5 md:col-span-4">
+              <Label className="text-[12.5px]">NCM</Label>
+              <Input
+                value={ncm}
+                onChange={(e) => setNcm(e.target.value)}
+                placeholder="Cole como quiser: 8422, 8438.10, 1006.30.21 — usamos os 4 primeiros dígitos"
+              />
+              {rubros.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {rubros.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => removerRubro(r)}
+                      title="Remover este NCM"
+                      className="rounded-full border border-[var(--bg-border)] bg-[var(--bg-base)] px-2.5 py-0.5 text-[11.5px] text-[var(--text-primary)] hover:border-[var(--danger)] hover:text-[var(--danger)]"
+                    >
+                      {r} ×
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setNcm("")}
+                    className="px-1 text-[11.5px] text-[var(--text-muted)] underline hover:no-underline"
+                  >
+                    limpar
+                  </button>
+                </div>
+              )}
+              <p className="text-[11.5px] text-[var(--text-muted)]">
+                {rubros.length} rubro(s) de 4 dígitos · período máximo de 12 meses ·{" "}
+                {baseSel
+                  ? `limite da base: ${baseSel.queryLimit.toLocaleString("pt-BR")} operações`
+                  : "selecione a base"}
+              </p>
+              {invalidos.length > 0 && (
+                <p className="text-[11.5px] text-[var(--warning)]">
+                  Ignorado(s) por ter menos de 4 dígitos: {invalidos.join(", ")}
+                </p>
+              )}
+            </div>
           </div>
-        )}
 
-      </section>
+          {/* Filtros avançados: consulta entre duas empresas */}
+          <div className="mt-4 border-t border-[var(--bg-border)] pt-3">
+            <button
+              type="button"
+              onClick={() => setAvancado((v) => !v)}
+              className="flex items-center gap-1.5 text-[12.5px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Filtros de empresa e contraparte
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${avancado ? "rotate-180" : ""}`}
+              />
+            </button>
+            {avancado && (
+              <div className="mt-3 grid gap-4 md:grid-cols-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[12.5px]">Empresa local contém</Label>
+                  <Input
+                    value={filtroEmpresa}
+                    onChange={(e) => setFiltroEmpresa(e.target.value)}
+                    placeholder="Ex.: NESTLE"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[12.5px]">Contraparte no exterior contém</Label>
+                  <Input
+                    value={filtroContraparte}
+                    onChange={(e) => setFiltroContraparte(e.target.value)}
+                    placeholder="Ex.: BOSCH"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[12.5px]">Mín. de operações</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={minOperacoes}
+                    onChange={(e) => setMinOperacoes(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[12.5px]">Valor mínimo (USD)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={minValor}
+                    onChange={(e) => setMinValor(e.target.value)}
+                  />
+                </div>
+                <p className="md:col-span-4 text-[11.5px] text-[var(--text-muted)]">
+                  Preencha os dois campos de nome para isolar as transações entre duas empresas
+                  específicas.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button onClick={() => void iniciarBusca()} disabled={!podeBuscar || checando}>
+              {buscarMut.isPending || checando ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
+              Buscar transações
+            </Button>
+            {impedimento && (
+              <span className="text-[12px] text-[var(--text-muted)]">{impedimento}</span>
+            )}
+          </div>
+
+          {repetida && (
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-[var(--info)] bg-[var(--bg-base)] p-2.5 text-[12px] text-[var(--text-primary)]">
+              <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "var(--info)" }} />
+              <span>
+                Última busca com estes mesmos filtros feita em{" "}
+                {new Date(repetida.created_at).toLocaleString("pt-BR")} · {repetida.total_empresas}{" "}
+                resultado(s) salvos.
+              </span>
+              <div className="flex-1" />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setCampanhaId(repetida.campanha_id);
+                  setSelecionados([]);
+                  setRepetida(null);
+                }}
+              >
+                Ver resultado salvo
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setRepetida(null);
+                  buscarMut.mutate();
+                }}
+              >
+                Buscar de novo na API
+              </Button>
+            </div>
+          )}
+
+          {aviso && (
+            <div className="mt-3 flex items-start gap-2 rounded-md border border-[var(--warning)] bg-[var(--bg-base)] p-2.5 text-[12px] text-[var(--text-primary)]">
+              <AlertTriangle
+                className="mt-0.5 h-4 w-4 shrink-0"
+                style={{ color: "var(--warning)" }}
+              />
+              <span>{aviso}</span>
+            </div>
+          )}
+        </section>
       )}
 
       {/* Histórico de buscas (fica salvo no sistema, com o responsável) */}
@@ -1355,7 +1345,8 @@ function MineracaoPage() {
           )}
           {!campanhas.isLoading && (campanhas.data ?? []).length === 0 && (
             <p className="text-[12.5px] text-[var(--text-muted)]">
-              Nenhuma busca salva ainda. As consultas feitas na aba “Buscar transações” aparecem aqui.
+              Nenhuma busca salva ainda. As consultas feitas na aba “Buscar transações” aparecem
+              aqui.
             </p>
           )}
           <div className="space-y-1.5">
@@ -1425,8 +1416,6 @@ function MineracaoPage() {
           </div>
         </section>
       )}
-
-
 
       {/* Resultados */}
       {campanhaId && (
@@ -1560,7 +1549,9 @@ function MineracaoPage() {
                             }
                           />
                         </td>
-                        <td className="p-2 font-medium text-[var(--text-primary)]">{r["empresa"]}</td>
+                        <td className="p-2 font-medium text-[var(--text-primary)]">
+                          {r["empresa"]}
+                        </td>
                         <td className="p-2 text-[var(--text-muted)]">
                           {r["contraparte"] ? (
                             String(r["contraparte"])
@@ -1579,13 +1570,17 @@ function MineracaoPage() {
                             "—"
                           )}
                         </td>
-                        <td className="p-2 text-[var(--text-muted)]">{(r["rubros"] ?? []).join(", ")}</td>
+                        <td className="p-2 text-[var(--text-muted)]">
+                          {(r["rubros"] ?? []).join(", ")}
+                        </td>
                         <td className="p-2 text-right">{ops}</td>
                         <td className="p-2 text-right">{usd(valor)}</td>
                         <td className="p-2 text-right text-[var(--text-muted)]">
                           {usd(ops > 0 ? valor / ops : 0)}
                         </td>
-                        <td className="p-2 text-[var(--text-muted)]">{r["ultima_operacao"] ?? "—"}</td>
+                        <td className="p-2 text-[var(--text-muted)]">
+                          {r["ultima_operacao"] ?? "—"}
+                        </td>
                         <td className="p-2 text-[var(--text-muted)]">
                           <button
                             type="button"
@@ -1598,7 +1593,9 @@ function MineracaoPage() {
                             {r["anotacao"] ? String(r["anotacao"]) : "anotar"}
                           </button>
                         </td>
-                        <td className="p-2 text-[var(--text-muted)]">{convertido ? "Convertido" : "—"}</td>
+                        <td className="p-2 text-[var(--text-muted)]">
+                          {convertido ? "Convertido" : "—"}
+                        </td>
                       </tr>
                       {notaAberta === id && (
                         <tr className="border-b border-[var(--bg-border)] bg-[var(--bg-base)]">
@@ -1656,7 +1653,6 @@ function MineracaoPage() {
                 )}
               </tbody>
             </table>
-
           </div>
         </section>
       )}

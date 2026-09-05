@@ -19,10 +19,7 @@ import {
 export const Route = createFileRoute("/suporte/$token")({
   ssr: false,
   head: () => ({
-    meta: [
-      { title: "Chamado de suporte — Solutek" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Chamado de suporte — Solutek" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <PublicSiteShell>

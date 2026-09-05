@@ -69,16 +69,14 @@ function ContaPage() {
     setUploadProgress(0);
     try {
       const path = `${user.id}/avatar-${Date.now()}.jpg`;
-      const { error: upErr } = await supabase.storage
-        .from("avatars")
-        .upload(path, blob, {
-          upsert: true,
-          contentType: "image/jpeg",
-          onUploadProgress: (e: { loaded: number; total?: number }) => {
-            const pct = Math.round((e.loaded / (e.total || blob.size)) * 100);
-            setUploadProgress(pct);
-          },
-        } as any);
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, blob, {
+        upsert: true,
+        contentType: "image/jpeg",
+        onUploadProgress: (e: { loaded: number; total?: number }) => {
+          const pct = Math.round((e.loaded / (e.total || blob.size)) * 100);
+          setUploadProgress(pct);
+        },
+      } as any);
       if (upErr) throw upErr;
       const { data: signed, error: sErr } = await supabase.storage
         .from("avatars")
@@ -86,7 +84,10 @@ function ContaPage() {
       if (sErr) throw sErr;
       const url = signed.signedUrl;
       setAvatarUrl(url);
-      await profileMut.mutateAsync({ full_name: fullName.trim() || (profile?.full_name ?? ""), avatar_url: url });
+      await profileMut.mutateAsync({
+        full_name: fullName.trim() || (profile?.full_name ?? ""),
+        avatar_url: url,
+      });
       setPendingFile(null);
     } catch (e) {
       toast.error((e as Error).message);
@@ -189,9 +190,7 @@ function ContaPage() {
               {uploading && (
                 <div className="mt-2 w-48">
                   <Progress value={uploadProgress} />
-                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-                    {uploadProgress}%
-                  </p>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">{uploadProgress}%</p>
                 </div>
               )}
               <p className="mt-1 text-[11px] text-[var(--text-muted)]">
@@ -265,8 +264,7 @@ function PasswordCard() {
 
   const changeFn = useServerFn(changeMyPassword);
   const mut = useMutation({
-    mutationFn: (v: { current_password: string; new_password: string }) =>
-      changeFn({ data: v }),
+    mutationFn: (v: { current_password: string; new_password: string }) => changeFn({ data: v }),
     onSuccess: () => {
       toast.success("Senha alterada com sucesso");
       setCurrent("");
