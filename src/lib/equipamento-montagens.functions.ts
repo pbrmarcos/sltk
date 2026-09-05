@@ -59,7 +59,7 @@ export const createMontagem = createServerFn({ method: "POST" })
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const { data: eqp, error: eqpErr } = await context.supabase
       .from("cliente_equipamentos")
-      .select("id, cliente_id")
+      .select("id, cliente_id, codigo, modelo")
       .eq("id", data.equipamento_id)
       .single();
     if (eqpErr || !eqp) throw new Error("Equipamento não encontrado.");
@@ -77,6 +77,25 @@ export const createMontagem = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
+
+    if (data.responsavel_id) {
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        await safeDispatch({
+          eventKey: "montagem.card_atribuido",
+          triggeredBy: context.userId,
+          entityTable: "equipamento_montagens",
+          entityId: row.id,
+          vars: {
+            card: `${(eqp as any).modelo ?? "Equipamento"} (${(eqp as any).codigo ?? ""})`,
+            link: appUrl(`/producao/montagem`),
+          },
+        });
+      } catch (e) {
+        console.error("[montagens/createMontagem] email dispatch failed", e);
+      }
+    }
+
     return row;
   });
 
@@ -98,11 +117,47 @@ export const updateMontagem = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const { id, ...rest } = data;
+    const { data: antes } = await context.supabase
+      .from("equipamento_montagens")
+      .select("status, responsavel_id, equipamento_id, cliente_equipamentos(codigo, modelo)")
+      .eq("id", id)
+      .maybeSingle();
     const { error } = await context.supabase
       .from("equipamento_montagens")
       .update({ ...rest, updated_by: context.userId })
       .eq("id", id);
     if (error) throw friendlyDbError(error);
+
+    const atribuiuAgora = !!data.responsavel_id && data.responsavel_id !== (antes as any)?.responsavel_id;
+    const bloqueouAgora = data.status === "bloqueada" && (antes as any)?.status !== "bloqueada";
+    if (atribuiuAgora || bloqueouAgora) {
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        const eqp = (antes as any)?.cliente_equipamentos;
+        const card = `${eqp?.modelo ?? "Equipamento"} (${eqp?.codigo ?? ""})`;
+        if (atribuiuAgora) {
+          await safeDispatch({
+            eventKey: "montagem.card_atribuido",
+            triggeredBy: context.userId,
+            entityTable: "equipamento_montagens",
+            entityId: id,
+            vars: { card, link: appUrl(`/producao/montagem`) },
+          });
+        }
+        if (bloqueouAgora) {
+          await safeDispatch({
+            eventKey: "montagem.card_bloqueado",
+            triggeredBy: context.userId,
+            entityTable: "equipamento_montagens",
+            entityId: id,
+            vars: { card, motivo: data.observacoes ?? "", link: appUrl(`/producao/montagem`) },
+          });
+        }
+      } catch (e) {
+        console.error("[montagens/updateMontagem] email dispatch failed", e);
+      }
+    }
+
     return { ok: true };
   });
 
