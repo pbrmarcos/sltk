@@ -262,6 +262,40 @@ export const inviteFornecedores = createServerFn({ method: "POST" })
       ator: context.userId,
       detalhes: { count: data.fornecedor_ids.length },
     });
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      const { data: cot } = await sb
+        .from("cotacoes")
+        .select("codigo, titulo")
+        .eq("id", data.cotacao_id)
+        .maybeSingle();
+      const { data: fornecedores } = await sb
+        .from("fornecedores")
+        .select("id, nome_fantasia, razao_social")
+        .in("id", data.fornecedor_ids);
+      for (const f of (fornecedores ?? []) as Array<{
+        id: string;
+        nome_fantasia: string | null;
+        razao_social: string | null;
+      }>) {
+        await safeDispatch({
+          eventKey: "rfq.enviada_fornecedor",
+          triggeredBy: context.userId,
+          entityTable: "cotacoes",
+          entityId: data.cotacao_id,
+          vars: {
+            codigo: (cot as any)?.codigo ?? "",
+            item: (cot as any)?.titulo ?? "",
+            fornecedor: f.nome_fantasia || f.razao_social || "",
+            link: appUrl(`/compras/cotacoes/${data.cotacao_id}`),
+          },
+        });
+      }
+    } catch (e) {
+      console.error("[cotacoes/inviteFornecedores] email dispatch failed", e);
+    }
+
     return { ok: true as const };
   });
 
@@ -559,6 +593,35 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
       evento: "proposta_recebida",
       detalhes: { convite_id: c.id, total },
     });
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      const { data: convite2 } = await sb
+        .from("cotacao_fornecedores")
+        .select("fornecedor_id, fornecedores(nome_fantasia, razao_social)")
+        .eq("id", c.id)
+        .maybeSingle();
+      const { data: cot } = await sb
+        .from("cotacoes")
+        .select("codigo")
+        .eq("id", c.cotacao_id)
+        .maybeSingle();
+      const fornecedor = (convite2 as any)?.fornecedores;
+      await safeDispatch({
+        eventKey: "rfq.resposta_recebida",
+        triggeredBy: null,
+        triggeredByKind: "automation",
+        entityTable: "cotacoes",
+        entityId: c.cotacao_id,
+        vars: {
+          codigo: (cot as any)?.codigo ?? "",
+          fornecedor: fornecedor?.nome_fantasia || fornecedor?.razao_social || "",
+          link: appUrl(`/compras/cotacoes/${c.cotacao_id}`),
+        },
+      });
+    } catch (e) {
+      console.error("[cotacoes/publicSubmitProposta] email dispatch failed", e);
+    }
 
     return { ok: true as const, total };
   });
