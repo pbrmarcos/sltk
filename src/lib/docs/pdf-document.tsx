@@ -5,6 +5,7 @@ import { formatDate, formatMoney, formatNumber } from "./formatters";
 import { moedaLabel } from "@/lib/moedas";
 import { t } from "./i18n";
 import { CHROME_PAGE_STYLE, PdfHeader, PdfFooter } from "./pdf-chrome";
+import { itensPrincipais, itensOpcionais, calcularSubtotal, calcularTotalOpcionais, calcularValorItem } from "./orcamento-calc";
 
 // ============================================================
 // Design tokens
@@ -229,7 +230,7 @@ function renderDescricaoTecnica(
   idioma: Idioma,
 ) {
   const conf = bloco<{ titulo?: string }>(blocos, "descricao_tecnica", idioma);
-  const equipamentos = payload.equipamentos.filter((e) => !e.opcional);
+  const equipamentos = itensPrincipais(payload.equipamentos);
   return (
     <View>
       <Text style={s.sectionTitle}>{conf?.titulo || t(idioma, "descricao_tecnica")}</Text>
@@ -261,10 +262,10 @@ function renderValores(
 ) {
   const conf = bloco<{ titulo?: string }>(blocos, "valores", idioma);
   const m = payload.moeda;
-  const principais = payload.equipamentos.filter((e) => !e.opcional);
-  const opcionais = payload.equipamentos.filter((e) => e.opcional);
-  const subtotal = principais.reduce((acc, e) => acc + e.quantidade * e.valor_unitario, 0);
-  const totalOpc = opcionais.reduce((acc, e) => acc + e.quantidade * e.valor_unitario, 0);
+  const principais = itensPrincipais(payload.equipamentos);
+  const opcionais = itensOpcionais(payload.equipamentos);
+  const subtotal = calcularSubtotal(payload.equipamentos);
+  const totalOpc = calcularTotalOpcionais(payload.equipamentos);
 
   const TableHeader = () => (
     <View style={s.tHeader} fixed>
@@ -287,7 +288,7 @@ function renderValores(
     <View style={s.table}>
       <TableHeader />
       {items.map((eq, idx) => {
-        const total = eq.quantidade * eq.valor_unitario;
+        const total = calcularValorItem(eq);
         return (
           <View
             key={idx}
@@ -350,9 +351,7 @@ function renderCondicoesPagamento(
 ) {
   const conf = bloco<{ titulo?: string; texto?: string }>(blocos, "condicoes_pagamento", idioma);
   const overrideTxt = override(payload, "condicoes_pagamento", idioma);
-  const total = payload.equipamentos
-    .filter((e) => !e.opcional)
-    .reduce((acc, e) => acc + e.quantidade * e.valor_unitario, 0);
+  const total = calcularSubtotal(payload.equipamentos);
   return (
     <View>
       <Text style={s.sectionTitle}>{conf?.titulo || "Condições de Pagamento"}</Text>

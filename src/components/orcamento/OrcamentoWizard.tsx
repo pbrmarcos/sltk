@@ -50,6 +50,7 @@ import type {
 } from "@/lib/docs/types";
 import { OrcamentoPdfPreview } from "@/components/docs/OrcamentoPdfPreview";
 import { diffOrcamentoPayload, type BumpKind, BUMP_LABEL } from "@/lib/docs/orcamento-diff";
+import { calcularSubtotal } from "@/lib/docs/orcamento-calc";
 import { useFormDraft } from "@/hooks/use-form-draft";
 import { NovoClienteDialog } from "@/components/clientes/NovoClienteDialog";
 import { getOportunidade, vincularClienteOportunidade } from "@/lib/oportunidades.functions";
@@ -402,13 +403,7 @@ export function OrcamentoWizard({
   const removeEq = (idx: number) => setEquipamentos((arr) => arr.filter((_, i) => i !== idx));
   const addEq = () => setEquipamentos((arr) => [...arr, EMPTY_EQ()]);
 
-  const subtotal = useMemo(
-    () =>
-      equipamentos
-        .filter((e) => !e.opcional)
-        .reduce((s, e) => s + e.quantidade * e.valor_unitario, 0),
-    [equipamentos],
-  );
+  const subtotal = useMemo(() => calcularSubtotal(equipamentos), [equipamentos]);
 
   const buildPayload = (): OrcamentoPayload | null => {
     if (!clienteRow || !user) return null;
