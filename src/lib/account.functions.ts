@@ -88,8 +88,8 @@ export const removeMyAvatar = createServerFn({ method: "POST" })
         if (pathMatch?.[1]) {
           await db.storage.from("avatars").remove([decodeURIComponent(pathMatch[1])]);
         }
-      } catch {
-        // ignore parse/storage errors
+      } catch (e) {
+        console.warn("[account] falha ao remover avatar antigo do storage", e);
       }
     }
 
