@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  BLOCO_SCHEMAS,
-  defaultBlocoConteudo,
-  type BlocoTipo,
-} from "./equipamento-pagina.shared";
+import { BLOCO_SCHEMAS, defaultBlocoConteudo, type BlocoTipo } from "./equipamento-pagina.shared";
 
 const TIPOS: BlocoTipo[] = [
   "hero",

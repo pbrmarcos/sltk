@@ -25,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -46,7 +45,10 @@ import {
   BLOCO_LABEL,
   type BlocoTipo,
   type EquipamentoBloco,
+  type IdiomaPagina,
 } from "@/lib/equipamento-pagina.shared";
+import { BlocoFormulario } from "@/components/admin/equipamento-pagina/bloco-formularios";
+import { RenderBloco } from "@/components/equipamentos/blocos/Blocos";
 
 export const Route = createFileRoute("/_authenticated/admin/paginas-equipamentos")({
   component: Page,
@@ -351,9 +353,9 @@ function BlocoCard({
   onChanged: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [txt, setTxt] = useState(JSON.stringify(bloco.conteudo_json, null, 2));
+  const [conteudo, setConteudo] = useState<Record<string, unknown>>(bloco.conteudo_json);
+  const [idiomaPreview, setIdiomaPreview] = useState<IdiomaPagina>("pt");
   const [saving, setSaving] = useState(false);
-  const [errParse, setErrParse] = useState<string | null>(null);
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -407,46 +409,64 @@ function BlocoCard({
       </div>
       {expanded && (
         <div className="border-t border-border bg-muted/20 p-4">
-          <p className="mb-2 text-xs text-muted-foreground">
-            Edite o JSON do bloco (chaves <code>*_pt</code>, <code>*_es</code>, <code>*_en</code>{" "}
-            por idioma; <code>itens</code>/<code>imagens</code>/<code>bullets_pt</code> como
-            listas).
-          </p>
-          <Textarea
-            className="font-mono text-xs"
-            rows={16}
-            value={txt}
-            onChange={(e) => {
-              setTxt(e.target.value);
-              try {
-                JSON.parse(e.target.value);
-                setErrParse(null);
-              } catch (err: any) {
-                setErrParse(err.message);
-              }
-            }}
-          />
-          {errParse && <p className="mt-1 text-xs text-destructive">JSON inválido: {errParse}</p>}
-          <div className="mt-3 flex justify-end">
-            <Button
-              disabled={!!errParse || saving}
-              onClick={async () => {
-                try {
-                  setSaving(true);
-                  const parsed = JSON.parse(txt);
-                  await adminUpdateBloco({ data: { bloco_id: bloco.id, conteudo_json: parsed } });
-                  toast.success("Bloco salvo.");
-                  onChanged();
-                } catch (e: any) {
-                  toast.error(e.message);
-                } finally {
-                  setSaving(false);
-                }
-              }}
-            >
-              <Save className="mr-1.5 h-4 w-4" />
-              Salvar bloco
-            </Button>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div>
+              <BlocoFormulario tipo={bloco.tipo_bloco} value={conteudo} onChange={setConteudo} />
+              <div className="mt-4 flex justify-end">
+                <Button
+                  disabled={saving}
+                  onClick={async () => {
+                    try {
+                      setSaving(true);
+                      await adminUpdateBloco({
+                        data: {
+                          bloco_id: bloco.id,
+                          tipo_bloco: bloco.tipo_bloco,
+                          conteudo_json: conteudo,
+                        },
+                      });
+                      toast.success("Bloco salvo.");
+                      onChanged();
+                    } catch (e: any) {
+                      toast.error(e.message);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  <Save className="mr-1.5 h-4 w-4" />
+                  Salvar bloco
+                </Button>
+              </div>
+            </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">Preview</span>
+                <div className="flex gap-1">
+                  {(["pt", "es", "en"] as const).map((idi) => (
+                    <Button
+                      key={idi}
+                      type="button"
+                      size="sm"
+                      variant={idiomaPreview === idi ? "default" : "outline"}
+                      className="h-7 px-2.5 text-xs uppercase"
+                      onClick={() => setIdiomaPreview(idi)}
+                    >
+                      {idi}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="max-h-[600px] overflow-y-auto overflow-x-auto rounded-md border border-border">
+                <div className="min-w-[900px]">
+                  <RenderBloco
+                    bloco={{ ...bloco, conteudo_json: conteudo }}
+                    idioma={idiomaPreview}
+                    ctaHref="#"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

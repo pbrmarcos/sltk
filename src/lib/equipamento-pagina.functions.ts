@@ -246,7 +246,8 @@ export const adminUpdateBloco = createServerFn({ method: "POST" })
     await ensureAdmin(sb, context.userId);
     const { bloco_id, tipo_bloco, ...patch } = data;
     if (patch.conteudo_json !== undefined) {
-      if (!tipo_bloco) throw new Error("tipo_bloco é obrigatório para validar o conteúdo do bloco.");
+      if (!tipo_bloco)
+        throw new Error("tipo_bloco é obrigatório para validar o conteúdo do bloco.");
       const result = BLOCO_SCHEMAS[tipo_bloco].safeParse(patch.conteudo_json);
       if (!result.success) {
         const detalhes = result.error.issues
