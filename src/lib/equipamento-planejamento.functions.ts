@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -115,6 +116,7 @@ export const togglePlanejamentoItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => toggleItemInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySupabase;
     const uid = context.userId;
     const { data: prof } = await sb.from("profiles").select("full_name, email").eq("id", uid).maybeSingle();
@@ -179,6 +181,7 @@ export const criarEquipamentoDeOrcamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => criarInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySupabase;
     // Fetch template descrição para gravar resumo
     const { data: tpl } = await sb

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -146,6 +147,7 @@ export const uploadEquipamentoDocumento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => uploadInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) {
       throw new Error(`Tipo de arquivo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, ZIP.`);
@@ -226,6 +228,7 @@ export const removerEquipamentoDocumento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const { error } = await context.supabase
       .from("cliente_equipamento_documentos" as never)
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)

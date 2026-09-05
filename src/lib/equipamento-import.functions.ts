@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -161,6 +162,7 @@ export const applyEquipamentoDisciplinaExcel = createServerFn({ method: "POST" }
     }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     await assertEmPlanejamento(sb, data.equipamentoId);
 
@@ -277,6 +279,7 @@ export const logEdicaoManualEtapa = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     await log(sb, context.userId, {
       equipamento_id: data.equipamentoId,

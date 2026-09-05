@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -230,6 +231,7 @@ export const createSATRelatorio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
     let tplId = data.template_id;
     let tplVersao: number | null = null;
     if (!tplId) {
@@ -310,6 +312,7 @@ export const saveSATRelatorio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => saveInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
     const patch: Record<string, unknown> = { updated_by: context.userId };
     for (const k of [
       "dados",
@@ -349,6 +352,7 @@ export const uploadSATAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => uploadInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) {
       throw new Error(
@@ -458,6 +462,7 @@ export const deleteSATAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => delAnexInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
     const { error } = await context.supabase
       .from("sat_relatorio_anexo")
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)

@@ -166,6 +166,39 @@ export async function assertEngineerOrHigher(
   }
 }
 
+/**
+ * Espelha a RPC `can_access_module` usada pelas policies de RLS de vários
+ * módulos (ex.: Qualidade, Fornecedores) — consulta a matriz dinâmica
+ * `role_module_permissions` (configurável em Usuários & Permissões), não uma
+ * lista fixa de papéis. Sempre prefira isto a uma lista de papéis hardcoded
+ * quando o módulo já usa essa RPC na RLS, para não divergir do que o banco
+ * realmente permite.
+ */
+export async function canAccessModule(
+  supabase: Client,
+  userId: string,
+  module: string,
+): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("can_access_module", {
+    _user: userId,
+    _module: module,
+  });
+  if (error) throw new Error(error.message);
+  return Boolean(data);
+}
+
+export async function assertCanAccessModule(
+  supabase: Client,
+  userId: string,
+  module: string,
+  message = "Acesso restrito a este módulo.",
+): Promise<void> {
+  if (!(await canAccessModule(supabase, userId, module))) {
+    throw new AdminGuardError("module_not_allowed", message);
+  }
+}
+
 /** Número de admins ativos (via RPC SECURITY DEFINER). */
 export async function countActiveAdmins(supabase: Client): Promise<number> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

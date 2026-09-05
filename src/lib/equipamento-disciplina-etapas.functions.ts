@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -98,6 +99,7 @@ export const createEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => createInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const uid = context.userId;
     // computa próxima ordem se não fornecida
@@ -149,6 +151,7 @@ export const updateEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => updateInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const { id, ...rest } = data;
     const payload: Record<string, unknown> = { ...rest, updated_by: context.userId };
@@ -169,6 +172,7 @@ export const reorderEtapas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => reorderInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     for (const it of data.items) {
       const payload: Record<string, unknown> = { ordem: it.ordem, updated_by: context.userId };
@@ -183,6 +187,7 @@ export const deleteEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const { error } = await sb
       .from("equipamento_disciplina_etapas")
@@ -217,6 +222,7 @@ export const addEtapaComentario = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const nome = await currentUserName(sb, context.userId);
     const { data: row, error } = await sb

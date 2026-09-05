@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 
 /**
  * Server functions do módulo FAT (Factory Acceptance Test).
@@ -98,6 +99,7 @@ export const createFat = createServerFn({ method: "POST" })
     z.object({ processo_id: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     // Pega cliente do processo
     const { data: proc, error: pErr } = await context.supabase
       .from("processos")
@@ -197,6 +199,7 @@ export const updateFatIdentificacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof identSchema>) => identSchema.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase
       .from("fat_relatorios")
       .update({ ...data.patch, status: "em_execucao" as const })
@@ -220,6 +223,7 @@ export const setChecklistResposta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof respSchema>) => respSchema.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     // upsert pela única (fat_id, template_id)
     const { error } = await context.supabase
       .from("fat_checklist_resposta")
@@ -334,6 +338,7 @@ export const upsertMedicao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof medSchema>) => medSchema.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const status_auto = computeStatus(data.nominal, data.tolerancia, data.medido);
     const row = {
       fat_id: data.fat_id,
@@ -359,6 +364,7 @@ export const deleteMedicao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase.from("fat_medicoes").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
@@ -382,6 +388,7 @@ export const upsertRnc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof rncSchema>) => rncSchema.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { id, ...rest } = data;
     if (id) {
       const { error } = await context.supabase.from("fat_rnc").update(rest).eq("id", id);
@@ -416,6 +423,7 @@ export const submitAssinatura = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof assSchema>) => assSchema.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const hash = await sha256Hex(`${data.fat_id}|${data.tipo}|${data.nome}|${data.assinatura_svg}`);
     const { error } = await context.supabase
       .from("fat_assinaturas")
@@ -441,6 +449,7 @@ export const removeAssinatura = createServerFn({ method: "POST" })
     z.object({ fat_id: z.string().uuid(), tipo: z.enum(["inspetor", "testemunha"]) }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase
       .from("fat_assinaturas")
       .delete()
@@ -457,6 +466,7 @@ export const homologarFat = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { data: fat, error: fErr } = await context.supabase
       .from("fat_relatorios")
       .select("id, progresso, nok_count")

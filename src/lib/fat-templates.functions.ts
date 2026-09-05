@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -189,6 +190,7 @@ export const novaVersaoFATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => novaVersaoInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { data: maxRow } = await context.supabase
       .from(TBL)
       .select("versao")
@@ -251,6 +253,7 @@ export const setFATTemplateAtivo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => setAtivoInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase
       .from(TBL)
       .update({ ativo: true, updated_by: context.userId } as never)
@@ -269,6 +272,7 @@ export const updateFATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updTplInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const patch: Record<string, unknown> = { updated_by: context.userId };
     if (data.nome !== undefined) patch.nome = data.nome;
     if (data.descricao !== undefined) patch.descricao = data.descricao;
@@ -286,6 +290,7 @@ export const archiveFATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => archiveInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase
       .from(TBL)
       .update({
@@ -312,6 +317,7 @@ export const upsertFATSecao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => secaoUpsert.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     if (data.id) {
       const { error } = await context.supabase
         .from(TBL_SEC)
@@ -343,6 +349,7 @@ export const deleteFATSecao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => deleteSecaoInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase.from(TBL_SEC).delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
@@ -366,6 +373,7 @@ export const upsertFATItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => itemUpsert.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const payload = {
       secao_id: data.secao_id,
       ordem: data.ordem,
@@ -400,6 +408,7 @@ export const deleteFATItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => deleteItemInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase.from(TBL_ITEM).delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
