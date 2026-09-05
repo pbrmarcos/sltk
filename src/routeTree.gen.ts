@@ -81,7 +81,6 @@ import { Route as AuthenticatedAdminOrigensLeadRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminModelosFormularioRouteImport } from './routes/_authenticated/admin.modelos-formulario'
 import { Route as AuthenticatedAdminMineracaoRouteImport } from './routes/_authenticated/admin.mineracao'
 import { Route as AuthenticatedAdminMigrationsRouteImport } from './routes/_authenticated/admin.migrations'
-import { Route as AuthenticatedAdminLogsFiscaisRouteImport } from './routes/_authenticated/admin.logs-fiscais'
 import { Route as AuthenticatedAdminGeralRouteImport } from './routes/_authenticated/admin.geral'
 import { Route as AuthenticatedAdminFormulariosRecebidosRouteImport } from './routes/_authenticated/admin.formularios-recebidos'
 import { Route as AuthenticatedAdminEtapasEquipamentosRouteImport } from './routes/_authenticated/admin.etapas-equipamentos'
@@ -89,7 +88,6 @@ import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminDiagnosticoRouteImport } from './routes/_authenticated/admin.diagnostico'
 import { Route as AuthenticatedAdminContatoRouteImport } from './routes/_authenticated/admin.contato'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin.configuracoes'
-import { Route as AuthenticatedAdminChecklistTiposRouteImport } from './routes/_authenticated/admin.checklist-tipos'
 import { Route as AuthenticatedAdminBancoRouteImport } from './routes/_authenticated/admin.banco'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin.auditoria'
 import { Route as AuthenticatedQualidadeFatIndexRouteImport } from './routes/_authenticated/qualidade.fat.index'
@@ -102,7 +100,6 @@ import { Route as AuthenticatedComprasAlmoxarifadoIndexRouteImport } from './rou
 import { Route as AuthenticatedComercialOrcamentoIndexRouteImport } from './routes/_authenticated/comercial.orcamento.index'
 import { Route as AuthenticatedAjudaDocumentacaoIndexRouteImport } from './routes/_authenticated/ajuda.documentacao.index'
 import { Route as AuthenticatedAdminEtapasEquipamentosIndexRouteImport } from './routes/_authenticated/admin.etapas-equipamentos.index'
-import { Route as AuthenticatedAdminEntrevistasIndexRouteImport } from './routes/_authenticated/admin.entrevistas.index'
 import { Route as PRelatorioTipoTokenRouteImport } from './routes/p.relatorio.$tipo.$token'
 import { Route as ApiPublicRfqUploadRouteImport } from './routes/api/public/rfq.upload'
 import { Route as ApiPublicRfqSubmitRouteImport } from './routes/api/public/rfq.submit'
@@ -538,12 +535,6 @@ const AuthenticatedAdminMigrationsRoute =
     path: '/migrations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminLogsFiscaisRoute =
-  AuthenticatedAdminLogsFiscaisRouteImport.update({
-    id: '/logs-fiscais',
-    path: '/logs-fiscais',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminGeralRoute = AuthenticatedAdminGeralRouteImport.update({
   id: '/geral',
   path: '/geral',
@@ -583,12 +574,6 @@ const AuthenticatedAdminConfiguracoesRoute =
   AuthenticatedAdminConfiguracoesRouteImport.update({
     id: '/configuracoes',
     path: '/configuracoes',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminChecklistTiposRoute =
-  AuthenticatedAdminChecklistTiposRouteImport.update({
-    id: '/checklist-tipos',
-    path: '/checklist-tipos',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminBancoRoute = AuthenticatedAdminBancoRouteImport.update({
@@ -661,12 +646,6 @@ const AuthenticatedAdminEtapasEquipamentosIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedAdminEtapasEquipamentosRoute,
-  } as any)
-const AuthenticatedAdminEntrevistasIndexRoute =
-  AuthenticatedAdminEntrevistasIndexRouteImport.update({
-    id: '/entrevistas/',
-    path: '/entrevistas/',
-    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const PRelatorioTipoTokenRoute = PRelatorioTipoTokenRouteImport.update({
   id: '/p/relatorio/$tipo/$token',
@@ -885,7 +864,6 @@ export interface FileRoutesByFullPath {
   '/suporte/': typeof SuporteIndexRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/banco': typeof AuthenticatedAdminBancoRoute
-  '/admin/checklist-tipos': typeof AuthenticatedAdminChecklistTiposRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/contato': typeof AuthenticatedAdminContatoRoute
   '/admin/diagnostico': typeof AuthenticatedAdminDiagnosticoRoute
@@ -893,7 +871,6 @@ export interface FileRoutesByFullPath {
   '/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/admin/geral': typeof AuthenticatedAdminGeralRoute
-  '/admin/logs-fiscais': typeof AuthenticatedAdminLogsFiscaisRoute
   '/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
   '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
@@ -965,7 +942,6 @@ export interface FileRoutesByFullPath {
   '/api/public/rfq/submit': typeof ApiPublicRfqSubmitRoute
   '/api/public/rfq/upload': typeof ApiPublicRfqUploadRoute
   '/p/relatorio/$tipo/$token': typeof PRelatorioTipoTokenRoute
-  '/admin/entrevistas/': typeof AuthenticatedAdminEntrevistasIndexRoute
   '/admin/etapas-equipamentos/': typeof AuthenticatedAdminEtapasEquipamentosIndexRoute
   '/ajuda/documentacao/': typeof AuthenticatedAjudaDocumentacaoIndexRoute
   '/comercial/orcamento/': typeof AuthenticatedComercialOrcamentoIndexRoute
@@ -1011,14 +987,12 @@ export interface FileRoutesByTo {
   '/suporte': typeof SuporteIndexRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/banco': typeof AuthenticatedAdminBancoRoute
-  '/admin/checklist-tipos': typeof AuthenticatedAdminChecklistTiposRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/contato': typeof AuthenticatedAdminContatoRoute
   '/admin/diagnostico': typeof AuthenticatedAdminDiagnosticoRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/admin/geral': typeof AuthenticatedAdminGeralRoute
-  '/admin/logs-fiscais': typeof AuthenticatedAdminLogsFiscaisRoute
   '/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
   '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
@@ -1087,7 +1061,6 @@ export interface FileRoutesByTo {
   '/api/public/rfq/submit': typeof ApiPublicRfqSubmitRoute
   '/api/public/rfq/upload': typeof ApiPublicRfqUploadRoute
   '/p/relatorio/$tipo/$token': typeof PRelatorioTipoTokenRoute
-  '/admin/entrevistas': typeof AuthenticatedAdminEntrevistasIndexRoute
   '/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosIndexRoute
   '/ajuda/documentacao': typeof AuthenticatedAjudaDocumentacaoIndexRoute
   '/comercial/orcamento': typeof AuthenticatedComercialOrcamentoIndexRoute
@@ -1136,7 +1109,6 @@ export interface FileRoutesById {
   '/suporte/': typeof SuporteIndexRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/banco': typeof AuthenticatedAdminBancoRoute
-  '/_authenticated/admin/checklist-tipos': typeof AuthenticatedAdminChecklistTiposRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/contato': typeof AuthenticatedAdminContatoRoute
   '/_authenticated/admin/diagnostico': typeof AuthenticatedAdminDiagnosticoRoute
@@ -1144,7 +1116,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   '/_authenticated/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/_authenticated/admin/geral': typeof AuthenticatedAdminGeralRoute
-  '/_authenticated/admin/logs-fiscais': typeof AuthenticatedAdminLogsFiscaisRoute
   '/_authenticated/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/_authenticated/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
   '/_authenticated/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
@@ -1216,7 +1187,6 @@ export interface FileRoutesById {
   '/api/public/rfq/submit': typeof ApiPublicRfqSubmitRoute
   '/api/public/rfq/upload': typeof ApiPublicRfqUploadRoute
   '/p/relatorio/$tipo/$token': typeof PRelatorioTipoTokenRoute
-  '/_authenticated/admin/entrevistas/': typeof AuthenticatedAdminEntrevistasIndexRoute
   '/_authenticated/admin/etapas-equipamentos/': typeof AuthenticatedAdminEtapasEquipamentosIndexRoute
   '/_authenticated/ajuda/documentacao/': typeof AuthenticatedAjudaDocumentacaoIndexRoute
   '/_authenticated/comercial/orcamento/': typeof AuthenticatedComercialOrcamentoIndexRoute
@@ -1265,7 +1235,6 @@ export interface FileRouteTypes {
     | '/suporte/'
     | '/admin/auditoria'
     | '/admin/banco'
-    | '/admin/checklist-tipos'
     | '/admin/configuracoes'
     | '/admin/contato'
     | '/admin/diagnostico'
@@ -1273,7 +1242,6 @@ export interface FileRouteTypes {
     | '/admin/etapas-equipamentos'
     | '/admin/formularios-recebidos'
     | '/admin/geral'
-    | '/admin/logs-fiscais'
     | '/admin/migrations'
     | '/admin/mineracao'
     | '/admin/modelos-formulario'
@@ -1345,7 +1313,6 @@ export interface FileRouteTypes {
     | '/api/public/rfq/submit'
     | '/api/public/rfq/upload'
     | '/p/relatorio/$tipo/$token'
-    | '/admin/entrevistas/'
     | '/admin/etapas-equipamentos/'
     | '/ajuda/documentacao/'
     | '/comercial/orcamento/'
@@ -1391,14 +1358,12 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/admin/auditoria'
     | '/admin/banco'
-    | '/admin/checklist-tipos'
     | '/admin/configuracoes'
     | '/admin/contato'
     | '/admin/diagnostico'
     | '/admin/emails'
     | '/admin/formularios-recebidos'
     | '/admin/geral'
-    | '/admin/logs-fiscais'
     | '/admin/migrations'
     | '/admin/mineracao'
     | '/admin/modelos-formulario'
@@ -1467,7 +1432,6 @@ export interface FileRouteTypes {
     | '/api/public/rfq/submit'
     | '/api/public/rfq/upload'
     | '/p/relatorio/$tipo/$token'
-    | '/admin/entrevistas'
     | '/admin/etapas-equipamentos'
     | '/ajuda/documentacao'
     | '/comercial/orcamento'
@@ -1515,7 +1479,6 @@ export interface FileRouteTypes {
     | '/suporte/'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/banco'
-    | '/_authenticated/admin/checklist-tipos'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/contato'
     | '/_authenticated/admin/diagnostico'
@@ -1523,7 +1486,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/etapas-equipamentos'
     | '/_authenticated/admin/formularios-recebidos'
     | '/_authenticated/admin/geral'
-    | '/_authenticated/admin/logs-fiscais'
     | '/_authenticated/admin/migrations'
     | '/_authenticated/admin/mineracao'
     | '/_authenticated/admin/modelos-formulario'
@@ -1595,7 +1557,6 @@ export interface FileRouteTypes {
     | '/api/public/rfq/submit'
     | '/api/public/rfq/upload'
     | '/p/relatorio/$tipo/$token'
-    | '/_authenticated/admin/entrevistas/'
     | '/_authenticated/admin/etapas-equipamentos/'
     | '/_authenticated/ajuda/documentacao/'
     | '/_authenticated/comercial/orcamento/'
@@ -2151,13 +2112,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMigrationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/logs-fiscais': {
-      id: '/_authenticated/admin/logs-fiscais'
-      path: '/logs-fiscais'
-      fullPath: '/admin/logs-fiscais'
-      preLoaderRoute: typeof AuthenticatedAdminLogsFiscaisRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/geral': {
       id: '/_authenticated/admin/geral'
       path: '/geral'
@@ -2205,13 +2159,6 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes'
       fullPath: '/admin/configuracoes'
       preLoaderRoute: typeof AuthenticatedAdminConfiguracoesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/checklist-tipos': {
-      id: '/_authenticated/admin/checklist-tipos'
-      path: '/checklist-tipos'
-      fullPath: '/admin/checklist-tipos'
-      preLoaderRoute: typeof AuthenticatedAdminChecklistTiposRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/banco': {
@@ -2297,13 +2244,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/etapas-equipamentos/'
       preLoaderRoute: typeof AuthenticatedAdminEtapasEquipamentosIndexRouteImport
       parentRoute: typeof AuthenticatedAdminEtapasEquipamentosRoute
-    }
-    '/_authenticated/admin/entrevistas/': {
-      id: '/_authenticated/admin/entrevistas/'
-      path: '/entrevistas'
-      fullPath: '/admin/entrevistas/'
-      preLoaderRoute: typeof AuthenticatedAdminEntrevistasIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/p/relatorio/$tipo/$token': {
       id: '/p/relatorio/$tipo/$token'
@@ -2553,7 +2493,6 @@ const AuthenticatedAdminEtapasEquipamentosRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminBancoRoute: typeof AuthenticatedAdminBancoRoute
-  AuthenticatedAdminChecklistTiposRoute: typeof AuthenticatedAdminChecklistTiposRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminContatoRoute: typeof AuthenticatedAdminContatoRoute
   AuthenticatedAdminDiagnosticoRoute: typeof AuthenticatedAdminDiagnosticoRoute
@@ -2561,7 +2500,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEtapasEquipamentosRoute: typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   AuthenticatedAdminFormulariosRecebidosRoute: typeof AuthenticatedAdminFormulariosRecebidosRoute
   AuthenticatedAdminGeralRoute: typeof AuthenticatedAdminGeralRoute
-  AuthenticatedAdminLogsFiscaisRoute: typeof AuthenticatedAdminLogsFiscaisRoute
   AuthenticatedAdminMigrationsRoute: typeof AuthenticatedAdminMigrationsRoute
   AuthenticatedAdminMineracaoRoute: typeof AuthenticatedAdminMineracaoRoute
   AuthenticatedAdminModelosFormularioRoute: typeof AuthenticatedAdminModelosFormularioRoute
@@ -2572,13 +2510,11 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminSuporteRoute: typeof AuthenticatedAdminSuporteRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminEntrevistasSegmentoIdRoute: typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
-  AuthenticatedAdminEntrevistasIndexRoute: typeof AuthenticatedAdminEntrevistasIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminBancoRoute: AuthenticatedAdminBancoRoute,
-  AuthenticatedAdminChecklistTiposRoute: AuthenticatedAdminChecklistTiposRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminContatoRoute: AuthenticatedAdminContatoRoute,
   AuthenticatedAdminDiagnosticoRoute: AuthenticatedAdminDiagnosticoRoute,
@@ -2588,7 +2524,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFormulariosRecebidosRoute:
     AuthenticatedAdminFormulariosRecebidosRoute,
   AuthenticatedAdminGeralRoute: AuthenticatedAdminGeralRoute,
-  AuthenticatedAdminLogsFiscaisRoute: AuthenticatedAdminLogsFiscaisRoute,
   AuthenticatedAdminMigrationsRoute: AuthenticatedAdminMigrationsRoute,
   AuthenticatedAdminMineracaoRoute: AuthenticatedAdminMineracaoRoute,
   AuthenticatedAdminModelosFormularioRoute:
@@ -2602,8 +2537,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedAdminEntrevistasSegmentoIdRoute:
     AuthenticatedAdminEntrevistasSegmentoIdRoute,
-  AuthenticatedAdminEntrevistasIndexRoute:
-    AuthenticatedAdminEntrevistasIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
