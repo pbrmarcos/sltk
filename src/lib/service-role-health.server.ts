@@ -24,13 +24,8 @@ let cached: ServiceRoleStatus | undefined;
 let inflight: Promise<ServiceRoleStatus> | undefined;
 
 function readEnv() {
-  const url =
-    process.env.SUPABASE_URL ||
-    process.env.DEST_SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL ||
-    "";
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.DEST_SUPABASE_SERVICE_ROLE_KEY || "";
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
   return { url, key };
 }
 

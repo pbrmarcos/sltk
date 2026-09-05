@@ -3,8 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { STATIC_SUPABASE_PUBLISHABLE_KEY, STATIC_SUPABASE_URL } from './config';
 
-const SUPABASE_URL = STATIC_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = STATIC_SUPABASE_PUBLISHABLE_KEY;
+// STATIC_* é o congelamento do último valor publicado pela Lovable (o
+// projeto de staging) — mantido só como fallback caso a env var de build
+// não esteja definida. O ambiente real deve sempre vir de VITE_SUPABASE_*.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || STATIC_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || STATIC_SUPABASE_PUBLISHABLE_KEY;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

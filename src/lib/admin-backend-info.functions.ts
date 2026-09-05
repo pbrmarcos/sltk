@@ -21,15 +21,10 @@ export const getBackendInfo = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
   await assertAdmin(context.supabase, context.userId);
   const fallback = getSupabasePublicConfig();
-  const url = process.env.SUPABASE_URL ?? process.env.DEST_SUPABASE_URL ?? fallback.url ?? null;
+  const url = process.env.SUPABASE_URL ?? fallback.url ?? null;
   const projectId = process.env.SUPABASE_PROJECT_ID ?? projectRefFromUrl(url);
-  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.DEST_SUPABASE_PUBLISHABLE_KEY ?? fallback.publishableKey ?? null;
+  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY ?? fallback.publishableKey ?? null;
   const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY ?? null;
-
-  const destUrl = process.env.DEST_SUPABASE_URL ?? null;
-  const destProjectId = process.env.DEST_SUPABASE_PROJECT_ID ?? projectRefFromUrl(destUrl);
-  const destPublishable = process.env.DEST_SUPABASE_PUBLISHABLE_KEY ?? null;
-  const destServiceRole = process.env.DEST_SUPABASE_SERVICE_ROLE_KEY ?? null;
 
   // Ping leve no Auth health endpoint pra validar se o projeto está ativo — reaproveita o helper do motor de diagnóstico.
   async function ping(target?: string | null) {
@@ -38,39 +33,20 @@ export const getBackendInfo = createServerFn({ method: "GET" })
     return { ok: r.ok, status: r.status, error: r.ok ? null : (r.erro ?? `HTTP ${r.status}`) };
   }
 
-  const activeRef = projectRefFromUrl(url) ?? projectId;
-  const destRef = projectRefFromUrl(destUrl) ?? destProjectId;
-  // Só é um "segundo banco" de verdade se apontar para outro projeto Supabase.
-  const destDistinto = Boolean(destUrl) && destRef !== activeRef;
-
-  const [activePing, destPing] = await Promise.all([
-    ping(url),
-    destDistinto ? ping(destUrl) : Promise.resolve({ ok: false, status: 0, error: null as string | null }),
-  ]);
+  const activePing = await ping(url);
 
   return {
     active: {
       label: "Banco de dados do sistema",
       url,
       projectId,
-      projectRef: activeRef,
+      projectRef: projectRefFromUrl(url) ?? projectId,
       dashboardUrl: projectId ? `https://supabase.com/dashboard/project/${projectId}` : null,
       publishableKeyMasked: mask(publishable),
       hasServiceRole: Boolean(serviceRole),
       ping: activePing,
     },
-    dest: destDistinto
-      ? {
-          label: "Segundo Supabase configurado (DEST_*)",
-          url: destUrl,
-          projectId: destProjectId,
-          projectRef: destRef,
-          dashboardUrl: destProjectId ? `https://supabase.com/dashboard/project/${destProjectId}` : null,
-          publishableKeyMasked: mask(destPublishable),
-          hasServiceRole: Boolean(destServiceRole),
-          ping: destPing,
-        }
-      : null,
+    dest: null,
     checkedAt: new Date().toISOString(),
   };
 });

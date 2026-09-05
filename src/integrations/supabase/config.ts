@@ -14,15 +14,8 @@ function readRuntimeEnv() {
 export function getSupabasePublicConfig(): SupabasePublicConfig {
   const env = readRuntimeEnv();
   return {
-    url:
-      env.SUPABASE_URL ||
-      env.DEST_SUPABASE_URL ||
-      env.VITE_SUPABASE_URL ||
-      STATIC_SUPABASE_URL,
+    url: env.SUPABASE_URL || env.VITE_SUPABASE_URL || STATIC_SUPABASE_URL,
     publishableKey:
-      env.SUPABASE_PUBLISHABLE_KEY ||
-      env.DEST_SUPABASE_PUBLISHABLE_KEY ||
-      env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      STATIC_SUPABASE_PUBLISHABLE_KEY,
+      env.SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY || STATIC_SUPABASE_PUBLISHABLE_KEY,
   };
 }

@@ -4,12 +4,13 @@
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
-import { STATIC_SUPABASE_URL } from './config';
 
+// Sem fallback pra DEST_SUPABASE_*/STATIC_SUPABASE_*: esta é a conexão
+// privilegiada (service role). Prefira falhar alto a resolver silenciosamente
+// para um projeto de staging/destino esquecido no ambiente.
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.DEST_SUPABASE_URL || process.env.VITE_SUPABASE_URL || STATIC_SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.DEST_SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [

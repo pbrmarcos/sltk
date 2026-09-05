@@ -92,6 +92,18 @@ async function probe(cap: CapabilityDef): Promise<{
       if (s.ok) return { status: "ok", detalhe: "Acesso administrativo liberado." };
       return { status: s.reason === "missing" ? "ausente" : "erro", detalhe: s.message };
     }
+    case "sb_management": {
+      const token = process.env.SB_MANAGEMENT_ACCESS_TOKEN;
+      if (!token) return { status: "ausente", detalhe: "Token não configurado." };
+      const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || process.env.SUPABASE_PROJECT_ID;
+      if (!projectRef) return { status: "erro", detalhe: "Project ref do Supabase não encontrado." };
+      const r = await timedFetch(`https://api.supabase.com/v1/projects/${projectRef}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return r.ok
+        ? { status: "ok", detalhe: "Token válido — Migrations pode aplicar SQL.", latencia_ms: r.ms }
+        : { status: "erro", detalhe: r.erro ?? `Management API respondeu ${r.status}.`, latencia_ms: r.ms };
+    }
     case "groq": {
       const key = process.env.GROQ_API_KEY;
       if (!key) return { status: "ausente", detalhe: "Chave não configurada." };

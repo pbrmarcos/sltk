@@ -19,10 +19,8 @@ import {
 
 const ENV_KEYS = [
   "SUPABASE_URL",
-  "DEST_SUPABASE_URL",
   "VITE_SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "DEST_SUPABASE_SERVICE_ROLE_KEY",
 ] as const;
 
 let saved: Record<string, string | undefined> = {};
