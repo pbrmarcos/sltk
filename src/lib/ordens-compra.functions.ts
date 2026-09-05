@@ -2,7 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { OC_REQUIRED_FIELDS, OC_STATUS, type OcStatus } from "@/lib/ordens-compra.shared";
+import {
+  OC_REQUIRED_FIELDS,
+  OC_STATUS,
+  type OcStatus,
+  exigeValidacaoWizard,
+  patchParaStatusOc,
+} from "@/lib/ordens-compra.shared";
 
 type SB = { from: (t: string) => any; rpc: (n: string, p?: any) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -642,7 +648,7 @@ export const setOcStatus = createServerFn({ method: "POST" })
     if (!cur) throw new Error("OC não encontrada");
 
     // Validar wizard ao sair de rascunho
-    if (cur.status === "rascunho" && data.status !== "rascunho" && data.status !== "cancelada") {
+    if (exigeValidacaoWizard(cur.status as OcStatus, data.status)) {
       const got = await getOrdemCompra({ data: { id: data.id } });
       if (got.faltantes.length > 0) {
         throw new Error(
@@ -651,12 +657,7 @@ export const setOcStatus = createServerFn({ method: "POST" })
       }
     }
 
-    const patch: Record<string, unknown> = { status: data.status };
-    if (data.status === "aprovada") {
-      patch.aprovado_em = new Date().toISOString();
-      patch.aprovado_por = uid;
-    }
-    if (data.status === "enviada") patch.enviado_em = new Date().toISOString();
+    const patch = patchParaStatusOc(data.status, uid, new Date().toISOString());
 
     const { error } = await sb.from("ordens_compra").update(patch).eq("id", data.id);
     if (error) throw friendlyDbError(error);

@@ -3,6 +3,7 @@ import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { validarMotivo, patchParaStatusEmbarque } from "@/lib/logistica-status";
 
 export const LOGISTICA_STATUS = [
   "rascunho",
@@ -251,9 +252,6 @@ export const updateEmbarque = createServerFn({ method: "POST" })
   });
 
 // ---------- Mudar status ----------
-// Transições que exigem motivo obrigatório (mínimo 5 caracteres).
-const CRITICAL_STATUS: LogisticaStatus[] = ["embarcado", "entregue", "cancelado"];
-
 export const setStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -268,15 +266,8 @@ export const setStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "logistica");
-    // Motivo obrigatório para transições críticas
-    if (CRITICAL_STATUS.includes(data.status)) {
-      const trimmed = (data.notas ?? "").trim();
-      if (trimmed.length < 5) {
-        throw new Error(
-          `Motivo obrigatório para marcar como "${data.status}" (mínimo 5 caracteres).`,
-        );
-      }
-    }
+    const erroMotivo = validarMotivo(data.status, data.notas);
+    if (erroMotivo) throw new Error(erroMotivo);
 
     // Ler status atual para registrar a transição
     const { data: prev } = await (context.supabase as any)
@@ -286,10 +277,11 @@ export const setStatus = createServerFn({ method: "POST" })
       .maybeSingle();
     const fromStatus = (prev as { status?: string } | null)?.status ?? null;
 
-    const patch: Record<string, unknown> = { status: data.status, updated_by: context.userId };
     const now = new Date().toISOString();
-    if (data.status === "embarcado") patch.data_saida = now;
-    if (data.status === "entregue") patch.data_entrega = now;
+    const patch: Record<string, unknown> = {
+      ...patchParaStatusEmbarque(data.status, now),
+      updated_by: context.userId,
+    };
     const { error } = await (context.supabase as any)
       .from("logistica_embarques")
       .update(patch)

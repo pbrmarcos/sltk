@@ -44,6 +44,29 @@ export type OcWizardField = {
   group: "comprador" | "fornecedor" | "comercial" | "itens";
 };
 
+/**
+ * Sair de "rascunho" (exceto pra "cancelada") exige que o wizard de dados
+ * obrigatórios (OC_REQUIRED_FIELDS) esteja completo.
+ */
+export function exigeValidacaoWizard(statusAtual: OcStatus, statusNovo: OcStatus): boolean {
+  return statusAtual === "rascunho" && statusNovo !== "rascunho" && statusNovo !== "cancelada";
+}
+
+/** Campos extras a gravar na OC conforme o novo status. */
+export function patchParaStatusOc(
+  status: OcStatus,
+  uid: string,
+  nowISO: string,
+): Record<string, unknown> {
+  const patch: Record<string, unknown> = { status };
+  if (status === "aprovada") {
+    patch.aprovado_em = nowISO;
+    patch.aprovado_por = uid;
+  }
+  if (status === "enviada") patch.enviado_em = nowISO;
+  return patch;
+}
+
 export const OC_REQUIRED_FIELDS: OcWizardField[] = [
   { key: "comprador_razao_social", label: "Razão social do comprador", group: "comprador" },
   { key: "comprador_cnpj", label: "CNPJ do comprador", group: "comprador" },

@@ -8,6 +8,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher } from "@/lib/admin-guard";
+import { patchParaStatusChamado, eventoDeEmail } from "@/lib/suporte-status";
 
 async function meuNome(sb: any, uid: string): Promise<string> {
   const { data } = await sb.from("profiles").select("full_name, email").eq("id", uid).maybeSingle();
@@ -382,22 +383,12 @@ export const alterarStatusChamado = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     await assertEngineerOrHigher(sb, context.userId);
 
-    const patch: Record<string, unknown> = { status: data.para };
-    if (data.para === "resolvido") patch.resolvido_em = new Date().toISOString();
-    if (data.para === "reaberto") {
-      patch.reaberto_em = new Date().toISOString();
-      patch.resolvido_em = null;
-    }
+    const patch = patchParaStatusChamado(data.para, new Date().toISOString());
     const { error } = await sb.from("chamados").update(patch).eq("id", data.chamado_id);
     if (error) throw friendlyDbError(error);
 
     // Dispara e-mail para transições relevantes
-    const eventKey =
-      data.para === "resolvido"
-        ? "chamado.resolvido"
-        : data.para === "reaberto"
-          ? "chamado.reaberto"
-          : null;
+    const eventKey = eventoDeEmail(data.para);
     if (eventKey) {
       const { safeDispatch, appUrl, fmtDate } = await import("./email/safe-dispatch.server");
       const { data: ch } = await sb
