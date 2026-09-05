@@ -547,7 +547,7 @@ const FASE_BG_VAR: Record<EtapaFase, string> = {
 };
 
 const STATUS_DOT: Record<EtapaStatus, string> = {
-  pendente: "bg-zinc-400",
+  pendente: "bg-[var(--neutral)]",
   em_andamento: "bg-sky-500",
   concluida: "bg-emerald-500",
   atrasada: "bg-rose-500",

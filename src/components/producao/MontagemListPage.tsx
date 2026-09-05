@@ -149,7 +149,7 @@ export function MontagemListPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-20 overflow-hidden rounded-full bg-zinc-100">
+                  <div className="h-2 w-20 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
                     <div className="h-full bg-blue-500" style={{ width: `${r.progresso ?? 0}%` }} />
                   </div>
                   <span className="text-xs tabular-nums">{r.progresso ?? 0}%</span>

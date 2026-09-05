@@ -576,7 +576,7 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-[var(--bg-border)]">
                 {orcamentos.map((o) => {
                   const isBestPrice = melhorPreco?.id === o.id;
                   const isBestLead = melhorPrazo?.id === o.id;

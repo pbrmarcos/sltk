@@ -345,14 +345,14 @@ export function DisciplinaTab({
 
 const STATUS_BG: Record<EtapaStatus, string> = {
   em_progresso: "bg-blue-50/60 dark:bg-blue-950/20 border-blue-200/70 dark:border-blue-900/40",
-  nao_iniciado: "bg-zinc-50/70 dark:bg-zinc-900/30 border-zinc-200/70 dark:border-zinc-800/60",
+  nao_iniciado: "bg-[var(--bg-elevated)] border-[var(--bg-border)]",
   bloqueado: "bg-rose-50/60 dark:bg-rose-950/20 border-rose-200/70 dark:border-rose-900/40",
   concluido:
     "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200/70 dark:border-emerald-900/40",
 };
 const STATUS_BAR: Record<EtapaStatus, string> = {
   em_progresso: "before:bg-blue-500",
-  nao_iniciado: "before:bg-zinc-400",
+  nao_iniciado: "before:bg-[var(--neutral)]",
   bloqueado: "before:bg-rose-500",
   concluido: "before:bg-emerald-500",
 };
@@ -510,7 +510,7 @@ function SortableEtapa({
   const dueRed = isDueDatePast(row.data_vencimento) && row.status !== "concluido";
   const hasChildren = childrenRows.length > 0;
   const prioDot: Record<Prioridade, string> = {
-    baixa: "bg-zinc-400",
+    baixa: "bg-[var(--neutral)]",
     media: "bg-blue-500",
     alta: "bg-amber-500",
     urgente: "bg-rose-500",

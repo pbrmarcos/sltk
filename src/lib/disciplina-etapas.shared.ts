@@ -26,13 +26,13 @@ export const ETAPA_STATUS_LABEL: Record<EtapaStatus, string> = {
 };
 export const ETAPA_STATUS_COLOR: Record<EtapaStatus, string> = {
   em_progresso: "border-blue-200 bg-blue-50 text-blue-700",
-  nao_iniciado: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  nao_iniciado: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   bloqueado: "border-rose-200 bg-rose-50 text-rose-700",
   concluido: "border-emerald-200 bg-emerald-50 text-emerald-700",
 };
 export const ETAPA_STATUS_DOT: Record<EtapaStatus, string> = {
   em_progresso: "bg-blue-500",
-  nao_iniciado: "bg-zinc-400",
+  nao_iniciado: "bg-[var(--neutral)]",
   bloqueado: "bg-rose-500",
   concluido: "bg-emerald-500",
 };
@@ -44,7 +44,7 @@ export const PRIORIDADE_LABEL: Record<Prioridade, string> = {
   urgente: "Urgente",
 };
 export const PRIORIDADE_COLOR: Record<Prioridade, string> = {
-  baixa: "border-zinc-200 bg-zinc-50 text-zinc-600",
+  baixa: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   media: "border-blue-200 bg-blue-50 text-blue-700",
   alta: "border-amber-200 bg-amber-50 text-amber-700",
   urgente: "border-rose-200 bg-rose-50 text-rose-700",

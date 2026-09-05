@@ -135,13 +135,13 @@ export function SATAnexoUploader({
               >
                 {isImg ? (
                   <a href={a.drive_view_url} target="_blank" rel="noreferrer">
-                    <div className="h-10 w-10 rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] text-[var(--text-muted)] uppercase">
+                    <div className="h-10 w-10 rounded bg-[var(--bg-elevated)] flex items-center justify-center text-[10px] text-[var(--text-muted)] uppercase">
                       IMG
                     </div>
                   </a>
                 ) : (
                   <a href={a.drive_view_url} target="_blank" rel="noreferrer">
-                    <div className="h-10 w-10 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <div className="h-10 w-10 rounded bg-[var(--bg-elevated)] flex items-center justify-center">
                       <FileText className="h-5 w-5 text-[var(--text-muted)]" />
                     </div>
                   </a>

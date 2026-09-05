@@ -167,7 +167,7 @@ export function AlmoxLinhaCell({
     return (
       <>
         <div className="flex flex-col items-end gap-1">
-          <span className="text-[11px] text-zinc-400">sem vínculo</span>
+          <span className="text-[11px] text-[var(--text-muted)]">sem vínculo</span>
           {podeEditar && (
             <div className="flex gap-1">
               <Button
@@ -220,7 +220,7 @@ export function AlmoxLinhaCell({
           <Boxes className="mr-1 h-3 w-3" /> {fmt(estoque.disponivel)} {insumo.unidade ?? ""}
         </Badge>
         {estoque.reservado_projeto > 0 && (
-          <span className="text-[10px] text-zinc-500">
+          <span className="text-[10px] text-[var(--text-secondary)]">
             reservado: {fmt(estoque.reservado_projeto)}
           </span>
         )}
@@ -292,20 +292,20 @@ export function AlmoxLinhaCell({
                     key={i.item_id}
                     type="button"
                     onClick={() => setItemSel(i)}
-                    className={`flex w-full items-center justify-between px-2 py-1.5 text-left text-xs hover:bg-zinc-50 ${
+                    className={`flex w-full items-center justify-between px-2 py-1.5 text-left text-xs hover:bg-[var(--bg-elevated)] ${
                       itemSel?.item_id === i.item_id ? "bg-blue-50" : ""
                     }`}
                   >
                     <span className="truncate">
                       <span className="font-mono">{i.codigo}</span> · {i.descricao}
                     </span>
-                    <span className="ml-2 shrink-0 text-zinc-500">
+                    <span className="ml-2 shrink-0 text-[var(--text-secondary)]">
                       {fmt(i.disponivel)} {i.unidade_estoque}
                     </span>
                   </button>
                 ))}
                 {(itens as any[]).length === 0 && (
-                  <p className="px-2 py-3 text-xs text-zinc-500">Nenhum item encontrado.</p>
+                  <p className="px-2 py-3 text-xs text-[var(--text-secondary)]">Nenhum item encontrado.</p>
                 )}
               </div>
               {itemSel &&
@@ -373,7 +373,7 @@ export function AlmoxLinhaCell({
 
           {dlg === "reservar" && (
             <div className="grid gap-3">
-              <p className="text-xs text-zinc-600">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Disponível: {fmt(estoque?.disponivel ?? 0)} {insumo.unidade ?? ""} · necessário:{" "}
                 {fmt(Number(insumo.quantidade))} {insumo.unidade ?? ""}
               </p>

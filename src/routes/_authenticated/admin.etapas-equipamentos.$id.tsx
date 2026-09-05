@@ -446,7 +446,7 @@ function Page() {
 
 function PrioridadeBadge({ p }: { p: string }) {
   const map: Record<string, string> = {
-    baixa: "bg-slate-500/15 text-slate-700",
+    baixa: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
     media: "bg-blue-500/15 text-blue-700",
     alta: "bg-amber-500/15 text-amber-700",
     urgente: "bg-red-500/15 text-red-700",

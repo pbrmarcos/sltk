@@ -7,7 +7,7 @@ export const INSUMO_CRITICIDADE_LABEL: Record<InsumoCriticidade, string> = {
   critica: "Crítica",
 };
 export const INSUMO_CRITICIDADE_COLOR: Record<InsumoCriticidade, string> = {
-  baixa: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  baixa: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   media: "border-blue-200 bg-blue-50 text-blue-700",
   alta: "border-amber-200 bg-amber-50 text-amber-700",
   critica: "border-rose-200 bg-rose-50 text-rose-700",
@@ -35,14 +35,14 @@ export const INSUMO_STATUS_LABEL: Record<InsumoStatus, string> = {
   cancelado: "Cancelado",
 };
 export const INSUMO_STATUS_COLOR: Record<InsumoStatus, string> = {
-  rascunho: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  rascunho: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   aprovado: "border-emerald-200 bg-emerald-50 text-emerald-700",
   em_cotacao: "border-amber-200 bg-amber-50 text-amber-700",
   pronto_aprovacao: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700",
   cotado: "border-blue-200 bg-blue-50 text-blue-700",
   em_compra: "border-violet-200 bg-violet-50 text-violet-700",
   recebido: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  cancelado: "border-zinc-200 bg-zinc-50 text-zinc-500",
+  cancelado: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--text-muted)]",
 };
 
 export const INSUMO_DISCIPLINAS = [

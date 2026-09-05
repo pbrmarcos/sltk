@@ -277,6 +277,6 @@ function statusClass(s: string): string {
     case "arquivado":
       return "bg-rose-50 text-rose-800 border-rose-200";
     default:
-      return "bg-slate-100 text-slate-700 border-slate-200";
+      return "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]";
   }
 }

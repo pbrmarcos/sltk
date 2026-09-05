@@ -20,7 +20,7 @@ export const OC_STATUS_LABEL: Record<OcStatus, string> = {
 };
 
 export const OC_STATUS_COLOR: Record<OcStatus, string> = {
-  rascunho: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  rascunho: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   aguardando_aprovacao: "border-amber-200 bg-amber-50 text-amber-800",
   aprovada: "border-blue-200 bg-blue-50 text-blue-700",
   enviada: "border-indigo-200 bg-indigo-50 text-indigo-700",

@@ -74,8 +74,8 @@ export const Route = createFileRoute("/_authenticated/documentos/$id")({
 });
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  rascunho: { label: "Rascunho", cls: "bg-slate-100 text-slate-700 border-slate-200" },
-  emitido: { label: "Emitido", cls: "bg-slate-100 text-slate-700 border-slate-200" },
+  rascunho: { label: "Rascunho", cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
+  emitido: { label: "Emitido", cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
   em_revisao: { label: "Em revisão", cls: "bg-amber-50 text-amber-800 border-amber-200" },
   aprovado: { label: "Aprovado", cls: "bg-emerald-50 text-emerald-800 border-emerald-200" },
   publicado: { label: "Publicado", cls: "bg-sky-50 text-sky-800 border-sky-200" },
@@ -88,7 +88,7 @@ const ACAO_META: Record<string, { label: string; cls: string }> = {
   rejeitar: { label: "Rejeitado", cls: "text-rose-700" },
   publicar: { label: "Publicado", cls: "text-sky-700" },
   arquivar: { label: "Arquivado", cls: "text-rose-700" },
-  reabrir: { label: "Reaberto", cls: "text-slate-700" },
+  reabrir: { label: "Reaberto", cls: "text-[var(--text-primary)]" },
 };
 
 // Breadcrumb dinâmico por tipo de documento.
@@ -318,7 +318,7 @@ function DocumentoDetailPage() {
                           ? "bg-amber-100 text-amber-800 border-amber-200"
                           : kind === "patch"
                             ? "bg-sky-100 text-sky-800 border-sky-200"
-                            : "bg-slate-100 text-slate-700 border-slate-200";
+                            : "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]";
                     return (
                       <TableRow key={v.id}>
                         <TableCell className="font-mono text-xs">v{v.versao}</TableCell>

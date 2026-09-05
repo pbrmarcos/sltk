@@ -121,11 +121,11 @@ function OrcamentosListPage() {
                 const STATUS_META: Record<string, { label: string; cls: string }> = {
                   rascunho: {
                     label: "Rascunho",
-                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
                   },
                   emitido: {
                     label: "Emitido",
-                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
                   },
                   em_revisao: {
                     label: "Em revisão",

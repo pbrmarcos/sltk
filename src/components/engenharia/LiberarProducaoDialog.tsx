@@ -263,7 +263,7 @@ export function LiberarProducaoDialog({
         ) : (
           <div className="space-y-4 text-sm">
             {/* Cabeçalho */}
-            <div className="rounded-md border bg-zinc-50 p-3">
+            <div className="rounded-md border bg-[var(--bg-elevated)] p-3">
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{eq?.modelo}</span>
                 <Badge variant="outline" className="font-mono text-[10px]">
@@ -302,7 +302,7 @@ export function LiberarProducaoDialog({
 
             {/* Etapas por disciplina */}
             <div>
-              <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-zinc-700">
+              <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--text-primary)]">
                 <ClipboardList className="h-3.5 w-3.5" /> Etapas por disciplina
               </p>
               {disciplinasEtapas.length === 0 ? (
@@ -340,7 +340,7 @@ export function LiberarProducaoDialog({
 
             {/* Insumos */}
             <div>
-              <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-zinc-700">
+              <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--text-primary)]">
                 <Package className="h-3.5 w-3.5" /> Insumos ({totais?.total ?? 0})
               </p>
               <div className="grid grid-cols-3 gap-2 text-xs">

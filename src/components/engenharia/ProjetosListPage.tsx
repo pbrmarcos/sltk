@@ -440,7 +440,7 @@ function ProjetoDetalheDialog({
             </TabsContent>
             <TabsContent value="insumos">
               {projeto.__demo ? (
-                <div className="text-xs text-zinc-500 p-4">
+                <div className="text-xs text-[var(--text-secondary)] p-4">
                   Insumos só ficam disponíveis em projetos reais (não DEMO).
                 </div>
               ) : (

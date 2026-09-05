@@ -133,7 +133,7 @@ function CotacoesListPage() {
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
             placeholder="Buscar por código, título, descrição ou PN..."
             className="pl-8 w-80"
@@ -159,8 +159,8 @@ function CotacoesListPage() {
       {/* Checklists formais (agrupados) */}
       <div className="mt-6">
         <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-sm font-semibold text-zinc-700">Checklists formais (agrupados)</h2>
-          <span className="text-xs text-zinc-500">{rows.length} registro(s)</span>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Checklists formais (agrupados)</h2>
+          <span className="text-xs text-[var(--text-secondary)]">{rows.length} registro(s)</span>
         </div>
         <div className="rounded-md border bg-white">
           <Table>
@@ -237,10 +237,10 @@ function CotacoesListPage() {
       {/* Checklist por Insumo (fluxo direto da solicitação) */}
       <div className="mt-8">
         <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-sm font-semibold text-zinc-700">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
             Checklist por Insumo (fluxo direto)
           </h2>
-          <span className="text-xs text-zinc-500">{insumos.length} registro(s)</span>
+          <span className="text-xs text-[var(--text-secondary)]">{insumos.length} registro(s)</span>
         </div>
         <div className="rounded-md border bg-white">
           <Table>
@@ -286,7 +286,7 @@ function CotacoesListPage() {
                     <TableRow key={i.id}>
                       <TableCell>
                         <div className="font-medium text-sm leading-tight">{i.descricao}</div>
-                        <div className="text-[11px] font-mono text-zinc-500">
+                        <div className="text-[11px] font-mono text-[var(--text-secondary)]">
                           {i.codigo_interno ?? "—"}
                           {i.fabricante_sugerido ? ` · ${i.fabricante_sugerido}` : ""}
                           {i.part_number ? ` · PN ${i.part_number}` : ""}
@@ -294,7 +294,7 @@ function CotacoesListPage() {
                       </TableCell>
                       <TableCell className="text-xs">
                         <div>{i.clientes?.codigo ?? "—"}</div>
-                        <div className="text-zinc-500">
+                        <div className="text-[var(--text-secondary)]">
                           {i.equipamento_projetos?.cliente_equipamentos?.codigo ?? "—"}
                           {i.equipamento_projetos?.revisao
                             ? ` · Rev. ${i.equipamento_projetos.revisao}`
@@ -311,7 +311,7 @@ function CotacoesListPage() {
                       </TableCell>
                       <TableCell className="text-xs">
                         <span className="inline-flex items-center gap-1">
-                          <FileText className="h-3 w-3 text-zinc-400" />
+                          <FileText className="h-3 w-3 text-[var(--text-muted)]" />
                           {i.docs_gerados}
                         </span>
                       </TableCell>
@@ -388,7 +388,7 @@ function CotacoesListPage() {
 function KpiCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-md border bg-white p-4">
-      <div className="text-xs text-zinc-500">{label}</div>
+      <div className="text-xs text-[var(--text-secondary)]">{label}</div>
       <div className="mt-1 text-2xl font-semibold">{value}</div>
     </div>
   );

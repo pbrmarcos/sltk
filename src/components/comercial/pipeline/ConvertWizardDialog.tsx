@@ -82,7 +82,7 @@ function fmtBRL(v: number | null): string {
 }
 
 const STAGE_TONE: Record<string, string> = {
-  novo: "bg-slate-100 text-slate-700",
+  novo: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   qualificado: "bg-blue-50 text-blue-700",
   proposta: "bg-indigo-50 text-indigo-700",
   negociacao: "bg-amber-50 text-amber-700",
@@ -1028,7 +1028,7 @@ export function ConvertWizardDialog({
               >
                 Ganhar: {counts.win}
               </Badge>
-              <Badge variant="outline" className="bg-slate-50 text-slate-700">
+              <Badge variant="outline" className="bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]">
                 Manter: {counts.keep}
               </Badge>
               <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">

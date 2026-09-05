@@ -343,7 +343,7 @@ function AdminEntrevistaEditor() {
                         return (
                           <div className="border rounded-md overflow-hidden text-sm">
                             <div
-                              className="grid bg-slate-50 text-xs font-medium text-muted-foreground px-3 py-2"
+                              className="grid bg-[var(--bg-elevated)] text-xs font-medium text-muted-foreground px-3 py-2"
                               style={{ gridTemplateColumns: "1.2fr 1.4fr 1.6fr 1.2fr" }}
                             >
                               <div>Responsável</div>

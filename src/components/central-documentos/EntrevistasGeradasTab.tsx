@@ -34,7 +34,7 @@ export function EntrevistasGeradasTab() {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div className="relative w-full max-w-md">
-          <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400" />
+          <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -42,7 +42,7 @@ export function EntrevistasGeradasTab() {
             className="pl-8"
           />
         </div>
-        <div className="text-xs text-zinc-500">
+        <div className="text-xs text-[var(--text-secondary)]">
           {query.isFetching ? (
             <span className="inline-flex items-center gap-1">
               <Loader2 className="h-3 w-3 animate-spin" /> carregando…
@@ -55,7 +55,7 @@ export function EntrevistasGeradasTab() {
 
       <div className="overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         <table className="w-full text-sm">
-          <thead className="bg-zinc-50 text-zinc-600">
+          <thead className="bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
             <tr className="text-left">
               <th className="px-3 py-2 font-medium">Data</th>
               <th className="px-3 py-2 font-medium">Entrevista</th>
@@ -69,15 +69,15 @@ export function EntrevistasGeradasTab() {
           <tbody>
             {rows.length === 0 && !query.isLoading ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-zinc-500">
+                <td colSpan={7} className="px-3 py-8 text-center text-[var(--text-secondary)]">
                   Nenhum PDF de entrevista arquivado ainda. Use “Arquivar no Drive” no card da
                   entrevista respondida.
                 </td>
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} className="border-t border-[var(--bg-border)] hover:bg-zinc-50/60">
-                  <td className="px-3 py-2 whitespace-nowrap text-zinc-700">
+                <tr key={r.id} className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]">
+                  <td className="px-3 py-2 whitespace-nowrap text-[var(--text-primary)]">
                     {new Date(r.criado_em).toLocaleString("pt-BR", {
                       dateStyle: "short",
                       timeStyle: "short",
@@ -88,12 +88,12 @@ export function EntrevistasGeradasTab() {
                       ENT-{r.codigo}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2 text-zinc-700">{r.segmento}</td>
+                  <td className="px-3 py-2 text-[var(--text-primary)]">{r.segmento}</td>
                   <td className="px-3 py-2">
                     <div className="max-w-[240px]">
-                      <div className="truncate text-zinc-800">{r.lead_nome || "—"}</div>
+                      <div className="truncate text-[var(--text-primary)]">{r.lead_nome || "—"}</div>
                       {r.lead_empresa && (
-                        <div className="truncate text-[11px] text-zinc-500">{r.lead_empresa}</div>
+                        <div className="truncate text-[11px] text-[var(--text-secondary)]">{r.lead_empresa}</div>
                       )}
                     </div>
                   </td>
@@ -115,7 +115,7 @@ export function EntrevistasGeradasTab() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 w-7 p-0 text-zinc-500 hover:bg-zinc-100"
+                          className="h-7 w-7 p-0 text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
                           title="Copiar link"
                           onClick={() => copy(r.drive_view_url!)}
                         >
@@ -123,18 +123,18 @@ export function EntrevistasGeradasTab() {
                         </Button>
                       </div>
                     ) : (
-                      <span className="text-zinc-300">—</span>
+                      <span className="text-[var(--text-muted)]">—</span>
                     )}
                   </td>
                   <td className="px-3 py-2 text-right">
                     {r.drive_folder_url ? (
-                      <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-zinc-600">
+                      <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-[var(--text-secondary)]">
                         <a href={r.drive_folder_url} target="_blank" rel="noopener noreferrer">
                           <FileDown className="mr-1 h-3 w-3" /> Drive
                         </a>
                       </Button>
                     ) : (
-                      <span className="text-zinc-300">—</span>
+                      <span className="text-[var(--text-muted)]">—</span>
                     )}
                   </td>
                 </tr>

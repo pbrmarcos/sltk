@@ -604,7 +604,7 @@ const OPP_STAGE_LABEL: Record<OppStage, string> = {
 };
 
 const OPP_STAGE_COLOR: Record<OppStage, string> = {
-  novo: "border-slate-200 bg-slate-50 text-slate-700",
+  novo: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   qualificado: "border-sky-200 bg-sky-50 text-sky-700",
   proposta: "border-indigo-200 bg-indigo-50 text-indigo-700",
   negociacao: "border-amber-200 bg-amber-50 text-amber-700",
@@ -614,7 +614,7 @@ const OPP_STAGE_COLOR: Record<OppStage, string> = {
 
 const PROC_STAGE_COLOR: Record<string, string> = {
   // Projeto
-  Lead: "border-slate-200 bg-slate-50 text-slate-700",
+  Lead: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   ETP: "border-sky-200 bg-sky-50 text-sky-700",
   Orçamento: "border-indigo-200 bg-indigo-50 text-indigo-700",
   OC: "border-violet-200 bg-violet-50 text-violet-700",
@@ -625,13 +625,13 @@ const PROC_STAGE_COLOR: Record<string, string> = {
   Embarque: "border-cyan-200 bg-cyan-50 text-cyan-700",
   "Pós-venda": "border-teal-200 bg-teal-50 text-teal-700",
   // Atendimento
-  Solicitação: "border-slate-200 bg-slate-50 text-slate-700",
+  Solicitação: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   Análise: "border-sky-200 bg-sky-50 text-sky-700",
   Registro: "border-indigo-200 bg-indigo-50 text-indigo-700",
   Resolução: "border-amber-200 bg-amber-50 text-amber-700",
   Encerrado: "border-emerald-200 bg-emerald-50 text-emerald-700",
   // Instalação
-  Preparação: "border-slate-200 bg-slate-50 text-slate-700",
+  Preparação: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   Agendamento: "border-sky-200 bg-sky-50 text-sky-700",
   Arranque: "border-amber-200 bg-amber-50 text-amber-700",
   Treinamento: "border-violet-200 bg-violet-50 text-violet-700",
@@ -950,11 +950,11 @@ function VisaoTab({
                 const ORC_STATUS_META: Record<string, { label: string; cls: string }> = {
                   rascunho: {
                     label: "Rascunho",
-                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
                   },
                   emitido: {
                     label: "Emitido",
-                    cls: "bg-slate-100 text-slate-700 border-slate-200",
+                    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
                   },
                   em_revisao: {
                     label: "Em revisão",
@@ -1755,7 +1755,7 @@ function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editH
                       "grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white",
                       c.principal
                         ? "bg-gradient-to-br from-amber-500 to-amber-700"
-                        : "bg-gradient-to-br from-slate-700 to-slate-900",
+                        : "bg-[var(--neutral)]",
                     )}
                   >
                     {String(c.nome)
@@ -2374,7 +2374,7 @@ function SociosTab({
             <ul className="divide-y divide-border">
               {filtered.map((s) => (
                 <li key={s.id} className="flex items-center gap-3 px-5 py-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-bold text-white">
+                  <div className="grid h-9 w-9 place-items-center rounded-full bg-[var(--neutral)] text-[11px] font-bold text-white">
                     {(s.nome ?? "?")
                       .split(" ")
                       .map((n: string) => n[0])

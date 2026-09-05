@@ -1107,7 +1107,7 @@ function LogDetailDialog({
                   <div className="text-[10px] uppercase text-muted-foreground">
                     Assunto (template)
                   </div>
-                  <pre className="whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-[11px]">
+                  <pre className="whitespace-pre-wrap rounded bg-[var(--bg-elevated)] p-2 font-mono text-[11px]">
                     {log.template_snapshot.subject_template}
                   </pre>
                 </div>
@@ -1115,7 +1115,7 @@ function LogDetailDialog({
                   <div className="text-[10px] uppercase text-muted-foreground">
                     Corpo (template)
                   </div>
-                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-[11px]">
+                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-[var(--bg-elevated)] p-2 font-mono text-[11px]">
                     {log.template_snapshot.body_template}
                   </pre>
                 </div>

@@ -30,10 +30,10 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  rascunho: "bg-slate-500/15 text-slate-700 border-slate-500/30 dark:text-slate-300",
+  rascunho: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   preenchendo: "bg-amber-500/15 text-amber-700 border-amber-500/30 dark:text-amber-300",
   assinado: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30 dark:text-emerald-300",
-  arquivado: "bg-slate-500/15 text-slate-700 border-slate-500/30 dark:text-slate-300",
+  arquivado: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
 };
 
 function SATListPage() {

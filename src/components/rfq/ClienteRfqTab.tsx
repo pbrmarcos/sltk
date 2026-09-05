@@ -42,8 +42,8 @@ type Props = { clienteId: string };
 const STATUS_BADGE: Record<string, string> = {
   aberto: "border-sky-200 bg-sky-50 text-sky-700",
   preenchido: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  expirado: "border-slate-200 bg-slate-50 text-slate-500",
-  arquivado: "border-slate-200 bg-slate-50 text-slate-500",
+  expirado: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--text-muted)]",
+  arquivado: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--text-muted)]",
 };
 
 export function ClienteRfqTab({ clienteId }: Props) {

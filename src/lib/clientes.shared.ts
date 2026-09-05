@@ -9,7 +9,7 @@ export type ClienteStatus = (typeof CLIENTE_STATUS)[number];
 
 export const CLIENTE_STATUS_COLOR: Record<ClienteStatus, string> = {
   ativo: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  suspect: "bg-slate-50 text-slate-700 border-slate-200",
+  suspect: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   prospect: "bg-amber-50 text-amber-700 border-amber-200",
   inativo: "bg-stone-100 text-stone-600 border-stone-200",
 };
@@ -42,10 +42,10 @@ export const CLIENTE_LIFECYCLE_LABEL: Record<ClienteLifecycle, string> = {
 };
 
 export const CLIENTE_LIFECYCLE_COLOR: Record<ClienteLifecycle, string> = {
-  suspect: "bg-slate-100 text-slate-700",
+  suspect: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   prospect: "bg-blue-100 text-blue-700",
   cliente: "bg-emerald-100 text-emerald-700",
-  inativo: "bg-zinc-100 text-zinc-600",
+  inativo: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
 };
 
 /** Idiomas suportados */

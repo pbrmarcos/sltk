@@ -7,7 +7,7 @@ import {
 } from "@/lib/oportunidades.functions";
 
 const STAGE_TONE: Record<PipelineStage, string> = {
-  novo: "bg-slate-100 text-slate-700",
+  novo: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   qualificado: "bg-blue-50 text-blue-700",
   proposta: "bg-indigo-50 text-indigo-700",
   negociacao: "bg-amber-50 text-amber-700",

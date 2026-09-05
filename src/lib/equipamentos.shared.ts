@@ -60,7 +60,7 @@ export const EQUIPAMENTO_STATUS_COLOR: Record<EquipamentoStatus, string> = {
   operacional: "border-emerald-200 bg-emerald-50 text-emerald-700",
   manutencao: "border-amber-200 bg-amber-50 text-amber-700",
   parado: "border-rose-200 bg-rose-50 text-rose-700",
-  descomissionado: "border-zinc-200 bg-zinc-50 text-zinc-600",
+  descomissionado: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
 };
 
 /**

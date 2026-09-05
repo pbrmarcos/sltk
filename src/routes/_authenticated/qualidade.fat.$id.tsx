@@ -590,7 +590,7 @@ function ChecklistCard({
                                   ? "border-green-600 bg-green-600 text-white"
                                   : k === "nok"
                                     ? "border-red-600 bg-red-600 text-white"
-                                    : "border-gray-500 bg-gray-500 text-white"
+                                    : "border-[var(--neutral)] bg-[var(--neutral)] text-white"
                                 : "border-[var(--bg-border)] bg-[var(--bg-surface)]"
                             }`}
                           >

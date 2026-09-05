@@ -57,7 +57,7 @@ const TIPO_META: Record<string, { label: string; icon: any; tone: string }> = {
   reordenacao: {
     label: "Reordem",
     icon: ArrowUpDown,
-    tone: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200",
+    tone: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   },
 };
 
@@ -137,7 +137,7 @@ export function HistoricoEquipamentoDrawer({
             <p className="text-xs italic text-muted-foreground">Sem registros ainda.</p>
           )}
           {rows.map((r: any) => {
-            const meta = TIPO_META[r.tipo] ?? { label: r.tipo, icon: Pencil, tone: "bg-zinc-100" };
+            const meta = TIPO_META[r.tipo] ?? { label: r.tipo, icon: Pencil, tone: "bg-[var(--badge-neutral-bg)]" };
             const Icon = meta.icon;
             return (
               <div key={r.id} className="rounded-md border p-2 text-xs">

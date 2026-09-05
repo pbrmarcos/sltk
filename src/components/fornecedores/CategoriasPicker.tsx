@@ -52,9 +52,9 @@ const TINT: Record<string, string> = {
   empacotadoras: "bg-orange-50 text-orange-700",
   paletizadoras: "bg-yellow-50 text-yellow-700",
   sensores: "bg-emerald-50 text-emerald-700",
-  valvulas: "bg-slate-100 text-slate-700",
+  valvulas: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   bombas: "bg-cyan-50 text-cyan-700",
-  motores_redutores: "bg-zinc-100 text-zinc-700",
+  motores_redutores: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   inversores: "bg-violet-50 text-violet-700",
   clps_ihm: "bg-indigo-50 text-indigo-700",
   paineis_eletricos: "bg-blue-50 text-blue-700",
@@ -113,7 +113,7 @@ export function CategoriasPicker({
       {categorias.map((c) => {
         const Icon = ICONS[c.slug] ?? Package;
         const active = selected.includes(c.slug);
-        const tint = TINT[c.slug] ?? "bg-slate-100 text-slate-700";
+        const tint = TINT[c.slug] ?? "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]";
         return (
           <button
             key={c.slug}

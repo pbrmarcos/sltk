@@ -8,11 +8,11 @@ export const ETP_STATUS_LABEL: Record<EtpStatus, string> = {
   obsoleto: "Obsoleto",
 };
 export const ETP_STATUS_COLOR: Record<EtpStatus, string> = {
-  rascunho: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  rascunho: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   em_revisao: "border-amber-200 bg-amber-50 text-amber-700",
   aprovado: "border-emerald-200 bg-emerald-50 text-emerald-700",
   rejeitado: "border-rose-200 bg-rose-50 text-rose-700",
-  obsoleto: "border-zinc-200 bg-zinc-50 text-zinc-500",
+  obsoleto: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--text-muted)]",
 };
 
 /** Transições permitidas no workflow do ETP. */
@@ -96,7 +96,7 @@ export const ETAPA_STATUS_LABEL: Record<EtapaStatus, string> = {
   bloqueada: "Bloqueada",
 };
 export const ETAPA_STATUS_COLOR: Record<EtapaStatus, string> = {
-  pendente: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  pendente: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   em_andamento: "border-blue-200 bg-blue-50 text-blue-700",
   concluida: "border-emerald-200 bg-emerald-50 text-emerald-700",
   atrasada: "border-rose-200 bg-rose-50 text-rose-700",
@@ -124,10 +124,10 @@ export const PROJETO_STATUS_LABEL: Record<ProjetoStatus, string> = {
   obsoleto: "Obsoleto",
 };
 export const PROJETO_STATUS_COLOR: Record<ProjetoStatus, string> = {
-  em_elaboracao: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  em_elaboracao: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   em_aprovacao: "border-amber-200 bg-amber-50 text-amber-700",
   liberado_producao: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  obsoleto: "border-zinc-200 bg-zinc-50 text-zinc-500",
+  obsoleto: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--text-muted)]",
 };
 
 /* ============ PRODUÇÃO & QUALIDADE ============ */
@@ -141,7 +141,7 @@ export const MONTAGEM_STATUS_LABEL: Record<MontagemStatus, string> = {
   bloqueada: "Bloqueada",
 };
 export const MONTAGEM_STATUS_COLOR: Record<MontagemStatus, string> = {
-  nao_iniciada: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  nao_iniciada: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   em_andamento: "border-blue-200 bg-blue-50 text-blue-700",
   concluida: "border-emerald-200 bg-emerald-50 text-emerald-700",
   bloqueada: "border-rose-200 bg-rose-50 text-rose-700",
@@ -170,7 +170,7 @@ export const REVISAO_STATUS_LABEL: Record<RevisaoStatus, string> = {
   reprovada: "Reprovada",
 };
 export const REVISAO_STATUS_COLOR: Record<RevisaoStatus, string> = {
-  pendente: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  pendente: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   em_andamento: "border-blue-200 bg-blue-50 text-blue-700",
   aprovada: "border-emerald-200 bg-emerald-50 text-emerald-700",
   aprovada_com_ressalvas: "border-amber-200 bg-amber-50 text-amber-700",
