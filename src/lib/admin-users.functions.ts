@@ -262,7 +262,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
 
     const { data: before, error: befErr } = await admin
       .from("profiles")
-      .select("full_name")
+      .select("full_name, email")
       .eq("id", data.id)
       .maybeSingle();
     if (befErr) throw friendlyDbError(befErr);
@@ -333,6 +333,30 @@ export const updateAdminUser = createServerFn({ method: "POST" })
       } catch (e) {
         console.warn("[admin] signOut após role change falhou", e);
       }
+
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        const { data: ator } = await admin
+          .from("profiles")
+          .select("full_name")
+          .eq("id", context.userId)
+          .maybeSingle();
+        await safeDispatch({
+          eventKey: "usuario.papel_alterado",
+          triggeredBy: context.userId,
+          entityTable: "profiles",
+          entityId: data.id,
+          vars: {
+            email: before.email ?? "",
+            de: oldRoles.join(", ") || "—",
+            para: newRoles.join(", ") || "—",
+            ator: ator?.full_name ?? "",
+            link: appUrl(`/admin/usuarios`),
+          },
+        });
+      } catch (e) {
+        console.error("[admin-users/updateAdminUser] email dispatch failed", e);
+      }
     }
 
     await logAuditServer(admin, context.userId, entries);
@@ -351,6 +375,12 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
     const admin = await assertAdmin(context.userId);
     // Hierarquia + proteção do último admin.
     await assertCanActOn(admin, context.userId, data.id, "disable");
+
+    const { data: alvo } = await admin
+      .from("profiles")
+      .select("email")
+      .eq("id", data.id)
+      .maybeSingle();
 
     // Marca perfil como disabled (defense in depth) + soft delete.
     // Cast: colunas disabled_* recém-adicionadas; types.ts regenera após migration.
@@ -390,6 +420,20 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
         new_value: "deactivated",
       },
     ]);
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      await safeDispatch({
+        eventKey: "usuario.desativado",
+        triggeredBy: context.userId,
+        entityTable: "profiles",
+        entityId: data.id,
+        vars: { email: alvo?.email ?? "", link: appUrl(`/admin/usuarios`) },
+      });
+    } catch (e) {
+      console.error("[admin-users/deactivateAdminUser] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
@@ -455,6 +499,26 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
     // Vetor de escalação: um ator só pode resetar alvos com rank inferior.
     await assertCanActOn(context.supabase, context.userId, data.id, "password_reset");
 
+    const { data: alvo } = await context.supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", data.id)
+      .maybeSingle();
+    const notificarReset = async () => {
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        await safeDispatch({
+          eventKey: "usuario.senha_redefinida",
+          triggeredBy: context.userId,
+          entityTable: "profiles",
+          entityId: data.id,
+          vars: { email: alvo?.email ?? "", link: appUrl(`/admin/usuarios`) },
+        });
+      } catch (e) {
+        console.error("[admin-users/resetAdminUserPassword] email dispatch failed", e);
+      }
+    };
+
     // Caminho preferencial: definir a senha temporária via Admin API.
     try {
       const { getCriticalClient } = await import("@/lib/supabase-client.server");
@@ -476,6 +540,7 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       } catch {
         /* auditoria não deve bloquear o reset */
       }
+      await notificarReset();
       return { ok: true, mode: "password" as const, email: null as string | null };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -495,5 +560,6 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       _password: data.password,
     });
     if (rpcErr) throw friendlyDbError(rpcErr);
+    await notificarReset();
     return { ok: true, mode: "password" as const, email: null as string | null };
   });
