@@ -201,6 +201,12 @@ export const updateStage = createServerFn({ method: "POST" })
     if (data.stage === "perdido" && !data.lost_reason) {
       throw new Error("Motivo da perda é obrigatório");
     }
+    const sb = context.supabase as any;
+    const { data: antes } = await sb
+      .from("oportunidades")
+      .select("pipeline_stage, titulo, empresa_lead, valor_estimado, cliente_id")
+      .eq("id", data.id)
+      .maybeSingle();
     const patch: { pipeline_stage: PipelineStage; lost_reason?: string | null } = {
       pipeline_stage: data.stage,
     };
@@ -208,6 +214,55 @@ export const updateStage = createServerFn({ method: "POST" })
     if (data.stage !== "perdido") patch.lost_reason = null;
     const { error } = await context.supabase.from("oportunidades").update(patch).eq("id", data.id);
     if (error) throw friendlyDbError(error);
+
+    try {
+      const eventKey =
+        data.stage === "ganho"
+          ? "oportunidade.ganha"
+          : data.stage === "perdido"
+            ? "oportunidade.perdida"
+            : "oportunidade.stage_alterado";
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      let clienteNome = antes?.empresa_lead || "";
+      if (antes?.cliente_id) {
+        const { data: cliente } = await sb
+          .from("clientes")
+          .select("razao_social, nome_fantasia")
+          .eq("id", antes.cliente_id)
+          .maybeSingle();
+        clienteNome = cliente?.nome_fantasia || cliente?.razao_social || clienteNome;
+      }
+      const { data: perfil } = await sb
+        .from("profiles")
+        .select("full_name")
+        .eq("id", context.userId)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey,
+        triggeredBy: context.userId,
+        entityTable: "oportunidades",
+        entityId: data.id,
+        vars: {
+          titulo: antes?.titulo ?? "",
+          cliente_nome: clienteNome,
+          stage_anterior: STAGE_LABEL[(antes?.pipeline_stage as PipelineStage) ?? "novo"],
+          stage_novo: STAGE_LABEL[data.stage],
+          valor: antes?.valor_estimado
+            ? Number(antes.valor_estimado).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })
+            : "",
+          motivo: data.lost_reason ?? "",
+          usuario: perfil?.full_name ?? "",
+          data: new Date().toLocaleString("pt-BR"),
+          link: appUrl(`/comercial/pipeline`),
+        },
+      });
+    } catch (e) {
+      console.error("[oportunidades/updateStage] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
@@ -383,6 +438,46 @@ export const createOportunidade = createServerFn({ method: "POST" })
       }
       throw friendlyDbError(error);
     }
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      let clienteNome = data.empresa_lead || "";
+      if (data.cliente_id) {
+        const { data: cliente } = await sb
+          .from("clientes")
+          .select("razao_social, nome_fantasia")
+          .eq("id", data.cliente_id)
+          .maybeSingle();
+        clienteNome = cliente?.nome_fantasia || cliente?.razao_social || clienteNome;
+      }
+      const { data: perfil } = await sb
+        .from("profiles")
+        .select("full_name")
+        .eq("id", context.userId)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey: "oportunidade.criada",
+        triggeredBy: context.userId,
+        entityTable: "oportunidades",
+        entityId: (row as { id: string }).id,
+        vars: {
+          titulo: data.titulo,
+          cliente_nome: clienteNome,
+          stage_novo: STAGE_LABEL.novo,
+          valor: data.valor_estimado
+            ? Number(data.valor_estimado).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })
+            : "",
+          usuario: perfil?.full_name ?? "",
+          link: appUrl(`/comercial/pipeline`),
+        },
+      });
+    } catch (e) {
+      console.error("[oportunidades/createOportunidade] email dispatch failed", e);
+    }
+
     return {
       ...(row as { id: string; codigo: string }),
       reused: false as const,
