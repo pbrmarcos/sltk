@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { assertCanAccessModule } from "@/lib/admin-guard";
 // Geração do PDF da Entrevista Técnica (PT/ES/EN) com backup no bucket
 // "documentos" e organização no Google Drive:
 //   Comercial / Entrevistas / {segmento} / ENT-{codigo}
@@ -57,6 +58,7 @@ export const gerarDocumentoEntrevista = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const uid = context.userId;
 

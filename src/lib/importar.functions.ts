@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -15,6 +16,7 @@ export const bulkImport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => ImportInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, data.entity);
     const sb = context.supabase as AnySb;
     const results = { inserted: 0, skipped: 0, errors: [] as string[] };
 

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -163,6 +164,7 @@ export const updateStage = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     if (data.stage === "perdido" && !data.lost_reason) {
       throw new Error("Motivo da perda é obrigatório");
     }
@@ -188,6 +190,7 @@ export const restoreOportunidade = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     let targetStage: Exclude<PipelineStage, "perdido"> = data.stage ?? "qualificado";
     if (!data.stage) {
       const { data: history } = await context.supabase
@@ -253,6 +256,7 @@ export const createOportunidade = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
 
     // ---- 1. Idempotência: mesma requisição não cria duas oportunidades ----
@@ -366,6 +370,7 @@ export const updateOportunidade = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { id, ...rest } = data;
     const patch: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(rest)) {
@@ -390,6 +395,7 @@ export const convertToProcesso = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { data: opp, error: oppErr } = await context.supabase
       .from("oportunidades")
       .select("*")
@@ -502,6 +508,7 @@ export const vincularClienteOportunidade = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), cliente_id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { error } = await context.supabase
       .from("oportunidades")
       .update({ cliente_id: data.cliente_id })

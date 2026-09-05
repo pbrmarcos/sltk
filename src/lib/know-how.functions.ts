@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -206,6 +207,7 @@ export const createItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "know_how");
     const base = slugify(data.titulo);
     const suffix = Math.random().toString(36).slice(2, 6);
     const slug = `${base}-${suffix}`;
@@ -246,6 +248,7 @@ export const updateItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "know_how");
     const patch: Record<string, unknown> = {};
     for (const k of ["titulo", "resumo", "corpo", "midia_url", "tags", "papeis_alvo"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
@@ -286,6 +289,7 @@ export const aprovarItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "know_how");
     // Registrar versão atual antes de publicar
     const { data: cur } = await (context.supabase as any).from("kh_itens")
       .select("versao, titulo, resumo, corpo, midia_url")
@@ -320,6 +324,7 @@ export const solicitarAjuste = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "know_how");
     const { error } = await (context.supabase as any).from("kh_itens")
       .update({ status: "rascunho", revisor_id: context.userId })
       .eq("id", data.id);

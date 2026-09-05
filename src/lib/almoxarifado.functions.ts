@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -110,6 +111,7 @@ export const salvarAlmoxItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => itemSchema.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const clean = (v?: string | null) => (v && v.trim() ? v.trim() : null);
     const payload = {
@@ -245,6 +247,7 @@ export const registrarMovimento = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     // saída e ajuste negativo entram com quantidade negativa (movimento é append-only)
     const sinal = data.tipo === "saida_projeto" || (data.tipo === "ajuste" && data.negativo) ? -1 : 1;
@@ -389,6 +392,7 @@ export const registrarRecebimento = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     // idempotência: evento_key único por OC
     const { data: existente } = await sb
@@ -534,6 +538,7 @@ export const vincularInsumoAoItem = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
 
     if (!data.item_id) {
@@ -583,6 +588,7 @@ export const criarItemDeInsumo = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const { data: linha } = await sb
       .from("projeto_insumos")

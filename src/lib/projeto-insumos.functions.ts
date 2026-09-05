@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -147,6 +148,7 @@ export const upsertInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => upsertInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
     // Carrega projeto para preencher equipamento_id/cliente_id
     const { data: proj, error: pe } = await sb
@@ -191,6 +193,7 @@ export const setInsumoStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => setStatusInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
     const patch: Record<string, unknown> = {
       status: data.status,
@@ -215,6 +218,7 @@ export const removerInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => removerInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
     const now = new Date().toISOString();
 

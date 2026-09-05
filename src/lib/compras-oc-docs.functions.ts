@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { assertCanAccessModule } from "@/lib/admin-guard";
 // Gera PDF trilíngue (PT/ES/EN) de Ordem de Compra e salva no Google Drive
 // dentro da mesma árvore usada nas Solicitações do insumo:
 //   Compras / Solicitacoes / {cliente} / {projeto} / {TAG} / OC / v{N} /
@@ -37,6 +38,7 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
     z.object({ ordem_compra_id: z.string().uuid() }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const uid = context.userId;
 

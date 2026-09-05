@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -95,6 +96,7 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => uploadInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) throw new Error(`Tipo não permitido (${data.mime_type}).`);
@@ -247,6 +249,7 @@ export const removeInsumoAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const { data: cur, error: gErr } = await sb
       .from("insumo_anexos")
@@ -287,6 +290,7 @@ export const addInsumoComentario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ insumo_id: z.string().uuid(), texto: z.string().min(1).max(2000) }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const nome = await actorNome(sb, context.userId);
     await logAtividade(sb, data.insumo_id, context.userId, nome, "comentario", data.texto);
@@ -341,6 +345,7 @@ export const reverterAtividade = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as any;
     const { data: at, error: gErr } = await sb
       .from("insumo_atividades")

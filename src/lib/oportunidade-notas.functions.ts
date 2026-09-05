@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -36,6 +37,7 @@ export const addOportunidadeNota = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { data: profile } = await context.supabase
       .from("profiles")
       .select("full_name, email")
@@ -60,6 +62,7 @@ export const removerOportunidadeNota = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { error } = await context.supabase
       .from("oportunidade_notas" as never)
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
