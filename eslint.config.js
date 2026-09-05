@@ -34,6 +34,12 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Rebaixado (não desligado) por pragmatismo: ~720 usos pré-existentes,
+      // sobretudo em *.functions.ts lidando com retornos não tipados do
+      // Supabase (RPCs, tabelas ainda fora de types.ts). Continua visível
+      // no lint, só não bloqueia o CI por um padrão legado — não usar `any`
+      // em código novo sem necessidade real.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   eslintPluginPrettier,

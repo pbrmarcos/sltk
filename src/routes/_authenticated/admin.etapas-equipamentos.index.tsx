@@ -64,6 +64,10 @@ function Page() {
     );
   }
 
+  return <EtapasEquipamentosPanel />;
+}
+
+function EtapasEquipamentosPanel() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [filtro, setFiltro] = useState<"todos" | "sim" | "nao">("todos");

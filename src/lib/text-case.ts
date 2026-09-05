@@ -48,9 +48,9 @@ export function titleCasePtBR(raw: string): string {
       if (idx > 0 && STOPWORDS.has(lower)) return lower;
       // Trata sub-tokens internos como "moinhos-do-sul"
       return w
-        .split(/([\-/·])/)
+        .split(/([-/·])/)
         .map((part, i, arr) => {
-          if (/^[\-/·]$/.test(part)) return part;
+          if (/^[-/·]$/.test(part)) return part;
           const subLower = part.toLocaleLowerCase("pt-BR");
           // primeira sub-palavra do primeiro token sempre capitaliza
           if (idx === 0 && i === 0) return titleWord(part);

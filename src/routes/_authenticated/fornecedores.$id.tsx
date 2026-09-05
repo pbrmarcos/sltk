@@ -234,7 +234,7 @@ function FornecedorDetailPage() {
     try {
       for (const file of Array.from(files)) {
         const ext = file.name.split(".").pop() ?? "bin";
-        const safe = file.name.replace(/[^\w.\-]+/g, "_");
+        const safe = file.name.replace(/[^\w.-]+/g, "_");
         const path = `${id}/${Date.now()}_${safe}`;
         const { error: upErr } = await supabase.storage.from("fornecedores").upload(path, file, {
           cacheControl: "3600",

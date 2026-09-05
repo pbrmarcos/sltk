@@ -77,10 +77,6 @@ function FormulariosRecebidosPage() {
     { label: "Formulários recebidos" },
   ];
 
-  const [search, setSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-
   if (role !== "admin" && role !== "manager") {
     return (
       <PageContainer>
@@ -94,6 +90,14 @@ function FormulariosRecebidosPage() {
       </PageContainer>
     );
   }
+
+  return <FormulariosRecebidosPanel crumbs={crumbs} />;
+}
+
+function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?: string }[] }) {
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const listChamadosFn = useServerFn(listChamados);
   const listEntrevistasFn = useServerFn(listEntrevistas);

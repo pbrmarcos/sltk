@@ -23,5 +23,8 @@ jobs:
       - name: Type-check
         run: bun x tsc --noEmit -p tsconfig.json
 
+      - name: Lint
+        run: bun run lint
+
       - name: Unit tests
         run: bun run test

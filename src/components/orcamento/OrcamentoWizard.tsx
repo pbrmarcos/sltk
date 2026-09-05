@@ -1442,7 +1442,6 @@ function EquipImageUploader(props: {
     <div className="rounded-md border border-dashed border-[var(--bg-border)] bg-[var(--bg-base)] p-2">
       {preview ? (
         <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={preview} alt="" className="h-20 w-28 rounded object-contain bg-white" />
           <div className="flex flex-1 flex-col gap-1">
             <span className="truncate text-xs text-[var(--text-muted)]">Imagem carregada</span>

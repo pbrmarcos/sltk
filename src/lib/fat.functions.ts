@@ -346,8 +346,8 @@ function computeStatus(
   const m = tol.replace(/\s/g, "");
   let lo = nominal,
     hi = nominal;
-  const pct = m.match(/^[±+\-]?(\d+(?:[.,]\d+)?)%$/);
-  const abs = m.match(/^[±+\-]?(\d+(?:[.,]\d+)?)$/);
+  const pct = m.match(/^[±+-]?(\d+(?:[.,]\d+)?)%$/);
+  const abs = m.match(/^[±+-]?(\d+(?:[.,]\d+)?)$/);
   if (pct) {
     const p = parseFloat(pct[1].replace(",", ".")) / 100;
     lo = nominal * (1 - p);

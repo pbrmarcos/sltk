@@ -56,7 +56,7 @@ export const uploadEtapaAnexo = createServerFn({ method: "POST" })
     if (bin.byteLength !== data.tamanho_bytes) {
       throw new Error("Tamanho do arquivo não confere.");
     }
-    const safe = data.nome_arquivo.replace(/[^\w.\-]+/g, "_").slice(-120);
+    const safe = data.nome_arquivo.replace(/[^\w.-]+/g, "_").slice(-120);
     const path = `${equipamento_id}/${data.etapa_id}/${Date.now()}_${safe}`;
 
     const { error: upErr } = await sb.storage

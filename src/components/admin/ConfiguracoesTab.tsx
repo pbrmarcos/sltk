@@ -113,7 +113,6 @@ function FileField({
           style={{ width: size, height: size }}
         >
           {display ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img src={display} alt="" className="max-h-full max-w-full object-contain" />
           ) : (
             <span className="text-[10px] text-[var(--text-muted)]">sem imagem</span>

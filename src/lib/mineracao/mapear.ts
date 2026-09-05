@@ -93,7 +93,7 @@ export function parseNumero(valor: unknown): number {
   if (valor == null) return 0;
   let s = String(valor).trim();
   if (!s) return 0;
-  s = s.replace(/[^\d,.\-]/g, "");
+  s = s.replace(/[^\d,.-]/g, "");
   if (!s || s === "-") return 0;
   const ultimaVirgula = s.lastIndexOf(",");
   const ultimoPonto = s.lastIndexOf(".");
