@@ -40,7 +40,7 @@ export function fmtDate(d?: Date | string | null): string {
 
 /** Constrói URL absoluta para um path do app. */
 export function appUrl(path: string): string {
-  const base = "https://solutek-hub.lovable.app";
+  const base = process.env.PUBLIC_APP_URL || "https://sltkamericas.com";
   if (!path) return base;
   return path.startsWith("http") ? path : `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
