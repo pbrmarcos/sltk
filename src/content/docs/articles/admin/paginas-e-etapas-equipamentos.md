@@ -7,7 +7,7 @@ tipo: guia
 nivel: intermediario
 tags: [admin, equipamentos, catalogo, etapas, template]
 papeis: [admin, manager]
-atualizado_em: 2026-08-20
+atualizado_em: 2026-09-05
 app_version: "0.99.4"
 ---
 
@@ -23,25 +23,21 @@ app_version: "0.99.4"
 O site em `/equipamentos/{slug}` (ex.: `/equipamentos/envasadora`) é montado a partir de blocos configuráveis.
 
 :::step{n="1" title="Abrir /admin/paginas-equipamentos"}
-A tela lista todos os equipamentos com **status** (Publicado/Rascunho), **última atualização** e **contagem de blocos**.
+A lista à esquerda mostra todos os equipamentos com nome, slug, família e o **status** (Publicado/Rascunho). Busque por nome, slug ou família na caixa de busca.
 :::
 
 :::step{n="2" title="Editar blocos da página"}
-Clique no equipamento. Você vê a árvore de blocos (hero, galeria, especificações, aplicações, FAQ, formulário de Checklist). Cada bloco tem:
+Clique no equipamento. A tela tem duas abas: **Blocos** e **SEO**. Na aba Blocos, cada bloco é um cartão com:
 
-- Título e subtítulo.
-- Imagem/vídeo (upload ou URL).
-- Texto rico com variáveis.
-- Ordem (arraste para reordenar).
-- **Visível sim/não** (para esconder sem excluir).
+- Setas para mover pra cima/baixo (não há arrastar-e-soltar).
+- Olho para mostrar/ocultar sem excluir, e lixeira pra remover.
+- **Editar**, que abre um formulário estruturado por campo (título, subtítulo, itens de lista etc. — cada um dos 9 tipos de bloco tem seus próprios campos) com abas PT/ES/EN pra cada texto, mais uma **preview ao vivo** ao lado mostrando exatamente como o bloco fica na página pública, com seletor de idioma.
+
+Use **Adicionar bloco** pra escolher entre os 9 tipos disponíveis: Hero, Descrição rica, Especificações técnicas, Benefícios, Casos de uso, Galeria de imagens, Perguntas frequentes, Vídeo e CTA de orçamento.
 :::
 
 :::step{n="3" title="Publicar"}
-No topo, mude o status para **Publicado** e clique em **Salvar**. A página fica disponível em segundos com cache limpo automaticamente.
-:::
-
-:::dica
-Blocos duplicados de outro equipamento (**"Duplicar de..."**) aceleram cadastrar um novo tipo — só troque os textos e imagens.
+No topo da página, o interruptor **Publicada/Rascunho** salva assim que você muda — não precisa de um botão "Salvar" separado. A aba SEO (título, descrição, imagem OG) tem seu próprio botão **Salvar SEO**.
 :::
 
 ## Parte 2 — Template de etapas
