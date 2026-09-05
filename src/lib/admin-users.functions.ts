@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanActOn, assertAdmin as assertAdminRole } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
+import type { AuditEntry } from "@/lib/audit";
 
 const ROLES = [
   "admin",
@@ -29,32 +31,6 @@ async function assertAdmin(userId: string) {
   const supabaseAdmin = await getCriticalClient();
   await assertAdminRole(supabaseAdmin, userId);
   return supabaseAdmin;
-}
-
-async function logAudit(
-  admin: Awaited<ReturnType<typeof assertAdmin>>,
-  userId: string,
-  entries: Array<{
-    table_name: string;
-    record_id: string;
-    action: "INSERT" | "UPDATE" | "DELETE";
-    field_changed?: string | null;
-    old_value?: unknown;
-    new_value?: unknown;
-  }>,
-) {
-  if (entries.length === 0) return;
-  await admin.from("audit_log").insert(
-    entries.map((e) => ({
-      user_id: userId,
-      table_name: e.table_name,
-      record_id: e.record_id,
-      action: e.action,
-      field_changed: e.field_changed ?? null,
-      old_value: (e.old_value ?? null) as never,
-      new_value: (e.new_value ?? null) as never,
-    })),
-  );
 }
 
 const listInput = z.object({
@@ -255,7 +231,7 @@ export const createAdminUser = createServerFn({ method: "POST" })
     // triggers das tabelas registram as alterações. Com service role mantemos
     // também o evento agregado de criação.
     if (privilegedClient) {
-      await logAudit(privilegedClient, context.userId, [
+      await logAuditServer(privilegedClient, context.userId, [
         {
           table_name: "profiles",
           record_id: newId,
@@ -305,7 +281,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
       await assertCanActOn(admin, context.userId, data.id, "role_change");
     }
 
-    const entries: Parameters<typeof logAudit>[2] = [];
+    const entries: AuditEntry[] = [];
 
     if (before.full_name !== data.full_name) {
       const { error: upErr } = await admin
@@ -355,7 +331,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
       }
     }
 
-    await logAudit(admin, context.userId, entries);
+    await logAuditServer(admin, context.userId, entries);
     return { ok: true };
   });
 
@@ -404,7 +380,7 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
       console.warn("[admin] signOut após deactivate falhou", e);
     }
 
-    await logAudit(admin, context.userId, [
+    await logAuditServer(admin, context.userId, [
       {
         table_name: "profiles",
         record_id: data.id,
@@ -439,7 +415,7 @@ export const reactivateAdminUser = createServerFn({ method: "POST" })
     });
     if (banErr) throw new Error(banErr.message);
 
-    await logAudit(admin, context.userId, [
+    await logAuditServer(admin, context.userId, [
       {
         table_name: "profiles",
         record_id: data.id,
@@ -487,7 +463,7 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       });
       if (error) throw new Error(error.message);
       try {
-        await logAudit(supabaseAdmin, context.userId, [
+        await logAuditServer(supabaseAdmin, context.userId, [
           {
             table_name: "auth.users",
             record_id: data.id,

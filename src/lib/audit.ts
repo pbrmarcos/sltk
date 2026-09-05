@@ -1,6 +1,6 @@
 import { logAuditFn } from "./audit.functions";
 
-export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
+export type AuditAction = "INSERT" | "UPDATE" | "DELETE" | "ACCESS";
 
 export interface AuditEntry {
   table_name: string;

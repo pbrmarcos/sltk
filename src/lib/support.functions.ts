@@ -18,6 +18,7 @@ import {
   getMaxRoleRank,
   type AppRoleName,
 } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 
 export type SupportUserRow = {
   id: string;
@@ -140,14 +141,12 @@ export const supportResetPassword = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
 
-    await supabaseAdmin.from("audit_log").insert({
-      user_id: context.userId,
+    await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "auth.users",
       record_id: data.id,
       action: "UPDATE",
       field_changed: "password",
-      new_value: "reset_by_support" as never,
-      old_value: null as never,
+      new_value: "reset_by_support",
     });
 
     return { ok: true };
@@ -194,14 +193,12 @@ export const supportSendPasswordRecovery = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
 
-    await supabaseAdmin.from("audit_log").insert({
-      user_id: context.userId,
+    await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "auth.users",
       record_id: data.id,
       action: "UPDATE",
       field_changed: "password_recovery_link",
-      new_value: "sent_by_support" as never,
-      old_value: null as never,
+      new_value: "sent_by_support",
     });
 
     return { ok: true };

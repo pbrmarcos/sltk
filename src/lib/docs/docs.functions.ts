@@ -7,6 +7,7 @@ import React from "react";
 import { OrcamentoPdf } from "./pdf-document";
 import { FatPdf, type FatPdfPayload } from "./fat-pdf";
 import { SatPdf, type SatPdfPayload, type SatItemTipo } from "./sat-pdf";
+import { logAuditServer } from "@/lib/audit.server";
 import type {
   Bloco,
   DocumentoLayoutConfig,
@@ -300,8 +301,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
       .eq("id", ver.bloco_id);
     if (uErr) throw new Error(uErr.message);
     // Audit log: registra a tentativa/execução de restauração com impacto detalhado
-    await (supabaseAdmin as any).from("audit_log").insert({
-      user_id: context.userId,
+    await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "documento_blocos",
       record_id: ver.bloco_id,
       action: "UPDATE",
@@ -686,19 +686,14 @@ export const getSignedUrl = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // Auditoria de acesso a documento restrito — só metadados, nunca o conteúdo do arquivo.
-    try {
-      const { getCriticalClient } = await import("@/lib/supabase-client.server");
-      const supabaseAdmin = await getCriticalClient();
-      await (supabaseAdmin as any).from("audit_log").insert({
-        user_id: context.userId,
-        table_name: "documentos",
-        record_id: data.path,
-        action: "ACCESS",
-        new_value: { expiresIn: data.expiresIn ?? 600 },
-      });
-    } catch (e) {
-      console.error("[docs] falha ao registrar acesso ao documento", e);
-    }
+    const { getCriticalClient } = await import("@/lib/supabase-client.server");
+    const supabaseAdmin = await getCriticalClient();
+    await logAuditServer(supabaseAdmin, context.userId, {
+      table_name: "documentos",
+      record_id: data.path,
+      action: "ACCESS",
+      new_value: { expiresIn: data.expiresIn ?? 600 },
+    });
 
     return { url: signed?.signedUrl as string };
   });

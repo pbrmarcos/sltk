@@ -8,6 +8,7 @@ import {
   snapshotBloco,
   translateText,
 } from "./admin-docs.server";
+import { logAuditServer } from "@/lib/audit.server";
 
 export const listBlocos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -176,8 +177,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
       .eq("id", ver.bloco_id);
     if (uErr) throw new Error(uErr.message);
 
-    await (supabaseAdmin as any).from("audit_log").insert({
-      user_id: context.userId,
+    await logAuditServer(supabaseAdmin, context.userId, {
       table_name: "documento_blocos",
       record_id: ver.bloco_id,
       action: "UPDATE",

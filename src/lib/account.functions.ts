@@ -1,20 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAuditServer } from "@/lib/audit.server";
 
 const profileInput = z.object({
   full_name: z.string().trim().min(1).max(120),
   avatar_url: z.string().url().max(2000).nullable().optional(),
 });
-
-async function auditSafe(db: any, entries: Array<Record<string, unknown>>) {
-  if (entries.length === 0) return;
-  try {
-    await db.from("audit_log").insert(entries as never);
-  } catch (error) {
-    console.error("[account] audit_log insert failed:", error);
-  }
-}
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -64,7 +56,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
         new_value: data.avatar_url ?? null,
       });
     }
-    await auditSafe(db, entries);
+    await logAuditServer(db, context.userId, entries as never);
     return { ok: true };
   });
 
@@ -100,17 +92,14 @@ export const removeMyAvatar = createServerFn({ method: "POST" })
     if (upErr) throw new Error(upErr.message);
 
     if (before?.avatar_url !== null) {
-      await auditSafe(db, [
-        {
-          user_id: context.userId,
-          table_name: "profiles",
-          record_id: context.userId,
-          action: "UPDATE",
-          field_changed: "avatar_url",
-          old_value: before?.avatar_url ?? null,
-          new_value: null,
-        },
-      ]);
+      await logAuditServer(db, context.userId, {
+        table_name: "profiles",
+        record_id: context.userId,
+        action: "UPDATE",
+        field_changed: "avatar_url",
+        old_value: before?.avatar_url ?? null,
+        new_value: null,
+      });
     }
 
     return { ok: true };
@@ -165,16 +154,13 @@ export const changeMyPassword = createServerFn({ method: "POST" })
       if (upErr) throw new Error(upErr.message);
     }
 
-    await auditSafe(db, [
-      {
-        user_id: context.userId,
-        table_name: "auth.users",
-        record_id: context.userId,
-        action: "UPDATE",
-        field_changed: "password",
-        new_value: "changed_by_user",
-      },
-    ]);
+    await logAuditServer(db, context.userId, {
+      table_name: "auth.users",
+      record_id: context.userId,
+      action: "UPDATE",
+      field_changed: "password",
+      new_value: "changed_by_user",
+    });
 
     return { ok: true };
   });

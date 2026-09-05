@@ -2,6 +2,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertEngineerOrHigher } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 
 type AnySb = any;
 
@@ -13,10 +15,9 @@ export const DISCIPLINAS_PROJETO = ["mecanico", "eletrico", "automacao", "montag
 export type DisciplinaProjeto = (typeof DISCIPLINAS_PROJETO)[number];
 
 async function requireManagerRole(sb: AnySb, uid: string) {
-  const { data } = await sb.from("user_roles").select("role").eq("user_id", uid);
-  const roles = (data ?? []).map((r: any) => r.role);
-  const ok = roles.some((r: string) => r === "admin" || r === "manager" || r === "engineer");
-  if (!ok) throw new Error("Permissão negada (requer admin, manager ou engineer).");
+  await assertEngineerOrHigher(sb, uid).catch(() => {
+    throw new Error("Permissão negada (requer admin, manager ou engineer).");
+  });
 }
 
 async function actorInfo(sb: AnySb, uid: string) {
@@ -24,17 +25,21 @@ async function actorInfo(sb: AnySb, uid: string) {
   return { actor_user_id: uid, actor_nome: data?.full_name ?? data?.email ?? "Usuário" };
 }
 
+/**
+ * Antes gravava em colunas (actor_user_id/record_type/before_data/after_data)
+ * que não existem no schema real de audit_log — toda chamada falhava e era
+ * engolida pelo catch vazio, então nenhuma auditoria de templates jamais foi
+ * persistida. Corrigido para o formato real via logAuditServer.
+ */
 async function writeAudit(sb: AnySb, uid: string, action: string, recordType: string, recordId: string, before: any, after: any) {
-  try {
-    await sb.from("audit_log").insert({
-      actor_user_id: uid,
-      action,
-      record_type: recordType,
-      record_id: recordId,
-      before_data: before,
-      after_data: after,
-    });
-  } catch { /* ignore */ }
+  await logAuditServer(sb, uid, {
+    table_name: recordType,
+    record_id: recordId,
+    action: action === "delete" ? "DELETE" : action === "create" ? "INSERT" : "UPDATE",
+    field_changed: action,
+    old_value: before ?? null,
+    new_value: after ?? null,
+  });
 }
 
 async function snapshotTemplate(sb: AnySb, templateId: string) {

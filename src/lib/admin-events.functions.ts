@@ -7,6 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAuditServer } from "@/lib/audit.server";
 
 const denyInput = z.object({
   path: z.string().max(255),
@@ -17,43 +18,29 @@ export const logAdminAccessDenied = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => denyInput.parse(input))
   .handler(async ({ data, context }) => {
-    try {
-      const { getCriticalClient } = await import("@/lib/supabase-client.server");
+    const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
-      await supabaseAdmin.from("audit_log").insert({
-        user_id: context.userId,
-        table_name: "admin_events",
-        record_id: context.userId,
-        action: "INSERT",
-        field_changed: "admin.access_denied",
-        old_value: null as never,
-        new_value: { path: data.path, reason: data.reason } as never,
-      });
-      return { ok: true as const };
-    } catch (err) {
-      console.error("[admin-events] access_denied insert failed", err);
-      return { ok: false as const };
-    }
+    const { ok } = await logAuditServer(supabaseAdmin, context.userId, {
+      table_name: "admin_events",
+      record_id: context.userId,
+      action: "INSERT",
+      field_changed: "admin.access_denied",
+      old_value: null,
+      new_value: { path: data.path, reason: data.reason },
+    });
+    return { ok };
   });
 
 export const logAdminLogin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    try {
-      const { getCriticalClient } = await import("@/lib/supabase-client.server");
+    const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
-      await supabaseAdmin.from("audit_log").insert({
-        user_id: context.userId,
-        table_name: "admin_events",
-        record_id: context.userId,
-        action: "INSERT",
-        field_changed: "admin.login",
-        old_value: null as never,
-        new_value: null as never,
-      });
-      return { ok: true as const };
-    } catch (err) {
-      console.error("[admin-events] login insert failed", err);
-      return { ok: false as const };
-    }
+    const { ok } = await logAuditServer(supabaseAdmin, context.userId, {
+      table_name: "admin_events",
+      record_id: context.userId,
+      action: "INSERT",
+      field_changed: "admin.login",
+    });
+    return { ok };
   });
