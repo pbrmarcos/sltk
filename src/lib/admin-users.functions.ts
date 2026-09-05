@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertCanActOn } from "@/lib/admin-guard";
+import { assertCanActOn, assertAdmin as assertAdminRole } from "@/lib/admin-guard";
 
 const ROLES = [
   "admin",
@@ -27,14 +27,7 @@ export type AdminUserRow = {
 async function assertAdmin(userId: string) {
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
   const supabaseAdmin = await getCriticalClient();
-  const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Acesso restrito a administradores.");
+  await assertAdminRole(supabaseAdmin, userId);
   return supabaseAdmin;
 }
 

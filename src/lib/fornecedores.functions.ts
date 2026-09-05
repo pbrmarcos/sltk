@@ -7,13 +7,11 @@ import {
   FORNECEDOR_RANKINGS,
   FORNECEDOR_STATUS,
 } from "@/lib/fornecedores.shared";
+import { hasAnyRole } from "@/lib/admin-guard";
 
 async function assertPurchasingRole(supabase: any, uid: string): Promise<void> {
-  for (const r of ["admin", "manager", "purchasing"] as const) {
-    const { data } = await supabase.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return;
-  }
-  throw new Error("Sem permissão para operar em Fornecedores");
+  const ok = await hasAnyRole(supabase, uid, ["admin", "manager", "purchasing"]);
+  if (!ok) throw new Error("Sem permissão para operar em Fornecedores");
 }
 
 const listInput = z.object({

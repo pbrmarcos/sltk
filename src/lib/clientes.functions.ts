@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
+import { hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
@@ -18,25 +19,12 @@ const ALLOWED_ROLES = ["admin", "manager", "sales"] as const;
 const DELETE_ROLES = ["admin", "manager"] as const;
 type Role = (typeof ALLOWED_ROLES)[number];
 
-async function getUserRoles(
-  admin: SupabaseClient<Database>,
-  userId: string,
-): Promise<string[]> {
-  const { data, error } = await admin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => r.role as string);
-}
-
 async function assertRole(
   admin: SupabaseClient<Database>,
   userId: string,
   allowed: readonly string[],
 ): Promise<SupabaseClient<Database>> {
-  const roles = await getUserRoles(admin, userId);
-  const ok = roles.some((r) => allowed.includes(r));
+  const ok = await hasAnyRole(admin, userId, allowed as AppRoleName[]);
   if (!ok) throw new Error("Acesso restrito.");
   return admin;
 }

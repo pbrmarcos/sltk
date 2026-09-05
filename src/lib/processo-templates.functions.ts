@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertEngineerOrHigher as assertCanManage } from "@/lib/admin-guard";
 
 /**
  * Server fns para Templates de Processo (admin/manager/engineer).
@@ -98,18 +99,6 @@ export type TemplateDetalhe = {
   tarefas: TemplateTarefa[];
   eventos: TemplateEvento[];
 };
-
-async function assertCanManage(supabase: any, userId: string) {
-  const roles = await Promise.all(
-    (["admin", "manager", "engineer"] as const).map(async (r) => {
-      const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: r });
-      return data === true;
-    }),
-  );
-  if (!roles.some(Boolean)) {
-    throw new Error("Sem permissão para gerenciar templates.");
-  }
-}
 
 /** Resolve a list of user IDs -> { id: displayName } map via profiles. */
 async function resolveUserNames(supabase: any, ids: (string | null | undefined)[]) {

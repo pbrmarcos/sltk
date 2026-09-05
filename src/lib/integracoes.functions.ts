@@ -1,18 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
-
-async function assertAdmin(supabase: SupabaseClient<Database>, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  if (error) throw new Error(error.message);
-  if (!(data ?? []).some((r) => r.role === "admin")) throw new Error("Acesso restrito.");
-  return supabase;
-}
+import { assertAdmin } from "@/lib/admin-guard";
 
 export const listIntegracoes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -93,7 +82,8 @@ export const toggleIntegracao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => toggleInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const admin = context.supabase;
     const { error } = await admin
       .from("integracoes_config")
       .update({ ativo: data.ativo, updated_by: context.userId })

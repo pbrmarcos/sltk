@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
+import { assertAdmin } from "@/lib/admin-guard";
 
 // Carrega todos os .sql em supabase/pending-migrations/ como texto no bundle do server.
 const migrationsGlob = import.meta.glob("/supabase/pending-migrations/*.sql", {
@@ -17,15 +18,6 @@ function migrationsFromDisk() {
       return { name, path, sql };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", {
-    _user_id: userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Acesso restrito: apenas administradores.");
 }
 
 async function runSql(sql: string): Promise<{ ok: true } | { ok: false; error: string }> {

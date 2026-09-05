@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { hasRole } from "@/lib/admin-guard";
 import {
   signShareToken,
   verifyShareTokenSignature,
@@ -89,9 +90,9 @@ async function assertCanAccessRelatorio(
   tipo: "fat" | "sat",
   relatorio_id: string,
 ): Promise<void> {
-  const [{ data: isAdmin }, { data: isManager }] = await Promise.all([
-    ctxSupabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
-    ctxSupabase.rpc("has_role", { _user_id: userId, _role: "manager" }),
+  const [isAdmin, isManager] = await Promise.all([
+    hasRole(ctxSupabase, userId, "admin"),
+    hasRole(ctxSupabase, userId, "manager"),
   ]);
   if (isAdmin || isManager) return;
   const table = tipo === "fat" ? "fat_relatorios" : "sat_relatorio";
@@ -159,9 +160,9 @@ export const revokeShareLink = createServerFn({ method: "POST" })
       .maybeSingle();
     if (lErr) throw new Error(lErr.message);
     if (!link) throw new Error("Link não encontrado.");
-    const [{ data: isAdmin }, { data: isManager }] = await Promise.all([
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "manager" }),
+    const [isAdmin, isManager] = await Promise.all([
+      hasRole(context.supabase, context.userId, "admin"),
+      hasRole(context.supabase, context.userId, "manager"),
     ]);
     if (!isAdmin && !isManager && link.created_by !== context.userId) {
       throw new Error("Acesso negado.");

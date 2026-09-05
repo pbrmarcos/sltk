@@ -5,24 +5,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  assertEngineerOrHigher as assertReader,
+  assertAdminOrManager as assertWriter,
+} from "@/lib/admin-guard";
 
 const ORIGENS = ["site_publico", "interno", "contato_site"] as const;
 const PRIORIDADES = ["baixa", "media", "alta", "critica"] as const;
-
-async function assertReader(sb: any, uid: string) {
-  for (const r of ["admin", "manager", "engineer"]) {
-    const { data } = await sb.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return;
-  }
-  throw new Error("Sem permissão.");
-}
-async function assertWriter(sb: any, uid: string) {
-  for (const r of ["admin", "manager"]) {
-    const { data } = await sb.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return;
-  }
-  throw new Error("Apenas administradores podem alterar SLA.");
-}
 
 export const listSlaConfig = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

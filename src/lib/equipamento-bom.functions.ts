@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DISCIPLINAS, type Disciplina } from "@/lib/equipamento-disciplina-etapas.functions";
+import { assertAdminOrManager } from "@/lib/admin-guard";
 
 type AnySb = any;
 
@@ -185,9 +186,9 @@ export const approveBomItem = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
     // check manager/admin
-    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    const { data: isMgr } = await sb.rpc("has_role", { _user_id: context.userId, _role: "manager" });
-    if (!isAdmin && !isMgr) throw new Error("Apenas manager/admin pode aprovar insumos.");
+    await assertAdminOrManager(sb, context.userId).catch(() => {
+      throw new Error("Apenas manager/admin pode aprovar insumos.");
+    });
     const { error } = await sb.from("projeto_insumos").update({ status: "aprovado" }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -200,9 +201,9 @@ export const rejectBomItem = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
-    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    const { data: isMgr } = await sb.rpc("has_role", { _user_id: context.userId, _role: "manager" });
-    if (!isAdmin && !isMgr) throw new Error("Apenas manager/admin pode rejeitar insumos.");
+    await assertAdminOrManager(sb, context.userId).catch(() => {
+      throw new Error("Apenas manager/admin pode rejeitar insumos.");
+    });
     const { error } = await sb
       .from("projeto_insumos")
       .update({ status: "rascunho", observacoes: data.motivo ?? null })
@@ -252,9 +253,9 @@ export const runSeedEquipamento = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
-    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    const { data: isMgr } = await sb.rpc("has_role", { _user_id: context.userId, _role: "manager" });
-    if (!isAdmin && !isMgr) throw new Error("Apenas manager/admin pode rodar o seed.");
+    await assertAdminOrManager(sb, context.userId).catch(() => {
+      throw new Error("Apenas manager/admin pode rodar o seed.");
+    });
     // Primeiro tenta importar do template publicado (fallback interno chama seed_equipamento_disciplinas).
     const { data: eqRow } = await sb.from("cliente_equipamentos").select("planejamento_template_slug").eq("id", data.equipamento_id).maybeSingle();
     const { error } = await sb.rpc("import_etapas_do_template", {

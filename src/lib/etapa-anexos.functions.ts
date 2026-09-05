@@ -1,18 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertEngineerOrHigher } from "@/lib/admin-guard";
 
 type AnySb = any;
 const MAX_BYTES = 25 * 1024 * 1024;
 const ALLOWED_MIMES = ["application/pdf", "image/png", "image/jpeg"] as const;
-
-async function assertRole(sb: AnySb, uid: string) {
-  const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", uid);
-  const set = new Set(((roles ?? []) as { role: string }[]).map((r) => r.role));
-  if (!set.has("admin") && !set.has("manager") && !set.has("engineer")) {
-    throw new Error("Apenas admin, gestor ou engenheiro podem gerenciar anexos.");
-  }
-}
 
 export const listEtapaAnexos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -45,7 +38,7 @@ export const uploadEtapaAnexo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
 
     const { data: et, error: etErr } = await sb
       .from("equipamento_disciplina_etapas")
@@ -110,7 +103,7 @@ export const deleteEtapaAnexo = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ anexo_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as AnySb;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const { data: row } = await sb
       .from("equipamento_etapa_anexos")
       .select("storage_path")

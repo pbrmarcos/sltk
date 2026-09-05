@@ -1,8 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import { assertAdminOrManager } from "@/lib/admin-guard";
 
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
@@ -33,22 +32,12 @@ const listInput = z.object({
   pageSize: z.number().int().min(1).max(50).optional().default(50),
 });
 
-async function assertAdminOrManager(supabase: SupabaseClient<Database>, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .in("role", ["admin", "manager"]);
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("Acesso restrito.");
-  return supabase;
-}
-
 export const listAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => listInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdminOrManager(context.supabase, context.userId);
+    await assertAdminOrManager(context.supabase, context.userId);
+    const admin = context.supabase;
 
     let q = admin
       .from("audit_log")
@@ -117,7 +106,8 @@ export const searchAuditUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => userSearchInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdminOrManager(context.supabase, context.userId);
+    await assertAdminOrManager(context.supabase, context.userId);
+    const admin = context.supabase;
     let q = admin.from("profiles").select("id, email, full_name").limit(20);
     if (data.search) {
       const s = data.search.replace(/[%,]/g, "");
@@ -157,7 +147,8 @@ export const exportAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => exportInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdminOrManager(context.supabase, context.userId);
+    await assertAdminOrManager(context.supabase, context.userId);
+    const admin = context.supabase;
 
     let q = admin
       .from("audit_log")

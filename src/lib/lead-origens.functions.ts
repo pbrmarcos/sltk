@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { titleCasePtBR } from "@/lib/text-case";
+import { hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -26,13 +27,8 @@ export function normalizeOrigem(nome: string) {
 }
 
 async function assertRole(supabase: SupabaseClient<Database>, userId: string, allowed: readonly string[]) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  if (error) throw new Error(error.message);
-  const roles = (data ?? []).map((r) => r.role as string);
-  if (!roles.some((r) => allowed.includes(r))) throw new Error("Acesso restrito.");
+  const ok = await hasAnyRole(supabase, userId, allowed as AppRoleName[]);
+  if (!ok) throw new Error("Acesso restrito.");
   return supabase;
 }
 

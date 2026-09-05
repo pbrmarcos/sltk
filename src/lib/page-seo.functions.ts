@@ -1,18 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
-
-async function assertAdmin(supabase: SupabaseClient<Database>, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  if (error) throw new Error(error.message);
-  if (!(data ?? []).some((r) => r.role === "admin")) throw new Error("Acesso restrito.");
-  return supabase;
-}
+import { assertAdmin } from "@/lib/admin-guard";
 
 export type PageSeoRow = {
   route_path: string;
@@ -76,7 +65,8 @@ export const listPageSeo = createServerFn({ method: "GET" })
 export const scanPageSeo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const admin = await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const admin = context.supabase;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = admin as any;
     const now = new Date().toISOString();
@@ -125,7 +115,8 @@ export const upsertPageSeo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => upsertInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const admin = context.supabase;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = admin as any;
     const { error } = await sb.from("page_seo").upsert(
@@ -146,7 +137,8 @@ export const deletePageSeo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => deleteInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const admin = await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const admin = context.supabase;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = admin as any;
     const { error } = await sb.from("page_seo").delete().eq("route_path", data.route_path);

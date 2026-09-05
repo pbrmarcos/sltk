@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ETP_STATUS } from "@/lib/engenharia.shared";
+import { hasRole, assertAdminOrManager } from "@/lib/admin-guard";
 
 /* ============= LIST: por equipamento ============= */
 
@@ -144,15 +145,15 @@ async function assertCanEditEtp(context: {
   supabase: any;
   userId: string;
 }): Promise<{ isAdmin: boolean; isManager: boolean; isEngineer: boolean }> {
-  const [{ data: isAdmin }, { data: isManager }, { data: isEngineer }] = await Promise.all([
-    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
-    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "manager" }),
-    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "engineer" }),
+  const [isAdmin, isManager, isEngineer] = await Promise.all([
+    hasRole(context.supabase, context.userId, "admin"),
+    hasRole(context.supabase, context.userId, "manager"),
+    hasRole(context.supabase, context.userId, "engineer"),
   ]);
   if (!isAdmin && !isManager && !isEngineer) {
     throw new Error("Sem permissão: apenas admin, gestores e engenheiros podem editar ETPs.");
   }
-  return { isAdmin: !!isAdmin, isManager: !!isManager, isEngineer: !!isEngineer };
+  return { isAdmin, isManager, isEngineer };
 }
 
 export const updateEtp = createServerFn({ method: "POST" })
@@ -195,17 +196,9 @@ export const aprovarEtp = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     // Verificar role: somente admin/manager podem aprovar
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    const { data: isManager } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "manager",
-    });
-    if (!isAdmin && !isManager) {
+    await assertAdminOrManager(context.supabase, context.userId).catch(() => {
       throw new Error("Somente administradores ou gestores podem aprovar um ETP.");
-    }
+    });
     const anterior = await statusAtual(context as EtpCtx, data.id);
     if (anterior !== "rascunho" && anterior !== "em_revisao") {
       throw new Error("Apenas ETPs em rascunho ou em revisão podem ser aprovados.");
@@ -243,17 +236,9 @@ export const reabrirEtp = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    const { data: isManager } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "manager",
-    });
-    if (!isAdmin && !isManager) {
+    await assertAdminOrManager(context.supabase, context.userId).catch(() => {
       throw new Error("Somente administradores ou gestores podem reabrir um ETP aprovado.");
-    }
+    });
 
     const { data: cur, error: curErr } = await context.supabase
       .from("equipamento_etps")
@@ -492,12 +477,12 @@ async function logStatus(
 }
 
 async function getRoles(context: EtpCtx) {
-  const [{ data: isAdmin }, { data: isManager }, { data: isEngineer }] = await Promise.all([
-    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
-    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "manager" }),
-    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "engineer" }),
+  const [isAdmin, isManager, isEngineer] = await Promise.all([
+    hasRole(context.supabase, context.userId, "admin"),
+    hasRole(context.supabase, context.userId, "manager"),
+    hasRole(context.supabase, context.userId, "engineer"),
   ]);
-  return { isAdmin: !!isAdmin, isManager: !!isManager, isEngineer: !!isEngineer };
+  return { isAdmin, isManager, isEngineer };
 }
 
 async function statusAtual(context: EtpCtx, id: string): Promise<string> {

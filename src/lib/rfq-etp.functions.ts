@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertEngineerOrHigher } from "@/lib/admin-guard";
 
 /** Equipamentos de um cliente, para escolher onde o ETP será criado. */
 export const listEquipamentosDoCliente = createServerFn({ method: "POST" })
@@ -35,14 +36,9 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const [{ data: isAdmin }, { data: isManager }, { data: isEngineer }] = await Promise.all([
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "manager" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "engineer" }),
-    ]);
-    if (!isAdmin && !isManager && !isEngineer) {
+    await assertEngineerOrHigher(context.supabase, context.userId).catch(() => {
       throw new Error("Sem permissão para gerar ETP a partir de um checklist.");
-    }
+    });
 
     const { data: sub, error: subErr } = await context.supabase
       .from("rfq_submissao")

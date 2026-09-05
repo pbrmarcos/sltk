@@ -2,12 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getSupabasePublicConfig } from "@/integrations/supabase/config";
 import { pingSupabaseHealth } from "@/lib/system-diagnostics.server";
-
-async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  if (error) throw new Error(error.message);
-  if (!(data ?? []).some((r: { role: string }) => r.role === "admin")) throw new Error("Acesso restrito.");
-}
+import { assertAdmin } from "@/lib/admin-guard";
 
 function mask(v?: string | null) {
   if (!v) return null;

@@ -6,16 +6,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const ROLES = ["admin", "manager", "engineer"] as const;
-
-async function assertRole(sb: any, uid: string) {
-  for (const r of ROLES) {
-    const { data } = await sb.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return;
-  }
-  throw new Error("Sem permissão para acessar Chamados de Pós-venda.");
-}
+import { assertEngineerOrHigher } from "@/lib/admin-guard";
 
 async function meuNome(sb: any, uid: string): Promise<string> {
   const { data } = await sb.from("profiles").select("full_name, email").eq("id", uid).maybeSingle();
@@ -43,7 +34,7 @@ export const listChamados = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => listSchema.parse(i ?? {}))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
 
     // Filtro por cliente (nome/fantasia/CNPJ) resolvido para lista de ids.
     let clienteIds: string[] | null = null;
@@ -123,7 +114,7 @@ export const setPrioridadeChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => prioridadeSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
     const { data: atual } = await sb.from("chamados").select("prioridade").eq("id", data.chamado_id).maybeSingle();
     const anterior = atual?.prioridade ?? null;
@@ -151,7 +142,7 @@ export const reatribuirChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => reatribuirSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
 
     const { data: atual } = await sb
@@ -227,7 +218,7 @@ export const addComentarioInterno = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => comentarioSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
     const { error } = await sb.from("chamado_mensagens").insert({
       chamado_id: data.chamado_id,
@@ -251,7 +242,7 @@ export const listAtendentes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const { data: roles } = await sb
       .from("user_roles")
       .select("user_id, role")
@@ -275,7 +266,7 @@ export const getChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => getSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
 
     const { data: chamado, error } = await sb
       .from("chamados")
@@ -315,7 +306,7 @@ export const responderChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => responderSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
 
     // Se ninguém assumiu ainda, este atendente vira dono.
@@ -355,7 +346,7 @@ export const alterarStatusChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => statusSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
 
     const patch: Record<string, unknown> = { status: data.para };
     if (data.para === "resolvido") patch.resolvido_em = new Date().toISOString();
@@ -412,7 +403,7 @@ export const assumirChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => assumirSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
 
     const { error } = await sb
@@ -433,7 +424,7 @@ export const vincularEquipamentoChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => vincularSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertRole(sb, context.userId);
+    await assertEngineerOrHigher(sb, context.userId);
 
     let cliente_id: string | null = null;
     if (data.equipamento_id) {

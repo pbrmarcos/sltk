@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdminOrManager as assertAdmin, hasAnyRole } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   COL_CONTRA,
@@ -37,21 +38,8 @@ export type MineracaoConfig = {
   updated_at: string | null;
 };
 
-async function rolesOf(supabase: AnyDb, userId: string): Promise<string[]> {
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return ((data ?? []) as Array<{ role: string }>).map((r) => r.role);
-}
-
-async function assertAdmin(supabase: AnyDb, userId: string) {
-  const roles = await rolesOf(supabase, userId);
-  if (!roles.includes("admin") && !roles.includes("manager")) {
-    throw new Error("Acesso restrito a administradores.");
-  }
-}
-
 async function assertComercial(supabase: AnyDb, userId: string) {
-  const roles = await rolesOf(supabase, userId);
-  const ok = ["admin", "manager", "sales"].some((r) => roles.includes(r));
+  const ok = await hasAnyRole(supabase, userId, ["admin", "manager", "sales"]);
   if (!ok) throw new Error("Acesso restrito ao time comercial.");
 }
 
