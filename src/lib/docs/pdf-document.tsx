@@ -5,7 +5,13 @@ import { formatDate, formatMoney, formatNumber } from "./formatters";
 import { moedaLabel } from "@/lib/moedas";
 import { t } from "./i18n";
 import { CHROME_PAGE_STYLE, PdfHeader, PdfFooter } from "./pdf-chrome";
-import { itensPrincipais, itensOpcionais, calcularSubtotal, calcularTotalOpcionais, calcularValorItem } from "./orcamento-calc";
+import {
+  itensPrincipais,
+  itensOpcionais,
+  calcularSubtotal,
+  calcularTotalOpcionais,
+  calcularValorItem,
+} from "./orcamento-calc";
 
 // ============================================================
 // Design tokens

@@ -159,7 +159,9 @@ function CotacoesListPage() {
       {/* Checklists formais (agrupados) */}
       <div className="mt-6">
         <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Checklists formais (agrupados)</h2>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+            Checklists formais (agrupados)
+          </h2>
           <span className="text-xs text-[var(--text-secondary)]">{rows.length} registro(s)</span>
         </div>
         <div className="rounded-md border bg-white">

@@ -27,7 +27,9 @@ export function patchParaStatusChamado(
 }
 
 /** Transições que disparam e-mail automático pro solicitante/cliente. */
-export function eventoDeEmail(status: ChamadoStatus): "chamado.resolvido" | "chamado.reaberto" | null {
+export function eventoDeEmail(
+  status: ChamadoStatus,
+): "chamado.resolvido" | "chamado.reaberto" | null {
   if (status === "resolvido") return "chamado.resolvido";
   if (status === "reaberto") return "chamado.reaberto";
   return null;

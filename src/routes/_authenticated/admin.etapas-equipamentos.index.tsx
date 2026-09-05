@@ -130,7 +130,7 @@ function EtapasEquipamentosPanel() {
         </Select>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/30 text-xs uppercase text-muted-foreground">
             <tr>

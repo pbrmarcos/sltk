@@ -88,7 +88,11 @@ const STATUS_LABEL: Record<string, { label: string; className: string }> = {
     label: "Respondida",
     className: "bg-emerald-100 text-emerald-900 border-emerald-200",
   },
-  expirada: { label: "Expirada", className: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
+  expirada: {
+    label: "Expirada",
+    className:
+      "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  },
 };
 
 function EntrevistasListPage() {

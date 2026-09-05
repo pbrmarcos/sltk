@@ -50,7 +50,8 @@ import { toast } from "sonner";
 const ACTIVE_PIPELINE_STAGES = PIPELINE_STAGES.filter((stage) => stage !== "perdido");
 
 const LIFECYCLE_TONE: Record<string, string> = {
-  suspect: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  suspect:
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   prospect: "bg-blue-50 text-blue-700 border-blue-200",
   cliente: "bg-emerald-50 text-emerald-700 border-emerald-200",
 };

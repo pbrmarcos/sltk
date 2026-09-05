@@ -1028,7 +1028,10 @@ export function ConvertWizardDialog({
               >
                 Ganhar: {counts.win}
               </Badge>
-              <Badge variant="outline" className="bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]">
+              <Badge
+                variant="outline"
+                className="bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]"
+              >
                 Manter: {counts.keep}
               </Badge>
               <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">

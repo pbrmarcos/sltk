@@ -625,13 +625,15 @@ const PROC_STAGE_COLOR: Record<string, string> = {
   Embarque: "border-cyan-200 bg-cyan-50 text-cyan-700",
   "Pós-venda": "border-teal-200 bg-teal-50 text-teal-700",
   // Atendimento
-  Solicitação: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
+  Solicitação:
+    "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   Análise: "border-sky-200 bg-sky-50 text-sky-700",
   Registro: "border-indigo-200 bg-indigo-50 text-indigo-700",
   Resolução: "border-amber-200 bg-amber-50 text-amber-700",
   Encerrado: "border-emerald-200 bg-emerald-50 text-emerald-700",
   // Instalação
-  Preparação: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
+  Preparação:
+    "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   Agendamento: "border-sky-200 bg-sky-50 text-sky-700",
   Arranque: "border-amber-200 bg-amber-50 text-amber-700",
   Treinamento: "border-violet-200 bg-violet-50 text-violet-700",

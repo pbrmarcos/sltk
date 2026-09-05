@@ -114,7 +114,11 @@ export function HistoricoInsumosDrawer({
             <p className="text-xs italic text-muted-foreground">Sem registros ainda.</p>
           )}
           {(rows as any[]).map((r: any) => {
-            const meta = TIPO_META[r.tipo] ?? { label: r.tipo, icon: Pencil, tone: "bg-[var(--badge-neutral-bg)]" };
+            const meta = TIPO_META[r.tipo] ?? {
+              label: r.tipo,
+              icon: Pencil,
+              tone: "bg-[var(--badge-neutral-bg)]",
+            };
             const Icon = meta.icon;
             return (
               <div key={r.id} className="rounded-md border p-2 text-xs">

@@ -898,40 +898,42 @@ export function ProjetoInsumosPanel({
               {cotacoes.length}
             </Badge>
           </div>
-          <table className="w-full text-xs">
-            <thead className="bg-[var(--bg-surface)] text-left text-[var(--text-muted)]">
-              <tr>
-                <th className="px-3 py-1.5">Código</th>
-                <th className="px-3 py-1.5">Título</th>
-                <th className="px-3 py-1.5">Itens</th>
-                <th className="px-3 py-1.5">Status</th>
-                <th className="px-3 py-1.5">Criada</th>
-                <th className="px-3 py-1.5" />
-              </tr>
-            </thead>
-            <tbody>
-              {cotacoes.map((c) => (
-                <tr key={c.id} className="border-t border-[var(--bg-border)]">
-                  <td className="px-3 py-1.5 font-mono">{c.codigo}</td>
-                  <td className="px-3 py-1.5">{c.titulo}</td>
-                  <td className="px-3 py-1.5 tabular-nums">{c.itens}</td>
-                  <td className="px-3 py-1.5 capitalize">{c.status}</td>
-                  <td className="px-3 py-1.5 text-[var(--text-muted)]">
-                    {new Date(c.created_at).toLocaleDateString("pt-BR")}
-                  </td>
-                  <td className="px-3 py-1.5 text-right">
-                    <Link
-                      to="/compras/cotacoes/$id"
-                      params={{ id: c.id }}
-                      className="text-sky-700 hover:underline"
-                    >
-                      Abrir →
-                    </Link>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="bg-[var(--bg-surface)] text-left text-[var(--text-muted)]">
+                <tr>
+                  <th className="px-3 py-1.5">Código</th>
+                  <th className="px-3 py-1.5">Título</th>
+                  <th className="px-3 py-1.5">Itens</th>
+                  <th className="px-3 py-1.5">Status</th>
+                  <th className="px-3 py-1.5">Criada</th>
+                  <th className="px-3 py-1.5" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cotacoes.map((c) => (
+                  <tr key={c.id} className="border-t border-[var(--bg-border)]">
+                    <td className="px-3 py-1.5 font-mono">{c.codigo}</td>
+                    <td className="px-3 py-1.5">{c.titulo}</td>
+                    <td className="px-3 py-1.5 tabular-nums">{c.itens}</td>
+                    <td className="px-3 py-1.5 capitalize">{c.status}</td>
+                    <td className="px-3 py-1.5 text-[var(--text-muted)]">
+                      {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="px-3 py-1.5 text-right">
+                      <Link
+                        to="/compras/cotacoes/$id"
+                        params={{ id: c.id }}
+                        className="text-sky-700 hover:underline"
+                      >
+                        Abrir →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : null}
 

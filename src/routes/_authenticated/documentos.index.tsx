@@ -31,8 +31,14 @@ export const Route = createFileRoute("/_authenticated/documentos/")({
 });
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  rascunho: { label: "Rascunho", cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
-  emitido: { label: "Emitido", cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
+  rascunho: {
+    label: "Rascunho",
+    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  },
+  emitido: {
+    label: "Emitido",
+    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  },
   em_revisao: { label: "Em revisão", cls: "bg-amber-50 text-amber-800 border-amber-200" },
   aprovado: { label: "Aprovado", cls: "bg-emerald-50 text-emerald-800 border-emerald-200" },
   publicado: { label: "Publicado", cls: "bg-sky-50 text-sky-800 border-sky-200" },

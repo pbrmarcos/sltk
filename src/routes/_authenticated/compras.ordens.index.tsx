@@ -208,7 +208,12 @@ function OrdensListPage() {
 
       {/* KPIs */}
       <div className="grid gap-3 md:grid-cols-5 mb-4">
-        <KpiCard icon={FileText} label="Total" value={kpis?.total ?? 0} color="text-[var(--text-primary)]" />
+        <KpiCard
+          icon={FileText}
+          label="Total"
+          value={kpis?.total ?? 0}
+          color="text-[var(--text-primary)]"
+        />
         <KpiCard
           icon={Clock}
           label="Aguardando"

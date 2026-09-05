@@ -33,7 +33,8 @@ export const Route = createFileRoute("/_authenticated/logistica/embarques/")({
 });
 
 const STATUS_TONE: Record<LogisticaStatus, string> = {
-  rascunho: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  rascunho:
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   programado: "bg-blue-50 text-blue-700 border-blue-200",
   embarcado: "bg-amber-50 text-amber-800 border-amber-200",
   entregue: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -222,7 +223,7 @@ function EmbarquesIndex() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+        <div className="overflow-x-auto rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
           <table className="w-full text-sm">
             <thead className="bg-[var(--bg-elevated)] text-left text-xs uppercase text-[var(--text-muted)]">
               <tr>

@@ -29,6 +29,8 @@ export function calcularTotalOpcionais(equipamentos: EquipamentoOrcamento[]): nu
 }
 
 /** Valor de linha de um único item (quantidade × valor unitário). */
-export function calcularValorItem(item: Pick<EquipamentoOrcamento, "quantidade" | "valor_unitario">): number {
+export function calcularValorItem(
+  item: Pick<EquipamentoOrcamento, "quantidade" | "valor_unitario">,
+): number {
   return item.quantidade * item.valor_unitario;
 }

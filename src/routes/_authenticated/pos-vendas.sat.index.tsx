@@ -30,10 +30,12 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  rascunho: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  rascunho:
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   preenchendo: "bg-amber-500/15 text-amber-700 border-amber-500/30 dark:text-amber-300",
   assinado: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30 dark:text-emerald-300",
-  arquivado: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  arquivado:
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
 };
 
 function SATListPage() {
@@ -119,7 +121,7 @@ function SATListPage() {
         </Select>
       </div>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+      <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         <table className="w-full text-[13px]">
           <thead className="border-b border-[var(--bg-border)] text-left text-[12px] text-[var(--text-muted)]">
             <tr>

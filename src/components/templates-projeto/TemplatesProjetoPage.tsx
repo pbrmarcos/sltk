@@ -212,7 +212,7 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
           </Button>
         </div>
 
-        <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+        <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
           <table className="w-full text-[13px]">
             <thead className="border-b border-[var(--bg-border)] text-left text-[12px] text-[var(--text-muted)]">
               <tr>

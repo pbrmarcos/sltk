@@ -305,7 +305,9 @@ export function AlmoxLinhaCell({
                   </button>
                 ))}
                 {(itens as any[]).length === 0 && (
-                  <p className="px-2 py-3 text-xs text-[var(--text-secondary)]">Nenhum item encontrado.</p>
+                  <p className="px-2 py-3 text-xs text-[var(--text-secondary)]">
+                    Nenhum item encontrado.
+                  </p>
                 )}
               </div>
               {itemSel &&

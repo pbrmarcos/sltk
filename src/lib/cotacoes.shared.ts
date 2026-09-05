@@ -18,7 +18,8 @@ export const COTACAO_STATUS_LABEL: Record<CotacaoStatus, string> = {
 };
 
 export const COTACAO_STATUS_COLOR: Record<CotacaoStatus, string> = {
-  rascunho: "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
+  rascunho:
+    "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)]",
   aberta: "border-blue-200 bg-blue-50 text-blue-700",
   respondida: "border-amber-200 bg-amber-50 text-amber-800",
   escolhida: "border-emerald-200 bg-emerald-50 text-emerald-700",

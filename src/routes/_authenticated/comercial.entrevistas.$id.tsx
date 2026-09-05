@@ -238,7 +238,10 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     pendente: { label: "Pendente", cls: "bg-amber-100 text-amber-900 border-amber-200" },
     respondida: { label: "Respondida", cls: "bg-emerald-100 text-emerald-900 border-emerald-200" },
-    expirada: { label: "Expirada", cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
+    expirada: {
+      label: "Expirada",
+      cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+    },
   };
   const s = map[status] ?? map.pendente;
   return (

@@ -232,7 +232,7 @@ function NovaCotacaoPage() {
                 </span>
               )}
             </p>
-            <div className="max-h-[500px] overflow-y-auto rounded border">
+            <div className="max-h-[500px] overflow-auto rounded border">
               {(insumosQ.data ?? []).length === 0 ? (
                 <div className="p-6 text-sm text-[var(--text-muted)]">
                   Nenhum insumo aprovado disponível. Aprove insumos na aba de um projeto antes de
@@ -401,7 +401,7 @@ function NovaCotacaoPage() {
                 ? ` Filtrando por ${categoriasSel.length} categoria(s) dos insumos selecionados.`
                 : ""}
             </p>
-            <div className="max-h-[400px] overflow-y-auto rounded border">
+            <div className="max-h-[400px] overflow-auto rounded border">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-[var(--bg-elevated)]">
                   <tr className="text-left text-xs text-[var(--text-secondary)]">

@@ -7,7 +7,11 @@ const MAP: Record<string, { label: string; className: string }> = {
     label: "Site (contato)",
     className: "bg-emerald-100 text-emerald-800 border-emerald-200",
   },
-  interno: { label: "Interno", className: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]" },
+  interno: {
+    label: "Interno",
+    className:
+      "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  },
 };
 
 export function ChamadoOrigemBadge({ origem }: { origem: string | null | undefined }) {

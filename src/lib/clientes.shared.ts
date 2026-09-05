@@ -9,7 +9,8 @@ export type ClienteStatus = (typeof CLIENTE_STATUS)[number];
 
 export const CLIENTE_STATUS_COLOR: Record<ClienteStatus, string> = {
   ativo: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  suspect: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  suspect:
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   prospect: "bg-amber-50 text-amber-700 border-amber-200",
   inativo: "bg-stone-100 text-stone-600 border-stone-200",
 };

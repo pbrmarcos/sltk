@@ -92,7 +92,8 @@ const EVENTO_COLORS: Record<string, string> = {
   marco: "bg-violet-500/15 text-violet-700 border-violet-500/30 dark:text-violet-300",
   reuniao: "bg-sky-500/15 text-sky-700 border-sky-500/30 dark:text-sky-300",
   entrega: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30 dark:text-emerald-300",
-  outro: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
+  outro:
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
   kickoff: "bg-amber-500/15 text-amber-700 border-amber-500/30 dark:text-amber-300",
   fat: "bg-fuchsia-500/15 text-fuchsia-700 border-fuchsia-500/30 dark:text-fuchsia-300",
   embarque: "bg-cyan-500/15 text-cyan-700 border-cyan-500/30 dark:text-cyan-300",
@@ -112,7 +113,10 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 function colorFor(map: Record<string, string>, key: string) {
-  return map[key] ?? "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]";
+  return (
+    map[key] ??
+    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]"
+  );
 }
 
 function hashColor(text: string) {

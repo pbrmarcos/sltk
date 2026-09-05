@@ -53,7 +53,7 @@ export function EntrevistasGeradasTab() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+      <div className="overflow-x-auto rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         <table className="w-full text-sm">
           <thead className="bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
             <tr className="text-left">
@@ -76,7 +76,10 @@ export function EntrevistasGeradasTab() {
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]">
+                <tr
+                  key={r.id}
+                  className="border-t border-[var(--bg-border)] hover:bg-[var(--bg-elevated)]"
+                >
                   <td className="px-3 py-2 whitespace-nowrap text-[var(--text-primary)]">
                     {new Date(r.criado_em).toLocaleString("pt-BR", {
                       dateStyle: "short",
@@ -91,9 +94,13 @@ export function EntrevistasGeradasTab() {
                   <td className="px-3 py-2 text-[var(--text-primary)]">{r.segmento}</td>
                   <td className="px-3 py-2">
                     <div className="max-w-[240px]">
-                      <div className="truncate text-[var(--text-primary)]">{r.lead_nome || "—"}</div>
+                      <div className="truncate text-[var(--text-primary)]">
+                        {r.lead_nome || "—"}
+                      </div>
                       {r.lead_empresa && (
-                        <div className="truncate text-[11px] text-[var(--text-secondary)]">{r.lead_empresa}</div>
+                        <div className="truncate text-[11px] text-[var(--text-secondary)]">
+                          {r.lead_empresa}
+                        </div>
                       )}
                     </div>
                   </td>
@@ -128,7 +135,12 @@ export function EntrevistasGeradasTab() {
                   </td>
                   <td className="px-3 py-2 text-right">
                     {r.drive_folder_url ? (
-                      <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-[var(--text-secondary)]">
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[var(--text-secondary)]"
+                      >
                         <a href={r.drive_folder_url} target="_blank" rel="noopener noreferrer">
                           <FileDown className="mr-1 h-3 w-3" /> Drive
                         </a>

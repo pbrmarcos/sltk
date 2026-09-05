@@ -100,7 +100,7 @@ export function ChecklistTiposPanel() {
         </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
