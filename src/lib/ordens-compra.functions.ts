@@ -671,17 +671,20 @@ export const setOcStatus = createServerFn({ method: "POST" })
     // Disparo de e-mail (assíncrono; falhas não bloqueiam a operação)
     try {
       const eventKey =
-        data.status === "aprovada"
-          ? "oc.aprovada"
-          : data.status === "enviada"
-            ? "oc.enviada"
-            : data.status === "cancelada"
-              ? "oc.cancelada"
-              : null;
+        data.status === "aguardando_aprovacao"
+          ? "oc.aguardando_aprovacao"
+          : data.status === "aprovada"
+            ? "oc.aprovada"
+            : data.status === "enviada"
+              ? "oc.enviada"
+              : data.status === "cancelada"
+                ? "oc.cancelada"
+                : null;
       if (eventKey) {
         const { getCriticalClient } = await import("@/lib/supabase-client.server");
         const supabaseAdmin = await getCriticalClient();
         const { dispatchEmail } = await import("@/lib/email/dispatch.server");
+        const { appUrl } = await import("@/lib/email/safe-dispatch.server");
         const { data: oc } = await supabaseAdmin
           .from("ordens_compra")
           .select(
@@ -706,7 +709,7 @@ export const setOcStatus = createServerFn({ method: "POST" })
             usuario,
             motivo: data.observacao ?? "",
             data: new Date().toLocaleString("pt-BR"),
-            link: `https://solutek-hub.lovable.app/compras/ordens/${data.id}`,
+            link: appUrl(`/compras/ordens/${data.id}`),
           },
         });
       }
