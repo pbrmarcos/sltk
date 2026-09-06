@@ -336,7 +336,14 @@ function ItemRow({
         <Button variant="ghost" size="sm" onClick={() => setOpen((o) => !o)}>
           {open ? "Menos" : "Mais"}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onDelete} className="text-[var(--danger)]">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            if (window.confirm(`Excluir o item "${it.label}"?`)) onDelete();
+          }}
+          className="text-[var(--danger)]"
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>

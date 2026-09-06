@@ -69,6 +69,7 @@ export function ConfigurarCapacidadeDialog({
     <Dialog
       open={open}
       onOpenChange={(v) => {
+        if (!v && (salvar.isPending || remover.isPending)) return;
         setOpen(v);
         if (!v) setValores({});
       }}
@@ -107,7 +108,15 @@ export function ConfigurarCapacidadeDialog({
                     size="sm"
                     className="h-6 px-2 text-[11px] text-[var(--danger)] hover:text-[var(--danger)]"
                     disabled={remover.isPending}
-                    onClick={() => remover.mutate(e.nome)}
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Remover a credencial ${e.nome}? Isso desativa a integração até uma nova credencial ser configurada.`,
+                        )
+                      ) {
+                        remover.mutate(e.nome);
+                      }
+                    }}
                   >
                     {remover.isPending && remover.variables === e.nome ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -141,7 +150,11 @@ export function ConfigurarCapacidadeDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={salvar.isPending || remover.isPending}
+          >
             Cancelar
           </Button>
           <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>

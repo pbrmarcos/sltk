@@ -103,7 +103,11 @@ export function SeoTab() {
               key={row.route_path}
               row={row}
               onSave={(patch) => save.mutate({ ...patch, route_path: row.route_path })}
-              onDelete={() => del.mutate(row.route_path)}
+              onDelete={() => {
+                if (window.confirm(`Remover a configuração de SEO de "${row.route_path}"?`)) {
+                  del.mutate(row.route_path);
+                }
+              }}
               saving={save.isPending}
             />
           ))}

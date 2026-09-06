@@ -674,7 +674,11 @@ function PerguntaCard(props: {
                           key={o.id}
                           opcao={o}
                           onEdit={() => props.onEditOpcao(o)}
-                          onDelete={() => props.onDeleteOpcao(o.id)}
+                          onDelete={() => {
+                            if (window.confirm("Excluir esta opção de resposta?")) {
+                              props.onDeleteOpcao(o.id);
+                            }
+                          }}
                         />
                       ))}
                     </ul>

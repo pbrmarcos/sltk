@@ -929,7 +929,13 @@ export function EditOportunidadeDialog({
                       <span>
                         {n.user_nome ?? "—"} • {formatDateTime(n.created_at)}
                       </span>
-                      <Button size="sm" variant="ghost" onClick={() => delNotaMut.mutate(n.id)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (window.confirm("Excluir esta anotação?")) delNotaMut.mutate(n.id);
+                        }}
+                      >
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     </div>
@@ -999,7 +1005,15 @@ export function EditOportunidadeDialog({
                         </a>
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => delAnexoMut.mutate(a.id)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        if (window.confirm(`Excluir o arquivo "${a.nome_final}"?`)) {
+                          delAnexoMut.mutate(a.id);
+                        }
+                      }}
+                    >
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>

@@ -491,7 +491,11 @@ export function TemplateEditorDialog({ templateId, open, onOpenChange }: Props) 
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => removeItem.mutate(i.id)}
+                                  onClick={() => {
+                                    if (window.confirm(`Excluir o item "${i.titulo}"?`)) {
+                                      removeItem.mutate(i.id);
+                                    }
+                                  }}
                                 >
                                   <Trash2 className="h-3.5 w-3.5 text-[var(--danger)]" />
                                 </Button>
@@ -606,7 +610,11 @@ export function TemplateEditorDialog({ templateId, open, onOpenChange }: Props) 
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => removeTar.mutate(t.id)}
+                                  onClick={() => {
+                                    if (window.confirm(`Excluir a tarefa "${t.titulo}"?`)) {
+                                      removeTar.mutate(t.id);
+                                    }
+                                  }}
                                 >
                                   <Trash2 className="h-3.5 w-3.5 text-[var(--danger)]" />
                                 </Button>
@@ -718,7 +726,11 @@ export function TemplateEditorDialog({ templateId, open, onOpenChange }: Props) 
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => removeEvt.mutate(e.id)}
+                                  onClick={() => {
+                                    if (window.confirm(`Excluir o evento "${e.titulo}"?`)) {
+                                      removeEvt.mutate(e.id);
+                                    }
+                                  }}
                                 >
                                   <Trash2 className="h-3.5 w-3.5 text-[var(--danger)]" />
                                 </Button>
