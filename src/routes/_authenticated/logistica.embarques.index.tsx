@@ -24,6 +24,7 @@ import {
   type LogisticaStatus,
 } from "@/lib/logistica.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { useMyModules } from "@/hooks/use-my-modules";
 
 export const Route = createFileRoute("/_authenticated/logistica/embarques/")({
   head: () => ({
@@ -45,7 +46,8 @@ const ALL = "all";
 
 function EmbarquesIndex() {
   const { role } = useAuth();
-  const canCreate = role === "admin" || role === "manager" || role === "field";
+  const { modules } = useMyModules();
+  const canCreate = role === "admin" || modules.has("logistica");
 
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<string>(ALL);

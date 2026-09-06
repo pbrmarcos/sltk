@@ -22,6 +22,7 @@ import {
   listTransportadoras,
 } from "@/lib/logistica.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { useMyModules } from "@/hooks/use-my-modules";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/logistica/embarques/novo")({
@@ -30,7 +31,8 @@ export const Route = createFileRoute("/_authenticated/logistica/embarques/novo")
 
 function NovoEmbarque() {
   const { role } = useAuth();
-  const canCreate = role === "admin" || role === "manager" || role === "field";
+  const { modules } = useMyModules();
+  const canCreate = role === "admin" || modules.has("logistica");
   const navigate = useNavigate();
 
   const projetos = useQuery({

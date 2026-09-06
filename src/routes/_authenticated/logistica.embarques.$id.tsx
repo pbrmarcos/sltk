@@ -68,6 +68,7 @@ import {
 } from "@/lib/logistica.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useMyModules } from "@/hooks/use-my-modules";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/logistica/embarques/$id")({
@@ -86,7 +87,8 @@ const STATUS_TONE: Record<LogisticaStatus, string> = {
 function EmbarqueDetalhe() {
   const { id } = Route.useParams();
   const { role } = useAuth();
-  const canEdit = role === "admin" || role === "manager" || role === "field";
+  const { modules } = useMyModules();
+  const canEdit = role === "admin" || modules.has("logistica");
   const qc = useQueryClient();
 
   const getFn = useServerFn(getEmbarque);
