@@ -3,7 +3,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DISCIPLINAS, type Disciplina } from "@/lib/equipamento-disciplina-etapas.functions";
-import { assertAdminOrManager } from "@/lib/admin-guard";
+import { assertAdminOrManager, assertCanAccessModule } from "@/lib/admin-guard";
 
 type AnySb = any;
 
@@ -105,6 +105,7 @@ export const createBomItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => createItemInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const origem = await ensureProjetoForBom(
       sb,
@@ -149,6 +150,7 @@ export const updateBomItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => updateItemInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const { id, ...rest } = data;
     const patch: Record<string, unknown> = { ...rest };
@@ -165,6 +167,7 @@ export const deleteBomItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const { error } = await sb
       .from("projeto_insumos")
@@ -183,6 +186,7 @@ export const submitBomForApproval = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => submitInput.parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
     const { data: rows, error } = await sb
       .from("projeto_insumos")

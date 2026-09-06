@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 
 const BUCKET = "orcamento-imagens";
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
@@ -39,6 +40,7 @@ export const uploadOrcamentoImagem = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     if (!ALLOWED.has(data.content_type)) {
       throw new Error("Formato não suportado. Use PNG, JPG, WEBP ou GIF.");
     }
@@ -73,6 +75,7 @@ export const signOrcamentoImagem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { path: string }) => d)
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { data: r, error } = await context.supabase.storage
       .from(BUCKET)
       .createSignedUrl(data.path, 3600);

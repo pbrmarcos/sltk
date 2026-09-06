@@ -3,7 +3,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ETP_STATUS } from "@/lib/engenharia.shared";
-import { hasRole, assertAdminOrManager } from "@/lib/admin-guard";
+import { hasRole, assertAdminOrManager, assertCanAccessModule } from "@/lib/admin-guard";
 
 /* ============= LIST: por equipamento ============= */
 
@@ -70,6 +70,7 @@ export const createEtp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ equipamento_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const { data: eqp, error: eqpErr } = await context.supabase
       .from("cliente_equipamentos")
       .select("id, cliente_id")
