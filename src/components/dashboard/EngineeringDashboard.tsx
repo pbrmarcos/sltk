@@ -17,7 +17,7 @@ export function EngineeringDashboard({ userName }: { userName: string }) {
       subtitle="ETPs em aberto, etapas de projeto e revisões críticas."
       actions={[
         { label: "Projetos", to: "/engenharia/projetos", icon: FolderKanban },
-        { label: "ETPs", to: "/engenharia/etps", icon: Ruler },
+        { label: "ETPs", to: "/engenharia/etp", icon: Ruler },
         { label: "Apontar HH", to: "/engenharia/hh", icon: Clock },
       ]}
     >

@@ -260,7 +260,15 @@ function ChamadosListPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {query.isLoading ? (
+            {query.isError ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                  {query.error instanceof Error
+                    ? query.error.message
+                    : "Erro ao carregar chamados."}
+                </TableCell>
+              </TableRow>
+            ) : query.isLoading ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                   Carregando…
