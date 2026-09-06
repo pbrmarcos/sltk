@@ -23,8 +23,13 @@ import { IntegracoesTab } from "@/components/admin/IntegracoesTab";
 import { GroqConfigCard } from "@/components/admin/GroqConfigCard";
 import { EnriquecimentoLogsTab } from "@/components/admin/EnriquecimentoLogsTab";
 import { BancoTab } from "@/components/admin/BancoTab";
+import { ConfigurarCapacidadeDialog } from "@/components/admin/ConfigurarCapacidadeDialog";
 
 const AREAS = Object.keys(AREA_LABEL) as CapabilityArea[];
+
+// Credenciais de bootstrap do Supabase — pré-requisito pra sequer falar com
+// o banco, então nunca podem ser configuradas a partir dele.
+const SEM_FORMULARIO = new Set(["supabase_core", "supabase_service_role"]);
 
 const STATUS_META: Record<
   CapabilityStatus["status"],
@@ -73,7 +78,15 @@ export function DiagnosticoTab() {
           criticidade: c.criticidade,
           status: "nao_testado",
           detalhe: "Ainda não verificada nesta sessão.",
-          envs: [],
+          envs: [
+            ...c.envs.map((nome) => ({ nome, presente: false, mascara: null, opcional: false })),
+            ...(c.envsOpcionais ?? []).map((nome) => ({
+              nome,
+              presente: false,
+              mascara: null,
+              opcional: true,
+            })),
+          ],
         }));
     return AREAS.map((area) => ({ area, itens: base.filter((i) => i.area === area) })).filter(
       (g) => g.itens.length > 0,
@@ -190,6 +203,9 @@ export function DiagnosticoTab() {
                       >
                         <Icon className="h-4 w-4" /> {meta.label}
                       </span>
+                      {!SEM_FORMULARIO.has(i.id) && (
+                        <ConfigurarCapacidadeDialog cap={i} onSalvo={() => rodar.mutate([i.id])} />
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
