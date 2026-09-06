@@ -7,7 +7,7 @@ import { gerarDocumentoEntrevista } from "@/lib/entrevistas-docs.functions";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +19,16 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -598,15 +608,18 @@ function EntrevistaCard({
         </CardContent>
       </Card>
 
-      <Dialog open={confirmTrash} onOpenChange={setConfirmTrash}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mover para a lixeira</DialogTitle>
-            <DialogDescription>
+      <AlertDialog
+        open={confirmTrash}
+        onOpenChange={(o) => !trashMut.isPending && setConfirmTrash(o)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mover para a lixeira</AlertDialogTitle>
+            <AlertDialogDescription>
               A entrevista <strong>#{e.codigo}</strong> ficará na lixeira por 30 dias antes da
               exclusão automática. Você pode restaurá-la a qualquer momento nesse período.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <div className="space-y-2">
             <Label>Motivo (opcional)</Label>
             <Textarea
@@ -615,51 +628,56 @@ function EntrevistaCard({
               placeholder="Ex.: duplicada, teste, lead desqualificado…"
             />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmTrash(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={trashMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
               disabled={trashMut.isPending}
-              onClick={() => trashMut.mutate()}
+              onClick={(ev) => {
+                ev.preventDefault();
+                trashMut.mutate();
+              }}
             >
               {trashMut.isPending ? "Enviando…" : "Enviar para lixeira"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <Dialog open={confirmPurge} onOpenChange={setConfirmPurge}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-rose-700">
+      <AlertDialog
+        open={confirmPurge}
+        onOpenChange={(o) => !purgeMut.isPending && setConfirmPurge(o)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-rose-700">
               <ShieldAlert className="h-5 w-5" /> Excluir definitivamente
-            </DialogTitle>
-            <DialogDescription>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
               Esta ação é <strong>irreversível</strong>. Todas as respostas e anexos de{" "}
               <strong>#{e.codigo}</strong> serão apagados. A ação ficará registrada na auditoria com
               seu usuário.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <div className="space-y-2">
             <Label>Motivo (opcional, será registrado)</Label>
             <Textarea value={motivo} onChange={(ev) => setMotivo(ev.target.value)} />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmPurge(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={purgeMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
               disabled={purgeMut.isPending}
-              onClick={() => purgeMut.mutate()}
+              onClick={(ev) => {
+                ev.preventDefault();
+                purgeMut.mutate();
+              }}
             >
               {purgeMut.isPending ? "Excluindo…" : "Excluir definitivamente"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="flex h-[min(92vh,980px)] max-w-[min(1180px,calc(100vw-2rem))] flex-col overflow-hidden p-0 [&>button]:hidden">

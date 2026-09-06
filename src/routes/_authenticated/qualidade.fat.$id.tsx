@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -19,13 +19,15 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -300,35 +302,36 @@ function FatDetailPage() {
         relatorioCodigo={fat.codigo}
       />
 
-      <Dialog open={reprovarOpen} onOpenChange={(o) => !reproving && setReprovarOpen(o)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reprovar FAT</DialogTitle>
-            <DialogDescription>
+      <AlertDialog open={reprovarOpen} onOpenChange={(o) => !reproving && setReprovarOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reprovar FAT</AlertDialogTitle>
+            <AlertDialogDescription>
               Descreva a não conformidade encontrada. O motivo é enviado por e-mail para engenharia
               e gestão.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <Textarea
             value={motivoReprovacao}
             onChange={(e) => setMotivoReprovacao(e.target.value)}
             placeholder="Ex.: vazamento no circuito hidráulico durante o ensaio funcional…"
             rows={4}
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReprovarOpen(false)} disabled={reproving}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={doReprovar}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reproving}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
               disabled={reproving || motivoReprovacao.trim().length < 5}
+              onClick={(e) => {
+                e.preventDefault();
+                doReprovar();
+              }}
             >
               {reproving ? "Reprovando…" : "Confirmar reprovação"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
