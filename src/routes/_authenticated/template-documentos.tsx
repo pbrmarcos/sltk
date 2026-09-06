@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -15,8 +17,13 @@ import { listSATTemplates } from "@/lib/sat-templates.functions";
 type MainAba = "projetos" | "fat" | "sat";
 type ViewAba = "ativos" | "arquivados";
 
+const searchSchema = z.object({
+  aba: fallback(z.enum(["projetos", "fat", "sat"]), "projetos").default("projetos"),
+});
+
 function TemplateDocumentosPage() {
-  const [aba, setAba] = useState<MainAba>("projetos");
+  const search = Route.useSearch();
+  const [aba, setAba] = useState<MainAba>(search.aba);
   const [viewProjetos, setViewProjetos] = useState<ViewAba>("ativos");
   const [viewFat, setViewFat] = useState<ViewAba>("ativos");
   const [viewSat, setViewSat] = useState<ViewAba>("ativos");
@@ -90,5 +97,6 @@ function TemplateDocumentosPage() {
 }
 
 export const Route = createFileRoute("/_authenticated/template-documentos")({
+  validateSearch: zodValidator(searchSchema),
   component: TemplateDocumentosPage,
 });

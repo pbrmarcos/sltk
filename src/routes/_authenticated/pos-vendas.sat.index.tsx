@@ -83,10 +83,17 @@ function SATListPage() {
         title="SAT — Serviço de Atendimento Técnico"
         subtitle="Relatórios de atendimento técnico em campo"
         actions={
-          <Button onClick={() => createMut.mutate()} disabled={createMut.isPending}>
-            {createMut.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-            <Plus className="mr-1 h-4 w-4" /> Novo SAT
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link to="/template-documentos" search={{ aba: "sat" }}>
+                Templates de SAT
+              </Link>
+            </Button>
+            <Button onClick={() => createMut.mutate()} disabled={createMut.isPending}>
+              {createMut.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+              <Plus className="mr-1 h-4 w-4" /> Novo SAT
+            </Button>
+          </div>
         }
       />
 

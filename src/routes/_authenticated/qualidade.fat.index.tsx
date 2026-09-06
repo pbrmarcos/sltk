@@ -29,9 +29,16 @@ function FatListPage() {
         title="FAT — Factory Acceptance Test"
         subtitle="Validação final de equipamentos antes do embarque"
         actions={
-          <Button asChild>
-            <Link to="/qualidade/fat/novo">Novo FAT</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link to="/template-documentos" search={{ aba: "fat" }}>
+                Templates de FAT
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/qualidade/fat/novo">Novo FAT</Link>
+            </Button>
+          </div>
         }
       />
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_200px]">

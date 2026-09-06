@@ -22,10 +22,13 @@ const ROUTE_MODULE_PREFIXES: Array<[string, AppModule | AppModule[]]> = [
   ["/know-how", "know_how"],
   ["/changelog", "changelog"],
   ["/design-system", "admin"],
-  // Superfícies de configuração global (editor de blocos, templates) são
-  // administrativas: o menu já esconde, aqui fechamos o acesso por URL.
+  // Editor de blocos é administrativo de verdade: o menu já esconde, aqui
+  // fechamos o acesso por URL.
   ["/central-documentos", "admin"],
-  ["/template-documentos", "admin"],
+  // Templates de Documentos tem abas com dono diferente: Qualidade mantém os
+  // templates de FAT, Pós-venda os de SAT (o servidor já valida isso por
+  // módulo em cada aba) — não pode exigir só "admin" aqui.
+  ["/template-documentos", ["admin", "qualidade", "pos_vendas"]],
   // O importador é usado por quem já tem acesso a Clientes ou Fornecedores
   // (a função de servidor valida o módulo certo por entidade) — não é
   // administrativo, então não pode exigir só "admin" aqui.
