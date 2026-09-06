@@ -3,7 +3,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAuditServer } from "@/lib/audit.server";
-import { hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
+import { hasAnyRole, assertCanAccessModule, type AppRoleName } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
@@ -16,9 +16,7 @@ import {
   CLIENTE_STATUS,
 } from "@/lib/clientes.shared";
 
-const ALLOWED_ROLES = ["admin", "manager", "sales"] as const;
 const DELETE_ROLES = ["admin", "manager"] as const;
-type Role = (typeof ALLOWED_ROLES)[number];
 
 async function assertRole(
   admin: SupabaseClient<Database>,
@@ -193,7 +191,8 @@ export const createCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => clienteInputSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
+    await assertCanAccessModule(context.supabase, context.userId, "clientes");
+    const admin = context.supabase;
     const pais = await loadPais(admin, data.pais);
 
     const documento = normalizeDocumento(data.documento_fiscal_numero);
@@ -341,7 +340,8 @@ export const updateCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
+    await assertCanAccessModule(context.supabase, context.userId, "clientes");
+    const admin = context.supabase;
 
     const { data: before, error: befErr } = await admin
       .from("clientes")
@@ -708,7 +708,8 @@ export const addClienteSocio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => socioCreateInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
+    await assertCanAccessModule(context.supabase, context.userId, "clientes");
+    const admin = context.supabase;
     // Duplicate prevention: same nome (case-insensitive) no mesmo cliente, não removido.
     const { data: dup } = await admin
       .from("cliente_socios")
@@ -746,7 +747,8 @@ export const removerClienteSocio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
+    await assertCanAccessModule(context.supabase, context.userId, "clientes");
+    const admin = context.supabase;
     const { data: row, error: gErr } = await admin
       .from("cliente_socios")
       .select("id, cliente_id, nome")

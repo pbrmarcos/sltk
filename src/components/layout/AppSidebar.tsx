@@ -142,7 +142,6 @@ const SECTIONS: Section[] = [
   },
   {
     title: "Compras",
-    module: "compras",
     items: [
       {
         label: "Solicitações de Compra",
@@ -335,6 +334,7 @@ const SECTIONS: Section[] = [
         to: "/changelog",
         icon: FileText,
         roles: ["engineer", "production", "purchasing", "assembly", "field", "sales"],
+        module: "changelog",
       },
     ],
   },

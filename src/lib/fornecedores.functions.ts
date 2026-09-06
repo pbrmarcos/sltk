@@ -8,11 +8,15 @@ import {
   FORNECEDOR_RANKINGS,
   FORNECEDOR_STATUS,
 } from "@/lib/fornecedores.shared";
-import { hasAnyRole } from "@/lib/admin-guard";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 
 async function assertPurchasingRole(supabase: any, uid: string): Promise<void> {
-  const ok = await hasAnyRole(supabase, uid, ["admin", "manager", "purchasing"]);
-  if (!ok) throw new Error("Sem permissão para operar em Fornecedores");
+  await assertCanAccessModule(
+    supabase,
+    uid,
+    "fornecedores",
+    "Sem permissão para operar em Fornecedores.",
+  );
 }
 
 const listInput = z.object({
