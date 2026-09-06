@@ -411,7 +411,10 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
         )}
       </div>
 
-      <Dialog open={!!lostDialog} onOpenChange={(o) => !o && setLostDialog(null)}>
+      <Dialog
+        open={!!lostDialog}
+        onOpenChange={(o) => !o && !update.isPending && setLostDialog(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Marcar como perdida</DialogTitle>
@@ -424,7 +427,11 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
             maxLength={500}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLostDialog(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setLostDialog(null)}
+              disabled={update.isPending}
+            >
               Cancelar
             </Button>
             <Button

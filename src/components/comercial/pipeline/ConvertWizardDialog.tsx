@@ -485,8 +485,10 @@ export function ConvertWizardDialog({
 
   if (!source) return null;
 
+  const busy = createMut.isPending || convertMut.isPending;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
       <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -1125,12 +1127,12 @@ export function ConvertWizardDialog({
 
         <DialogFooter className="gap-2 sm:gap-2">
           {step > 1 && (
-            <Button variant="ghost" onClick={() => setStep((s) => (s - 1) as Step)}>
+            <Button variant="ghost" onClick={() => setStep((s) => (s - 1) as Step)} disabled={busy}>
               <ArrowLeft className="w-4 h-4 mr-1" /> Voltar
             </Button>
           )}
           <div className="flex-1" />
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
             Cancelar
           </Button>
 
