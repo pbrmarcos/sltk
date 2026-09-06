@@ -1,18 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Server functions do atendimento interno de chamados.
-// Restritas a admin/manager/engineer via has_role. As mutações passam pelas
-// políticas RLS acima + trigger de auditoria, então tudo cai em audit_log.
+// Operações do dia a dia (listar, ver, responder, mudar status, assumir,
+// comentário interno, vincular equipamento) aceitam admin/manager/engineer
+// OU o módulo pos_vendas — é a mesma tela que o menu já promete pro papel
+// field. Ações de gestão sobre a fila (prioridade, reatribuição, listar
+// atendentes) continuam restritas a admin/manager/engineer.
 
 import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertEngineerOrHigher } from "@/lib/admin-guard";
+import {
+  assertEngineerOrHigher,
+  hasAnyRole,
+  canAccessModule,
+  AdminGuardError,
+} from "@/lib/admin-guard";
 import { patchParaStatusChamado, eventoDeEmail } from "@/lib/suporte-status";
 
 async function meuNome(sb: any, uid: string): Promise<string> {
   const { data } = await sb.from("profiles").select("full_name, email").eq("id", uid).maybeSingle();
   return (data?.full_name as string) || (data?.email as string) || "Atendente";
+}
+
+/** Operação do dia a dia de Chamados: admin/manager/engineer OU módulo pos_vendas. */
+async function assertCanOperateChamado(sb: any, userId: string): Promise<void> {
+  const [engineerOrHigher, hasModule] = await Promise.all([
+    hasAnyRole(sb, userId, ["admin", "manager", "engineer"]),
+    canAccessModule(sb, userId, "pos_vendas"),
+  ]);
+  if (!engineerOrHigher && !hasModule) {
+    throw new AdminGuardError("not_authorized", "Acesso restrito a este módulo.");
+  }
 }
 
 const listSchema = z.object({
@@ -36,7 +55,7 @@ export const listChamados = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => listSchema.parse(i ?? {}))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
 
     // Filtro por cliente (nome/fantasia/CNPJ) resolvido para lista de ids.
     let clienteIds: string[] | null = null;
@@ -235,7 +254,7 @@ export const addComentarioInterno = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => comentarioSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
     const { error } = await sb.from("chamado_mensagens").insert({
       chamado_id: data.chamado_id,
@@ -283,7 +302,7 @@ export const getChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => getSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
 
     const { data: chamado, error } = await sb
       .from("chamados")
@@ -334,7 +353,7 @@ export const responderChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => responderSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
 
     // Se ninguém assumiu ainda, este atendente vira dono.
@@ -408,7 +427,7 @@ export const alterarStatusChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => statusSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
 
     const patch = patchParaStatusChamado(data.para, new Date().toISOString());
     const { error } = await sb.from("chamados").update(patch).eq("id", data.chamado_id);
@@ -460,7 +479,7 @@ export const assumirChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => assumirSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
 
     const { error } = await sb
@@ -481,7 +500,7 @@ export const vincularEquipamentoChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => vincularSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
 
     let cliente_id: string | null = null;
     if (data.equipamento_id) {
