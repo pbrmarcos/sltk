@@ -96,7 +96,7 @@ function EtapasPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Home", href: "/" },
-          { label: "Engenharia" },
+          { label: "Operações" },
           { label: "Planejamento" },
           { label: "Gantt / Etapas" },
         ]}

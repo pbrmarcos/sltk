@@ -89,7 +89,7 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Engenharia" }, { label: title }]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Operações" }, { label: title }]}
         title={title}
         subtitle={subtitle}
         actions={<Button onClick={() => setOpenNovo(true)}>Nova revisão</Button>}

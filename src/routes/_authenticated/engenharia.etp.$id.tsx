@@ -282,7 +282,7 @@ function EtpEditorPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Home", href: "/" },
-          { label: "Engenharia" },
+          { label: "Operações" },
           { label: "ETPs", href: "/engenharia/etp" },
           { label: `v${data.versao}` },
         ]}

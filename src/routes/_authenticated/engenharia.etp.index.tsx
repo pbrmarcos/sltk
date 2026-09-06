@@ -53,7 +53,7 @@ function EtpListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Engenharia" }, { label: "ETPs" }]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Operações" }, { label: "ETPs" }]}
         title="ETPs — Especificações Técnicas do Produto"
         subtitle="Versionamento por equipamento. Versão aprovada é a referência para fabricação."
         actions={<Button onClick={() => setOpenNovo(true)}>Novo ETP</Button>}

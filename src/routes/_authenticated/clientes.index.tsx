@@ -113,7 +113,7 @@ function ClientesListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "CRM" }, { label: "Clientes" }]}
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Comercial" }, { label: "Clientes" }]}
         title="Clientes"
         subtitle="Contas, key accounts e prospects"
         actions={

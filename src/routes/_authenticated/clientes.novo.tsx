@@ -13,7 +13,7 @@ function NovoClientePage() {
       <PageHeader
         breadcrumbs={[
           { label: "Home", href: "/" },
-          { label: "CRM" },
+          { label: "Comercial" },
           { label: "Clientes", href: "/clientes" },
           { label: "Novo" },
         ]}

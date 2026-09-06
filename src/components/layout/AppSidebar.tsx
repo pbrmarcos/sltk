@@ -85,6 +85,13 @@ const SECTIONS: Section[] = [
         module: "comercial",
       },
       {
+        label: "Clientes",
+        to: "/clientes",
+        icon: Building2,
+        roles: ["sales", "field"],
+        module: "clientes",
+      },
+      {
         label: "Entrevistas",
         to: "/comercial/entrevistas",
         icon: MessageSquare,
@@ -110,13 +117,6 @@ const SECTIONS: Section[] = [
   {
     title: "Operações",
     items: [
-      {
-        label: "Clientes",
-        to: "/clientes",
-        icon: Building2,
-        roles: ["sales", "field"],
-        module: "clientes",
-      },
       {
         label: "ETPs",
         to: "/engenharia/etp",
