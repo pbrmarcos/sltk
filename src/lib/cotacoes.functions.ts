@@ -2,18 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { COTACAO_STATUS } from "@/lib/cotacoes.shared";
 
 type SB = { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-async function isPurchasing(supabase: any, uid: string): Promise<boolean> {
-  const roles = ["admin", "manager", "purchasing"] as const;
-  for (const r of roles) {
-    const { data } = await supabase.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return true;
-  }
-  return false;
-}
 
 /* ============ LIST ============ */
 export const listCotacoes = createServerFn({ method: "POST" })
@@ -152,7 +144,7 @@ export const createCotacao = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
-    if (!(await isPurchasing(sb, context.userId))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
 
     const { data: cot, error: e1 } = await sb
       .from("cotacoes")
@@ -247,7 +239,7 @@ export const inviteFornecedores = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
-    if (!(await isPurchasing(sb, context.userId))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const rows = data.fornecedor_ids.map((fid) => ({
       cotacao_id: data.cotacao_id,
       fornecedor_id: fid,
@@ -307,7 +299,7 @@ export const setCotacaoStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
-    if (!(await isPurchasing(sb, context.userId))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const { error } = await sb.from("cotacoes").update({ status: data.status }).eq("id", data.id);
     if (error) throw friendlyDbError(error);
     await sb.from("cotacao_historico").insert({
@@ -332,7 +324,7 @@ export const escolherVencedor = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
-    if (!(await isPurchasing(sb, context.userId))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const { error } = await sb.from("cotacao_escolhas").upsert(
       {
         cotacao_item_id: data.cotacao_item_id,

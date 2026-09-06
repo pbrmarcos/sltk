@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import {
   OC_REQUIRED_FIELDS,
   OC_STATUS,
@@ -11,14 +12,6 @@ import {
 } from "@/lib/ordens-compra.shared";
 
 type SB = { from: (t: string) => any; rpc: (n: string, p?: any) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-async function canEdit(supabase: any, uid: string): Promise<boolean> {
-  for (const r of ["admin", "manager", "purchasing"] as const) {
-    const { data } = await supabase.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return true;
-  }
-  return false;
-}
 
 async function getUserName(supabase: any, uid: string): Promise<string> {
   const { data } = await supabase
@@ -190,7 +183,7 @@ export const createOrdemCompra = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão para criar OC");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     // Snapshot fornecedor
     const { data: f } = await sb
@@ -251,7 +244,7 @@ export const createOrdemDeCotacao = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     // Busca escolhas (vencedores) da cotação
     const { data: cot } = await sb
@@ -368,7 +361,7 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     const { data: insumo, error: e0 } = await sb
       .from("projeto_insumos")
@@ -549,7 +542,7 @@ export const updateOrdemCompra = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     const { data: cur } = await sb
       .from("ordens_compra")
@@ -598,7 +591,7 @@ export const upsertItemOc = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     const { id, ...rest } = data;
     if (id) {
@@ -617,7 +610,7 @@ export const removeItemOc = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
     const { error } = await sb.from("ordem_compra_itens").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
@@ -638,7 +631,7 @@ export const setOcStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
-    if (!(await canEdit(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     const { data: cur } = await sb
       .from("ordens_compra")
