@@ -82,15 +82,9 @@ describe("PERMISSION_RULES", () => {
     }> = [
       {
         role: "sales",
-        modules: { processos: true },
+        modules: { comercial: true },
         expectAction: "enable",
         expectModule: "dashboard",
-      },
-      {
-        role: "engineer",
-        modules: { dashboard: true, qualidade: true },
-        expectAction: "enable",
-        expectModule: "processos",
       },
       {
         role: "sales",
@@ -129,18 +123,9 @@ describe("PERMISSION_RULES", () => {
   });
 
   it("matriz com módulos ativos sem Dashboard falha", () => {
-    const m = { ...allOff(), processos: true, dashboard: false } as Record<AppModule, boolean>;
+    const m = { ...allOff(), comercial: true, dashboard: false } as Record<AppModule, boolean>;
     const v = validatePermissionMatrix("sales", m);
     expect(v.some((x) => x.ruleId === "dashboard-required")).toBe(true);
-  });
-
-  it("Qualidade ativa sem Processos falha e identifica células envolvidas", () => {
-    const m = { ...allOff(), dashboard: true, qualidade: true } as Record<AppModule, boolean>;
-    const v = validatePermissionMatrix("engineer", m);
-    const rule = v.find((x) => x.ruleId === "qualidade-requires-processos");
-    expect(rule).toBeDefined();
-    expect(rule?.modulesInvolved).toEqual(["qualidade", "processos"]);
-    expect(rule?.hint).toMatch(/FAT|revis/i);
   });
 
   it("Comercial e Pós-venda exigem Clientes", () => {
@@ -203,11 +188,11 @@ describe("applyBulkSetRolePermissions (integração)", () => {
         role: "sales",
         modules: {
           dashboard: true,
-          qualidade: true,
-          processos: false,
+          pos_vendas: true,
+          clientes: false,
         },
       }),
-    ).rejects.toThrow(/Qualidade.*requer.*Processos/);
+    ).rejects.toThrow(/Pós-venda.*requer.*Clientes/);
     expect(upsertCalls).toHaveLength(0);
   });
 
@@ -220,7 +205,6 @@ describe("applyBulkSetRolePermissions (integração)", () => {
         clientes: true,
         comercial: true,
         pos_vendas: true,
-        processos: true,
         qualidade: true,
       },
     });

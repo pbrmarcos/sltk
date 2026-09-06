@@ -5,7 +5,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const APP_MODULES = [
   "dashboard",
-  "processos",
   "clientes",
   "comercial",
   "engenharia",
@@ -23,7 +22,6 @@ export type AppModule = (typeof APP_MODULES)[number];
 
 export const MODULE_LABEL: Record<AppModule, string> = {
   dashboard: "Dashboard",
-  processos: "Processos / Pipeline",
   clientes: "Clientes",
   comercial: "Comercial (Pipeline, Checklists, Orçamentos)",
   engenharia: "Operações (ETP, Gantt, Projetos)",
@@ -184,15 +182,6 @@ export const PERMISSION_RULES: PermissionRule[] = [
       }
       return null;
     },
-  },
-  {
-    id: "qualidade-requires-processos",
-    description: "Qualidade depende de Processos.",
-    check: requires(
-      "qualidade",
-      "processos",
-      "FAT e revisões mecânica/elétrica pertencem sempre a um processo. Sem acesso a Processos o usuário não consegue abrir uma revisão.",
-    ),
   },
   {
     id: "pos_vendas-requires-clientes",

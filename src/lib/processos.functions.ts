@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 
 /**
  * Server fns para Processos (CRM pipeline).
@@ -278,6 +279,7 @@ export const createProcesso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { data: inserted, error } = await context.supabase
       .from("processos")
       .insert({
@@ -415,6 +417,7 @@ export const moveProcesso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => moveInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { data: before } = await context.supabase
       .from("processos")
       .select("stage, tipo")
@@ -557,6 +560,7 @@ export const toggleChecklistItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => toggleInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { error } = await context.supabase.from("processo_checklist_status").upsert(
       {
         processo_id: data.processo_id,
@@ -578,6 +582,7 @@ export const concluirTarefa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => idInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { error } = await context.supabase
       .from("processo_tarefas")
       .update({ status: "concluida" } as never)
@@ -711,6 +716,7 @@ export const marcarComoPerdido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => marcarPerdidoInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as unknown as Sb;
     await assertCanArchive({ supabase: sb, userId: context.userId }, data.id);
 
@@ -770,6 +776,7 @@ export const restaurarProcesso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => restoreInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as unknown as Sb;
     await assertCanArchive({ supabase: sb, userId: context.userId }, data.id);
 
