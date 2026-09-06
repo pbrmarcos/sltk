@@ -80,7 +80,7 @@ function SATListPage() {
           { label: "Pós-venda", href: "/pos-vendas" },
           { label: "Relatórios SAT" },
         ]}
-        title="Relatórios SAT"
+        title="SAT — Serviço de Atendimento Técnico"
         subtitle="Relatórios de atendimento técnico em campo"
         actions={
           <Button onClick={() => createMut.mutate()} disabled={createMut.isPending}>
