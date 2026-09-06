@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect, useMemo, useRef } from "react";
 import {
-  ShieldAlert,
   Save,
   History,
   Languages,
@@ -21,6 +20,7 @@ import { diffLines } from "diff";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,10 +86,7 @@ function AdminDocumentosPage() {
           breadcrumbs={[{ label: "Documentos" }, { label: "Editor de Blocos" }]}
           title="Editor de Blocos"
         />
-        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-12 text-center">
-          <ShieldAlert className="h-10 w-10 text-[var(--danger)]" />
-          <h2 className="text-lg font-semibold">Acesso restrito</h2>
-        </div>
+        <AccessDenied message="Esta área é exclusiva para administradores e gestores." />
       </PageContainer>
     );
   }

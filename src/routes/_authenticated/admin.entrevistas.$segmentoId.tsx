@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -204,11 +205,7 @@ function AdminEntrevistaEditor() {
           breadcrumbs={[{ label: "Administração", href: "/admin" }, { label: "Entrevistas" }]}
           title="Formulário de Entrevista"
         />
-        <Card className="mt-6">
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Acesso restrito a admin e manager.
-          </CardContent>
-        </Card>
+        <AccessDenied message="Esta área é exclusiva para administradores e gestores." />
       </PageContainer>
     );
   }

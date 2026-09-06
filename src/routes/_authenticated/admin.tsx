@@ -1,8 +1,9 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import { logAdminLogin, logAdminAccessDenied } from "@/lib/admin-events.functions";
 import { SettingsNav, firstAccessibleAdminRoute } from "@/components/admin/SettingsNav";
 
@@ -78,14 +79,7 @@ function AdminLayout() {
   if (!allowed) {
     return (
       <PageContainer>
-        <div className="mx-auto max-w-md rounded-lg border bg-card p-6 text-center">
-          <ShieldAlert className="mx-auto mb-3 h-8 w-8 text-destructive" />
-          <h1 className="text-lg font-semibold">Acesso restrito</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Este painel é reservado a administradores, gestores e engenharia. Você será
-            redirecionado.
-          </p>
-        </div>
+        <AccessDenied message="Este painel é reservado a administradores, gestores e engenharia. Você será redirecionado." />
       </PageContainer>
     );
   }

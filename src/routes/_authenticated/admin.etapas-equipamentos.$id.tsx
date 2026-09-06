@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  ShieldAlert,
   Plus,
   Trash2,
   ArrowUp,
@@ -19,6 +18,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -143,10 +143,7 @@ function Page() {
   if (!authorized) {
     return (
       <PageContainer>
-        <div className="mx-auto max-w-md rounded-lg border border-border bg-card p-6 text-center">
-          <ShieldAlert className="mx-auto mb-2 h-6 w-6 text-amber-600" />
-          <p className="text-sm font-medium">Acesso restrito</p>
-        </div>
+        <AccessDenied message="Esta área é exclusiva para administradores, gestores e engenharia." />
       </PageContainer>
     );
   }

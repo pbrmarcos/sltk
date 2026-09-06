@@ -5,7 +5,6 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   Loader2,
   Mail,
-  ShieldAlert,
   Send,
   CheckCircle2,
   XCircle,
@@ -17,6 +16,7 @@ import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -108,13 +108,7 @@ function EmailsAdminPage() {
     return (
       <PageContainer>
         <PageHeader breadcrumbs={crumbs} title="E-mails automáticos" />
-        <div className="flex flex-col items-center gap-2 rounded-lg border p-12 text-center">
-          <ShieldAlert className="h-10 w-10 text-destructive" />
-          <h2 className="text-lg font-semibold">Acesso restrito</h2>
-          <p className="text-sm text-muted-foreground">
-            Só administradores e gestores podem abrir esta tela.
-          </p>
-        </div>
+        <AccessDenied message="Só administradores e gestores podem abrir esta tela." />
       </PageContainer>
     );
   }

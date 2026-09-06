@@ -4,7 +4,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  ShieldAlert,
   Search,
   Plus,
   Eye,
@@ -19,6 +18,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import { SeoFieldsCard } from "@/components/admin/SeoFieldsCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,11 +59,7 @@ function Page() {
   if (role !== "admin") {
     return (
       <PageContainer>
-        <div className="mx-auto max-w-md rounded-lg border border-border bg-card p-6 text-center">
-          <ShieldAlert className="mx-auto mb-2 h-6 w-6 text-amber-600" />
-          <p className="text-sm font-medium">Acesso restrito</p>
-          <p className="text-xs text-muted-foreground">Somente administradores.</p>
-        </div>
+        <AccessDenied message="Esta área é exclusiva para administradores." />
       </PageContainer>
     );
   }

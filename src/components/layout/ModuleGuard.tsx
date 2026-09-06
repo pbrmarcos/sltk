@@ -1,12 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
 import { useRef } from "react";
-import { ShieldAlert } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useMyModules } from "@/hooks/use-my-modules";
 import { moduleForPath } from "@/lib/route-modules";
 import { MODULE_LABEL } from "@/lib/permissoes.functions";
-import { Button } from "@/components/ui/button";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 
 /**
  * Guard de módulo aplicado a todas as rotas autenticadas.
@@ -41,19 +40,15 @@ export function ModuleGuard({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <div className="max-w-md rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 text-center">
-        <ShieldAlert className="mx-auto mb-4 h-10 w-10 text-[var(--text-muted)]" />
-        <h1 className="text-lg font-semibold">Acesso restrito</h1>
-        <p className="mt-2 text-sm text-[var(--text-muted)]">
+    <AccessDenied
+      backTo="/dashboard"
+      message={
+        <>
           Seu perfil não tem permissão para o módulo{" "}
           <strong>{requiredList.map((m) => MODULE_LABEL[m]).join(" ou ")}</strong>. Solicite
           liberação a um administrador em Administração › Usuários &amp; Permissões.
-        </p>
-        <Button asChild className="mt-6">
-          <Link to="/dashboard">Voltar ao dashboard</Link>
-        </Button>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }

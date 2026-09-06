@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ShieldAlert,
   UserPlus,
   Pencil,
   UserX,
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AccessDenied } from "@/components/layout/AccessDenied";
 import {
   Table,
   TableBody,
@@ -90,13 +90,7 @@ function UsuariosPage() {
     return (
       <PageContainer>
         <PageHeader breadcrumbs={crumbs} title="Usuários & Permissões" />
-        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-12 text-center">
-          <ShieldAlert className="h-10 w-10 text-[var(--danger)]" />
-          <h2 className="text-lg font-semibold">Acesso restrito</h2>
-          <p className="text-sm text-[var(--text-muted)]">
-            Esta área é exclusiva para administradores, gestores e engenharia.
-          </p>
-        </div>
+        <AccessDenied message="Esta área é exclusiva para administradores, gestores e engenharia." />
       </PageContainer>
     );
   }
