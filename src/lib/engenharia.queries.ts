@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { listEquipamentoEtps, listAllEtps, getEtp } from "@/lib/equipamento-etps.functions";
 import { listEtpHistorico } from "@/lib/equipamento-etp-historico.functions";
-import { listEquipamentoEtapas, listHHConsolidado } from "@/lib/equipamento-etapas.functions";
+import { listEquipamentoEtapas } from "@/lib/equipamento-etapas.functions";
 import { listProjetosByEquipamento, listAllProjetos } from "@/lib/equipamento-projetos.functions";
 import { listAllMontagens } from "@/lib/equipamento-montagens.functions";
 import { listAllRevisoes } from "@/lib/equipamento-revisoes.functions";
@@ -50,17 +50,6 @@ export const equipamentoEtapasQueryOptions = (equipamentoId: string) =>
     queryKey: ["engenharia", "etapas", equipamentoId],
     queryFn: () => listEquipamentoEtapas({ data: { equipamento_id: equipamentoId } }),
     enabled: !!equipamentoId,
-  });
-
-export const hhConsolidadoQueryOptions = (params: {
-  cliente_id?: string;
-  q?: string;
-  only_with_etapas?: boolean;
-  page?: number;
-}) =>
-  queryOptions({
-    queryKey: ["engenharia", "hh", params],
-    queryFn: () => listHHConsolidado({ data: params }),
   });
 
 export const equipamentoProjetosQueryOptions = (equipamentoId: string) =>

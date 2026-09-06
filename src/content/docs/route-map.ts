@@ -49,7 +49,6 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/engenharia/etp", category: "engenharia", slug: "criar-etp" },
   { route: "/engenharia/etp/$id", category: "engenharia", slug: "criar-etp" },
   { route: "/engenharia/etapas", category: "engenharia", slug: "etapas-e-kanban" },
-  { route: "/engenharia/hh", category: "engenharia", slug: "etapas-e-kanban" },
 
   // Compras
   { route: "/compras/solicitacao", category: "compras", slug: "criar-solicitacao" },

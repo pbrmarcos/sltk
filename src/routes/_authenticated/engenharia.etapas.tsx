@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { PlanejamentoTabs } from "@/components/engenharia/PlanejamentoTabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -104,8 +103,6 @@ function EtapasPage() {
         title="Planejamento"
         subtitle="Plano de etapas por equipamento, com H/H estimada mecânica e elétrica."
       />
-      <PlanejamentoTabs />
-
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_220px]">
         <Input
           placeholder="Buscar equipamento (código, modelo ou cliente)…"

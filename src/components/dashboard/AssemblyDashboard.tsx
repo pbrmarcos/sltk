@@ -1,4 +1,4 @@
-import { Wrench, Clock, ListChecks } from "lucide-react";
+import { Wrench, ListChecks } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { MeterCard } from "./MeterCard";
 import { DashboardCard } from "./DashboardCard";
@@ -17,7 +17,6 @@ export function AssemblyDashboard({ userName }: { userName: string }) {
       subtitle="Sua fila de etapas e o andamento das entregas."
       actions={[
         { label: "Minhas etapas", to: "/producao/montagem", icon: ListChecks },
-        { label: "Apontar HH", to: "/engenharia/hh", icon: Clock },
         { label: "Ordens", to: "/producao/montagem", icon: Wrench },
       ]}
     >

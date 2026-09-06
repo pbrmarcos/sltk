@@ -1,4 +1,4 @@
-import { Ruler, FolderKanban, Clock } from "lucide-react";
+import { Ruler, FolderKanban } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
@@ -18,7 +18,6 @@ export function EngineeringDashboard({ userName }: { userName: string }) {
       actions={[
         { label: "Projetos", to: "/engenharia/projetos", icon: FolderKanban },
         { label: "ETPs", to: "/engenharia/etp", icon: Ruler },
-        { label: "Apontar HH", to: "/engenharia/hh", icon: Clock },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

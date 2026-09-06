@@ -56,7 +56,6 @@ import { Route as AuthenticatedKnowHowSlugRouteImport } from './routes/_authenti
 import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_authenticated/fornecedores.novo'
 import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authenticated/fornecedores.$id'
 import { Route as AuthenticatedEngenhariaProjetosRouteImport } from './routes/_authenticated/engenharia.projetos'
-import { Route as AuthenticatedEngenhariaHhRouteImport } from './routes/_authenticated/engenharia.hh'
 import { Route as AuthenticatedEngenhariaEtpRouteImport } from './routes/_authenticated/engenharia.etp'
 import { Route as AuthenticatedEngenhariaEtapasRouteImport } from './routes/_authenticated/engenharia.etapas'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
@@ -385,12 +384,6 @@ const AuthenticatedEngenhariaProjetosRoute =
   AuthenticatedEngenhariaProjetosRouteImport.update({
     id: '/engenharia/projetos',
     path: '/engenharia/projetos',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedEngenhariaHhRoute =
-  AuthenticatedEngenhariaHhRouteImport.update({
-    id: '/engenharia/hh',
-    path: '/engenharia/hh',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedEngenhariaEtpRoute =
@@ -888,7 +881,6 @@ export interface FileRoutesByFullPath {
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/engenharia/etapas': typeof AuthenticatedEngenhariaEtapasRoute
   '/engenharia/etp': typeof AuthenticatedEngenhariaEtpRouteWithChildren
-  '/engenharia/hh': typeof AuthenticatedEngenhariaHhRoute
   '/engenharia/projetos': typeof AuthenticatedEngenhariaProjetosRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
@@ -1007,7 +999,6 @@ export interface FileRoutesByTo {
   '/compras/solicitacao': typeof AuthenticatedComprasSolicitacaoRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/engenharia/etapas': typeof AuthenticatedEngenhariaEtapasRoute
-  '/engenharia/hh': typeof AuthenticatedEngenhariaHhRoute
   '/engenharia/projetos': typeof AuthenticatedEngenhariaProjetosRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
@@ -1131,7 +1122,6 @@ export interface FileRoutesById {
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/engenharia/etapas': typeof AuthenticatedEngenhariaEtapasRoute
   '/_authenticated/engenharia/etp': typeof AuthenticatedEngenhariaEtpRouteWithChildren
-  '/_authenticated/engenharia/hh': typeof AuthenticatedEngenhariaHhRoute
   '/_authenticated/engenharia/projetos': typeof AuthenticatedEngenhariaProjetosRoute
   '/_authenticated/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/_authenticated/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
@@ -1256,7 +1246,6 @@ export interface FileRouteTypes {
     | '/documentos/$id'
     | '/engenharia/etapas'
     | '/engenharia/etp'
-    | '/engenharia/hh'
     | '/engenharia/projetos'
     | '/fornecedores/$id'
     | '/fornecedores/novo'
@@ -1375,7 +1364,6 @@ export interface FileRouteTypes {
     | '/compras/solicitacao'
     | '/documentos/$id'
     | '/engenharia/etapas'
-    | '/engenharia/hh'
     | '/engenharia/projetos'
     | '/fornecedores/$id'
     | '/fornecedores/novo'
@@ -1498,7 +1486,6 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos/$id'
     | '/_authenticated/engenharia/etapas'
     | '/_authenticated/engenharia/etp'
-    | '/_authenticated/engenharia/hh'
     | '/_authenticated/engenharia/projetos'
     | '/_authenticated/fornecedores/$id'
     | '/_authenticated/fornecedores/novo'
@@ -1922,13 +1909,6 @@ declare module '@tanstack/react-router' {
       path: '/engenharia/projetos'
       fullPath: '/engenharia/projetos'
       preLoaderRoute: typeof AuthenticatedEngenhariaProjetosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/engenharia/hh': {
-      id: '/_authenticated/engenharia/hh'
-      path: '/engenharia/hh'
-      fullPath: '/engenharia/hh'
-      preLoaderRoute: typeof AuthenticatedEngenhariaHhRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/engenharia/etp': {
@@ -2680,7 +2660,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedEngenhariaEtapasRoute: typeof AuthenticatedEngenhariaEtapasRoute
   AuthenticatedEngenhariaEtpRoute: typeof AuthenticatedEngenhariaEtpRouteWithChildren
-  AuthenticatedEngenhariaHhRoute: typeof AuthenticatedEngenhariaHhRoute
   AuthenticatedEngenhariaProjetosRoute: typeof AuthenticatedEngenhariaProjetosRoute
   AuthenticatedFornecedoresIdRoute: typeof AuthenticatedFornecedoresIdRoute
   AuthenticatedFornecedoresNovoRoute: typeof AuthenticatedFornecedoresNovoRoute
@@ -2743,7 +2722,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedEngenhariaEtapasRoute: AuthenticatedEngenhariaEtapasRoute,
   AuthenticatedEngenhariaEtpRoute: AuthenticatedEngenhariaEtpRouteWithChildren,
-  AuthenticatedEngenhariaHhRoute: AuthenticatedEngenhariaHhRoute,
   AuthenticatedEngenhariaProjetosRoute: AuthenticatedEngenhariaProjetosRoute,
   AuthenticatedFornecedoresIdRoute: AuthenticatedFornecedoresIdRoute,
   AuthenticatedFornecedoresNovoRoute: AuthenticatedFornecedoresNovoRoute,
