@@ -12,7 +12,7 @@ import {
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 const DIRECT_BASE = "https://www.googleapis.com";
 
-export function driveConfigured(): boolean {
+export async function driveConfigured(): Promise<boolean> {
   return serviceAccountConfigured();
 }
 

@@ -9,15 +9,18 @@ interface ServiceAccountCreds {
   key: string;
 }
 
-function readServiceAccountCreds(): ServiceAccountCreds | null {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const keyRaw = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+async function readServiceAccountCreds(): Promise<ServiceAccountCreds | null> {
+  const { getSecret } = await import("@/lib/secrets.server");
+  const [email, keyRaw] = await Promise.all([
+    getSecret("GOOGLE_SERVICE_ACCOUNT_EMAIL"),
+    getSecret("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"),
+  ]);
   if (!email || !keyRaw) return null;
   return { email, key: keyRaw.replace(/\\n/g, "\n") };
 }
 
-export function serviceAccountConfigured(): boolean {
-  return readServiceAccountCreds() != null;
+export async function serviceAccountConfigured(): Promise<boolean> {
+  return (await readServiceAccountCreds()) != null;
 }
 
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
@@ -41,7 +44,7 @@ export async function getGoogleAccessToken(
   scope: string,
   subject?: string,
 ): Promise<string | null> {
-  const creds = readServiceAccountCreds();
+  const creds = await readServiceAccountCreds();
   if (!creds) return null;
 
   const cacheKey = `${scope}::${subject ?? creds.email}`;

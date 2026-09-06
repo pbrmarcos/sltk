@@ -156,7 +156,7 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
     let driveViewUrl: string | null = null;
 
     const { driveConfigured } = await import("@/lib/docs/drive-auth.server");
-    const canDrive = driveConfigured();
+    const canDrive = await driveConfigured();
     if (canDrive) {
       try {
         const folder = await ensureInsumoFolder({ cliente_codigo, projeto_codigo, tag });

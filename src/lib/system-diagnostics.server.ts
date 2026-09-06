@@ -165,7 +165,7 @@ async function probe(cap: CapabilityDef): Promise<{
           };
     }
     case "google_drive": {
-      if (!driveConfigured())
+      if (!(await driveConfigured()))
         return { status: "ausente", detalhe: "Conta do Drive não vinculada." };
       const { baseUrl, headers } = await driveAuth();
       const r = await timedFetch(

@@ -20,8 +20,13 @@ export interface AiChatOptions {
   geminiModel?: string;
 }
 
-export function aiConfigured(): boolean {
-  return !!(process.env.GEMINI_API_KEY || process.env.LOVABLE_API_KEY);
+export async function aiConfigured(): Promise<boolean> {
+  const { secretExists } = await import("@/lib/secrets.server");
+  const [gemini, lovable] = await Promise.all([
+    secretExists("GEMINI_API_KEY"),
+    secretExists("LOVABLE_API_KEY"),
+  ]);
+  return gemini || lovable;
 }
 
 function partsFromUserContent(
@@ -87,9 +92,10 @@ async function callLovableGateway(apiKey: string, opts: AiChatOptions): Promise<
 }
 
 export async function aiChatComplete(opts: AiChatOptions): Promise<string> {
-  const geminiKey = process.env.GEMINI_API_KEY;
+  const { getSecret } = await import("@/lib/secrets.server");
+  const geminiKey = await getSecret("GEMINI_API_KEY");
   if (geminiKey) return callGeminiDirect(geminiKey, opts);
-  const lovableKey = process.env.LOVABLE_API_KEY;
+  const lovableKey = await getSecret("LOVABLE_API_KEY");
   if (lovableKey) return callLovableGateway(lovableKey, opts);
   throw new Error(
     "Recurso de IA indisponível — a integração não está configurada. Verifique em Configurações › Chaves & Diagnóstico.",

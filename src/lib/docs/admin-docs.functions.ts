@@ -228,7 +228,7 @@ export const translateBloco = createServerFn({ method: "POST" })
     if (!isAdmin && !isMgr) throw new Error("Acesso restrito.");
 
     const { aiConfigured } = await import("@/lib/ai-gateway.server");
-    if (!aiConfigured())
+    if (!(await aiConfigured()))
       throw new Error("Recurso de IA indisponível — a integração não está configurada.");
 
     const { getCriticalClient } = await import("@/lib/supabase-client.server");

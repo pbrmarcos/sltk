@@ -19,17 +19,18 @@ const SENDER_NAME = "Solutek";
 const RESEND_API_URL = "https://api.resend.com/emails";
 const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 
-function readResendCreds() {
-  const resend = process.env.RESEND_API_KEY;
+async function readResendCreds() {
+  const { getSecret } = await import("@/lib/secrets.server");
+  const resend = await getSecret("RESEND_API_KEY");
   if (!resend) return null;
   return { resend };
 }
 
-export function providerConfigured(): boolean {
-  return readResendCreds() != null;
+export async function providerConfigured(): Promise<boolean> {
+  return (await readResendCreds()) != null;
 }
 
-export function calendarConfigured(): boolean {
+export async function calendarConfigured(): Promise<boolean> {
   return serviceAccountConfigured();
 }
 
@@ -49,7 +50,7 @@ export type SendResult =
     };
 
 export async function sendMail(input: SendMailInput): Promise<SendResult> {
-  const creds = readResendCreds();
+  const creds = await readResendCreds();
   if (!creds) return { ok: false, reason: "provider_not_configured" };
 
   const res = await fetch(RESEND_API_URL, {

@@ -161,7 +161,7 @@ export async function dispatchEmail(admin: Admin, input: DispatchInput): Promise
     return;
   }
 
-  if (!providerConfigured()) {
+  if (!(await providerConfigured())) {
     await logTable.insert({
       event_key: input.eventKey,
       triggered_by: input.triggeredBy,

@@ -606,7 +606,7 @@ export const traduzirTexto = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     await requireAdminOrManager(sb, context.userId);
-    if (!aiConfigured())
+    if (!(await aiConfigured()))
       throw new Error(
         "Recurso de IA indisponível — a integração não está configurada. Verifique em Configurações › Chaves & Diagnóstico.",
       );

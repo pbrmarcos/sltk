@@ -1261,7 +1261,7 @@ export const uploadScanToDrive = createServerFn({ method: "POST" })
     if (!f) throw new Error("Fornecedor não encontrado");
 
     const { driveConfigured } = await import("@/lib/docs/drive-auth.server");
-    if (!driveConfigured()) {
+    if (!(await driveConfigured())) {
       return {
         ok: false as const,
         error:
