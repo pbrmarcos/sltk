@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GerarEtpDialog } from "@/components/rfq/GerarEtpDialog";
 import { Inbox, ExternalLink } from "lucide-react";
+import { TableLoading, TableEmpty, TableError } from "@/components/data/TableStates";
 import { listRfqSubmissoes, getRfqSubmissao } from "@/lib/rfq.functions";
 import { pickLabel } from "@/lib/rfq.shared";
 import type { FormularioSchema, Idioma } from "@/lib/rfq.shared";
@@ -55,12 +56,15 @@ function FormulariosRfqPage() {
           <div className="border-b border-border px-4 py-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
             <Inbox className="mr-1 inline h-3.5 w-3.5" /> Inbox
           </div>
-          {listQ.isLoading ? (
-            <div className="p-4 text-sm text-muted-foreground">Carregando…</div>
+          {listQ.isError ? (
+            <TableError
+              description="Não foi possível carregar as submissões."
+              onRetry={() => listQ.refetch()}
+            />
+          ) : listQ.isLoading ? (
+            <TableLoading />
           ) : (listQ.data ?? []).length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">
-              Nenhuma submissão ainda.
-            </div>
+            <TableEmpty title="Nenhuma submissão ainda" />
           ) : (
             <ul className="divide-y divide-border">
               {(listQ.data ?? []).map((s: any) => (
@@ -102,8 +106,13 @@ function FormulariosRfqPage() {
             <div className="p-8 text-center text-sm text-muted-foreground">
               Selecione uma submissão para ver as respostas.
             </div>
+          ) : detQ.isError ? (
+            <TableError
+              description="Não foi possível carregar esta submissão."
+              onRetry={() => detQ.refetch()}
+            />
           ) : detQ.isLoading || !detQ.data ? (
-            <div className="p-8 text-sm text-muted-foreground">Carregando…</div>
+            <TableLoading />
           ) : (
             <SubmissaoDetalhe data={detQ.data} />
           )}
