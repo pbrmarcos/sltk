@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin/modelos-formulario")
       { title: "Modelos de Formulário — Admin | SLTK" },
       {
         name: "description",
-        content: "Gerencie os tipos de Checklist (RFQ) e os segmentos de Entrevista.",
+        content: "Gerencie os tipos de Checklist e os segmentos de Entrevista.",
       },
     ],
   }),
@@ -80,7 +80,7 @@ function ModelosFormularioPanel({
       <PageHeader
         breadcrumbs={crumbs}
         title="Modelos de Formulário"
-        subtitle="Schemas usados nos formulários públicos: tipos de Checklist (RFQ) e segmentos de Entrevista."
+        subtitle="Schemas usados nos formulários públicos: tipos de Checklist e segmentos de Entrevista."
       />
 
       <Tabs

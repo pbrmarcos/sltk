@@ -160,7 +160,7 @@ function PublicCotacaoPage() {
         <div className="rounded-lg border bg-white p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-xs uppercase text-zinc-500">Checklist {cot.codigo}</div>
+              <div className="text-xs uppercase text-zinc-500">Cotação {cot.codigo}</div>
               <h1 className="mt-1 text-2xl font-bold">{cot.titulo}</h1>
               {cot.descricao && <p className="mt-1 text-sm text-zinc-600">{cot.descricao}</p>}
               {fornecedor && (

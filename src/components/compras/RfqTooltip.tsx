@@ -4,7 +4,7 @@ import { HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const RFQ_TOOLTIP_TEXT =
-  "Checklist de cotação = pedido formal de proposta.\nÉ enviado a fornecedores para obter preço, prazo, condições de pagamento e Incoterm para um item.";
+  "Cotação de compra = pedido formal de proposta.\nÉ enviado a fornecedores para obter preço, prazo, condições de pagamento e Incoterm para um item.";
 
 export function RfqTooltip({ children }: { children: React.ReactNode }) {
   return (
