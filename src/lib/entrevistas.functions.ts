@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 
 const CODIGO_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; // sem 0/O/1/I
 function genCodigo(len = 6): string {
@@ -24,6 +25,7 @@ async function isAdminOrManager(sb: any, uid: string): Promise<boolean> {
 export const listSegmentos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const { data, error } = await (context.supabase as any)
       .from("entrevista_segmentos")
       .select("id, slug, nome_pt, nome_es, nome_en, ordem, ativo")
@@ -73,6 +75,7 @@ export const listEntrevistas = createServerFn({ method: "GET" })
       .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const escopo = data?.escopo ?? "ativas";
     let q = sb
@@ -122,6 +125,7 @@ export const criarEntrevista = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => criarSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     // Retry para gerar código único
     let codigo = "";
@@ -187,6 +191,7 @@ export const getEntrevista = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { data: e, error } = await sb
       .from("entrevistas")
@@ -259,6 +264,7 @@ export const enviarEntrevistaPorEmail = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), email: z.string().email() }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { data: e } = await sb
       .from("entrevistas")
@@ -294,6 +300,7 @@ export const expirarEntrevista = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { data: e, error } = await sb
       .from("entrevistas")
@@ -356,6 +363,7 @@ export const moverEntrevistaParaLixeira = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), motivo: z.string().max(500).optional().nullable() }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const now = new Date();
     const purge = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -394,6 +402,7 @@ export const restaurarEntrevista = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { data: e, error } = await sb
       .from("entrevistas")
@@ -465,6 +474,7 @@ export const listEntrevistaAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ entrevista_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
       .from("entrevista_audit")

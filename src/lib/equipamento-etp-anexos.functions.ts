@@ -3,6 +3,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { driveAuth } from "@/lib/docs/drive-auth.server";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 
 /**
  * Anexos de ETPs no Google Drive.
@@ -128,15 +129,7 @@ export const uploadEtpAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => uploadInput.parse(input))
   .handler(async ({ data, context }) => {
-    // Permissão: somente admin/manager/engineer
-    const [{ data: isAdmin }, { data: isManager }, { data: isEngineer }] = await Promise.all([
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "manager" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "engineer" }),
-    ]);
-    if (!isAdmin && !isManager && !isEngineer) {
-      throw new Error("Sem permissão para anexar arquivos a este ETP.");
-    }
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
 
     const limit = MIME_LIMITS[data.mime_type];
     if (!limit) throw new Error(`Tipo de arquivo não permitido (${data.mime_type}).`);
@@ -250,14 +243,7 @@ export const removerEtpAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const [{ data: isAdmin }, { data: isManager }, { data: isEngineer }] = await Promise.all([
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "manager" }),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "engineer" }),
-    ]);
-    if (!isAdmin && !isManager && !isEngineer) {
-      throw new Error("Sem permissão para remover anexos.");
-    }
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
 
     const { data: row, error: getErr } = await context.supabase
       .from("equipamento_etp_anexos" as never)

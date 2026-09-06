@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertAdminOrManager as assertAdmin, hasAnyRole } from "@/lib/admin-guard";
+import { assertAdminOrManager as assertAdmin, assertCanAccessModule } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   COL_CONTRA,
@@ -39,8 +39,7 @@ export type MineracaoConfig = {
 };
 
 async function assertComercial(supabase: AnyDb, userId: string) {
-  const ok = await hasAnyRole(supabase, userId, ["admin", "manager", "sales"]);
-  if (!ok) throw new Error("Acesso restrito ao time comercial.");
+  await assertCanAccessModule(supabase, userId, "comercial", "Acesso restrito ao time comercial.");
 }
 
 async function loadCreds(supabase: AnyDb) {
