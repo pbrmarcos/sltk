@@ -7,7 +7,7 @@ import { driveAuth } from "@/lib/docs/drive-auth.server";
 
 /**
  * Anexos por insumo (arquivos técnicos, orçamentos recebidos) + trilha de atividades.
- * Upload direto para Google Drive na MESMA estrutura da RFQ do item:
+ * Upload direto para Google Drive na MESMA estrutura da Cotação do item:
  *   {ROOT}/Compras/Solicitacoes/{cliente.codigo}/{projeto.codigo}/{SC-YYYY-XXXXXX}/
  */
 
@@ -166,7 +166,7 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
         const ext = data.filename.includes(".") ? "." + data.filename.split(".").pop() : "";
         const prefix =
           data.kind === "orcamento" ? "orcamento" : data.kind === "tecnico" ? "tecnico" : "anexo";
-        // Versão por tipo/anexo: incrementa dentro da pasta do item (mesma pasta versionada da RFQ)
+        // Versão por tipo/anexo: incrementa dentro da pasta do item (mesma pasta versionada da Cotação)
         const { count: nPrev } = await sb
           .from("insumo_anexos")
           .select("id", { count: "exact", head: true })
@@ -179,7 +179,7 @@ export const uploadInsumoAnexo = createServerFn({ method: "POST" })
           .replace(/\.[^.]+$/, "")
           .replace(/[^a-zA-Z0-9._-]/g, "_")
           .slice(0, 60);
-        // Padrão único de nomenclatura (alinhado ao PDF de RFQ):
+        // Padrão único de nomenclatura (alinhado ao PDF de Cotação):
         //   {prefix}_{TAG}_v{N}_{stamp}_{original}.ext
         const finalName = `${prefix}_${tag}_v${versao}_${stamp}_${safe}${ext}`;
         const up = await driveUploadMultipart({
@@ -282,7 +282,7 @@ export const getInsumoDriveFolderUrl = createServerFn({ method: "GET" })
       .limit(1)
       .maybeSingle();
     if ((a as any)?.drive_folder_url) return { url: (a as any).drive_folder_url as string };
-    // 2) documentos RFQ gerados
+    // 2) documentos de Cotação gerados
     const { data: d } = await sb
       .from("insumo_documentos_gerados")
       .select("drive_folder_url")

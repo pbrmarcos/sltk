@@ -170,7 +170,7 @@ function CotacaoDetailPage() {
         actions={
           <div className="flex gap-2">
             {cot.status === "rascunho" && (
-              <Button onClick={() => changeStatus("aberta")}>Abrir Checklist</Button>
+              <Button onClick={() => changeStatus("aberta")}>Abrir cotação</Button>
             )}
             {cot.status === "aberta" && (
               <Button variant="outline" onClick={() => changeStatus("encerrada")}>

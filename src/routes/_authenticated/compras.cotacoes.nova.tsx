@@ -23,7 +23,7 @@ import {
   createCotacao,
   listFornecedoresParaCotacao,
   listInsumosAprovados,
-  listInsumosParaRFQ,
+  listInsumosParaCotacao,
 } from "@/lib/cotacoes.functions";
 import { INCOTERMS, MOEDAS } from "@/lib/cotacoes.shared";
 
@@ -43,7 +43,7 @@ function NovaCotacaoPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
   const insumosFn = useServerFn(listInsumosAprovados);
-  const insumosByIdsFn = useServerFn(listInsumosParaRFQ);
+  const insumosByIdsFn = useServerFn(listInsumosParaCotacao);
   const fornsFn = useServerFn(listFornecedoresParaCotacao);
   const createFn = useServerFn(createCotacao);
 
@@ -84,10 +84,10 @@ function NovaCotacaoPage() {
     if (titulo || !insumosQ.data) return;
     const arr = insumosQ.data as Array<{ id: string; descricao: string }>;
     if (fromBom && preIds.length > 1) {
-      setTitulo(`Checklist — ${preIds.length} itens da B.O.M.`);
+      setTitulo(`Cotação — ${preIds.length} itens da B.O.M.`);
     } else if (preIds.length === 1) {
       const it = arr.find((i) => i.id === preIds[0]);
-      if (it) setTitulo(`Checklist — ${it.descricao}`);
+      if (it) setTitulo(`Cotação — ${it.descricao}`);
     }
   }, [fromBom, preIds, insumosQ.data, titulo]);
 
@@ -158,7 +158,7 @@ function NovaCotacaoPage() {
       groups.set(key, arr);
     }
     if (groups.size < 2) {
-      toast.info("Só uma categoria selecionada — use 'Criar checklist' normal.");
+      toast.info("Só uma categoria selecionada — use 'Criar e abrir cotação' normal.");
       return;
     }
     setEnviando(true);
@@ -184,7 +184,7 @@ function NovaCotacaoPage() {
         });
         ok += 1;
       }
-      toast.success(`${ok} checklists criados (uma por categoria).`);
+      toast.success(`${ok} cotações criadas (uma por categoria).`);
       navigate({ to: "/compras/cotacoes" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao dividir por categoria");
@@ -202,7 +202,7 @@ function NovaCotacaoPage() {
           { label: "Cotações", href: "/compras/cotacoes" },
           { label: "Nova" },
         ]}
-        title="Nova cotação (Checklist)"
+        title="Nova cotação"
         subtitle={`Passo ${step} de 3`}
       />
 
@@ -226,7 +226,7 @@ function NovaCotacaoPage() {
                     onClick={submitPorCategoria}
                     disabled={enviando}
                   >
-                    dividir em {categoriasSel.length} Checklists
+                    dividir em {categoriasSel.length} cotações
                   </button>
                   .
                 </span>
@@ -236,7 +236,7 @@ function NovaCotacaoPage() {
               {(insumosQ.data ?? []).length === 0 ? (
                 <div className="p-6 text-sm text-[var(--text-muted)]">
                   Nenhum insumo aprovado disponível. Aprove insumos na aba de um projeto antes de
-                  criar o checklist.
+                  criar a cotação.
                 </div>
               ) : (
                 <table className="w-full text-sm">
@@ -455,7 +455,7 @@ function NovaCotacaoPage() {
                   Salvar como rascunho
                 </Button>
                 <Button disabled={enviando} onClick={() => submit(true)}>
-                  Criar e abrir Checklist
+                  Criar e abrir cotação
                 </Button>
               </div>
             </div>

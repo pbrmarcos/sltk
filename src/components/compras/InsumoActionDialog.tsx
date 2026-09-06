@@ -57,11 +57,14 @@ import {
 } from "@/lib/projeto-insumos.shared";
 import type { InsumoRow } from "@/lib/projeto-insumos.functions";
 import { upsertInsumo, setInsumoStatus } from "@/lib/projeto-insumos.functions";
-import { gerarDocumentoRfqInsumo, listInsumoDocumentos } from "@/lib/compras-rfq-docs.functions";
+import {
+  gerarDocumentoCotacaoInsumo,
+  listInsumoDocumentos,
+} from "@/lib/compras-cotacao-docs.functions";
 import { InsumoAnexosPanel } from "./InsumoAnexosPanel";
 import { InsumoHistoricoPanel } from "./InsumoHistoricoPanel";
 import { InsumoOverviewPanel } from "./InsumoOverviewPanel";
-import { RfqTooltip } from "./RfqTooltip";
+import { CotacaoTooltip } from "./CotacaoTooltip";
 import { itemTag } from "@/lib/docs/item-tag";
 import { useFormDraft } from "@/hooks/use-form-draft";
 import { confirmDiscard } from "@/lib/unsaved-guard";
@@ -89,7 +92,7 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
   const qc = useQueryClient();
   const upsertFn = useServerFn(upsertInsumo);
   const setStatusFn = useServerFn(setInsumoStatus);
-  const gerarDocFn = useServerFn(gerarDocumentoRfqInsumo);
+  const gerarDocFn = useServerFn(gerarDocumentoCotacaoInsumo);
   const listDocsFn = useServerFn(listInsumoDocumentos);
 
   const [descricao, setDescricao] = useState("");
@@ -852,18 +855,18 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
                     <div className="space-y-1">
                       <Label className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1">
                         Nota do comprador (opcional)
-                        <RfqTooltip>
+                        <CotacaoTooltip>
                           <span className="cursor-help rounded-full bg-[var(--bg-elevated)] p-0.5">
                             <HelpCircle className="h-3 w-3 text-[var(--text-muted)]" />
                           </span>
-                        </RfqTooltip>
+                        </CotacaoTooltip>
                       </Label>
                       <Textarea
                         rows={2}
                         maxLength={2000}
                         value={notaCompras}
                         onChange={(e) => setNotaCompras(e.target.value)}
-                        placeholder="Instruções específicas para o fornecedor neste Checklist (Solicitação de Cotação)."
+                        placeholder="Instruções específicas para o fornecedor nesta Solicitação de Cotação."
                         className="text-xs"
                       />
                     </div>

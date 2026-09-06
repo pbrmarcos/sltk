@@ -34,9 +34,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { RfqTooltip } from "./RfqTooltip";
+import { CotacaoTooltip } from "./CotacaoTooltip";
 import { listInsumoAnexos } from "@/lib/insumo-anexos.functions";
-import { listInsumoDocumentos } from "@/lib/compras-rfq-docs.functions";
+import { listInsumoDocumentos } from "@/lib/compras-cotacao-docs.functions";
 import {
   solicitarAprovacaoOC,
   decidirAprovacaoOC,
@@ -88,7 +88,7 @@ function fornecedorLabel(a: Anexo) {
 
 const STATUS_NEXT: Record<InsumoStatus, string> = {
   rascunho: "Aguardando aprovação da engenharia",
-  aprovado: "Pronto para envio de Checklist pelo Compras",
+  aprovado: "Pronto para envio de Cotação pelo Compras",
   em_cotacao: "Aguardando propostas dos fornecedores",
   pronto_aprovacao: "Aguardando aprovação da engenharia/manager",
   cotado: "Aprovado — pronto para gerar Ordem de Compra",
@@ -167,7 +167,7 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
 
   const anexos = (anexosQ.data ?? []) as Anexo[];
   const orcamentos = useMemo(() => anexos.filter((a) => a.kind === "orcamento"), [anexos]);
-  const rfqsGerados = docsQ.data?.length ?? 0;
+  const cotacoesGeradas = docsQ.data?.length ?? 0;
 
   const { melhorPreco, melhorPrazo } = useMemo(() => {
     let best: Anexo | null = null;
@@ -212,17 +212,17 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
       { key: "necessidade", label: "Necessidade em (data)", ok: !!insumo.necessidade_em },
       { key: "criticidade", label: "Criticidade definida", ok: !!insumo.criticidade },
       {
-        key: "rfq_gerado",
+        key: "cotacao_gerada",
         label: (
           <span className="inline-flex items-center gap-1">
-            Checklist gerado
-            <RfqTooltip>
+            Cotação gerada
+            <CotacaoTooltip>
               <HelpCircle className="h-3 w-3 text-[var(--text-muted)] cursor-help" />
-            </RfqTooltip>
+            </CotacaoTooltip>
           </span>
         ),
-        ok: rfqsGerados > 0,
-        hint: rfqsGerados ? `${rfqsGerados} PDF(s) no Drive` : "Gere na aba Ações",
+        ok: cotacoesGeradas > 0,
+        hint: cotacoesGeradas ? `${cotacoesGeradas} PDF(s) no Drive` : "Gere na aba Ações",
       },
       {
         key: "propostas",
@@ -233,7 +233,7 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
     ];
     const done = rows.filter((r) => r.ok).length;
     return { rows, done, total: rows.length, pct: Math.round((done / rows.length) * 100) };
-  }, [insumo, rfqsGerados, orcamentos.length]);
+  }, [insumo, cotacoesGeradas, orcamentos.length]);
 
   const status = insumo.status as InsumoStatus;
   const nextAction = STATUS_NEXT[status] ?? "—";
@@ -248,11 +248,13 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
           value={orcamentos.length.toString()}
           hint={
             <span className="inline-flex items-center gap-1">
-              <RfqTooltip>
+              <CotacaoTooltip>
                 <span className="cursor-help underline decoration-zinc-300 underline-offset-2">
-                  {rfqsGerados ? `${rfqsGerados} Checklist enviado(s)` : "Nenhum Checklist enviado"}
+                  {cotacoesGeradas
+                    ? `${cotacoesGeradas} Cotação(ões) enviada(s)`
+                    : "Nenhuma Cotação enviada"}
                 </span>
-              </RfqTooltip>
+              </CotacaoTooltip>
             </span>
           }
           tone={orcamentos.length >= 2 ? "success" : orcamentos.length === 1 ? "warning" : "muted"}
@@ -552,7 +554,7 @@ export function InsumoOverviewPanel({ insumo, onGoToAnexos, onGoToAcoes }: Props
           <EmptyState
             onGoToAnexos={onGoToAnexos}
             onGoToAcoes={onGoToAcoes}
-            hasRfq={rfqsGerados > 0}
+            hasCotacao={cotacoesGeradas > 0}
           />
         ) : (
           <div className="overflow-x-auto">
@@ -713,11 +715,11 @@ function KpiCard({
 function EmptyState({
   onGoToAnexos,
   onGoToAcoes,
-  hasRfq,
+  hasCotacao,
 }: {
   onGoToAnexos: () => void;
   onGoToAcoes: () => void;
-  hasRfq: boolean;
+  hasCotacao: boolean;
 }) {
   return (
     <div className="p-6 text-center">
@@ -728,35 +730,35 @@ function EmptyState({
         Nenhuma proposta recebida ainda
       </p>
       <p className="text-xs text-[var(--text-muted)] mt-1 mb-3">
-        {hasRfq ? (
+        {hasCotacao ? (
           <>
-            <RfqTooltip>
+            <CotacaoTooltip>
               <span className="cursor-help underline decoration-zinc-300 underline-offset-2">
-                Checklist
+                Cotação
               </span>
-            </RfqTooltip>{" "}
-            já foi enviado — anexe as propostas retornadas pelos fornecedores.
+            </CotacaoTooltip>{" "}
+            já foi enviada — anexe as propostas retornadas pelos fornecedores.
           </>
         ) : (
           <>
-            Gere o{" "}
-            <RfqTooltip>
+            Gere a{" "}
+            <CotacaoTooltip>
               <span className="cursor-help underline decoration-zinc-300 underline-offset-2">
-                Checklist
+                Cotação
               </span>
-            </RfqTooltip>{" "}
+            </CotacaoTooltip>{" "}
             e depois anexe as propostas recebidas para comparar aqui.
           </>
         )}
       </p>
       <div className="flex items-center justify-center gap-2">
-        {!hasRfq && (
+        {!hasCotacao && (
           <button
             type="button"
             onClick={onGoToAcoes}
             className="text-[11px] px-2.5 py-1 rounded border border-[var(--bg-border)] hover:border-[var(--bg-border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
           >
-            Gerar Checklist
+            Gerar Cotação
           </button>
         )}
         <button

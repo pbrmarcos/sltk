@@ -6,7 +6,7 @@ import { Copy, ExternalLink, FileDown, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { listRfqDocumentosGerados } from "@/lib/compras-rfq-docs.functions";
+import { listCotacaoDocumentosGerados } from "@/lib/compras-cotacao-docs.functions";
 
 type Idioma = "pt" | "es" | "en";
 const IDIOMA_FLAG: Record<Idioma, string> = { pt: "🇧🇷", es: "🇪🇸", en: "🇺🇸" };
@@ -21,12 +21,12 @@ async function copy(url: string, lang: Idioma) {
   }
 }
 
-export function RfqGeradosTab() {
-  const listFn = useServerFn(listRfqDocumentosGerados);
+export function CotacaoGeradosTab() {
+  const listFn = useServerFn(listCotacaoDocumentosGerados);
   const [q, setQ] = useState("");
 
   const query = useQuery({
-    queryKey: ["central-docs", "rfq-gerados", q],
+    queryKey: ["central-docs", "cotacao-gerados", q],
     queryFn: () => listFn({ data: { q, limit: 200 } }),
   });
 
@@ -73,7 +73,7 @@ export function RfqGeradosTab() {
             {rows.length === 0 && !query.isLoading ? (
               <tr>
                 <td colSpan={8} className="px-3 py-8 text-center text-[var(--text-secondary)]">
-                  Nenhum documento Checklist gerado ainda.
+                  Nenhum documento de Cotação gerado ainda.
                 </td>
               </tr>
             ) : (

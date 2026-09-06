@@ -3,10 +3,10 @@
 import { HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-const RFQ_TOOLTIP_TEXT =
+const COTACAO_TOOLTIP_TEXT =
   "Cotação de compra = pedido formal de proposta.\nÉ enviado a fornecedores para obter preço, prazo, condições de pagamento e Incoterm para um item.";
 
-export function RfqTooltip({ children }: { children: React.ReactNode }) {
+export function CotacaoTooltip({ children }: { children: React.ReactNode }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild className="cursor-help">
@@ -17,16 +17,16 @@ export function RfqTooltip({ children }: { children: React.ReactNode }) {
         align="center"
         className="max-w-xs whitespace-pre-line leading-snug"
       >
-        {RFQ_TOOLTIP_TEXT}
+        {COTACAO_TOOLTIP_TEXT}
       </TooltipContent>
     </Tooltip>
   );
 }
 
-export function RfqTooltipIcon({ className }: { className?: string }) {
+export function CotacaoTooltipIcon({ className }: { className?: string }) {
   return (
-    <RfqTooltip>
+    <CotacaoTooltip>
       <HelpCircle className={className} />
-    </RfqTooltip>
+    </CotacaoTooltip>
   );
 }

@@ -68,7 +68,7 @@ import {
   restoreBlocoVersao,
   translateBloco,
 } from "@/lib/docs/admin-docs.functions";
-import { RfqGeradosTab } from "@/components/central-documentos/RfqGeradosTab";
+import { CotacaoGeradosTab } from "@/components/central-documentos/CotacaoGeradosTab";
 import { EntrevistasGeradasTab } from "@/components/central-documentos/EntrevistasGeradasTab";
 
 export const Route = createFileRoute("/_authenticated/central-documentos")({
@@ -104,7 +104,7 @@ function AdminDocumentosPage() {
           <TabsTrigger value="blocos">Blocos</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="tipos">Tipos</TabsTrigger>
-          <TabsTrigger value="rfq-gerados">Cotações geradas</TabsTrigger>
+          <TabsTrigger value="cotacao-gerados">Cotações geradas</TabsTrigger>
           <TabsTrigger value="entrevistas">Entrevistas</TabsTrigger>
         </TabsList>
         <TabsContent value="blocos" className="mt-4">
@@ -116,8 +116,8 @@ function AdminDocumentosPage() {
         <TabsContent value="tipos" className="mt-4">
           <TiposTab />
         </TabsContent>
-        <TabsContent value="rfq-gerados" className="mt-4">
-          <RfqGeradosTab />
+        <TabsContent value="cotacao-gerados" className="mt-4">
+          <CotacaoGeradosTab />
         </TabsContent>
         <TabsContent value="entrevistas" className="mt-4">
           <EntrevistasGeradasTab />

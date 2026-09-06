@@ -45,7 +45,7 @@ export const listCotacoes = createServerFn({ method: "POST" })
     } = await q.order("created_at", { ascending: false }).range(from, from + data.per_page - 1);
     if (error) throw friendlyDbError(error);
 
-    // Para cada RFQ, conta convites/respostas
+    // Para cada Cotação, conta convites/respostas
     const ids = (rows ?? []).map((r: { id: string }) => r.id);
     const counts: Record<string, { convites: number; respondidos: number }> = {};
     if (ids.length) {
@@ -272,7 +272,7 @@ export const inviteFornecedores = createServerFn({ method: "POST" })
         razao_social: string | null;
       }>) {
         await safeDispatch({
-          eventKey: "rfq.enviada_fornecedor",
+          eventKey: "cotacao.enviada_fornecedor",
           triggeredBy: context.userId,
           entityTable: "cotacoes",
           entityId: data.cotacao_id,
@@ -358,7 +358,7 @@ export const listInsumosAprovados = createServerFn({ method: "GET" })
   });
 
 /* ============ INSUMOS POR IDS (pré-seleção vinda da B.O.M.) ============ */
-export const listInsumosParaRFQ = createServerFn({ method: "POST" })
+export const listInsumosParaCotacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z.object({ ids: z.array(z.string().uuid()).min(1).max(200) }).parse(i),
@@ -376,7 +376,7 @@ export const listInsumosParaRFQ = createServerFn({ method: "POST" })
     return (rows ?? []) as any[];
   });
 
-/* ============ COTAÇÕES DO PROJETO (B.O.M. → RFQs) ============ */
+/* ============ COTAÇÕES DO PROJETO (B.O.M. → Cotações) ============ */
 export const listCotacoesDoProjeto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projeto_id: z.string().uuid() }).parse(i))
@@ -600,7 +600,7 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
         .maybeSingle();
       const fornecedor = (convite2 as any)?.fornecedores;
       await safeDispatch({
-        eventKey: "rfq.resposta_recebida",
+        eventKey: "cotacao.resposta_recebida",
         triggeredBy: null,
         triggeredByKind: "automation",
         entityTable: "cotacoes",

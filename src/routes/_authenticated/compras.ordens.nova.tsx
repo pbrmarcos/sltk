@@ -152,7 +152,7 @@ function NovaOcPage() {
                 <strong className="text-foreground">Insumo:</strong> {insumoIdSearch}
                 <div className="mt-1 text-xs">
                   Se nenhum fornecedor for informado, o sistema usará o sugerido na aprovação ou o
-                  último Checklist respondido.
+                  último fornecedor a responder a cotação.
                 </div>
               </div>
               <div className="space-y-2">

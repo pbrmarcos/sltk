@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Geração trilíngue (PT/ES/EN) do documento de Solicitação de Cotação (Checklist)
+// Geração trilíngue (PT/ES/EN) do documento de Solicitação de Cotação a fornecedor
 // a partir de um insumo. Renderiza PDF real usando o MESMO pipeline oficial
 // do Central de Documentos (@react-pdf/renderer + blocos + layout config),
 // upload no Google Drive e histórico em `insumo_documentos_gerados`.
@@ -10,7 +10,7 @@ import { z } from "zod";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { RfqPdf } from "@/lib/docs/pdf-rfq";
+import { CotacaoPdf } from "@/lib/docs/pdf-cotacao";
 import type { Bloco, DocumentoLayoutConfig, Idioma } from "@/lib/docs/types";
 
 const IDIOMAS = ["pt", "es", "en"] as const;
@@ -27,7 +27,7 @@ async function isPurchasing(supabase: any, uid: string): Promise<boolean> {
 /** Gera documento PDF em PT/ES/EN e salva no Google Drive.
  *  Estrutura: Compras / Solicitacoes / {cliente_codigo} / {projeto_codigo} / {tag}
  */
-export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
+export const gerarDocumentoCotacaoInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
@@ -113,7 +113,7 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
     const projeto_codigo = ins.equipamento_projetos?.cliente_equipamentos?.codigo ?? "SEM-PROJETO";
 
     // Código do documento passa a usar a TAG (documento externo sem referência ao projeto).
-    const codigoDoc = `Checklist-${tag}`;
+    const codigoDoc = `Cotacao-${tag}`;
 
     // Versão: extrai o maior v{N} do histórico deste insumo e incrementa.
     const { data: docsPrev } = await sb
@@ -175,7 +175,7 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
 
     for (const idioma of data.idiomas as Idioma[]) {
       const buffer = await renderToBuffer(
-        React.createElement(RfqPdf, {
+        React.createElement(CotacaoPdf, {
           codigo: codigoDoc,
           versao,
           idioma,
@@ -251,7 +251,7 @@ export const gerarDocumentoRfqInsumo = createServerFn({ method: "POST" })
     };
   });
 
-/** Lista o histórico de documentos Checklist gerados para um insumo. */
+/** Lista o histórico de documentos de Cotação gerados para um insumo. */
 export const listInsumoDocumentos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ insumo_id: z.string().uuid() }).parse(i))
@@ -274,9 +274,9 @@ export const listInsumoDocumentos = createServerFn({ method: "GET" })
     }>;
   });
 
-/** Lista global de documentos Checklist gerados, agrupados por batch (insumo + fornecedor + minuto).
+/** Lista global de documentos de Cotação gerados, agrupados por batch (insumo + fornecedor + minuto).
  *  Usado pela Central de Documentos para auditoria. */
-export const listRfqDocumentosGerados = createServerFn({ method: "GET" })
+export const listCotacaoDocumentosGerados = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z

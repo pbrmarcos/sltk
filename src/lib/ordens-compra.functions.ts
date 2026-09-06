@@ -346,7 +346,7 @@ export const createOrdemDeCotacao = createServerFn({ method: "POST" })
     return { ocs: ocsCriadas };
   });
 
-/* ============ CREATE FROM INSUMO (RFQ direto) ============ */
+/* ============ CREATE FROM INSUMO (Cotação direto) ============ */
 export const createOrdemDeInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
@@ -374,7 +374,7 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
     if (insumo.status === "cancelado") throw new Error("Insumo cancelado");
 
     // *** Gate de liberação p/ produção ***
-    // Cotação/RFQ é livre durante o planejamento, mas a OC só pode ser
+    // Cotação é livre durante o planejamento, mas a OC só pode ser
     // emitida depois que o projeto do equipamento estiver `liberado_producao`.
     if (insumo.projeto_id) {
       const { data: proj } = await sb
@@ -411,7 +411,7 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
     let fornecedor_id = data.fornecedor_id ?? aprov.fornecedor_id_sugerido ?? null;
     if (!fornecedor_id) {
       const { data: envios } = await sb
-        .from("insumo_rfq_envios")
+        .from("insumo_cotacao_envios")
         .select("fornecedor_id, data_resposta, data_envio, status, created_at")
         .eq("insumo_id", data.insumo_id)
         .order("data_resposta", { ascending: false, nullsFirst: false })

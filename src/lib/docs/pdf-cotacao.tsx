@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * PDF de Solicitação de Cotação (RFQ) — A4 retrato, 1 página.
+ * PDF de Solicitação de Cotação — A4 retrato, 1 página.
  * Layout enxuto: descrição do produto → condições → fecho → assinatura.
  * Cabeçalho e rodapé vêm do chrome da Central de Documentos (logo,
  * empresa, endereço, TAG do item, responsável).
@@ -135,7 +135,7 @@ function RichText({ style, text }: { style: any; text: string }) {
   );
 }
 
-export type RfqPdfProps = {
+export type CotacaoPdfProps = {
   codigo: string;
   versao: string;
   idioma: Idioma;
@@ -160,7 +160,7 @@ export type RfqPdfProps = {
   nota_compras?: string | null;
 };
 
-export function RfqPdf(props: RfqPdfProps) {
+export function CotacaoPdf(props: CotacaoPdfProps) {
   const { codigo, versao, idioma, data, layout, blocos, item, responsavel, nota_compras } = props;
   const accent = layout.accent_color || "#0B3D91";
   const s = styles(accent);

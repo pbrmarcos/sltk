@@ -25,7 +25,7 @@ import {
 import { TableEmpty, TableError, TableSkeleton } from "@/components/data/TableStates";
 import { Plus, Search, FileText, ShoppingCart, ExternalLink } from "lucide-react";
 import { listCotacoes } from "@/lib/cotacoes.functions";
-import { listInsumosRfq } from "@/lib/projeto-insumos.functions";
+import { listInsumosCotacao } from "@/lib/projeto-insumos.functions";
 import {
   COTACAO_STATUS,
   COTACAO_STATUS_COLOR,
@@ -48,7 +48,7 @@ function CotacoesListPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"todos" | CotacaoStatus>("todos");
   const listFn = useServerFn(listCotacoes);
-  const listInsumosFn = useServerFn(listInsumosRfq);
+  const listInsumosFn = useServerFn(listInsumosCotacao);
 
   const listQ = useQuery({
     queryKey: ["cotacoes", "list", { q, status }],
@@ -57,7 +57,7 @@ function CotacoesListPage() {
   });
 
   const insumosQ = useQuery({
-    queryKey: ["cotacoes", "insumos-rfq", { q }],
+    queryKey: ["cotacoes", "insumos-cotacao", { q }],
     queryFn: () => listInsumosFn({ data: { q: q || "", status: "todos" } }),
     placeholderData: keepPreviousData,
   });
@@ -108,12 +108,8 @@ function CotacoesListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Compras" },
-          { label: "Cotações (Checklist)" },
-        ]}
-        title="Cotações (Checklist)"
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Compras" }, { label: "Cotações" }]}
+        title="Cotações"
         subtitle="Pedidos de cotação a fornecedores e comparativo de propostas"
         actions={
           <Button asChild>
@@ -156,11 +152,11 @@ function CotacoesListPage() {
         </Select>
       </div>
 
-      {/* Checklists formais (agrupados) */}
+      {/* Cotações formais (agrupadas) */}
       <div className="mt-6">
         <div className="flex items-baseline justify-between mb-2">
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-            Checklists formais (agrupados)
+            Cotações formais (agrupadas)
           </h2>
           <span className="text-xs text-[var(--text-secondary)]">{rows.length} registro(s)</span>
         </div>
@@ -236,11 +232,11 @@ function CotacoesListPage() {
         </div>
       </div>
 
-      {/* Checklist por Insumo (fluxo direto da solicitação) */}
+      {/* Cotação por Insumo (fluxo direto da solicitação) */}
       <div className="mt-8">
         <div className="flex items-baseline justify-between mb-2">
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-            Checklist por Insumo (fluxo direto)
+            Cotação por Insumo (fluxo direto)
           </h2>
           <span className="text-xs text-[var(--text-secondary)]">{insumos.length} registro(s)</span>
         </div>

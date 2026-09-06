@@ -245,9 +245,9 @@ export function ProjetoInsumosPanel({
     });
   }, [filteredRows]);
 
-  const RFQ_ELIGIBLE = ["aprovado", "em_cotacao", "pronto_aprovacao", "cotado"] as const;
-  const isRfqEligible = (s: string) => (RFQ_ELIGIBLE as readonly string[]).includes(s);
-  const isSelectable = (s: string) => s === "rascunho" || isRfqEligible(s);
+  const COTACAO_ELIGIBLE = ["aprovado", "em_cotacao", "pronto_aprovacao", "cotado"] as const;
+  const isCotacaoEligible = (s: string) => (COTACAO_ELIGIBLE as readonly string[]).includes(s);
+  const isSelectable = (s: string) => s === "rascunho" || isCotacaoEligible(s);
 
   const selectableIds = useMemo(
     () => filteredRows.filter((r) => isSelectable(r.status)).map((r) => r.id),
@@ -257,20 +257,20 @@ export function ProjetoInsumosPanel({
 
   const selectedRows = useMemo(() => rows.filter((r) => selected.has(r.id)), [rows, selected]);
   const selRascunho = selectedRows.filter((r) => r.status === "rascunho");
-  const selRfq = selectedRows.filter((r) => isRfqEligible(r.status));
-  const modoSelecao: "rascunho" | "rfq" | "misto" | "nenhum" =
+  const selCotacao = selectedRows.filter((r) => isCotacaoEligible(r.status));
+  const modoSelecao: "rascunho" | "cotacao" | "misto" | "nenhum" =
     selectedRows.length === 0
       ? "nenhum"
       : selRascunho.length === selectedRows.length
         ? "rascunho"
-        : selRfq.length === selectedRows.length
-          ? "rfq"
+        : selCotacao.length === selectedRows.length
+          ? "cotacao"
           : "misto";
-  const categoriasRfq = useMemo(() => {
+  const categoriasCotacao = useMemo(() => {
     const s = new Set<string>();
-    for (const r of selRfq) if (r.categoria_slug) s.add(r.categoria_slug);
+    for (const r of selCotacao) if (r.categoria_slug) s.add(r.categoria_slug);
     return Array.from(s);
-  }, [selRfq]);
+  }, [selCotacao]);
 
   // Prévia do envio p/ aprovação (client-side; server aplica a mesma lógica)
   const previaEnvio = useMemo(() => {
@@ -298,8 +298,8 @@ export function ProjetoInsumosPanel({
   }, [selectedRows]);
 
   const navigate = useNavigate();
-  function enviarParaRFQ() {
-    const ids = selRfq.map((r) => r.id);
+  function enviarParaCotacao() {
+    const ids = selCotacao.map((r) => r.id);
     if (!ids.length) return;
     navigate({
       to: "/compras/cotacoes/nova",
@@ -836,7 +836,7 @@ export function ProjetoInsumosPanel({
           className={cn(
             "rounded-lg border px-3 py-2 flex flex-wrap items-center justify-between gap-2",
             modoSelecao === "rascunho" && "border-emerald-200 bg-emerald-50",
-            modoSelecao === "rfq" && "border-sky-200 bg-sky-50",
+            modoSelecao === "cotacao" && "border-sky-200 bg-sky-50",
             modoSelecao === "misto" && "border-amber-200 bg-amber-50",
           )}
         >
@@ -844,13 +844,13 @@ export function ProjetoInsumosPanel({
             <span className="font-medium">{selected.size}</span>{" "}
             {selected.size === 1 ? "item selecionado" : "itens selecionados"}
             {modoSelecao === "rascunho" && " · todos rascunhos → aprovar em lote"}
-            {modoSelecao === "rfq" && (
+            {modoSelecao === "cotacao" && (
               <>
                 {" "}
-                · todos aprovados/em cotação → gerar Checklist
-                {categoriasRfq.length > 1 && (
+                · todos aprovados/em cotação → gerar Cotação
+                {categoriasCotacao.length > 1 && (
                   <span className="ml-1 text-amber-700">
-                    ({categoriasRfq.length} categorias — considere dividir)
+                    ({categoriasCotacao.length} categorias — considere dividir)
                   </span>
                 )}
               </>
@@ -868,7 +868,7 @@ export function ProjetoInsumosPanel({
             >
               Limpar
             </Button>
-            {(modoSelecao === "rascunho" || modoSelecao === "rfq") && (
+            {(modoSelecao === "rascunho" || modoSelecao === "cotacao") && (
               <Button
                 size="sm"
                 className="bg-violet-600 hover:bg-violet-700"
@@ -879,10 +879,10 @@ export function ProjetoInsumosPanel({
                 Enviar seleção p/ aprovação ({selected.size})
               </Button>
             )}
-            {modoSelecao === "rfq" && (
-              <Button size="sm" className="bg-sky-600 hover:bg-sky-700" onClick={enviarParaRFQ}>
+            {modoSelecao === "cotacao" && (
+              <Button size="sm" className="bg-sky-600 hover:bg-sky-700" onClick={enviarParaCotacao}>
                 <ShoppingCart className="h-4 w-4 mr-1" />
-                Enviar para Cotação ({selRfq.length})
+                Enviar para Cotação ({selCotacao.length})
               </Button>
             )}
           </div>

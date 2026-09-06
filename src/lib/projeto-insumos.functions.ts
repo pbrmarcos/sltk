@@ -415,8 +415,8 @@ export const listCategorias = createServerFn({ method: "GET" })
     return (data ?? []) as Array<{ slug: string; nome_pt: string }>;
   });
 
-/* ============ RFQs POR INSUMO (para tela Cotações/RFQ) ============ */
-export const listInsumosRfq = createServerFn({ method: "POST" })
+/* ============ COTAÇÕES POR INSUMO (para tela Cotações) ============ */
+export const listInsumosCotacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
@@ -490,7 +490,7 @@ export const listInsumosRfq = createServerFn({ method: "POST" })
         docs[r.insumo_id] = (docs[r.insumo_id] ?? 0) + 1;
       }
       const { data: env } = await sb
-        .from("insumo_rfq_envios")
+        .from("insumo_cotacao_envios")
         .select("insumo_id, data_resposta, status")
         .in("insumo_id", ids);
       for (const r of (env ?? []) as Array<{
