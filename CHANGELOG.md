@@ -1,3 +1,19 @@
+## 1.1.6 — Credenciais de integração configuráveis pela tela de administração — 2026-09-05
+
+- Em Configurações → Sistema → Chaves & Diagnóstico, cada integração externa (e-mail, IA, Google Drive, entre outras) ganhou um botão "Configurar" para cadastrar ou remover a credencial direto pela tela, sem precisar de acesso ao servidor.
+- Os valores digitados nunca são exibidos de volta — a tela mostra apenas se a credencial está configurada ou não.
+- Toda alteração fica registrada na auditoria (quem mexeu e quando), sem guardar o valor da credencial no histórico.
+
+---
+
+## 1.1.5 — E-mails automáticos revisados e ampliados — 2026-09-05
+
+- E-mails que já existiam foram conferidos um a um: assunto, conteúdo e o momento certo de disparo.
+- Configurações de e-mail que nunca chegaram a ser usadas foram removidas, mantendo só o que o sistema realmente dispara.
+- Novos eventos passam a gerar e-mail automático: oportunidade criada, ganha ou perdida; ETP enviado, aprovado ou reprovado; etapas de equipamento atribuídas ou concluídas; convite de fornecedor para cotação; embarque criado, despachado ou entregue; abertura e resposta de chamados de suporte; e mudanças de acesso de usuário (papel, desativação, redefinição de senha).
+
+---
+
 ## 1.1.4 — Orçamento herda a qualificação da oportunidade — 2026-09-04
 
 - **Gerar orçamento a partir da oportunidade usa a qualificação do card**: o passo inicial do orçamento deixa de ser uma busca em branco. Se a oportunidade tem cliente vinculado, ele aparece selecionado com opção de "Trocar cliente"; se é um lead sem cliente, o cartão mostra empresa, contato, e-mail e telefone qualificados, com os caminhos "Criar cliente com estes dados" (modal já preenchido) ou "Vincular a um cliente existente".
