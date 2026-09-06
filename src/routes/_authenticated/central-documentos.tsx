@@ -83,8 +83,8 @@ function AdminDocumentosPage() {
     return (
       <PageContainer>
         <PageHeader
-          breadcrumbs={[{ label: "Documentos" }, { label: "Central de Documentos" }]}
-          title="Central de Documentos"
+          breadcrumbs={[{ label: "Documentos" }, { label: "Editor de Blocos" }]}
+          title="Editor de Blocos"
         />
         <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-12 text-center">
           <ShieldAlert className="h-10 w-10 text-[var(--danger)]" />
@@ -97,8 +97,8 @@ function AdminDocumentosPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Documentos" }, { label: "Central de Documentos" }]}
-        title="Central de Documentos"
+        breadcrumbs={[{ label: "Documentos" }, { label: "Editor de Blocos" }]}
+        title="Editor de Blocos"
         subtitle="Configuração do motor de documentos: blocos por tipo, layout, histórico e tradução automática."
       />
 
