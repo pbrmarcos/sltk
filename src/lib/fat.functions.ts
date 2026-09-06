@@ -530,42 +530,130 @@ export const homologarFat = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
 
-    try {
-      const { getCriticalClient } = await import("@/lib/supabase-client.server");
-      const supabaseAdmin = await getCriticalClient();
-      const { dispatchEmail } = await import("@/lib/email/dispatch.server");
-      const { data: full } = await supabaseAdmin
-        .from("fat_relatorios")
-        .select("codigo, tag_equipamento, cliente_id")
-        .eq("id", data.id)
-        .maybeSingle();
-      const { data: cli } = full?.cliente_id
-        ? await supabaseAdmin
-            .from("clientes")
-            .select("razao_social, nome_fantasia")
-            .eq("id", full.cliente_id)
-            .maybeSingle()
-        : { data: null };
-      await dispatchEmail(supabaseAdmin, {
-        eventKey: "fat.homologado",
-        triggeredBy: context.userId,
-        triggeredByKind: "user",
-        entityTable: "fat_relatorios",
-        entityId: data.id,
-        vars: {
-          codigo: full?.codigo ?? "",
-          titulo: full?.tag_equipamento ?? "",
-          cliente_nome: cli?.nome_fantasia || cli?.razao_social || "",
-          data: new Date().toLocaleString("pt-BR"),
-          link: `https://solutek-hub.lovable.app/qualidade/fat/${data.id}`,
-        },
-      });
-    } catch (e) {
-      console.error("[fat/homologar] email dispatch failed", e);
-    }
+    const { equipamento, projeto, cliente_nome, usuario } = await fatEmailContext(
+      context.supabase,
+      data.id,
+      context.userId,
+    );
+    const { safeDispatch, appUrl, fmtDate } = await import("@/lib/email/safe-dispatch.server");
+    await safeDispatch({
+      eventKey: "fat.homologado",
+      triggeredBy: context.userId,
+      entityTable: "fat_relatorios",
+      entityId: data.id,
+      vars: {
+        equipamento,
+        projeto,
+        cliente_nome,
+        usuario,
+        data: fmtDate(),
+        link: appUrl(`/qualidade/fat/${data.id}`),
+      },
+    });
 
     return { ok: true };
   });
+
+// ============================================================
+// REPROVAR
+// ============================================================
+export const reprovarFat = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string; motivo: string }) =>
+    z.object({ id: z.string().uuid(), motivo: z.string().trim().min(5).max(2000) }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
+    const { data: fat, error: fErr } = await context.supabase
+      .from("fat_relatorios")
+      .select("id, status")
+      .eq("id", data.id)
+      .single();
+    if (fErr || !fat) throw new Error("FAT não encontrado.");
+    if (!["em_execucao", "aguardando_homologacao"].includes(fat.status)) {
+      throw new Error("Este FAT não está em um status que permita reprovação.");
+    }
+
+    // Cast local: reprovado_em/reprovado_por/motivo_reprovacao são novas
+    // colunas (migration 20260906120000) que ainda não estão em types.ts
+    // gerado.
+    const { error } = await (
+      context.supabase.from("fat_relatorios") as unknown as {
+        update: (row: Record<string, unknown>) => {
+          eq: (
+            c: string,
+            v: string,
+          ) => Promise<{ error: { message: string; code?: string | null } | null }>;
+        };
+      }
+    )
+      .update({
+        status: "reprovado",
+        reprovado_em: new Date().toISOString(),
+        reprovado_por: context.userId,
+        motivo_reprovacao: data.motivo,
+      })
+      .eq("id", data.id);
+    if (error) throw friendlyDbError(error);
+
+    const { equipamento, projeto, cliente_nome, usuario } = await fatEmailContext(
+      context.supabase,
+      data.id,
+      context.userId,
+    );
+    const { safeDispatch, appUrl, fmtDate } = await import("@/lib/email/safe-dispatch.server");
+    await safeDispatch({
+      eventKey: "fat.reprovado",
+      triggeredBy: context.userId,
+      entityTable: "fat_relatorios",
+      entityId: data.id,
+      vars: {
+        equipamento,
+        projeto,
+        cliente_nome,
+        usuario,
+        motivo: data.motivo,
+        data: fmtDate(),
+        link: appUrl(`/qualidade/fat/${data.id}`),
+      },
+    });
+
+    return { ok: true };
+  });
+
+/** Dados comuns aos e-mails de homologação/reprovação de FAT. */
+async function fatEmailContext(
+  supabase: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  fatId: string,
+  userId: string,
+): Promise<{ equipamento: string; projeto: string; cliente_nome: string; usuario: string }> {
+  const [{ data: full }, { data: prof }] = await Promise.all([
+    supabase
+      .from("fat_relatorios")
+      .select("tag_equipamento, cliente_id, processo_id")
+      .eq("id", fatId)
+      .maybeSingle(),
+    supabase.from("profiles").select("full_name, email").eq("id", userId).maybeSingle(),
+  ]);
+  const [{ data: cli }, { data: proc }] = await Promise.all([
+    full?.cliente_id
+      ? supabase
+          .from("clientes")
+          .select("razao_social, nome_fantasia")
+          .eq("id", full.cliente_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    full?.processo_id
+      ? supabase.from("processos").select("codigo, titulo").eq("id", full.processo_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  return {
+    equipamento: full?.tag_equipamento ?? "",
+    projeto: proc ? `${proc.codigo} · ${proc.titulo}` : "",
+    cliente_nome: cli?.nome_fantasia || cli?.razao_social || "",
+    usuario: prof?.full_name || prof?.email || "Usuário",
+  };
+}
 
 // ============================================================
 // SIGNED URL para evidência (foto)

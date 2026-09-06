@@ -18,6 +18,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -30,6 +38,7 @@ import {
   submitAssinatura,
   removeAssinatura,
   homologarFat,
+  reprovarFat,
   getFatFotoSignedUrl,
   FAT_STATUS_LABEL,
   FAT_SECOES,
@@ -52,10 +61,14 @@ function FatDetailPage() {
   const qc = useQueryClient();
   const fetchFn = useServerFn(getFat);
   const homologar = useServerFn(homologarFat);
+  const reprovar = useServerFn(reprovarFat);
   const genDoc = useServerFn(generateFatDocument);
   const [homologating, setHomologating] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [reprovarOpen, setReprovarOpen] = useState(false);
+  const [motivoReprovacao, setMotivoReprovacao] = useState("");
+  const [reproving, setReproving] = useState(false);
 
   async function gerarDocumento() {
     setGeneratingDoc(true);
@@ -98,6 +111,21 @@ function FatDetailPage() {
     }
   }
 
+  async function doReprovar() {
+    setReproving(true);
+    try {
+      await reprovar({ data: { id, motivo: motivoReprovacao } });
+      toast.success("FAT reprovado");
+      setReprovarOpen(false);
+      setMotivoReprovacao("");
+      refresh();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao reprovar");
+    } finally {
+      setReproving(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <PageContainer>
@@ -118,6 +146,8 @@ function FatDetailPage() {
 
   const fat = data.fat as any;
   const isHomologado = fat.status === "homologado";
+  const isReprovado = fat.status === "reprovado";
+  const canReprovar = ["em_execucao", "aguardando_homologacao"].includes(fat.status);
 
   return (
     <PageContainer>
@@ -149,12 +179,23 @@ function FatDetailPage() {
               <FileText className="mr-1.5 h-4 w-4" />
               {generatingDoc ? "Gerando…" : "Gerar documento (PT/ES/EN)"}
             </Button>
+            {canReprovar && (
+              <Button variant="destructive" onClick={() => setReprovarOpen(true)}>
+                Reprovar
+              </Button>
+            )}
             <Button
               onClick={doHomologar}
-              disabled={homologating || isHomologado || blockers.length > 0}
+              disabled={homologating || isHomologado || isReprovado || blockers.length > 0}
               title={blockers.length ? "Resolva as pendências abaixo" : ""}
             >
-              {isHomologado ? "Homologado" : homologating ? "Homologando…" : "Homologar"}
+              {isHomologado
+                ? "Homologado"
+                : isReprovado
+                  ? "Reprovado"
+                  : homologating
+                    ? "Homologando…"
+                    : "Homologar"}
             </Button>
             <Button variant="outline" onClick={() => nav({ to: "/qualidade/fat" })}>
               Voltar
@@ -162,6 +203,13 @@ function FatDetailPage() {
           </>
         }
       />
+
+      {isReprovado && fat.motivo_reprovacao && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTitle>FAT reprovado</AlertTitle>
+          <AlertDescription>{fat.motivo_reprovacao}</AlertDescription>
+        </Alert>
+      )}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]">
         <Card className="p-4">
@@ -251,6 +299,36 @@ function FatDetailPage() {
         relatorioId={id}
         relatorioCodigo={fat.codigo}
       />
+
+      <Dialog open={reprovarOpen} onOpenChange={(o) => !reproving && setReprovarOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reprovar FAT</DialogTitle>
+            <DialogDescription>
+              Descreva a não conformidade encontrada. O motivo é enviado por e-mail para engenharia
+              e gestão.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={motivoReprovacao}
+            onChange={(e) => setMotivoReprovacao(e.target.value)}
+            placeholder="Ex.: vazamento no circuito hidráulico durante o ensaio funcional…"
+            rows={4}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReprovarOpen(false)} disabled={reproving}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={doReprovar}
+              disabled={reproving || motivoReprovacao.trim().length < 5}
+            >
+              {reproving ? "Reprovando…" : "Confirmar reprovação"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
