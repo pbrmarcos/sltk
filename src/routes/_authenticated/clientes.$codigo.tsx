@@ -21,8 +21,8 @@ import {
   type EquipamentoRow,
 } from "@/components/clientes/equipamentos/EquipamentoDrawer";
 import { CriarEquipamentoWizard } from "@/components/clientes/equipamentos/CriarEquipamentoWizard";
-import { ClienteRfqTab } from "@/components/rfq/ClienteRfqTab";
-import { ClienteTimeComercialTab } from "@/components/rfq/ClienteTimeComercialTab";
+import { ClienteChecklistTab } from "@/components/checklist/ClienteChecklistTab";
+import { ClienteTimeComercialTab } from "@/components/checklist/ClienteTimeComercialTab";
 import {
   SensitiveOnly,
   RestrictedNotice,
@@ -139,7 +139,7 @@ const TABS = [
 const GESTAO_SECOES = [
   { id: "visao", label: "Visão geral" },
   { id: "equipamentos", label: "Equipamentos" },
-  { id: "rfq", label: "Checklists" },
+  { id: "checklist", label: "Checklists" },
   { id: "socios", label: "Sócios" },
   { id: "documentos", label: "Documentos" },
   { id: "timeline", label: "Timeline" },
@@ -173,7 +173,7 @@ const TIPO_LABEL: Record<string, string> = {
 const searchSchema = z.object({
   tab: fallback(z.enum(["gestao", "time"]), "gestao").default("gestao"),
   sec: fallback(
-    z.enum(["visao", "equipamentos", "rfq", "socios", "documentos", "timeline"]),
+    z.enum(["visao", "equipamentos", "checklist", "socios", "documentos", "timeline"]),
     "visao",
   ).default("visao"),
 });
@@ -503,7 +503,7 @@ function ClientePage() {
                 />
               )}
               {sec === "equipamentos" && <EquipamentosTab clienteId={cliente.id} />}
-              {sec === "rfq" && <ClienteRfqTab clienteId={cliente.id} />}
+              {sec === "checklist" && <ClienteChecklistTab clienteId={cliente.id} />}
               {sec === "socios" && (
                 <SensitiveOnly fallback={<RestrictedNotice what="Quadro societário" />}>
                   <SociosTab

@@ -4,7 +4,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { getSupabasePublicConfig } from "@/integrations/supabase/config";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { FormularioSchema, Idioma } from "@/lib/rfq.shared";
+import type { FormularioSchema, Idioma } from "@/lib/checklist.shared";
 
 function randomToken(len = 6): string {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -20,11 +20,11 @@ function slugify(input: string, max = 24): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return base.slice(0, max) || "rfq";
+  return base.slice(0, max) || "checklist";
 }
 
 /**
- * Constrói slug legível a partir do código do cliente + código do tipo RFQ.
+ * Constrói slug legível a partir do código do cliente + código do tipo de Checklist.
  * Ex.: acme-desensaque_bigbag-a3k9m2
  */
 function buildReadableSlug(clienteCodigo: string | null, tipoCodigo: string | null): string {
@@ -44,11 +44,11 @@ async function hasAny(sb: any, uid: string, roles: string[]): Promise<boolean> {
 // ------------------------------------------------------------------
 // Catálogo
 // ------------------------------------------------------------------
-export const listRfqTipos = createServerFn({ method: "GET" })
+export const listChecklistTipos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await (context.supabase as any)
-      .from("rfq_formulario_tipo")
+      .from("checklist_formulario_tipo")
       .select("id, codigo, nome_pt, nome_es, nome_en, familia, descricao")
       .eq("ativo", true)
       .order("nome_pt", { ascending: true });
@@ -65,12 +65,12 @@ export const listRfqTipos = createServerFn({ method: "GET" })
   });
 
 // Retorna o schema completo (para preview no dialog de emissão)
-export const getRfqTipoSchema = createServerFn({ method: "GET" })
+export const getChecklistTipoSchema = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await (context.supabase as any)
-      .from("rfq_formulario_tipo")
+      .from("checklist_formulario_tipo")
       .select("id, codigo, nome_pt, nome_es, nome_en, campos_schema")
       .eq("id", data.id)
       .maybeSingle();
@@ -87,9 +87,9 @@ export const getRfqTipoSchema = createServerFn({ method: "GET" })
   });
 
 // ------------------------------------------------------------------
-// Admin: CRUD de tipos de RFQ (editor visual)
+// Admin: CRUD de tipos de Checklist (editor visual)
 // ------------------------------------------------------------------
-export const adminListRfqTipos = createServerFn({ method: "GET" })
+export const adminListChecklistTipos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as any;
@@ -97,7 +97,7 @@ export const adminListRfqTipos = createServerFn({ method: "GET" })
       throw new Error("Acesso restrito.");
     }
     const { data, error } = await sb
-      .from("rfq_formulario_tipo")
+      .from("checklist_formulario_tipo")
       .select(
         "id, codigo, nome_pt, nome_es, nome_en, familia, descricao, campos_schema, ativo, updated_at",
       )
@@ -142,7 +142,7 @@ const secaoSchemaZ = z.object({
 });
 const formularioSchemaZ = z.object({ secoes: z.array(secaoSchemaZ) });
 
-export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
+export const adminUpsertChecklistTipo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
@@ -180,12 +180,15 @@ export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
     };
     if (data.id) {
-      const { error } = await sb.from("rfq_formulario_tipo").update(payload).eq("id", data.id);
+      const { error } = await sb
+        .from("checklist_formulario_tipo")
+        .update(payload)
+        .eq("id", data.id);
       if (error) throw friendlyDbError(error);
       return { ok: true as const, id: data.id };
     }
     const { data: inserted, error } = await sb
-      .from("rfq_formulario_tipo")
+      .from("checklist_formulario_tipo")
       .insert(payload)
       .select("id")
       .single();
@@ -193,7 +196,7 @@ export const adminUpsertRfqTipo = createServerFn({ method: "POST" })
     return { ok: true as const, id: inserted.id as string };
   });
 
-export const adminToggleRfqTipoAtivo = createServerFn({ method: "POST" })
+export const adminToggleChecklistTipoAtivo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), ativo: z.boolean() }).parse(i))
   .handler(async ({ data, context }) => {
@@ -202,7 +205,7 @@ export const adminToggleRfqTipoAtivo = createServerFn({ method: "POST" })
       throw new Error("Acesso restrito.");
     }
     const { error } = await sb
-      .from("rfq_formulario_tipo")
+      .from("checklist_formulario_tipo")
       .update({ ativo: data.ativo, updated_at: new Date().toISOString() })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
@@ -212,7 +215,7 @@ export const adminToggleRfqTipoAtivo = createServerFn({ method: "POST" })
 // ------------------------------------------------------------------
 // Emitir link (sales/manager/admin)
 // ------------------------------------------------------------------
-export const emitirRfqLink = createServerFn({ method: "POST" })
+export const emitirChecklistLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
@@ -233,7 +236,7 @@ export const emitirRfqLink = createServerFn({ method: "POST" })
     // Busca códigos legíveis para compor o slug (cliente + tipo).
     const [{ data: cli }, { data: tipo }] = await Promise.all([
       sb.from("clientes").select("codigo").eq("id", data.cliente_id).maybeSingle(),
-      sb.from("rfq_formulario_tipo").select("codigo").eq("id", data.tipo_id).maybeSingle(),
+      sb.from("checklist_formulario_tipo").select("codigo").eq("id", data.tipo_id).maybeSingle(),
     ]);
     const codigoCliente = (cli?.codigo as string | null) ?? null;
     const codigoTipo = (tipo?.codigo as string | null) ?? null;
@@ -241,7 +244,7 @@ export const emitirRfqLink = createServerFn({ method: "POST" })
     let slug = buildReadableSlug(codigoCliente, codigoTipo);
     for (let i = 0; i < 5; i++) {
       const { data: hit } = await sb
-        .from("rfq_formulario_link")
+        .from("checklist_formulario_link")
         .select("id")
         .eq("slug", slug)
         .maybeSingle();
@@ -250,7 +253,7 @@ export const emitirRfqLink = createServerFn({ method: "POST" })
     }
 
     const { data: inserted, error } = await sb
-      .from("rfq_formulario_link")
+      .from("checklist_formulario_link")
       .insert({
         cliente_id: data.cliente_id,
         tipo_id: data.tipo_id,
@@ -269,15 +272,15 @@ export const emitirRfqLink = createServerFn({ method: "POST" })
 // ------------------------------------------------------------------
 // Listar links do cliente
 // ------------------------------------------------------------------
-export const listRfqLinksCliente = createServerFn({ method: "GET" })
+export const listChecklistLinksCliente = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ cliente_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
-      .from("rfq_formulario_link")
+      .from("checklist_formulario_link")
       .select(
-        "id, slug, idioma, status, titulo, criado_em, expira_em, preenchido_em, submissao_id, tipo_id, sales_id, rfq_formulario_tipo:tipo_id(nome_pt, codigo)",
+        "id, slug, idioma, status, titulo, criado_em, expira_em, preenchido_em, submissao_id, tipo_id, sales_id, checklist_formulario_tipo:tipo_id(nome_pt, codigo)",
       )
       .eq("cliente_id", data.cliente_id)
       .order("criado_em", { ascending: false });
@@ -286,13 +289,13 @@ export const listRfqLinksCliente = createServerFn({ method: "GET" })
   });
 
 // Arquivar link
-export const arquivarRfqLink = createServerFn({ method: "POST" })
+export const arquivarChecklistLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ link_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { error } = await sb
-      .from("rfq_formulario_link")
+      .from("checklist_formulario_link")
       .update({ status: "arquivado" })
       .eq("id", data.link_id);
     if (error) throw friendlyDbError(error);
@@ -302,7 +305,7 @@ export const arquivarRfqLink = createServerFn({ method: "POST" })
 // ------------------------------------------------------------------
 // Inbox de submissões (manager)
 // ------------------------------------------------------------------
-export const listRfqSubmissoes = createServerFn({ method: "GET" })
+export const listChecklistSubmissoes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
@@ -316,9 +319,9 @@ export const listRfqSubmissoes = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     let q = sb
-      .from("rfq_submissao")
+      .from("checklist_submissao")
       .select(
-        "id, link_id, cliente_id, tipo_id, idioma, preenchido_por_nome, preenchido_por_email, criado_em, lida_em, oportunidade_id, clientes:cliente_id(codigo, razao_social), rfq_formulario_tipo:tipo_id(nome_pt, codigo)",
+        "id, link_id, cliente_id, tipo_id, idioma, preenchido_por_nome, preenchido_por_email, criado_em, lida_em, oportunidade_id, clientes:cliente_id(codigo, razao_social), checklist_formulario_tipo:tipo_id(nome_pt, codigo)",
       )
       .order("criado_em", { ascending: false })
       .limit(data.limit);
@@ -330,28 +333,28 @@ export const listRfqSubmissoes = createServerFn({ method: "GET" })
   });
 
 // Detalhe da submissão (respostas + schema)
-export const getRfqSubmissao = createServerFn({ method: "GET" })
+export const getChecklistSubmissao = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: sub, error } = await sb
-      .from("rfq_submissao")
+      .from("checklist_submissao")
       .select(
-        "id, link_id, cliente_id, tipo_id, idioma, respostas, preenchido_por_nome, preenchido_por_email, preenchido_por_telefone, criado_em, lida_em, oportunidade_id, observacoes_internas, clientes:cliente_id(codigo, razao_social), rfq_formulario_tipo:tipo_id(nome_pt, nome_es, nome_en, codigo, campos_schema)",
+        "id, link_id, cliente_id, tipo_id, idioma, respostas, preenchido_por_nome, preenchido_por_email, preenchido_por_telefone, criado_em, lida_em, oportunidade_id, observacoes_internas, clientes:cliente_id(codigo, razao_social), checklist_formulario_tipo:tipo_id(nome_pt, nome_es, nome_en, codigo, campos_schema)",
       )
       .eq("id", data.id)
       .single();
     if (error) throw friendlyDbError(error);
     const { data: anexos } = await sb
-      .from("rfq_submissao_anexo")
+      .from("checklist_submissao_anexo")
       .select("id, campo_id, nome, mime, drive_view_url, criado_em")
       .eq("submissao_id", data.id)
       .order("criado_em", { ascending: true });
     // marca como lida
     if (!sub.lida_em) {
       await sb
-        .from("rfq_submissao")
+        .from("checklist_submissao")
         .update({ lida_em: new Date().toISOString(), lida_por: context.userId })
         .eq("id", data.id);
     }
@@ -488,7 +491,7 @@ export const revogarLiberacaoSales = createServerFn({ method: "POST" })
 // ------------------------------------------------------------------
 // Este endpoint é chamado do lado do servidor via server route público — abaixo
 // exposto também como server function para conveniência do renderer autenticado.
-export const getRfqPublicoPorSlug = createServerFn({ method: "GET" })
+export const getChecklistPublicoPorSlug = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) => z.object({ slug: z.string().min(3).max(64) }).parse(i))
   .handler(async ({ data }) => {
     const { createClient } = await import("@supabase/supabase-js");
@@ -498,9 +501,9 @@ export const getRfqPublicoPorSlug = createServerFn({ method: "GET" })
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
     const { data: link, error } = await (supabase as any)
-      .from("rfq_formulario_link")
+      .from("checklist_formulario_link")
       .select(
-        "id, cliente_id, tipo_id, idioma, slug, status, titulo, expira_em, rfq_formulario_tipo:tipo_id(nome_pt, nome_es, nome_en, campos_schema)",
+        "id, cliente_id, tipo_id, idioma, slug, status, titulo, expira_em, checklist_formulario_tipo:tipo_id(nome_pt, nome_es, nome_en, campos_schema)",
       )
       .eq("slug", data.slug)
       .maybeSingle();
@@ -522,10 +525,10 @@ export const getRfqPublicoPorSlug = createServerFn({ method: "GET" })
         expira_em: (link.expira_em || null) as string | null,
       },
       tipo: {
-        nome_pt: link.rfq_formulario_tipo?.nome_pt as string,
-        nome_es: (link.rfq_formulario_tipo?.nome_es || null) as string | null,
-        nome_en: (link.rfq_formulario_tipo?.nome_en || null) as string | null,
-        campos_schema: link.rfq_formulario_tipo?.campos_schema as FormularioSchema,
+        nome_pt: link.checklist_formulario_tipo?.nome_pt as string,
+        nome_es: (link.checklist_formulario_tipo?.nome_es || null) as string | null,
+        nome_en: (link.checklist_formulario_tipo?.nome_en || null) as string | null,
+        campos_schema: link.checklist_formulario_tipo?.campos_schema as FormularioSchema,
       },
     };
   });
@@ -536,8 +539,8 @@ export const getRfqPublicoPorSlug = createServerFn({ method: "GET" })
 
 /**
  * Sugere o template de projeto padrão para uma oportunidade, com base em:
- * 1) rfq_submissao_id vinculada explicitamente à oportunidade; senão
- * 2) submissão RFQ mais recente do mesmo cliente.
+ * 1) checklist_submissao_id vinculada explicitamente à oportunidade; senão
+ * 2) submissão de Checklist mais recente do mesmo cliente.
  * Retorna null se não houver submissão ou template configurado.
  */
 export const sugerirTemplateParaOportunidade = createServerFn({ method: "POST" })
@@ -547,24 +550,24 @@ export const sugerirTemplateParaOportunidade = createServerFn({ method: "POST" }
     const sb = context.supabase as any;
     const { data: opp } = await sb
       .from("oportunidades")
-      .select("id, cliente_id, rfq_submissao_id")
+      .select("id, cliente_id, checklist_submissao_id")
       .eq("id", data.oportunidade_id)
       .maybeSingle();
     if (!opp) return null;
 
     let submissao: any = null;
-    if (opp.rfq_submissao_id) {
+    if (opp.checklist_submissao_id) {
       const { data: s } = await sb
-        .from("rfq_submissao")
-        .select("id, tipo_id, criado_em, rfq_formulario_tipo(nome_pt)")
-        .eq("id", opp.rfq_submissao_id)
+        .from("checklist_submissao")
+        .select("id, tipo_id, criado_em, checklist_formulario_tipo(nome_pt)")
+        .eq("id", opp.checklist_submissao_id)
         .maybeSingle();
       submissao = s;
     }
     if (!submissao && opp.cliente_id) {
       const { data: s } = await sb
-        .from("rfq_submissao")
-        .select("id, tipo_id, criado_em, rfq_formulario_tipo(nome_pt)")
+        .from("checklist_submissao")
+        .select("id, tipo_id, criado_em, checklist_formulario_tipo(nome_pt)")
         .eq("cliente_id", opp.cliente_id)
         .order("criado_em", { ascending: false })
         .limit(1)
@@ -575,8 +578,8 @@ export const sugerirTemplateParaOportunidade = createServerFn({ method: "POST" }
 
     const { data: tpl } = await sb
       .from("processo_templates")
-      .select("id, nome, tipo, rfq_tipo_id")
-      .eq("rfq_tipo_id", submissao.tipo_id)
+      .select("id, nome, tipo, checklist_tipo_id")
+      .eq("checklist_tipo_id", submissao.tipo_id)
       .eq("tipo", "projeto")
       .eq("ativo", true)
       .is("deleted_at", null)
@@ -587,15 +590,15 @@ export const sugerirTemplateParaOportunidade = createServerFn({ method: "POST" }
     return {
       submissao_id: submissao.id as string,
       submissao_em: submissao.criado_em as string,
-      rfq_tipo_id: submissao.tipo_id as string,
-      rfq_tipo_nome: (submissao.rfq_formulario_tipo?.nome_pt ?? null) as string | null,
+      checklist_tipo_id: submissao.tipo_id as string,
+      checklist_tipo_nome: (submissao.checklist_formulario_tipo?.nome_pt ?? null) as string | null,
       template_id: (tpl?.id ?? null) as string | null,
       template_nome: (tpl?.nome ?? null) as string | null,
     };
   });
 
 /**
- * Vincula uma submissão RFQ a uma oportunidade (idempotente).
+ * Vincula uma submissão de Checklist a uma oportunidade (idempotente).
  */
 export const vincularSubmissaoOportunidade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -612,7 +615,7 @@ export const vincularSubmissaoOportunidade = createServerFn({ method: "POST" })
     const { error } = await sb
       .from("oportunidades")
       .update({
-        rfq_submissao_id: data.submissao_id,
+        checklist_submissao_id: data.submissao_id,
         updated_at: new Date().toISOString(),
         updated_by: context.userId,
       })
@@ -631,7 +634,7 @@ export const listOportunidadesDoCliente = createServerFn({ method: "POST" })
     const sb = context.supabase as any;
     const { data: rows, error } = await sb
       .from("oportunidades")
-      .select("id, codigo, titulo, pipeline_stage, rfq_submissao_id, created_at")
+      .select("id, codigo, titulo, pipeline_stage, checklist_submissao_id, created_at")
       .eq("cliente_id", data.cliente_id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
@@ -642,7 +645,7 @@ export const listOportunidadesDoCliente = createServerFn({ method: "POST" })
       codigo: string | null;
       titulo: string;
       pipeline_stage: string;
-      rfq_submissao_id: string | null;
+      checklist_submissao_id: string | null;
       created_at: string;
     }>;
   });

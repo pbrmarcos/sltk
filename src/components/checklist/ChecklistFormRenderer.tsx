@@ -24,8 +24,8 @@ import {
   UploadCloud,
   UserRound,
 } from "lucide-react";
-import type { FormularioSchema, Idioma } from "@/lib/rfq.shared";
-import { pickLabel } from "@/lib/rfq.shared";
+import type { FormularioSchema, Idioma } from "@/lib/checklist.shared";
+import { pickLabel } from "@/lib/checklist.shared";
 import { cn } from "@/lib/utils";
 
 type AnexoRow = {
@@ -202,7 +202,7 @@ function mimeIcon(mime: string) {
 
 const SECTION_ICONS = [ClipboardList, Paperclip, UserRound];
 
-export function RFQFormRenderer({
+export function ChecklistFormRenderer({
   schema,
   idioma,
   slug,
@@ -283,7 +283,7 @@ export function RFQFormRenderer({
         fd.set("campo_id", campoId);
         fd.set("file", file);
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/public/rfq/upload");
+        xhr.open("POST", "/api/public/checklist/upload");
         xhr.upload.onprogress = (evt) => {
           if (evt.lengthComputable) {
             const pct = Math.min(99, Math.round((evt.loaded / evt.total) * 100));

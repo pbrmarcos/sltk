@@ -10,7 +10,7 @@ const q = z.object({
   submissao_id: z.string().uuid(),
 });
 
-export const Route = createFileRoute("/api/public/rfq/status")({
+export const Route = createFileRoute("/api/public/checklist/status")({
   server: {
     handlers: {
       OPTIONS: async () =>
@@ -37,15 +37,15 @@ export const Route = createFileRoute("/api/public/rfq/status")({
           const supabaseAdmin = await getCriticalClient();
 
           const { data: sub, error } = await (supabaseAdmin as any)
-            .from("rfq_submissao")
+            .from("checklist_submissao")
             .select(
-              "id, criado_em, lida_em, oportunidade_id, respostas, link_id, rfq_formulario_link:link_id(slug, status, preenchido_em)",
+              "id, criado_em, lida_em, oportunidade_id, respostas, link_id, checklist_formulario_link:link_id(slug, status, preenchido_em)",
             )
             .eq("id", parsed.data.submissao_id)
             .maybeSingle();
 
           if (error) throw error;
-          if (!sub || sub.rfq_formulario_link?.slug !== parsed.data.slug) {
+          if (!sub || sub.checklist_formulario_link?.slug !== parsed.data.slug) {
             return Response.json(
               { ok: false, error: "Protocolo não encontrado." },
               { status: 404 },
@@ -53,11 +53,11 @@ export const Route = createFileRoute("/api/public/rfq/status")({
           }
 
           const { count: anexosCount } = await (supabaseAdmin as any)
-            .from("rfq_submissao_anexo")
+            .from("checklist_submissao_anexo")
             .select("id", { count: "exact", head: true })
             .eq("submissao_id", sub.id);
 
-          const enviado = sub.rfq_formulario_link?.status === "preenchido";
+          const enviado = sub.checklist_formulario_link?.status === "preenchido";
           let etapa: "rascunho" | "recebido" | "em_analise" | "atendido" = "rascunho";
           if (sub.oportunidade_id) etapa = "atendido";
           else if (sub.lida_em) etapa = "em_analise";
@@ -68,7 +68,7 @@ export const Route = createFileRoute("/api/public/rfq/status")({
               ok: true,
               etapa,
               criado_em: sub.criado_em,
-              preenchido_em: sub.rfq_formulario_link?.preenchido_em ?? null,
+              preenchido_em: sub.checklist_formulario_link?.preenchido_em ?? null,
               lida_em: sub.lida_em,
               anexos: anexosCount ?? 0,
               oportunidade: Boolean(sub.oportunidade_id),

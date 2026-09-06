@@ -1,5 +1,5 @@
 /**
- * Server fns para marcar formulários (contato/entrevista/rfq) como
+ * Server fns para marcar formulários (contato/entrevista/checklist) como
  * "pendente" | "lido" e listar o mapa de status.
  */
 import { createServerFn } from "@tanstack/react-start";
@@ -7,7 +7,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const ENTITY = z.enum(["contato", "entrevista", "rfq"]);
+const ENTITY = z.enum(["contato", "entrevista", "checklist"]);
 const STATUS = z.enum(["pendente", "lido"]);
 
 async function requireAdminOrManager(userId: string) {
@@ -24,7 +24,7 @@ async function requireAdminOrManager(userId: string) {
 }
 
 export type FormInboxStatusRow = {
-  entity_type: "contato" | "entrevista" | "rfq";
+  entity_type: "contato" | "entrevista" | "checklist";
   entity_id: string;
   status: "pendente" | "lido";
   updated_at: string;

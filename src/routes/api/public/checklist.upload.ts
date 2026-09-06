@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 
-// Upload público de anexo (PDF/JPG/PNG até 50 MB) para um formulário RFQ.
-// Envia ao Google Drive dentro da pasta do cliente e registra em
-// rfq_submissao_anexo.
+// Upload público de anexo (PDF/JPG/PNG até 50 MB) para um formulário de
+// Checklist. Envia ao Google Drive dentro da pasta do cliente e registra em
+// checklist_submissao_anexo.
 
 const MAX_BYTES = 50 * 1024 * 1024;
 const ALLOWED = new Set(["application/pdf", "image/png", "image/jpeg", "image/jpg"]);
@@ -53,7 +53,7 @@ function stampName(campoId: string | null, mime: string, original: string): stri
   return `${campo}${ts}_${base}.${ext}`;
 }
 
-export const Route = createFileRoute("/api/public/rfq/upload")({
+export const Route = createFileRoute("/api/public/checklist/upload")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
@@ -85,7 +85,7 @@ export const Route = createFileRoute("/api/public/rfq/upload")({
 
           const supa: any = await getAdmin();
           const { data: link, error: eLink } = await supa
-            .from("rfq_formulario_link")
+            .from("checklist_formulario_link")
             .select("id, cliente_id, status, expira_em, submissao_id, slug")
             .eq("slug", slug)
             .maybeSingle();
@@ -128,7 +128,7 @@ export const Route = createFileRoute("/api/public/rfq/upload")({
             "Solutek",
             "Clientes",
             clienteFolder,
-            "RFQ",
+            "Checklist",
             safeSeg(link.slug, 80),
           ]);
           const up = await uploadFile({
@@ -139,7 +139,7 @@ export const Route = createFileRoute("/api/public/rfq/upload")({
           });
 
           const { data: anexo, error: eAnx } = await supa
-            .from("rfq_submissao_anexo")
+            .from("checklist_submissao_anexo")
             .insert({
               submissao_id: submissaoId,
               campo_id: campoId,

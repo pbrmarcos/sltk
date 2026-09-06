@@ -15,41 +15,41 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  adminListRfqTipos,
-  adminUpsertRfqTipo,
-  adminToggleRfqTipoAtivo,
-} from "@/lib/rfq.functions";
-import type { FormularioSchema } from "@/lib/rfq.shared";
+  adminListChecklistTipos,
+  adminUpsertChecklistTipo,
+  adminToggleChecklistTipoAtivo,
+} from "@/lib/checklist.functions";
+import type { FormularioSchema } from "@/lib/checklist.shared";
 import {
-  RfqTipoEditor,
+  ChecklistTipoEditor,
   makeEmptyDraft,
-  type RfqTipoDraft,
-} from "@/components/rfq/admin/RfqTipoEditor";
+  type ChecklistTipoDraft,
+} from "@/components/checklist/admin/ChecklistTipoEditor";
 
-/** Catálogo de tipos de Checklist (RFQ) — antes era /admin/checklist-tipos, agora vive em Modelos de Formulário. */
+/** Catálogo de tipos de Checklist — antes era /admin/checklist-tipos, agora vive em Modelos de Formulário. */
 export function ChecklistTiposPanel() {
   const qc = useQueryClient();
   const [busca, setBusca] = useState("");
-  const [draft, setDraft] = useState<RfqTipoDraft | null>(null);
+  const [draft, setDraft] = useState<ChecklistTipoDraft | null>(null);
   const [saving, setSaving] = useState(false);
 
   const listQ = useQuery({
-    queryKey: ["admin-rfq-tipos"],
-    queryFn: () => adminListRfqTipos(),
+    queryKey: ["admin-checklist-tipos"],
+    queryFn: () => adminListChecklistTipos(),
   });
 
   const toggleMut = useMutation({
-    mutationFn: (v: { id: string; ativo: boolean }) => adminToggleRfqTipoAtivo({ data: v }),
+    mutationFn: (v: { id: string; ativo: boolean }) => adminToggleChecklistTipoAtivo({ data: v }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-rfq-tipos"] });
-      qc.invalidateQueries({ queryKey: ["rfq-tipos"] });
+      qc.invalidateQueries({ queryKey: ["admin-checklist-tipos"] });
+      qc.invalidateQueries({ queryKey: ["checklist-tipos"] });
     },
     onError: (e: any) => toast.error(e.message || "Erro."),
   });
 
   const upsertMut = useMutation({
-    mutationFn: (d: RfqTipoDraft) =>
-      adminUpsertRfqTipo({
+    mutationFn: (d: ChecklistTipoDraft) =>
+      adminUpsertChecklistTipo({
         data: {
           id: d.id ?? null,
           codigo: d.codigo,
@@ -65,8 +65,8 @@ export function ChecklistTiposPanel() {
     onSuccess: () => {
       toast.success("Tipo salvo.");
       setDraft(null);
-      qc.invalidateQueries({ queryKey: ["admin-rfq-tipos"] });
-      qc.invalidateQueries({ queryKey: ["rfq-tipos"] });
+      qc.invalidateQueries({ queryKey: ["admin-checklist-tipos"] });
+      qc.invalidateQueries({ queryKey: ["checklist-tipos"] });
     },
     onError: (e: any) => toast.error(e.message || "Erro ao salvar."),
     onSettled: () => setSaving(false),
@@ -185,7 +185,7 @@ export function ChecklistTiposPanel() {
             </DialogDescription>
           </DialogHeader>
           {draft && (
-            <RfqTipoEditor
+            <ChecklistTipoEditor
               draft={draft}
               onChange={setDraft}
               saving={saving}

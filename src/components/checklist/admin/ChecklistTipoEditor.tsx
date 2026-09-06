@@ -20,10 +20,10 @@ import type {
   FormularioSchema,
   Idioma,
   SecaoSchema,
-} from "@/lib/rfq.shared";
-import { RFQFormRenderer } from "@/components/rfq/RFQFormRenderer";
+} from "@/lib/checklist.shared";
+import { ChecklistFormRenderer } from "@/components/checklist/ChecklistFormRenderer";
 
-export type RfqTipoDraft = {
+export type ChecklistTipoDraft = {
   id?: string | null;
   codigo: string;
   nome_pt: string;
@@ -63,14 +63,14 @@ function moveInArray<T>(arr: T[], from: number, to: number): T[] {
   return next;
 }
 
-export function RfqTipoEditor({
+export function ChecklistTipoEditor({
   draft,
   onChange,
   onSave,
   saving,
 }: {
-  draft: RfqTipoDraft;
-  onChange: (next: RfqTipoDraft) => void;
+  draft: ChecklistTipoDraft;
+  onChange: (next: ChecklistTipoDraft) => void;
   onSave: () => void;
   saving: boolean;
 }) {
@@ -461,7 +461,7 @@ export function RfqTipoEditor({
           </Select>
         </div>
         <div className="rounded-md border border-dashed border-border bg-muted/30 p-4">
-          <RFQFormRenderer schema={draft.campos_schema} idioma={previewIdioma} preview />
+          <ChecklistFormRenderer schema={draft.campos_schema} idioma={previewIdioma} preview />
         </div>
       </TabsContent>
 
@@ -474,7 +474,7 @@ export function RfqTipoEditor({
   );
 }
 
-export function makeEmptyDraft(): RfqTipoDraft {
+export function makeEmptyDraft(): ChecklistTipoDraft {
   return {
     codigo: "",
     nome_pt: "",

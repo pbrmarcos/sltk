@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Clock, Copy, Eye, Loader2, MailCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Idioma } from "@/lib/rfq.shared";
+import type { Idioma } from "@/lib/checklist.shared";
 
 type Etapa = "rascunho" | "recebido" | "em_analise" | "atendido";
 type StatusResp = {
@@ -108,7 +108,7 @@ type Props = {
   idioma: Idioma;
 };
 
-export function RFQStatusPanel({ slug, protocolo, idioma }: Props) {
+export function ChecklistStatusPanel({ slug, protocolo, idioma }: Props) {
   const t = T[idioma];
   const [status, setStatus] = useState<StatusResp | null>(null);
   const [carregando, setCarregando] = useState(false);
@@ -118,7 +118,7 @@ export function RFQStatusPanel({ slug, protocolo, idioma }: Props) {
   async function fetchStatus() {
     setCarregando(true);
     try {
-      const url = `/api/public/rfq/status?slug=${encodeURIComponent(slug)}&submissao_id=${encodeURIComponent(
+      const url = `/api/public/checklist/status?slug=${encodeURIComponent(slug)}&submissao_id=${encodeURIComponent(
         protocolo,
       )}`;
       const res = await fetch(url, { cache: "no-store" });

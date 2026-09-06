@@ -15,7 +15,7 @@ app_version: "0.99.4"
 - `/checklist/$slug` é um checklist técnico **público por link** — o cliente responde sem precisar de login.
 - Cada **tipo de Checklist** é configurado em `/admin/checklist-tipos` com blocos (dados, uploads, matriz de itens).
 - O envio cria uma **cotação staging** que o comercial revisa antes de virar oportunidade.
-- Uploads passam por endpoint público seguro (`/api/public/rfq/upload`) com limite de tamanho e MIME.
+- Uploads passam por endpoint público seguro (`/api/public/checklist/upload`) com limite de tamanho e MIME.
 - Todo envio dispara notificação para `sales` e `manager` responsáveis pelo tipo.
 :::
 
@@ -34,7 +34,7 @@ Ele preenche os blocos, anexa desenhos/normas (PDF, DWG, imagens) e clica em **E
 :::
 
 :::step{n="4" title="Chega no staging"}
-A submissão vai para `/api/public/rfq/submit` → tabela de staging. Aparece em `/comercial/checklists` para o comercial revisar.
+A submissão vai para `/api/public/checklist/submit` → tabela de staging. Aparece em `/comercial/checklists` para o comercial revisar.
 :::
 
 :::step{n="5" title="Comercial promove"}
@@ -45,7 +45,7 @@ A submissão vai para `/api/public/rfq/submit` → tabela de staging. Aparece em
 
 | Camada | Como funciona |
 |---|---|
-| **Rota pública** | `/api/public/rfq/*` bypassa auth só nesses endpoints |
+| **Rota pública** | `/api/public/checklist/*` bypassa auth só nesses endpoints |
 | **Validação** | Schema Zod no submit; rejeita payload inválido |
 | **Upload** | MIME/tamanho validados; anexos escaneados em background |
 | **Rate limit** | IP throttling por endpoint |

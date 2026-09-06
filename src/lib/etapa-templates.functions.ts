@@ -737,13 +737,13 @@ export const revertEtapaTemplateVersao = createServerFn({ method: "POST" })
     return { versao: novaVersao };
   });
 
-// ============ RFQ Tipos p/ selects ============
-export const listRfqTiposForTemplate = createServerFn({ method: "GET" })
+// ============ Tipos de Checklist p/ selects ============
+export const listChecklistTiposForTemplate = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as AnySb;
     const { data } = await sb
-      .from("rfq_formulario_tipo")
+      .from("checklist_formulario_tipo")
       .select("id, slug, codigo, nome_pt, familia")
       .eq("ativo", true)
       .order("nome_pt");

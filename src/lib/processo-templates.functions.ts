@@ -41,7 +41,7 @@ export type TemplateLite = {
   descricao: string | null;
   tipo: ProcessoTipo;
   ativo: boolean;
-  rfq_tipo_id: string | null;
+  checklist_tipo_id: string | null;
   itens_count: number;
   tarefas_count: number;
   eventos_count: number;
@@ -87,7 +87,7 @@ export type TemplateDetalhe = {
     descricao: string | null;
     tipo: ProcessoTipo;
     ativo: boolean;
-    rfq_tipo_id: string | null;
+    checklist_tipo_id: string | null;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -219,7 +219,8 @@ export const listTemplates = createServerFn({ method: "GET" })
       descricao: r.descricao,
       tipo: r.tipo as ProcessoTipo,
       ativo: r.ativo,
-      rfq_tipo_id: (r as unknown as { rfq_tipo_id: string | null }).rfq_tipo_id ?? null,
+      checklist_tipo_id:
+        (r as unknown as { checklist_tipo_id: string | null }).checklist_tipo_id ?? null,
       itens_count: count(itens.data as never, r.id),
       tarefas_count: count(tarefas.data as never, r.id),
       eventos_count: count(eventos.data as never, r.id),
@@ -276,7 +277,8 @@ export const getTemplate = createServerFn({ method: "GET" })
         descricao: t.descricao,
         tipo: t.tipo as ProcessoTipo,
         ativo: t.ativo,
-        rfq_tipo_id: (t as unknown as { rfq_tipo_id: string | null }).rfq_tipo_id ?? null,
+        checklist_tipo_id:
+          (t as unknown as { checklist_tipo_id: string | null }).checklist_tipo_id ?? null,
         created_at: t.created_at,
         updated_at: t.updated_at,
         deleted_at: t.deleted_at ?? null,
@@ -325,7 +327,7 @@ const upsertTemplateInput = z.object({
   descricao: z.string().nullable().optional(),
   tipo: tipoSchema,
   ativo: z.boolean().default(true),
-  rfq_tipo_id: z.string().uuid().nullable().optional(),
+  checklist_tipo_id: z.string().uuid().nullable().optional(),
 });
 
 export const upsertTemplate = createServerFn({ method: "POST" })
@@ -350,7 +352,7 @@ export const upsertTemplate = createServerFn({ method: "POST" })
         updated_by: context.userId,
         updated_at: new Date().toISOString(),
       };
-      if (data.rfq_tipo_id !== undefined) patch.rfq_tipo_id = data.rfq_tipo_id;
+      if (data.checklist_tipo_id !== undefined) patch.checklist_tipo_id = data.checklist_tipo_id;
       const { error } = await context.supabase
         .from("processo_templates")
         .update(patch as never)
@@ -366,7 +368,7 @@ export const upsertTemplate = createServerFn({ method: "POST" })
       created_by: context.userId,
       updated_by: context.userId,
     };
-    if (data.rfq_tipo_id !== undefined) insertRow.rfq_tipo_id = data.rfq_tipo_id;
+    if (data.checklist_tipo_id !== undefined) insertRow.checklist_tipo_id = data.checklist_tipo_id;
     const { data: ins, error } = await context.supabase
       .from("processo_templates")
       .insert(insertRow as never)

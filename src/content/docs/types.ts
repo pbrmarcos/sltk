@@ -71,7 +71,7 @@ export const CATEGORIES: CategoryMeta[] = [
   {
     id: "comercial",
     label: "Comercial",
-    description: "Pipeline, oportunidades, orçamentos e RFQ.",
+    description: "Pipeline, oportunidades, orçamentos e Checklist.",
     order: 2,
   },
   {
@@ -116,13 +116,13 @@ export const CATEGORIES: CategoryMeta[] = [
   {
     id: "admin",
     label: "Administração",
-    description: "Usuários, permissões, auditoria, RFQ, SLA e páginas dos equipamentos.",
+    description: "Usuários, permissões, auditoria, Checklist, SLA e páginas dos equipamentos.",
     order: 12,
   },
   {
     id: "site-publico",
     label: "Site público",
-    description: "Home, catálogo e captação (RFQ/contato).",
+    description: "Home, catálogo e captação (Checklist/contato).",
     order: 13,
   },
 ];

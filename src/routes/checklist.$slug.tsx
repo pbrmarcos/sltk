@@ -2,16 +2,16 @@ import { assetUrl } from "@/lib/asset-url";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getRfqPublicoPorSlug } from "@/lib/rfq.functions";
-import { RFQFormRenderer } from "@/components/rfq/RFQFormRenderer";
-import { RFQStatusPanel } from "@/components/rfq/RFQStatusPanel";
-import type { Idioma } from "@/lib/rfq.shared";
-import { pickLabel } from "@/lib/rfq.shared";
+import { getChecklistPublicoPorSlug } from "@/lib/checklist.functions";
+import { ChecklistFormRenderer } from "@/components/checklist/ChecklistFormRenderer";
+import { ChecklistStatusPanel } from "@/components/checklist/ChecklistStatusPanel";
+import type { Idioma } from "@/lib/checklist.shared";
+import { pickLabel } from "@/lib/checklist.shared";
 import { CheckCircle2, AlertTriangle, Clock, ShieldCheck } from "lucide-react";
 import solutekLogo from "@/assets/favicon.png.asset.json";
 
 export const Route = createFileRoute("/checklist/$slug")({
-  component: PublicRfqPage,
+  component: PublicChecklistPage,
   head: () => ({
     meta: [
       { title: "Check-list técnico — Solutek" },
@@ -90,7 +90,7 @@ function diasAte(iso: string | null): number | null {
   return d < 0 ? 0 : d;
 }
 
-function PublicRfqPage() {
+function PublicChecklistPage() {
   const { slug } = Route.useParams();
   const [enviado, setEnviado] = useState(false);
   const [protocolo, setProtocolo] = useState<string | null>(null);
@@ -99,8 +99,8 @@ function PublicRfqPage() {
   const [submissaoId, setSubmissaoId] = useState<string | null>(null);
 
   const q = useQuery({
-    queryKey: ["rfq-public", slug],
-    queryFn: () => getRfqPublicoPorSlug({ data: { slug } }),
+    queryKey: ["checklist-public", slug],
+    queryFn: () => getChecklistPublicoPorSlug({ data: { slug } }),
   });
 
   // Se houver campos de anexo, cria submissão-rascunho já ao carregar.
@@ -120,7 +120,7 @@ function PublicRfqPage() {
   async function ensureSubmissao(): Promise<string | null> {
     if (submissaoId) return submissaoId;
     try {
-      const res = await fetch("/api/public/rfq/staging", {
+      const res = await fetch("/api/public/checklist/staging", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ slug }),
@@ -189,7 +189,7 @@ function PublicRfqPage() {
             <h1 className="text-xl font-semibold">{tt.titulo}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{tt.texto}</p>
           </div>
-          {protocolo && <RFQStatusPanel slug={slug} protocolo={protocolo} idioma={idioma} />}
+          {protocolo && <ChecklistStatusPanel slug={slug} protocolo={protocolo} idioma={idioma} />}
         </div>
       </div>
     );
@@ -238,7 +238,7 @@ function PublicRfqPage() {
             {erro}
           </div>
         )}
-        <RFQFormRenderer
+        <ChecklistFormRenderer
           schema={data.tipo.campos_schema}
           idioma={idioma}
           slug={slug}
@@ -250,7 +250,7 @@ function PublicRfqPage() {
             setEnviando(true);
             setErro(null);
             try {
-              const res = await fetch("/api/public/rfq/submit", {
+              const res = await fetch("/api/public/checklist/submit", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ slug, ...payload }),

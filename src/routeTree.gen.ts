@@ -100,12 +100,12 @@ import { Route as AuthenticatedComercialOrcamentoIndexRouteImport } from './rout
 import { Route as AuthenticatedAjudaDocumentacaoIndexRouteImport } from './routes/_authenticated/ajuda.documentacao.index'
 import { Route as AuthenticatedAdminEtapasEquipamentosIndexRouteImport } from './routes/_authenticated/admin.etapas-equipamentos.index'
 import { Route as PRelatorioTipoTokenRouteImport } from './routes/p.relatorio.$tipo.$token'
-import { Route as ApiPublicRfqUploadRouteImport } from './routes/api/public/rfq.upload'
-import { Route as ApiPublicRfqSubmitRouteImport } from './routes/api/public/rfq.submit'
-import { Route as ApiPublicRfqStatusRouteImport } from './routes/api/public/rfq.status'
-import { Route as ApiPublicRfqStagingRouteImport } from './routes/api/public/rfq.staging'
 import { Route as ApiPublicEntrevistaSubmitRouteImport } from './routes/api/public/entrevista.submit'
 import { Route as ApiPublicEntrevistaGetRouteImport } from './routes/api/public/entrevista.get'
+import { Route as ApiPublicChecklistUploadRouteImport } from './routes/api/public/checklist.upload'
+import { Route as ApiPublicChecklistSubmitRouteImport } from './routes/api/public/checklist.submit'
+import { Route as ApiPublicChecklistStatusRouteImport } from './routes/api/public/checklist.status'
+import { Route as ApiPublicChecklistStagingRouteImport } from './routes/api/public/checklist.staging'
 import { Route as AuthenticatedQualidadeFatNovoRouteImport } from './routes/_authenticated/qualidade.fat.novo'
 import { Route as AuthenticatedQualidadeFatIdRouteImport } from './routes/_authenticated/qualidade.fat.$id'
 import { Route as AuthenticatedPosVendasSatIdRouteImport } from './routes/_authenticated/pos-vendas.sat.$id'
@@ -644,26 +644,6 @@ const PRelatorioTipoTokenRoute = PRelatorioTipoTokenRouteImport.update({
   path: '/p/relatorio/$tipo/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicRfqUploadRoute = ApiPublicRfqUploadRouteImport.update({
-  id: '/api/public/rfq/upload',
-  path: '/api/public/rfq/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicRfqSubmitRoute = ApiPublicRfqSubmitRouteImport.update({
-  id: '/api/public/rfq/submit',
-  path: '/api/public/rfq/submit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicRfqStatusRoute = ApiPublicRfqStatusRouteImport.update({
-  id: '/api/public/rfq/status',
-  path: '/api/public/rfq/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicRfqStagingRoute = ApiPublicRfqStagingRouteImport.update({
-  id: '/api/public/rfq/staging',
-  path: '/api/public/rfq/staging',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicEntrevistaSubmitRoute =
   ApiPublicEntrevistaSubmitRouteImport.update({
     id: '/api/public/entrevista/submit',
@@ -675,6 +655,30 @@ const ApiPublicEntrevistaGetRoute = ApiPublicEntrevistaGetRouteImport.update({
   path: '/api/public/entrevista/get',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicChecklistUploadRoute =
+  ApiPublicChecklistUploadRouteImport.update({
+    id: '/api/public/checklist/upload',
+    path: '/api/public/checklist/upload',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicChecklistSubmitRoute =
+  ApiPublicChecklistSubmitRouteImport.update({
+    id: '/api/public/checklist/submit',
+    path: '/api/public/checklist/submit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicChecklistStatusRoute =
+  ApiPublicChecklistStatusRouteImport.update({
+    id: '/api/public/checklist/status',
+    path: '/api/public/checklist/status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicChecklistStagingRoute =
+  ApiPublicChecklistStagingRouteImport.update({
+    id: '/api/public/checklist/staging',
+    path: '/api/public/checklist/staging',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedQualidadeFatNovoRoute =
   AuthenticatedQualidadeFatNovoRouteImport.update({
     id: '/qualidade/fat/novo',
@@ -920,12 +924,12 @@ export interface FileRoutesByFullPath {
   '/pos-vendas/sat/$id': typeof AuthenticatedPosVendasSatIdRoute
   '/qualidade/fat/$id': typeof AuthenticatedQualidadeFatIdRoute
   '/qualidade/fat/novo': typeof AuthenticatedQualidadeFatNovoRoute
+  '/api/public/checklist/staging': typeof ApiPublicChecklistStagingRoute
+  '/api/public/checklist/status': typeof ApiPublicChecklistStatusRoute
+  '/api/public/checklist/submit': typeof ApiPublicChecklistSubmitRoute
+  '/api/public/checklist/upload': typeof ApiPublicChecklistUploadRoute
   '/api/public/entrevista/get': typeof ApiPublicEntrevistaGetRoute
   '/api/public/entrevista/submit': typeof ApiPublicEntrevistaSubmitRoute
-  '/api/public/rfq/staging': typeof ApiPublicRfqStagingRoute
-  '/api/public/rfq/status': typeof ApiPublicRfqStatusRoute
-  '/api/public/rfq/submit': typeof ApiPublicRfqSubmitRoute
-  '/api/public/rfq/upload': typeof ApiPublicRfqUploadRoute
   '/p/relatorio/$tipo/$token': typeof PRelatorioTipoTokenRoute
   '/admin/etapas-equipamentos/': typeof AuthenticatedAdminEtapasEquipamentosIndexRoute
   '/ajuda/documentacao/': typeof AuthenticatedAjudaDocumentacaoIndexRoute
@@ -1037,12 +1041,12 @@ export interface FileRoutesByTo {
   '/pos-vendas/sat/$id': typeof AuthenticatedPosVendasSatIdRoute
   '/qualidade/fat/$id': typeof AuthenticatedQualidadeFatIdRoute
   '/qualidade/fat/novo': typeof AuthenticatedQualidadeFatNovoRoute
+  '/api/public/checklist/staging': typeof ApiPublicChecklistStagingRoute
+  '/api/public/checklist/status': typeof ApiPublicChecklistStatusRoute
+  '/api/public/checklist/submit': typeof ApiPublicChecklistSubmitRoute
+  '/api/public/checklist/upload': typeof ApiPublicChecklistUploadRoute
   '/api/public/entrevista/get': typeof ApiPublicEntrevistaGetRoute
   '/api/public/entrevista/submit': typeof ApiPublicEntrevistaSubmitRoute
-  '/api/public/rfq/staging': typeof ApiPublicRfqStagingRoute
-  '/api/public/rfq/status': typeof ApiPublicRfqStatusRoute
-  '/api/public/rfq/submit': typeof ApiPublicRfqSubmitRoute
-  '/api/public/rfq/upload': typeof ApiPublicRfqUploadRoute
   '/p/relatorio/$tipo/$token': typeof PRelatorioTipoTokenRoute
   '/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosIndexRoute
   '/ajuda/documentacao': typeof AuthenticatedAjudaDocumentacaoIndexRoute
@@ -1161,12 +1165,12 @@ export interface FileRoutesById {
   '/_authenticated/pos-vendas/sat/$id': typeof AuthenticatedPosVendasSatIdRoute
   '/_authenticated/qualidade/fat/$id': typeof AuthenticatedQualidadeFatIdRoute
   '/_authenticated/qualidade/fat/novo': typeof AuthenticatedQualidadeFatNovoRoute
+  '/api/public/checklist/staging': typeof ApiPublicChecklistStagingRoute
+  '/api/public/checklist/status': typeof ApiPublicChecklistStatusRoute
+  '/api/public/checklist/submit': typeof ApiPublicChecklistSubmitRoute
+  '/api/public/checklist/upload': typeof ApiPublicChecklistUploadRoute
   '/api/public/entrevista/get': typeof ApiPublicEntrevistaGetRoute
   '/api/public/entrevista/submit': typeof ApiPublicEntrevistaSubmitRoute
-  '/api/public/rfq/staging': typeof ApiPublicRfqStagingRoute
-  '/api/public/rfq/status': typeof ApiPublicRfqStatusRoute
-  '/api/public/rfq/submit': typeof ApiPublicRfqSubmitRoute
-  '/api/public/rfq/upload': typeof ApiPublicRfqUploadRoute
   '/p/relatorio/$tipo/$token': typeof PRelatorioTipoTokenRoute
   '/_authenticated/admin/etapas-equipamentos/': typeof AuthenticatedAdminEtapasEquipamentosIndexRoute
   '/_authenticated/ajuda/documentacao/': typeof AuthenticatedAjudaDocumentacaoIndexRoute
@@ -1285,12 +1289,12 @@ export interface FileRouteTypes {
     | '/pos-vendas/sat/$id'
     | '/qualidade/fat/$id'
     | '/qualidade/fat/novo'
+    | '/api/public/checklist/staging'
+    | '/api/public/checklist/status'
+    | '/api/public/checklist/submit'
+    | '/api/public/checklist/upload'
     | '/api/public/entrevista/get'
     | '/api/public/entrevista/submit'
-    | '/api/public/rfq/staging'
-    | '/api/public/rfq/status'
-    | '/api/public/rfq/submit'
-    | '/api/public/rfq/upload'
     | '/p/relatorio/$tipo/$token'
     | '/admin/etapas-equipamentos/'
     | '/ajuda/documentacao/'
@@ -1402,12 +1406,12 @@ export interface FileRouteTypes {
     | '/pos-vendas/sat/$id'
     | '/qualidade/fat/$id'
     | '/qualidade/fat/novo'
+    | '/api/public/checklist/staging'
+    | '/api/public/checklist/status'
+    | '/api/public/checklist/submit'
+    | '/api/public/checklist/upload'
     | '/api/public/entrevista/get'
     | '/api/public/entrevista/submit'
-    | '/api/public/rfq/staging'
-    | '/api/public/rfq/status'
-    | '/api/public/rfq/submit'
-    | '/api/public/rfq/upload'
     | '/p/relatorio/$tipo/$token'
     | '/admin/etapas-equipamentos'
     | '/ajuda/documentacao'
@@ -1525,12 +1529,12 @@ export interface FileRouteTypes {
     | '/_authenticated/pos-vendas/sat/$id'
     | '/_authenticated/qualidade/fat/$id'
     | '/_authenticated/qualidade/fat/novo'
+    | '/api/public/checklist/staging'
+    | '/api/public/checklist/status'
+    | '/api/public/checklist/submit'
+    | '/api/public/checklist/upload'
     | '/api/public/entrevista/get'
     | '/api/public/entrevista/submit'
-    | '/api/public/rfq/staging'
-    | '/api/public/rfq/status'
-    | '/api/public/rfq/submit'
-    | '/api/public/rfq/upload'
     | '/p/relatorio/$tipo/$token'
     | '/_authenticated/admin/etapas-equipamentos/'
     | '/_authenticated/ajuda/documentacao/'
@@ -1571,12 +1575,12 @@ export interface RootRouteChildren {
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicReadinessRoute: typeof ApiPublicReadinessRoute
   PCotacaoTokenRoute: typeof PCotacaoTokenRoute
+  ApiPublicChecklistStagingRoute: typeof ApiPublicChecklistStagingRoute
+  ApiPublicChecklistStatusRoute: typeof ApiPublicChecklistStatusRoute
+  ApiPublicChecklistSubmitRoute: typeof ApiPublicChecklistSubmitRoute
+  ApiPublicChecklistUploadRoute: typeof ApiPublicChecklistUploadRoute
   ApiPublicEntrevistaGetRoute: typeof ApiPublicEntrevistaGetRoute
   ApiPublicEntrevistaSubmitRoute: typeof ApiPublicEntrevistaSubmitRoute
-  ApiPublicRfqStagingRoute: typeof ApiPublicRfqStagingRoute
-  ApiPublicRfqStatusRoute: typeof ApiPublicRfqStatusRoute
-  ApiPublicRfqSubmitRoute: typeof ApiPublicRfqSubmitRoute
-  ApiPublicRfqUploadRoute: typeof ApiPublicRfqUploadRoute
   PRelatorioTipoTokenRoute: typeof PRelatorioTipoTokenRoute
 }
 
@@ -2219,34 +2223,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PRelatorioTipoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/rfq/upload': {
-      id: '/api/public/rfq/upload'
-      path: '/api/public/rfq/upload'
-      fullPath: '/api/public/rfq/upload'
-      preLoaderRoute: typeof ApiPublicRfqUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/rfq/submit': {
-      id: '/api/public/rfq/submit'
-      path: '/api/public/rfq/submit'
-      fullPath: '/api/public/rfq/submit'
-      preLoaderRoute: typeof ApiPublicRfqSubmitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/rfq/status': {
-      id: '/api/public/rfq/status'
-      path: '/api/public/rfq/status'
-      fullPath: '/api/public/rfq/status'
-      preLoaderRoute: typeof ApiPublicRfqStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/rfq/staging': {
-      id: '/api/public/rfq/staging'
-      path: '/api/public/rfq/staging'
-      fullPath: '/api/public/rfq/staging'
-      preLoaderRoute: typeof ApiPublicRfqStagingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/entrevista/submit': {
       id: '/api/public/entrevista/submit'
       path: '/api/public/entrevista/submit'
@@ -2259,6 +2235,34 @@ declare module '@tanstack/react-router' {
       path: '/api/public/entrevista/get'
       fullPath: '/api/public/entrevista/get'
       preLoaderRoute: typeof ApiPublicEntrevistaGetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/checklist/upload': {
+      id: '/api/public/checklist/upload'
+      path: '/api/public/checklist/upload'
+      fullPath: '/api/public/checklist/upload'
+      preLoaderRoute: typeof ApiPublicChecklistUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/checklist/submit': {
+      id: '/api/public/checklist/submit'
+      path: '/api/public/checklist/submit'
+      fullPath: '/api/public/checklist/submit'
+      preLoaderRoute: typeof ApiPublicChecklistSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/checklist/status': {
+      id: '/api/public/checklist/status'
+      path: '/api/public/checklist/status'
+      fullPath: '/api/public/checklist/status'
+      preLoaderRoute: typeof ApiPublicChecklistStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/checklist/staging': {
+      id: '/api/public/checklist/staging'
+      path: '/api/public/checklist/staging'
+      fullPath: '/api/public/checklist/staging'
+      preLoaderRoute: typeof ApiPublicChecklistStagingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/qualidade/fat/novo': {
@@ -2797,12 +2801,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicReadinessRoute: ApiPublicReadinessRoute,
   PCotacaoTokenRoute: PCotacaoTokenRoute,
+  ApiPublicChecklistStagingRoute: ApiPublicChecklistStagingRoute,
+  ApiPublicChecklistStatusRoute: ApiPublicChecklistStatusRoute,
+  ApiPublicChecklistSubmitRoute: ApiPublicChecklistSubmitRoute,
+  ApiPublicChecklistUploadRoute: ApiPublicChecklistUploadRoute,
   ApiPublicEntrevistaGetRoute: ApiPublicEntrevistaGetRoute,
   ApiPublicEntrevistaSubmitRoute: ApiPublicEntrevistaSubmitRoute,
-  ApiPublicRfqStagingRoute: ApiPublicRfqStagingRoute,
-  ApiPublicRfqStatusRoute: ApiPublicRfqStatusRoute,
-  ApiPublicRfqSubmitRoute: ApiPublicRfqSubmitRoute,
-  ApiPublicRfqUploadRoute: ApiPublicRfqUploadRoute,
   PRelatorioTipoTokenRoute: PRelatorioTipoTokenRoute,
 }
 export const routeTree = rootRouteImport

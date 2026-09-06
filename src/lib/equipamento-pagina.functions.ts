@@ -39,7 +39,7 @@ export const listPaginasPublicadas = createServerFn({ method: "GET" }).handler(a
   const { data, error } = await sb
     .from("equipamento_pagina")
     .select(
-      "id, tipo_id, slug, seo_title_pt, seo_description_pt, og_image_url, publicado, rfq_formulario_tipo!inner(nome_pt, familia)",
+      "id, tipo_id, slug, seo_title_pt, seo_description_pt, og_image_url, publicado, checklist_formulario_tipo!inner(nome_pt, familia)",
     )
     .eq("publicado", true)
     .order("slug", { ascending: true });
@@ -47,8 +47,8 @@ export const listPaginasPublicadas = createServerFn({ method: "GET" }).handler(a
   return (data ?? []).map((r: any) => ({
     id: r.id as string,
     slug: r.slug as string,
-    nome_pt: r.rfq_formulario_tipo?.nome_pt as string,
-    familia: r.rfq_formulario_tipo?.familia as string | null,
+    nome_pt: r.checklist_formulario_tipo?.nome_pt as string,
+    familia: r.checklist_formulario_tipo?.familia as string | null,
     seo_title_pt: r.seo_title_pt as string | null,
     seo_description_pt: r.seo_description_pt as string | null,
     og_image_url: r.og_image_url as string | null,
@@ -64,7 +64,7 @@ export const getPaginaPorSlug = createServerFn({ method: "GET" })
     });
     const { data: pagina, error } = await sb
       .from("equipamento_pagina")
-      .select("*, rfq_formulario_tipo!inner(id, codigo, nome_pt, familia)")
+      .select("*, checklist_formulario_tipo!inner(id, codigo, nome_pt, familia)")
       .eq("slug", data.slug)
       .eq("publicado", true)
       .maybeSingle();
@@ -90,8 +90,8 @@ export const getPaginaPorSlug = createServerFn({ method: "GET" })
         seo_description_en: pagina.seo_description_en,
         og_image_url: pagina.og_image_url,
         publicado: pagina.publicado,
-        nome_pt: (pagina as any).rfq_formulario_tipo?.nome_pt as string,
-        codigo: (pagina as any).rfq_formulario_tipo?.codigo as string,
+        nome_pt: (pagina as any).checklist_formulario_tipo?.nome_pt as string,
+        codigo: (pagina as any).checklist_formulario_tipo?.codigo as string,
       } as EquipamentoPagina & { nome_pt: string; codigo: string },
       blocos: (blocos ?? []) as EquipamentoBloco[],
     };
@@ -106,7 +106,7 @@ export const adminListPaginas = createServerFn({ method: "GET" })
     const { data, error } = await sb
       .from("equipamento_pagina")
       .select(
-        "id, tipo_id, slug, publicado, seo_title_pt, og_image_url, rfq_formulario_tipo!inner(nome_pt, familia, codigo)",
+        "id, tipo_id, slug, publicado, seo_title_pt, og_image_url, checklist_formulario_tipo!inner(nome_pt, familia, codigo)",
       )
       .order("slug", { ascending: true });
     if (error) throw friendlyDbError(error);
@@ -117,9 +117,9 @@ export const adminListPaginas = createServerFn({ method: "GET" })
       publicado: r.publicado as boolean,
       seo_title_pt: r.seo_title_pt as string | null,
       og_image_url: r.og_image_url as string | null,
-      nome_pt: r.rfq_formulario_tipo?.nome_pt as string,
-      familia: r.rfq_formulario_tipo?.familia as string | null,
-      codigo: r.rfq_formulario_tipo?.codigo as string,
+      nome_pt: r.checklist_formulario_tipo?.nome_pt as string,
+      familia: r.checklist_formulario_tipo?.familia as string | null,
+      codigo: r.checklist_formulario_tipo?.codigo as string,
     }));
   });
 
@@ -131,7 +131,7 @@ export const adminGetPagina = createServerFn({ method: "GET" })
     await ensureAdmin(sb, context.userId);
     const { data: pagina, error } = await sb
       .from("equipamento_pagina")
-      .select("*, rfq_formulario_tipo!inner(nome_pt, codigo, familia)")
+      .select("*, checklist_formulario_tipo!inner(nome_pt, codigo, familia)")
       .eq("id", data.pagina_id)
       .maybeSingle();
     if (error) throw friendlyDbError(error);
@@ -145,8 +145,8 @@ export const adminGetPagina = createServerFn({ method: "GET" })
     return {
       pagina: {
         ...pagina,
-        nome_pt: (pagina as any).rfq_formulario_tipo?.nome_pt,
-        codigo: (pagina as any).rfq_formulario_tipo?.codigo,
+        nome_pt: (pagina as any).checklist_formulario_tipo?.nome_pt,
+        codigo: (pagina as any).checklist_formulario_tipo?.codigo,
       },
       blocos: (blocos ?? []) as EquipamentoBloco[],
     };
@@ -201,10 +201,10 @@ export const adminAddBloco = createServerFn({ method: "POST" })
     // pega nome_pt do tipo pra alimentar defaults
     const { data: p } = await sb
       .from("equipamento_pagina")
-      .select("rfq_formulario_tipo!inner(nome_pt)")
+      .select("checklist_formulario_tipo!inner(nome_pt)")
       .eq("id", data.pagina_id)
       .maybeSingle();
-    const nome = (p as any)?.rfq_formulario_tipo?.nome_pt || "Equipamento";
+    const nome = (p as any)?.checklist_formulario_tipo?.nome_pt || "Equipamento";
     const { data: last } = await sb
       .from("equipamento_pagina_bloco")
       .select("ordem")

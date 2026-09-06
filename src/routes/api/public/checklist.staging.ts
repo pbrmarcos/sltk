@@ -19,7 +19,7 @@ const CORS = {
   "access-control-allow-headers": "content-type",
 };
 
-export const Route = createFileRoute("/api/public/rfq/staging")({
+export const Route = createFileRoute("/api/public/checklist/staging")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/public/rfq/staging")({
           }
           const supa: any = await getAdmin();
           const { data: link, error: eLink } = await supa
-            .from("rfq_formulario_link")
+            .from("checklist_formulario_link")
             .select("id, cliente_id, tipo_id, idioma, status, expira_em, submissao_id")
             .eq("slug", parsed.data.slug)
             .maybeSingle();
@@ -62,7 +62,7 @@ export const Route = createFileRoute("/api/public/rfq/staging")({
           }
 
           const { data: sub, error: eSub } = await supa
-            .from("rfq_submissao")
+            .from("checklist_submissao")
             .insert({
               link_id: link.id,
               cliente_id: link.cliente_id,
@@ -74,11 +74,14 @@ export const Route = createFileRoute("/api/public/rfq/staging")({
             .single();
           if (eSub) throw eSub;
 
-          await supa.from("rfq_formulario_link").update({ submissao_id: sub.id }).eq("id", link.id);
+          await supa
+            .from("checklist_formulario_link")
+            .update({ submissao_id: sub.id })
+            .eq("id", link.id);
 
           return Response.json({ ok: true, submissao_id: sub.id }, { headers: CORS });
         } catch (err) {
-          console.error("[rfq.staging]", err);
+          console.error("[checklist.staging]", err);
           const msg =
             err && typeof err === "object" && "message" in err
               ? String((err as { message: unknown }).message)

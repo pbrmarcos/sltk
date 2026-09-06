@@ -19,7 +19,7 @@ import {
   listClienteLiberacoes,
   liberarClienteParaSales,
   revogarLiberacaoSales,
-} from "@/lib/rfq.functions";
+} from "@/lib/checklist.functions";
 
 export function ClienteTimeComercialTab({ clienteId }: { clienteId: string }) {
   const qc = useQueryClient();

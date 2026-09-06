@@ -2,7 +2,7 @@
 /**
  * PDF trilíngue (PT/ES/EN) de Ordem de Compra baseada em insumo.
  * Layout minimalista A4 retrato, reaproveita PdfHeader/PdfFooter para
- * consistência visual com Orçamento / RFQ / FAT / SAT.
+ * consistência visual com Orçamento / Checklist / FAT / SAT.
  */
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { CHROME_PAGE_STYLE, PdfFooter, PdfHeader } from "./pdf-chrome";

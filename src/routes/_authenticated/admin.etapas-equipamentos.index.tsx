@@ -33,7 +33,7 @@ import {
   duplicateEtapaTemplate,
   updateEtapaTemplate,
   deleteEtapaTemplate,
-  listRfqTiposForTemplate,
+  listChecklistTiposForTemplate,
 } from "@/lib/etapa-templates.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/etapas-equipamentos/")({
@@ -235,8 +235,8 @@ function NovoDialog({
   const [descricao, setDescricao] = useState("");
   const [tipoId, setTipoId] = useState<string>("");
   const { data: tipos = [] } = useQuery({
-    queryKey: ["rfq-tipos-tpl"],
-    queryFn: () => listRfqTiposForTemplate(),
+    queryKey: ["checklist-tipos-tpl"],
+    queryFn: () => listChecklistTiposForTemplate(),
   });
   const createMut = useMutation({
     mutationFn: () =>

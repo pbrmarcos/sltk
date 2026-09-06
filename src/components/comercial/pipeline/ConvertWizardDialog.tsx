@@ -49,7 +49,7 @@ import { listClientes, createCliente } from "@/lib/clientes.functions";
 import { paisesQueryOptions } from "@/lib/clientes.queries";
 import { enrichDocumento } from "@/lib/enrich.functions";
 import { listTemplates } from "@/lib/processo-templates.functions";
-import { sugerirTemplateParaOportunidade } from "@/lib/rfq.functions";
+import { sugerirTemplateParaOportunidade } from "@/lib/checklist.functions";
 import {
   normalizeDocumento,
   type ClienteInput,
@@ -998,7 +998,7 @@ export function ConvertWizardDialog({
                                 >
                                   <Sparkles className="w-3 h-3 mr-1" />
                                   Sugerido pelo Checklist (
-                                  {sugestaoQ.data.rfq_tipo_nome ?? "máquina vinculada"})
+                                  {sugestaoQ.data.checklist_tipo_nome ?? "máquina vinculada"})
                                 </Badge>
                               </div>
                             )}

@@ -1,4 +1,4 @@
-// Tipos compartilhados de formulário RFQ.
+// Tipos compartilhados de formulário de Checklist técnico.
 export type Idioma = "pt" | "es" | "en";
 
 export type CampoTipo =
@@ -36,7 +36,7 @@ export function pickLabel(r: Rotulo | undefined, idioma: Idioma): string {
   return (r[idioma] || r.pt || "").toString();
 }
 
-export type RfqTipo = {
+export type ChecklistTipo = {
   id: string;
   codigo: string;
   nome_pt: string;
@@ -47,7 +47,7 @@ export type RfqTipo = {
   campos_schema: FormularioSchema;
 };
 
-export type RfqLink = {
+export type ChecklistLink = {
   id: string;
   tipo_id: string;
   cliente_id: string;
@@ -62,7 +62,7 @@ export type RfqLink = {
   submissao_id: string | null;
 };
 
-export type RfqSubmissao = {
+export type ChecklistSubmissao = {
   id: string;
   link_id: string;
   cliente_id: string;

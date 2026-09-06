@@ -162,7 +162,7 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .order("created_at", { ascending: false })
       .limit(300),
     sb
-      .from("rfq_submissao")
+      .from("checklist_submissao")
       .select("id, criado_em, lida_em")
       .order("criado_em", { ascending: false })
       .limit(300),

@@ -24,18 +24,18 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, ExternalLink, FileText, Plus, Archive, CheckCircle2 } from "lucide-react";
 import {
-  listRfqTipos,
-  emitirRfqLink,
-  listRfqLinksCliente,
-  arquivarRfqLink,
-  listRfqSubmissoes,
-  getRfqTipoSchema,
+  listChecklistTipos,
+  emitirChecklistLink,
+  listChecklistLinksCliente,
+  arquivarChecklistLink,
+  listChecklistSubmissoes,
+  getChecklistTipoSchema,
   listOportunidadesDoCliente,
   vincularSubmissaoOportunidade,
-} from "@/lib/rfq.functions";
-import type { Idioma } from "@/lib/rfq.shared";
-import { IDIOMA_LABEL } from "@/lib/rfq.shared";
-import { RFQFormRenderer } from "@/components/rfq/RFQFormRenderer";
+} from "@/lib/checklist.functions";
+import type { Idioma } from "@/lib/checklist.shared";
+import { IDIOMA_LABEL } from "@/lib/checklist.shared";
+import { ChecklistFormRenderer } from "@/components/checklist/ChecklistFormRenderer";
 
 type Props = { clienteId: string };
 
@@ -48,24 +48,24 @@ const STATUS_BADGE: Record<string, string> = {
     "border-[var(--badge-neutral-border)] bg-[var(--badge-neutral-bg)] text-[var(--text-muted)]",
 };
 
-export function ClienteRfqTab({ clienteId }: Props) {
+export function ClienteChecklistTab({ clienteId }: Props) {
   const qc = useQueryClient();
   const [openEmit, setOpenEmit] = useState(false);
   const [vincularSubId, setVincularSubId] = useState<string | null>(null);
 
   const linksQ = useQuery({
-    queryKey: ["rfq-links", clienteId],
-    queryFn: () => listRfqLinksCliente({ data: { cliente_id: clienteId } }),
+    queryKey: ["checklist-links", clienteId],
+    queryFn: () => listChecklistLinksCliente({ data: { cliente_id: clienteId } }),
   });
   const subsQ = useQuery({
-    queryKey: ["rfq-subs-cliente", clienteId],
-    queryFn: () => listRfqSubmissoes({ data: { cliente_id: clienteId, limit: 200 } }),
+    queryKey: ["checklist-subs-cliente", clienteId],
+    queryFn: () => listChecklistSubmissoes({ data: { cliente_id: clienteId, limit: 200 } }),
   });
 
   const arquivarMut = useMutation({
-    mutationFn: (link_id: string) => arquivarRfqLink({ data: { link_id } }),
+    mutationFn: (link_id: string) => arquivarChecklistLink({ data: { link_id } }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["rfq-links", clienteId] });
+      qc.invalidateQueries({ queryKey: ["checklist-links", clienteId] });
       toast.success("Link arquivado.");
     },
   });
@@ -107,7 +107,7 @@ export function ClienteRfqTab({ clienteId }: Props) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 text-[13px] font-medium">
                     <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                    {l.rfq_formulario_tipo?.nome_pt ?? "—"}
+                    {l.checklist_formulario_tipo?.nome_pt ?? "—"}
                     <Badge variant="outline" className="ml-1 text-[10px] uppercase">
                       {l.idioma}
                     </Badge>
@@ -168,7 +168,7 @@ export function ClienteRfqTab({ clienteId }: Props) {
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[13px] font-medium">
-                    {s.rfq_formulario_tipo?.nome_pt ?? "—"}{" "}
+                    {s.checklist_formulario_tipo?.nome_pt ?? "—"}{" "}
                     <span className="text-[11.5px] text-muted-foreground">
                       · {s.preenchido_por_nome ?? "—"} ({s.preenchido_por_email ?? "—"})
                     </span>
@@ -203,7 +203,7 @@ export function ClienteRfqTab({ clienteId }: Props) {
         onClose={() => setOpenEmit(false)}
         clienteId={clienteId}
         onEmitted={() => {
-          qc.invalidateQueries({ queryKey: ["rfq-links", clienteId] });
+          qc.invalidateQueries({ queryKey: ["checklist-links", clienteId] });
         }}
       />
 
@@ -228,7 +228,7 @@ function EmitirDialog({
   clienteId: string;
   onEmitted: () => void;
 }) {
-  const tiposQ = useQuery({ queryKey: ["rfq-tipos"], queryFn: () => listRfqTipos() });
+  const tiposQ = useQuery({ queryKey: ["checklist-tipos"], queryFn: () => listChecklistTipos() });
   const [tipoId, setTipoId] = useState<string>("");
   const [idioma, setIdioma] = useState<Idioma>("pt");
   const [titulo, setTitulo] = useState("");
@@ -237,7 +237,7 @@ function EmitirDialog({
 
   const emitMut = useMutation({
     mutationFn: () =>
-      emitirRfqLink({
+      emitirChecklistLink({
         data: {
           cliente_id: clienteId,
           tipo_id: tipoId,
@@ -351,8 +351,8 @@ function EmitirBody({
   emitting: boolean;
 }) {
   const schemaQ = useQuery({
-    queryKey: ["rfq-tipo-schema", tipoId],
-    queryFn: () => getRfqTipoSchema({ data: { id: tipoId } }),
+    queryKey: ["checklist-tipo-schema", tipoId],
+    queryFn: () => getChecklistTipoSchema({ data: { id: tipoId } }),
     enabled: !!tipoId,
   });
 
@@ -434,7 +434,7 @@ function EmitirBody({
               Este é o formulário que o destinatário verá em <strong>{IDIOMA_LABEL[idioma]}</strong>
               .
             </p>
-            <RFQFormRenderer schema={schemaQ.data.campos_schema} idioma={idioma} preview />
+            <ChecklistFormRenderer schema={schemaQ.data.campos_schema} idioma={idioma} preview />
           </div>
         )}
       </TabsContent>
@@ -470,7 +470,7 @@ function VincularOportunidadeDialog({
     onSuccess: () => {
       toast.success("Submissão vinculada à oportunidade.");
       qc.invalidateQueries({ queryKey: ["oportunidades-do-cliente", clienteId] });
-      qc.invalidateQueries({ queryKey: ["rfq-subs-cliente", clienteId] });
+      qc.invalidateQueries({ queryKey: ["checklist-subs-cliente", clienteId] });
       onClose();
       setOppId("");
     },

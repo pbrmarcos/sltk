@@ -2,7 +2,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-// Endpoint público para receber submissões RFQ.
+// Endpoint público para receber submissões de Checklist.
 // Aceita JSON com { link_id, respostas, preenchido_por_{nome,email,telefone} }.
 // Usa cliente supabase com chave publishable (RLS + policies TO anon).
 const submitSchema = z.object({
@@ -19,7 +19,7 @@ async function getAdmin() {
   return supabaseAdmin as any;
 }
 
-export const Route = createFileRoute("/api/public/rfq/submit")({
+export const Route = createFileRoute("/api/public/checklist/submit")({
   server: {
     handlers: {
       OPTIONS: async () =>
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
 
           // 1. Localiza link aberto pelo slug.
           const { data: link, error: eLink } = await supa
-            .from("rfq_formulario_link")
+            .from("checklist_formulario_link")
             .select("id, cliente_id, tipo_id, idioma, status, expira_em, submissao_id")
             .eq("slug", parsed.data.slug)
             .maybeSingle();
@@ -74,13 +74,13 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
           let submissaoId: string | null = link.submissao_id ?? null;
           if (submissaoId) {
             const { error: eUpd } = await supa
-              .from("rfq_submissao")
+              .from("checklist_submissao")
               .update(payload)
               .eq("id", submissaoId);
             if (eUpd) throw eUpd;
           } else {
             const { data: sub, error: eSub } = await supa
-              .from("rfq_submissao")
+              .from("checklist_submissao")
               .insert({
                 link_id: link.id,
                 cliente_id: link.cliente_id,
@@ -96,7 +96,7 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
 
           // 3. Atualiza link.
           await supa
-            .from("rfq_formulario_link")
+            .from("checklist_formulario_link")
             .update({
               status: "preenchido",
               preenchido_em: new Date().toISOString(),
@@ -113,15 +113,15 @@ export const Route = createFileRoute("/api/public/rfq/submit")({
               .eq("id", link.cliente_id)
               .maybeSingle();
             const { data: tipo } = await supa
-              .from("rfq_formulario_tipo")
+              .from("checklist_formulario_tipo")
               .select("nome_pt")
               .eq("id", link.tipo_id)
               .maybeSingle();
             await safeDispatch({
-              eventKey: "form.rfq.recebida",
+              eventKey: "form.checklist.recebida",
               triggeredBy: null,
               triggeredByKind: "automation",
-              entityTable: "rfq_submissao",
+              entityTable: "checklist_submissao",
               entityId: submissaoId,
               vars: {
                 cliente: (cli?.razao_social as string) || (cli?.nome_fantasia as string) || "—",

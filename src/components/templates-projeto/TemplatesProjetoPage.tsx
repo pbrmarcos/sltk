@@ -11,7 +11,7 @@ import {
   type TemplateLite,
   type ProcessoTipo,
 } from "@/lib/processo-templates.functions";
-import { listRfqTipos } from "@/lib/rfq.functions";
+import { listChecklistTipos } from "@/lib/checklist.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -88,7 +88,7 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
   const [novoNome, setNovoNome] = useState("");
   const [novoTipo, setNovoTipo] = useState<ProcessoTipo>("projeto");
   const [novoDesc, setNovoDesc] = useState("");
-  const [novoRfqTipoId, setNovoRfqTipoId] = useState<string>("none");
+  const [novoChecklistTipoId, setNovoChecklistTipoId] = useState<string>("none");
   const [editId, setEditId] = useState<string | null>(null);
   const [delTpl, setDelTpl] = useState<TemplateLite | null>(null);
 
@@ -104,10 +104,10 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
       }),
   });
 
-  const listRfqTiposFn = useServerFn(listRfqTipos);
-  const rfqTiposQ = useQuery({
-    queryKey: ["rfq-tipos-ativos-templates"],
-    queryFn: () => listRfqTiposFn(),
+  const listChecklistTiposFn = useServerFn(listChecklistTipos);
+  const checklistTiposQ = useQuery({
+    queryKey: ["checklist-tipos-ativos-templates"],
+    queryFn: () => listChecklistTiposFn(),
   });
 
   const createMut = useMutation({
@@ -118,7 +118,8 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
           tipo: novoTipo,
           descricao: novoDesc.trim() ? capitalize(novoDesc.trim()) : null,
           ativo: true,
-          rfq_tipo_id: novoRfqTipoId && novoRfqTipoId !== "none" ? novoRfqTipoId : null,
+          checklist_tipo_id:
+            novoChecklistTipoId && novoChecklistTipoId !== "none" ? novoChecklistTipoId : null,
         },
       }),
     onSuccess: (r) => {
@@ -127,7 +128,7 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
       setNovoOpen(false);
       setNovoNome("");
       setNovoDesc("");
-      setNovoRfqTipoId("none");
+      setNovoChecklistTipoId("none");
       setEditId(r.id);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -171,7 +172,7 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
           tipo: t.tipo,
           descricao: t.descricao,
           ativo: !t.ativo,
-          rfq_tipo_id: t.rfq_tipo_id,
+          checklist_tipo_id: t.checklist_tipo_id,
         },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["processo-templates"] }),
@@ -382,13 +383,13 @@ export function TemplatesProjetoPage({ view = "ativos" }: { view?: "ativos" | "a
               {novoTipo === "projeto" && (
                 <div>
                   <Label>Máquina Checklist (opcional)</Label>
-                  <Select value={novoRfqTipoId} onValueChange={setNovoRfqTipoId}>
+                  <Select value={novoChecklistTipoId} onValueChange={setNovoChecklistTipoId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Nenhuma máquina vinculada" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Nenhuma</SelectItem>
-                      {(rfqTiposQ.data ?? []).map((t) => (
+                      {(checklistTiposQ.data ?? []).map((t) => (
                         <SelectItem key={t.id} value={t.id}>
                           {t.nome_pt}
                         </SelectItem>

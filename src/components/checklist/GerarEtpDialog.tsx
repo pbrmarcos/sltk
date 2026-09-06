@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileSignature, Loader2 } from "lucide-react";
-import { gerarEtpDeRfq, listEquipamentosDoCliente } from "@/lib/rfq-etp.functions";
+import { gerarEtpDeChecklist, listEquipamentosDoCliente } from "@/lib/checklist-etp.functions";
 
 export function GerarEtpDialog({
   submissaoId,
@@ -35,14 +35,14 @@ export function GerarEtpDialog({
   const navigate = useNavigate();
 
   const eqpsQ = useQuery({
-    queryKey: ["rfq-etp-equipamentos", clienteId],
+    queryKey: ["checklist-etp-equipamentos", clienteId],
     queryFn: () => listEquipamentosDoCliente({ data: { cliente_id: clienteId } }),
     enabled: open && !!clienteId,
   });
 
   const gerar = useMutation({
     mutationFn: () =>
-      gerarEtpDeRfq({ data: { submissao_id: submissaoId, equipamento_id: equipamentoId } }),
+      gerarEtpDeChecklist({ data: { submissao_id: submissaoId, equipamento_id: equipamentoId } }),
     onSuccess: (res) => {
       toast.success(`ETP v${res.versao} criado a partir do checklist.`);
       qc.invalidateQueries({ queryKey: ["engenharia"] });

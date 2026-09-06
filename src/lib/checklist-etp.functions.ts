@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
@@ -21,10 +22,10 @@ export const listEquipamentosDoCliente = createServerFn({ method: "POST" })
   });
 
 /**
- * Converte o checklist respondido (submissão de RFQ) em um ETP rascunho
+ * Converte o checklist respondido (submissão de Checklist) em um ETP rascunho
  * vinculado a um equipamento do cliente, preservando a rastreabilidade.
  */
-export const gerarEtpDeRfq = createServerFn({ method: "POST" })
+export const gerarEtpDeChecklist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
@@ -39,10 +40,12 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
       throw new Error("Sem permissão para gerar ETP a partir de um checklist.");
     });
 
-    const { data: sub, error: subErr } = await context.supabase
-      .from("rfq_submissao")
+    // checklist_submissao ainda não existe nos tipos gerados do Supabase; só é
+    // regenerado depois que a migration de rename rodar contra o banco real.
+    const { data: sub, error: subErr } = await (context.supabase as any)
+      .from("checklist_submissao")
       .select(
-        "id, cliente_id, idioma, respostas, criado_em, preenchido_por_nome, rfq_formulario_tipo(nome_pt, campos_schema)",
+        "id, cliente_id, idioma, respostas, criado_em, preenchido_por_nome, checklist_formulario_tipo(nome_pt, campos_schema)",
       )
       .eq("id", data.submissao_id)
       .single();
@@ -58,8 +61,9 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
     type Rotulo = { pt?: string; es?: string; en?: string };
     type Campo = { id: string; label?: Rotulo };
     type Secao = { id: string; titulo?: Rotulo; campos?: Campo[] };
-    const schema = ((sub as { rfq_formulario_tipo?: { campos_schema?: { secoes?: Secao[] } } })
-      .rfq_formulario_tipo?.campos_schema ?? { secoes: [] }) as { secoes?: Secao[] };
+    const schema = ((
+      sub as { checklist_formulario_tipo?: { campos_schema?: { secoes?: Secao[] } } }
+    ).checklist_formulario_tipo?.campos_schema ?? { secoes: [] }) as { secoes?: Secao[] };
     const respostas = (sub.respostas ?? {}) as Record<string, unknown>;
 
     const blocos: string[] = [];
@@ -83,8 +87,8 @@ export const gerarEtpDeRfq = createServerFn({ method: "POST" })
     }
     const requisitos = blocos.join("\n\n") || "Checklist sem respostas preenchidas.";
     const tipoNome =
-      (sub as { rfq_formulario_tipo?: { nome_pt?: string } }).rfq_formulario_tipo?.nome_pt ??
-      "Checklist técnico";
+      (sub as { checklist_formulario_tipo?: { nome_pt?: string } }).checklist_formulario_tipo
+        ?.nome_pt ?? "Checklist técnico";
 
     const { data: maior } = await context.supabase
       .from("equipamento_etps")

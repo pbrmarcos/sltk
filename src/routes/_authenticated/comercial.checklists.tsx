@@ -9,12 +9,12 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GerarEtpDialog } from "@/components/rfq/GerarEtpDialog";
+import { GerarEtpDialog } from "@/components/checklist/GerarEtpDialog";
 import { Inbox, ExternalLink } from "lucide-react";
 import { TableLoading, TableEmpty, TableError } from "@/components/data/TableStates";
-import { listRfqSubmissoes, getRfqSubmissao } from "@/lib/rfq.functions";
-import { pickLabel } from "@/lib/rfq.shared";
-import type { FormularioSchema, Idioma } from "@/lib/rfq.shared";
+import { listChecklistSubmissoes, getChecklistSubmissao } from "@/lib/checklist.functions";
+import { pickLabel } from "@/lib/checklist.shared";
+import type { FormularioSchema, Idioma } from "@/lib/checklist.shared";
 
 const searchSchema = z.object({
   submissao: fallback(z.string().uuid().optional(), undefined).default(undefined),
@@ -22,19 +22,19 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_authenticated/comercial/checklists")({
   validateSearch: zodValidator(searchSchema),
-  component: FormulariosRfqPage,
+  component: FormulariosChecklistPage,
 });
 
-function FormulariosRfqPage() {
+function FormulariosChecklistPage() {
   const search = Route.useSearch();
   const [selected, setSelected] = useState<string | undefined>(search.submissao);
   const listQ = useQuery({
-    queryKey: ["rfq-submissoes"],
-    queryFn: () => listRfqSubmissoes({ data: { limit: 200 } }),
+    queryKey: ["checklist-submissoes"],
+    queryFn: () => listChecklistSubmissoes({ data: { limit: 200 } }),
   });
   const detQ = useQuery({
-    queryKey: ["rfq-sub", selected],
-    queryFn: () => getRfqSubmissao({ data: { id: selected! } }),
+    queryKey: ["checklist-sub", selected],
+    queryFn: () => getChecklistSubmissao({ data: { id: selected! } }),
     enabled: Boolean(selected),
   });
 
@@ -77,7 +77,7 @@ function FormulariosRfqPage() {
                     }
                   >
                     <div className="flex items-center gap-2 text-[13px] font-medium">
-                      {s.rfq_formulario_tipo?.nome_pt ?? "—"}
+                      {s.checklist_formulario_tipo?.nome_pt ?? "—"}
                       {!s.lida_em && (
                         <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
                           NOVO
@@ -131,7 +131,7 @@ function SubmissaoDetalhe({
   };
 }) {
   const s = data.submissao;
-  const schema = (s.rfq_formulario_tipo?.campos_schema ?? { secoes: [] }) as FormularioSchema;
+  const schema = (s.checklist_formulario_tipo?.campos_schema ?? { secoes: [] }) as FormularioSchema;
   const idioma = (s.idioma as Idioma) ?? "pt";
   const respostas = (s.respostas ?? {}) as Record<string, unknown>;
   const clienteCodigo = s.clientes?.codigo;
@@ -140,7 +140,9 @@ function SubmissaoDetalhe({
     <div className="p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4">
         <div>
-          <h2 className="text-[15px] font-semibold">{s.rfq_formulario_tipo?.nome_pt ?? "—"}</h2>
+          <h2 className="text-[15px] font-semibold">
+            {s.checklist_formulario_tipo?.nome_pt ?? "—"}
+          </h2>
           <div className="mt-1 text-[12px] text-muted-foreground">
             {s.clientes?.razao_social} ·{" "}
             <Link to="/clientes/$codigo" params={{ codigo: clienteCodigo }} className="underline">

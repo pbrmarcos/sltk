@@ -34,10 +34,10 @@ import {
 import { ChamadoStatusBadge } from "@/components/suporte/ChamadoStatusBadge";
 import { listChamados } from "@/lib/suporte.functions";
 import { listEntrevistas } from "@/lib/entrevistas.functions";
-import { listRfqSubmissoes } from "@/lib/rfq.functions";
+import { listChecklistSubmissoes } from "@/lib/checklist.functions";
 import { listFormInboxStatus, setFormInboxStatus } from "@/lib/form-inbox-status.functions";
 
-type InboxKind = "contato" | "entrevista" | "rfq";
+type InboxKind = "contato" | "entrevista" | "checklist";
 type InboxStatus = "pendente" | "lido";
 
 export const Route = createFileRoute("/_authenticated/admin/formularios-recebidos")({
@@ -101,7 +101,7 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
 
   const listChamadosFn = useServerFn(listChamados);
   const listEntrevistasFn = useServerFn(listEntrevistas);
-  const listRfqFn = useServerFn(listRfqSubmissoes);
+  const listChecklistFn = useServerFn(listChecklistSubmissoes);
 
   const contato = useQuery({
     queryKey: ["form-inbox", "contato"],
@@ -124,9 +124,9 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
     queryFn: () => listEntrevistasFn({ data: { escopo: "ativas" } as any }),
   });
 
-  const rfqs = useQuery({
-    queryKey: ["form-inbox", "rfq"],
-    queryFn: () => listRfqFn({ data: { limit: 100 } as any }),
+  const checklists = useQuery({
+    queryKey: ["form-inbox", "checklist"],
+    queryFn: () => listChecklistFn({ data: { limit: 100 } as any }),
   });
 
   // Status pendente/lido por tipo.
@@ -139,9 +139,9 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
     queryKey: ["form-inbox-status", "entrevista"],
     queryFn: () => listStatusFn({ data: { entity_type: "entrevista" } }),
   });
-  const statusRfq = useQuery({
-    queryKey: ["form-inbox-status", "rfq"],
-    queryFn: () => listStatusFn({ data: { entity_type: "rfq" } }),
+  const statusChecklist = useQuery({
+    queryKey: ["form-inbox-status", "checklist"],
+    queryFn: () => listStatusFn({ data: { entity_type: "checklist" } }),
   });
 
   const statusMap = (kind: InboxKind): Record<string, InboxStatus> => {
@@ -150,14 +150,14 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
         ? statusContato.data
         : kind === "entrevista"
           ? statusEntrevista.data
-          : statusRfq.data;
+          : statusChecklist.data;
     const m: Record<string, InboxStatus> = {};
     for (const r of rows ?? []) m[r.entity_id] = r.status;
     return m;
   };
   const contatoStatusMap = statusMap("contato");
   const entrevistaStatusMap = statusMap("entrevista");
-  const rfqStatusMap = statusMap("rfq");
+  const checklistStatusMap = statusMap("checklist");
 
   const countByStatus = (rows: any[], map: Record<string, InboxStatus>) => {
     let lidos = 0;
@@ -167,7 +167,7 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
 
   const contatoAll = (contato.data?.rows ?? []) as any[];
   const entrevistaAll = ((entrevistas.data as any) ?? []) as any[];
-  const rfqAll = ((rfqs.data as any) ?? []) as any[];
+  const checklistAll = ((checklists.data as any) ?? []) as any[];
 
   const contatoRows = useMemo(
     () =>
@@ -196,9 +196,9 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
     [entrevistaResp, search, dateFrom, dateTo],
   );
 
-  const rfqRows = useMemo(
+  const checklistRows = useMemo(
     () =>
-      rfqAll
+      checklistAll
         .filter((r) => withinRange(r.criado_em, dateFrom, dateTo) || (!dateFrom && !dateTo))
         .filter((r) =>
           matches(
@@ -206,10 +206,10 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
             r.preenchido_por_nome,
             r.preenchido_por_email,
             r.clientes?.razao_social,
-            r.rfq_formulario_tipo?.nome_pt,
+            r.checklist_formulario_tipo?.nome_pt,
           ),
         ),
-    [rfqAll, search, dateFrom, dateTo],
+    [checklistAll, search, dateFrom, dateTo],
   );
 
   const hasFilter = search || dateFrom || dateTo;
@@ -238,10 +238,10 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
         <SummaryCard
           icon={<ClipboardList className="h-5 w-5" />}
           label="Checklists recebidos"
-          count={rfqRows.length}
-          total={rfqAll.length}
-          loading={rfqs.isLoading}
-          {...countByStatus(rfqRows, rfqStatusMap)}
+          count={checklistRows.length}
+          total={checklistAll.length}
+          loading={checklists.isLoading}
+          {...countByStatus(checklistRows, checklistStatusMap)}
         />
       </div>
 
@@ -309,7 +309,7 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
         <TabsList>
           <TabsTrigger value="contato">Contato ({contatoRows.length})</TabsTrigger>
           <TabsTrigger value="entrevistas">Entrevistas ({entrevistaRows.length})</TabsTrigger>
-          <TabsTrigger value="rfq">Checklist ({rfqRows.length})</TabsTrigger>
+          <TabsTrigger value="checklist">Checklist ({checklistRows.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="contato" className="mt-4">
@@ -452,7 +452,7 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
           </Card>
         </TabsContent>
 
-        <TabsContent value="rfq" className="mt-4">
+        <TabsContent value="checklist" className="mt-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Submissões de Checklist</CardTitle>
@@ -463,9 +463,9 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
               </Button>
             </CardHeader>
             <CardContent>
-              {rfqs.isLoading ? (
+              {checklists.isLoading ? (
                 <p className="text-sm text-[var(--text-secondary)]">Carregando…</p>
-              ) : rfqRows.length === 0 ? (
+              ) : checklistRows.length === 0 ? (
                 <p className="text-sm text-[var(--text-secondary)]">
                   {hasFilter
                     ? "Nenhum resultado para os filtros."
@@ -483,7 +483,7 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rfqRows.map((r) => (
+                    {checklistRows.map((r) => (
                       <TableRow key={r.id}>
                         <TableCell>{r.clientes?.razao_social ?? "—"}</TableCell>
                         <TableCell>
@@ -492,12 +492,12 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
                             {r.preenchido_por_email ?? ""}
                           </div>
                         </TableCell>
-                        <TableCell>{r.rfq_formulario_tipo?.nome_pt ?? "—"}</TableCell>
+                        <TableCell>{r.checklist_formulario_tipo?.nome_pt ?? "—"}</TableCell>
                         <TableCell>
                           <StatusToggle
-                            kind="rfq"
+                            kind="checklist"
                             id={r.id}
-                            status={rfqStatusMap[r.id] ?? "pendente"}
+                            status={checklistStatusMap[r.id] ?? "pendente"}
                           />
                         </TableCell>
                         <TableCell className="text-xs">{fmtDate(r.criado_em)}</TableCell>
