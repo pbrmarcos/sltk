@@ -39,16 +39,6 @@ export const ROLE_RANK: Record<AppRoleName, number> = {
   sales: 100,
 };
 
-/**
- * Roles com acesso ao layout `/admin/*` (leitura mínima).
- * Puro: sem React, sem TanStack. Reutilizável em `beforeLoad` e em
- * `createServerFn`.
- */
-export function canAccessAdminLayout(role: AppRoleName | string | null | undefined): boolean {
-  if (!role) return false;
-  return role === "admin" || role === "manager" || role === "engineer";
-}
-
 export class AdminGuardError extends Error {
   status: number;
   code: string;

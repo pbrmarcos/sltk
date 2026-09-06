@@ -33,6 +33,11 @@ const ROUTE_MODULE_PREFIXES: Array<[string, AppModule | AppModule[]]> = [
   // (a função de servidor valida o módulo certo por entidade) — não é
   // administrativo, então não pode exigir só "admin" aqui.
   ["/importar", ["clientes", "fornecedores"]],
+  // Etapas dos Equipamentos é a única tela admin que engenharia também usa
+  // de verdade (as próprias server functions já aceitam assertEngineerOrHigher) —
+  // sem isso, o módulo "admin" (que só pode ser concedido a manager) tornaria
+  // essa tela estruturalmente inacessível pra engenharia.
+  ["/admin/etapas-equipamentos", ["admin", "engenharia"]],
   ["/admin", "admin"],
 ];
 
