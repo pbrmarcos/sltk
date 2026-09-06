@@ -34,7 +34,8 @@ export function ModuleGuard({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (role === "admin" || modules.has(required)) {
+  const requiredList = Array.isArray(required) ? required : [required];
+  if (role === "admin" || requiredList.some((m) => modules.has(m))) {
     renderedOnce.current = true;
     return <>{children}</>;
   }
@@ -45,8 +46,9 @@ export function ModuleGuard({ children }: { children: React.ReactNode }) {
         <ShieldAlert className="mx-auto mb-4 h-10 w-10 text-[var(--text-muted)]" />
         <h1 className="text-lg font-semibold">Acesso restrito</h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
-          Seu perfil não tem permissão para o módulo <strong>{MODULE_LABEL[required]}</strong>.
-          Solicite liberação a um administrador em Administração › Usuários &amp; Permissões.
+          Seu perfil não tem permissão para o módulo{" "}
+          <strong>{requiredList.map((m) => MODULE_LABEL[m]).join(" ou ")}</strong>. Solicite
+          liberação a um administrador em Administração › Usuários &amp; Permissões.
         </p>
         <Button asChild className="mt-6">
           <Link to="/dashboard">Voltar ao dashboard</Link>
