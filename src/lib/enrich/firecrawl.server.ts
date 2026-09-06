@@ -20,7 +20,8 @@ export type ScrapeJsonOptions = {
 export async function firecrawlScrapeJson<T = Record<string, unknown>>(
   opts: ScrapeJsonOptions,
 ): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
-  const apiKey = process.env.FIRECRAWL_API_KEY;
+  const { getSecret } = await import("@/lib/secrets.server");
+  const apiKey = await getSecret("FIRECRAWL_API_KEY");
   if (!apiKey)
     return { ok: false, error: "Busca web indisponível — a integração não está configurada." };
 
@@ -84,7 +85,8 @@ export async function firecrawlSearchEnrich<T = Record<string, unknown>>(opts: {
   /** Etiqueta usada nos logs para distinguir o país/provider chamador */
   logLabel?: string;
 }): Promise<{ ok: true; data: T; url: string } | { ok: false; error: string }> {
-  const apiKey = process.env.FIRECRAWL_API_KEY;
+  const { getSecret } = await import("@/lib/secrets.server");
+  const apiKey = await getSecret("FIRECRAWL_API_KEY");
   if (!apiKey)
     return { ok: false, error: "Busca web indisponível — a integração não está configurada." };
 

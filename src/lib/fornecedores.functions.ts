@@ -885,7 +885,8 @@ export const scanFornecedorDocs = createServerFn({ method: "POST" })
       .maybeSingle();
     const userEmail = prof?.email ?? null;
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const { getSecret } = await import("@/lib/secrets.server");
+    const apiKey = await getSecret("GROQ_API_KEY");
     if (!apiKey) {
       const log = await logGeminiScan({
         user_id: userId,
@@ -1439,8 +1440,11 @@ export const reenriquecerFornecedor = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ fornecedor_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const apiKey = process.env.GROQ_API_KEY;
-    const firecrawlKey = process.env.FIRECRAWL_API_KEY;
+    const { getSecret } = await import("@/lib/secrets.server");
+    const [apiKey, firecrawlKey] = await Promise.all([
+      getSecret("GROQ_API_KEY"),
+      getSecret("FIRECRAWL_API_KEY"),
+    ]);
 
     const { data: f, error: fErr } = await supabase
       .from("fornecedores")

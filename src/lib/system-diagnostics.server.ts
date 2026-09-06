@@ -36,8 +36,9 @@ function mask(v?: string | null): string | null {
   return `${v.slice(0, 4)}••••${v.slice(-4)} (${v.length} car.)`;
 }
 
-function envStatus(nome: string, opcional: boolean): EnvStatus {
-  const v = process.env[nome];
+async function envStatus(nome: string, opcional: boolean): Promise<EnvStatus> {
+  const { getSecret } = await import("@/lib/secrets.server");
+  const v = await getSecret(nome);
   return { nome, presente: Boolean(v && v.trim()), mascara: mask(v), opcional };
 }
 
@@ -102,7 +103,8 @@ async function probe(cap: CapabilityDef): Promise<{
       return { status: s.reason === "missing" ? "ausente" : "erro", detalhe: s.message };
     }
     case "sb_management": {
-      const token = process.env.SB_MANAGEMENT_ACCESS_TOKEN;
+      const { getSecret } = await import("@/lib/secrets.server");
+      const token = await getSecret("SB_MANAGEMENT_ACCESS_TOKEN");
       if (!token) return { status: "ausente", detalhe: "Token não configurado." };
       const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || process.env.SUPABASE_PROJECT_ID;
       if (!projectRef)
@@ -194,10 +196,10 @@ async function probe(cap: CapabilityDef): Promise<{
 }
 
 async function statusFor(cap: CapabilityDef): Promise<CapabilityStatus> {
-  const envs = [
+  const envs = await Promise.all([
     ...cap.envs.map((n) => envStatus(n, false)),
     ...(cap.envsOpcionais ?? []).map((n) => envStatus(n, true)),
-  ];
+  ]);
   const faltando = envs.filter((e) => !e.opcional && !e.presente);
 
   const base = {

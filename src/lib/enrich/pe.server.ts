@@ -6,7 +6,8 @@ import type { EnrichedCliente } from "./types";
  * estado/condição e atividade econômica.
  */
 export async function enrichApisNetPe(ruc: string): Promise<EnrichedCliente | null> {
-  const token = process.env.APIS_NET_PE_TOKEN;
+  const { getSecret } = await import("@/lib/secrets.server");
+  const token = await getSecret("APIS_NET_PE_TOKEN");
   if (!token)
     throw new Error("Consulta de RUC do Peru indisponível — a integração não está configurada.");
 

@@ -22,7 +22,8 @@ function migrationsFromDisk() {
 }
 
 async function runSql(sql: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const token = process.env.SB_MANAGEMENT_ACCESS_TOKEN;
+  const { getSecret } = await import("@/lib/secrets.server");
+  const token = await getSecret("SB_MANAGEMENT_ACCESS_TOKEN");
   const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || process.env.SUPABASE_PROJECT_ID;
   if (!token)
     return {

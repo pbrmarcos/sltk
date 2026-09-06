@@ -59,7 +59,7 @@ export const createShareLink = createServerFn({ method: "POST" })
     const now = Math.floor(Date.now() / 1000);
     const exp = now + data.ttl_hours * 3600;
     const jti = newJti();
-    const token = signShareToken({
+    const token = await signShareToken({
       jti,
       tipo: data.tipo as ShareTipo,
       rid: data.relatorio_id,
@@ -245,7 +245,7 @@ function readRequestMeta(): { ip: string | null; user_agent: string | null } {
 }
 
 async function loadActiveLink(token: string) {
-  const payload = verifyShareTokenSignature(token); // already throws [invalid] / [expired]
+  const payload = await verifyShareTokenSignature(token); // already throws [invalid] / [expired]
   const { getCriticalClient } = await import("@/lib/supabase-client.server");
   const supabaseAdmin = await getCriticalClient();
   const { data: link, error } = await (supabaseAdmin as any)
@@ -327,7 +327,7 @@ async function logVisualizacaoSeguro(
   meta: { ip: string | null; user_agent: string | null },
 ) {
   try {
-    const payload = peekShareTokenPayload(token); // só assinatura
+    const payload = await peekShareTokenPayload(token); // só assinatura
     await logSubmissao({
       share_link_id: payload.jti,
       tipo: payload.tipo,

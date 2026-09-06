@@ -29,8 +29,9 @@ function b64urlDecode(s: string): Buffer {
   return Buffer.from(s.replace(/-/g, "+").replace(/_/g, "/") + pad, "base64");
 }
 
-function getSecret(): string {
-  const s = process.env.RELATORIO_SHARE_SECRET;
+async function getShareSecret(): Promise<string> {
+  const { getSecret } = await import("@/lib/secrets.server");
+  const s = await getSecret("RELATORIO_SHARE_SECRET");
   if (!s)
     throw new Error(
       "Compartilhamento externo de relatórios indisponível — a integração não está configurada.",
@@ -46,14 +47,16 @@ export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export function signShareToken(payload: ShareTokenPayload): string {
+export async function signShareToken(payload: ShareTokenPayload): Promise<string> {
   const head = b64urlEncode(Buffer.from(JSON.stringify(payload), "utf8"));
-  const mac = createHmac("sha256", getSecret()).update(head).digest();
+  const mac = createHmac("sha256", await getShareSecret())
+    .update(head)
+    .digest();
   return `${head}.${b64urlEncode(mac)}`;
 }
 
 /** Decodifica e valida APENAS a assinatura — não checa expiração nem revogação. */
-export function peekShareTokenPayload(token: string): ShareTokenPayload {
+export async function peekShareTokenPayload(token: string): Promise<ShareTokenPayload> {
   const parts = token.split(".");
   if (parts.length !== 2) {
     const err: any = new Error("[invalid] Link inválido.");
@@ -61,7 +64,9 @@ export function peekShareTokenPayload(token: string): ShareTokenPayload {
     throw err;
   }
   const [head, sig] = parts;
-  const expected = createHmac("sha256", getSecret()).update(head).digest();
+  const expected = createHmac("sha256", await getShareSecret())
+    .update(head)
+    .digest();
   let provided: Buffer;
   try {
     provided = b64urlDecode(sig);
@@ -92,8 +97,8 @@ export function peekShareTokenPayload(token: string): ShareTokenPayload {
 }
 
 /** Valida assinatura + expiração do token (não checa revogação no DB). */
-export function verifyShareTokenSignature(token: string): ShareTokenPayload {
-  const payload = peekShareTokenPayload(token);
+export async function verifyShareTokenSignature(token: string): Promise<ShareTokenPayload> {
+  const payload = await peekShareTokenPayload(token);
   if (typeof payload.exp !== "number" || payload.exp * 1000 < Date.now()) {
     const err: any = new Error("[expired] Link expirado. Solicite um novo.");
     err.code = "expired";

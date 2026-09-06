@@ -1209,7 +1209,8 @@ async function uploadAndSignImpl(
   ]);
   const folderUrl = await getFolderUrl(folderId);
 
-  const signingKey = process.env.DOC_SIGNING_KEY;
+  const { getSecret } = await import("@/lib/secrets.server");
+  const signingKey = await getSecret("DOC_SIGNING_KEY");
   if (!signingKey)
     throw new Error(
       "Emissão de links públicos indisponível — a assinatura de documentos não está configurada.",
@@ -1317,7 +1318,8 @@ export const verifyAssinatura = createServerFn({ method: "POST" })
     const supabaseAdmin = await getCriticalClient();
     const bytes = await readPdfBytes(supabaseAdmin, a.storage_path);
     const sha = await sha256Hex(bytes);
-    const signingKey = process.env.DOC_SIGNING_KEY;
+    const { getSecret } = await import("@/lib/secrets.server");
+    const signingKey = await getSecret("DOC_SIGNING_KEY");
     if (!signingKey)
       throw new Error(
         "Emissão de links públicos indisponível — a assinatura de documentos não está configurada.",
