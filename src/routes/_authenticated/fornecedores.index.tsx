@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { useMemo } from "react";
-import { Plus, Star, Building2, Search, X } from "lucide-react";
+import { Plus, Star, Building2, Search, X, Upload } from "lucide-react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryOptions } from "@tanstack/react-query";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -293,11 +293,18 @@ function FornecedoresListPage() {
         title="Fornecedores"
         subtitle="Cadastro de fornecedores (China, EUA, Europa, Brasil) e contatos."
         actions={
-          <Button asChild>
-            <Link to="/fornecedores/novo">
-              <Plus className="h-4 w-4" /> Novo fornecedor
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link to="/importar" search={{ entity: "fornecedores" }}>
+                <Upload className="h-4 w-4" /> Importar CSV
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/fornecedores/novo">
+                <Plus className="h-4 w-4" /> Novo fornecedor
+              </Link>
+            </Button>
+          </div>
         }
       />
 

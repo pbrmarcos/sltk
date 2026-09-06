@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -26,7 +28,12 @@ import { bulkImport } from "@/lib/importar.functions";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 
+const searchSchema = z.object({
+  entity: fallback(z.enum(["clientes", "fornecedores"]), "clientes").default("clientes"),
+});
+
 export const Route = createFileRoute("/_authenticated/importar")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: "Importar dados — Solutek" },
@@ -93,10 +100,11 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
 }
 
 function ImportarWizardPage() {
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const importFn = useServerFn(bulkImport);
   const [step, setStep] = useState<Step>(1);
-  const [entity, setEntity] = useState<Entity>("clientes");
+  const [entity, setEntity] = useState<Entity>(search.entity);
   const [csvText, setCsvText] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<null | {

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Plus, Star, Building2, AlertTriangle } from "lucide-react";
+import { Plus, Star, Building2, AlertTriangle, Upload } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
@@ -117,9 +117,21 @@ function ClientesListPage() {
         title="Clientes"
         subtitle="Contas, key accounts e prospects"
         actions={
-          <PermissionLinkButton module="clientes" to="/clientes/novo" size="sm" className="h-9">
-            <Plus className="mr-1 h-4 w-4" /> Novo cliente
-          </PermissionLinkButton>
+          <div className="flex items-center gap-2">
+            <PermissionLinkButton
+              module="clientes"
+              to="/importar"
+              search={{ entity: "clientes" }}
+              variant="outline"
+              size="sm"
+              className="h-9"
+            >
+              <Upload className="mr-1 h-4 w-4" /> Importar CSV
+            </PermissionLinkButton>
+            <PermissionLinkButton module="clientes" to="/clientes/novo" size="sm" className="h-9">
+              <Plus className="mr-1 h-4 w-4" /> Novo cliente
+            </PermissionLinkButton>
+          </div>
         }
       />
       <ProcessoComercialGuia destaque="ganho" />

@@ -130,7 +130,6 @@ import { Route as AuthenticatedAdminEntrevistasSegmentoIdRouteImport } from './r
 import { Route as AuthenticatedAjudaDocumentacaoCategoriaIndexRouteImport } from './routes/_authenticated/ajuda.documentacao.$categoria.index'
 import { Route as AuthenticatedComprasOrdensIdImprimirRouteImport } from './routes/_authenticated/compras.ordens.$id.imprimir'
 import { Route as AuthenticatedComercialOrcamentoIdCorrigirRouteImport } from './routes/_authenticated/comercial.orcamento.$id.corrigir'
-import { Route as AuthenticatedComercialEntrevistasIdImprimirRouteImport } from './routes/_authenticated/comercial.entrevistas.$id.imprimir'
 import { Route as AuthenticatedAjudaDocumentacaoCategoriaSlugRouteImport } from './routes/_authenticated/ajuda.documentacao.$categoria.$slug'
 
 const TrocarSenhaRoute = TrocarSenhaRouteImport.update({
@@ -821,12 +820,6 @@ const AuthenticatedComercialOrcamentoIdCorrigirRoute =
     path: '/corrigir',
     getParentRoute: () => AuthenticatedComercialOrcamentoIdRoute,
   } as any)
-const AuthenticatedComercialEntrevistasIdImprimirRoute =
-  AuthenticatedComercialEntrevistasIdImprimirRouteImport.update({
-    id: '/imprimir',
-    path: '/imprimir',
-    getParentRoute: () => AuthenticatedComercialEntrevistasIdRoute,
-  } as any)
 const AuthenticatedAjudaDocumentacaoCategoriaSlugRoute =
   AuthenticatedAjudaDocumentacaoCategoriaSlugRouteImport.update({
     id: '/$slug',
@@ -918,7 +911,7 @@ export interface FileRoutesByFullPath {
   '/admin/entrevistas/$segmentoId': typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
   '/admin/etapas-equipamentos/$id': typeof AuthenticatedAdminEtapasEquipamentosIdRoute
   '/ajuda/documentacao/$categoria': typeof AuthenticatedAjudaDocumentacaoCategoriaRouteWithChildren
-  '/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRouteWithChildren
+  '/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRoute
   '/comercial/orcamento/$id': typeof AuthenticatedComercialOrcamentoIdRouteWithChildren
   '/comercial/orcamento/novo': typeof AuthenticatedComercialOrcamentoNovoRoute
   '/compras/almoxarifado/$id': typeof AuthenticatedComprasAlmoxarifadoIdRoute
@@ -953,7 +946,6 @@ export interface FileRoutesByFullPath {
   '/pos-vendas/sat/': typeof AuthenticatedPosVendasSatIndexRoute
   '/qualidade/fat/': typeof AuthenticatedQualidadeFatIndexRoute
   '/ajuda/documentacao/$categoria/$slug': typeof AuthenticatedAjudaDocumentacaoCategoriaSlugRoute
-  '/comercial/entrevistas/$id/imprimir': typeof AuthenticatedComercialEntrevistasIdImprimirRoute
   '/comercial/orcamento/$id/corrigir': typeof AuthenticatedComercialOrcamentoIdCorrigirRoute
   '/compras/ordens/$id/imprimir': typeof AuthenticatedComprasOrdensIdImprimirRoute
   '/ajuda/documentacao/$categoria/': typeof AuthenticatedAjudaDocumentacaoCategoriaIndexRoute
@@ -1037,7 +1029,7 @@ export interface FileRoutesByTo {
   '/pos-vendas': typeof AuthenticatedPosVendasIndexRoute
   '/admin/entrevistas/$segmentoId': typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
   '/admin/etapas-equipamentos/$id': typeof AuthenticatedAdminEtapasEquipamentosIdRoute
-  '/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRouteWithChildren
+  '/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRoute
   '/comercial/orcamento/$id': typeof AuthenticatedComercialOrcamentoIdRouteWithChildren
   '/comercial/orcamento/novo': typeof AuthenticatedComercialOrcamentoNovoRoute
   '/compras/almoxarifado/$id': typeof AuthenticatedComprasAlmoxarifadoIdRoute
@@ -1072,7 +1064,6 @@ export interface FileRoutesByTo {
   '/pos-vendas/sat': typeof AuthenticatedPosVendasSatIndexRoute
   '/qualidade/fat': typeof AuthenticatedQualidadeFatIndexRoute
   '/ajuda/documentacao/$categoria/$slug': typeof AuthenticatedAjudaDocumentacaoCategoriaSlugRoute
-  '/comercial/entrevistas/$id/imprimir': typeof AuthenticatedComercialEntrevistasIdImprimirRoute
   '/comercial/orcamento/$id/corrigir': typeof AuthenticatedComercialOrcamentoIdCorrigirRoute
   '/compras/ordens/$id/imprimir': typeof AuthenticatedComprasOrdensIdImprimirRoute
   '/ajuda/documentacao/$categoria': typeof AuthenticatedAjudaDocumentacaoCategoriaIndexRoute
@@ -1163,7 +1154,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/entrevistas/$segmentoId': typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
   '/_authenticated/admin/etapas-equipamentos/$id': typeof AuthenticatedAdminEtapasEquipamentosIdRoute
   '/_authenticated/ajuda/documentacao/$categoria': typeof AuthenticatedAjudaDocumentacaoCategoriaRouteWithChildren
-  '/_authenticated/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRouteWithChildren
+  '/_authenticated/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRoute
   '/_authenticated/comercial/orcamento/$id': typeof AuthenticatedComercialOrcamentoIdRouteWithChildren
   '/_authenticated/comercial/orcamento/novo': typeof AuthenticatedComercialOrcamentoNovoRoute
   '/_authenticated/compras/almoxarifado/$id': typeof AuthenticatedComprasAlmoxarifadoIdRoute
@@ -1198,7 +1189,6 @@ export interface FileRoutesById {
   '/_authenticated/pos-vendas/sat/': typeof AuthenticatedPosVendasSatIndexRoute
   '/_authenticated/qualidade/fat/': typeof AuthenticatedQualidadeFatIndexRoute
   '/_authenticated/ajuda/documentacao/$categoria/$slug': typeof AuthenticatedAjudaDocumentacaoCategoriaSlugRoute
-  '/_authenticated/comercial/entrevistas/$id/imprimir': typeof AuthenticatedComercialEntrevistasIdImprimirRoute
   '/_authenticated/comercial/orcamento/$id/corrigir': typeof AuthenticatedComercialOrcamentoIdCorrigirRoute
   '/_authenticated/compras/ordens/$id/imprimir': typeof AuthenticatedComprasOrdensIdImprimirRoute
   '/_authenticated/ajuda/documentacao/$categoria/': typeof AuthenticatedAjudaDocumentacaoCategoriaIndexRoute
@@ -1324,7 +1314,6 @@ export interface FileRouteTypes {
     | '/pos-vendas/sat/'
     | '/qualidade/fat/'
     | '/ajuda/documentacao/$categoria/$slug'
-    | '/comercial/entrevistas/$id/imprimir'
     | '/comercial/orcamento/$id/corrigir'
     | '/compras/ordens/$id/imprimir'
     | '/ajuda/documentacao/$categoria/'
@@ -1443,7 +1432,6 @@ export interface FileRouteTypes {
     | '/pos-vendas/sat'
     | '/qualidade/fat'
     | '/ajuda/documentacao/$categoria/$slug'
-    | '/comercial/entrevistas/$id/imprimir'
     | '/comercial/orcamento/$id/corrigir'
     | '/compras/ordens/$id/imprimir'
     | '/ajuda/documentacao/$categoria'
@@ -1568,7 +1556,6 @@ export interface FileRouteTypes {
     | '/_authenticated/pos-vendas/sat/'
     | '/_authenticated/qualidade/fat/'
     | '/_authenticated/ajuda/documentacao/$categoria/$slug'
-    | '/_authenticated/comercial/entrevistas/$id/imprimir'
     | '/_authenticated/comercial/orcamento/$id/corrigir'
     | '/_authenticated/compras/ordens/$id/imprimir'
     | '/_authenticated/ajuda/documentacao/$categoria/'
@@ -2455,13 +2442,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComercialOrcamentoIdCorrigirRouteImport
       parentRoute: typeof AuthenticatedComercialOrcamentoIdRoute
     }
-    '/_authenticated/comercial/entrevistas/$id/imprimir': {
-      id: '/_authenticated/comercial/entrevistas/$id/imprimir'
-      path: '/imprimir'
-      fullPath: '/comercial/entrevistas/$id/imprimir'
-      preLoaderRoute: typeof AuthenticatedComercialEntrevistasIdImprimirRouteImport
-      parentRoute: typeof AuthenticatedComercialEntrevistasIdRoute
-    }
     '/_authenticated/ajuda/documentacao/$categoria/$slug': {
       id: '/_authenticated/ajuda/documentacao/$categoria/$slug'
       path: '/$slug'
@@ -2614,29 +2594,14 @@ const AuthenticatedAjudaDocumentacaoRouteWithChildren =
     AuthenticatedAjudaDocumentacaoRouteChildren,
   )
 
-interface AuthenticatedComercialEntrevistasIdRouteChildren {
-  AuthenticatedComercialEntrevistasIdImprimirRoute: typeof AuthenticatedComercialEntrevistasIdImprimirRoute
-}
-
-const AuthenticatedComercialEntrevistasIdRouteChildren: AuthenticatedComercialEntrevistasIdRouteChildren =
-  {
-    AuthenticatedComercialEntrevistasIdImprimirRoute:
-      AuthenticatedComercialEntrevistasIdImprimirRoute,
-  }
-
-const AuthenticatedComercialEntrevistasIdRouteWithChildren =
-  AuthenticatedComercialEntrevistasIdRoute._addFileChildren(
-    AuthenticatedComercialEntrevistasIdRouteChildren,
-  )
-
 interface AuthenticatedComercialEntrevistasRouteChildren {
-  AuthenticatedComercialEntrevistasIdRoute: typeof AuthenticatedComercialEntrevistasIdRouteWithChildren
+  AuthenticatedComercialEntrevistasIdRoute: typeof AuthenticatedComercialEntrevistasIdRoute
 }
 
 const AuthenticatedComercialEntrevistasRouteChildren: AuthenticatedComercialEntrevistasRouteChildren =
   {
     AuthenticatedComercialEntrevistasIdRoute:
-      AuthenticatedComercialEntrevistasIdRouteWithChildren,
+      AuthenticatedComercialEntrevistasIdRoute,
   }
 
 const AuthenticatedComercialEntrevistasRouteWithChildren =
