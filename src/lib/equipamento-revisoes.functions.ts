@@ -59,7 +59,7 @@ export const createRevisao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { data: eqp, error: eqpErr } = await context.supabase
       .from("cliente_equipamentos")
       .select("id, cliente_id")
@@ -99,7 +99,7 @@ export const updateRevisao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { id, ...rest } = data;
     const { error } = await context.supabase
       .from("equipamento_revisoes")
@@ -113,7 +113,7 @@ export const removerRevisao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { error } = await context.supabase
       .from("equipamento_revisoes")
       .update({ deleted_at: new Date().toISOString() })
