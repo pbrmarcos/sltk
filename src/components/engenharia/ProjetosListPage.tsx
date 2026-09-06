@@ -199,7 +199,7 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
                       )}
                     </div>
                     <div className="truncate text-xs text-[var(--text-muted)]">
-                      {r.clientes?.razao_social} · H/H: {Number(r.hh_consumida ?? 0).toFixed(1)}
+                      {r.clientes?.razao_social}
                     </div>
                   </div>
                   <Badge variant="outline" className="text-[11px]">
@@ -398,10 +398,6 @@ function ProjetoDetalheDialog({
                       {PROJETO_STATUS_LABEL[projeto.status as ProjetoStatus]}
                     </Badge>
                   }
-                />
-                <Info
-                  label="H/H consumida"
-                  value={`${Number(projeto.hh_consumida ?? 0).toFixed(1)} h`}
                 />
                 <Info
                   label="Liberado em"

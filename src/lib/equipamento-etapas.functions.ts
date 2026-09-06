@@ -220,17 +220,6 @@ export const listHHConsolidado = createServerFn({ method: "POST" })
         projetosAgg[k].mec += Number(e.hh_mecanica_real ?? 0);
         projetosAgg[k].elet += Number(e.hh_eletrica_real ?? 0);
       }
-      const { data: projetos } = await context.supabase
-        .from("equipamento_projetos")
-        .select("equipamento_id, disciplina, hh_consumida")
-        .in("equipamento_id", ids)
-        .is("deleted_at", null);
-      for (const p of projetos ?? []) {
-        const k = p.equipamento_id;
-        projetosAgg[k] ??= { mec: 0, elet: 0 };
-        if (p.disciplina === "mecanico") projetosAgg[k].mec += Number(p.hh_consumida ?? 0);
-        else if (p.disciplina === "eletrico") projetosAgg[k].elet += Number(p.hh_consumida ?? 0);
-      }
     }
 
     let rows = (eqps ?? []).map((e) => ({
