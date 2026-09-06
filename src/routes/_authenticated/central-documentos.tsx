@@ -104,7 +104,7 @@ function AdminDocumentosPage() {
           <TabsTrigger value="blocos">Blocos</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="tipos">Tipos</TabsTrigger>
-          <TabsTrigger value="rfq-gerados">Checklists gerados</TabsTrigger>
+          <TabsTrigger value="rfq-gerados">Cotações geradas</TabsTrigger>
           <TabsTrigger value="entrevistas">Entrevistas</TabsTrigger>
         </TabsList>
         <TabsContent value="blocos" className="mt-4">

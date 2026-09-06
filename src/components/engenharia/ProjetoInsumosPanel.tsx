@@ -882,7 +882,7 @@ export function ProjetoInsumosPanel({
             {modoSelecao === "rfq" && (
               <Button size="sm" className="bg-sky-600 hover:bg-sky-700" onClick={enviarParaRFQ}>
                 <ShoppingCart className="h-4 w-4 mr-1" />
-                Enviar para Checklist ({selRfq.length})
+                Enviar para Cotação ({selRfq.length})
               </Button>
             )}
           </div>
