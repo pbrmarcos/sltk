@@ -446,6 +446,11 @@ export const upsertContatoFornecedor = createServerFn({ method: "POST" })
         .update(payload)
         .eq("id", data.id);
       if (error) throw friendlyDbError(error);
+      await logAuditServer(supabase as any, context.userId, {
+        table_name: "fornecedor_contatos",
+        record_id: data.id,
+        action: "UPDATE",
+      });
       return { id: data.id };
     }
     const { data: created, error } = await supabase
@@ -454,6 +459,12 @@ export const upsertContatoFornecedor = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
+    await logAuditServer(supabase as any, context.userId, {
+      table_name: "fornecedor_contatos",
+      record_id: created.id,
+      action: "INSERT",
+      new_value: { fornecedor_id: data.fornecedor_id, nome: data.patch.nome },
+    });
     return { id: created.id };
   });
 
@@ -463,6 +474,11 @@ export const removeContatoFornecedor = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("fornecedor_contatos").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "fornecedor_contatos",
+      record_id: data.id,
+      action: "DELETE",
+    });
     return { ok: true };
   });
 
@@ -484,14 +500,24 @@ export const addNotaFornecedor = createServerFn({ method: "POST" })
       .select("full_name, email")
       .eq("id", userId)
       .maybeSingle();
-    const { error } = await supabase.from("fornecedor_notas").insert({
-      fornecedor_id: data.fornecedor_id,
-      texto: data.texto,
-      tipo: data.tipo,
-      user_id: userId,
-      user_nome: prof?.full_name || prof?.email || "Usuário",
-    } as never);
+    const { data: created, error } = await supabase
+      .from("fornecedor_notas")
+      .insert({
+        fornecedor_id: data.fornecedor_id,
+        texto: data.texto,
+        tipo: data.tipo,
+        user_id: userId,
+        user_nome: prof?.full_name || prof?.email || "Usuário",
+      } as never)
+      .select("id")
+      .single();
     if (error) throw friendlyDbError(error);
+    await logAuditServer(supabase as any, userId, {
+      table_name: "fornecedor_notas",
+      record_id: (created as { id: string }).id,
+      action: "INSERT",
+      new_value: { fornecedor_id: data.fornecedor_id, tipo: data.tipo },
+    });
     return { ok: true };
   });
 
@@ -515,18 +541,28 @@ export const registerAnexoFornecedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => anexoRegisterInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("fornecedor_anexos").insert({
-      fornecedor_id: data.fornecedor_id,
-      storage_bucket: "fornecedores",
-      storage_path: data.storage_path,
-      nome_original: data.nome_original,
-      nome_final: data.nome_final,
-      mime: data.mime ?? null,
-      tamanho: data.tamanho ?? null,
-      tipo: data.tipo ?? "documento",
-      descricao: data.descricao ?? null,
-    } as never);
+    const { data: created, error } = await context.supabase
+      .from("fornecedor_anexos")
+      .insert({
+        fornecedor_id: data.fornecedor_id,
+        storage_bucket: "fornecedores",
+        storage_path: data.storage_path,
+        nome_original: data.nome_original,
+        nome_final: data.nome_final,
+        mime: data.mime ?? null,
+        tamanho: data.tamanho ?? null,
+        tipo: data.tipo ?? "documento",
+        descricao: data.descricao ?? null,
+      } as never)
+      .select("id")
+      .single();
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "fornecedor_anexos",
+      record_id: (created as { id: string }).id,
+      action: "INSERT",
+      new_value: { fornecedor_id: data.fornecedor_id, nome_original: data.nome_original },
+    });
     return { ok: true };
   });
 
@@ -550,6 +586,11 @@ export const removeAnexoFornecedor = createServerFn({ method: "POST" })
       // best-effort: remove o arquivo no storage
       await supabase.storage.from("fornecedores").remove([row.storage_path]);
     }
+    await logAuditServer(supabase as any, context.userId, {
+      table_name: "fornecedor_anexos",
+      record_id: data.id,
+      action: "DELETE",
+    });
     return { ok: true };
   });
 
@@ -1631,10 +1672,18 @@ ${markdown.slice(0, 12000)}`;
           web.palavras_chave ?? null,
         ),
       };
-      await supabase
+      const { error: updErr } = await supabase
         .from("fornecedores")
         .update(updatePatch as never)
         .eq("id", f.id);
+      if (updErr) throw friendlyDbError(updErr);
+      await logAuditServer(supabase as any, userId, {
+        table_name: "fornecedores",
+        record_id: f.id,
+        action: "UPDATE",
+        field_changed: "reenriquecimento_web",
+        new_value: Object.keys(updatePatch),
+      });
 
       const matched = Array.isArray(web.categorias_match) ? web.categorias_match : [];
       if (matched.length) {
