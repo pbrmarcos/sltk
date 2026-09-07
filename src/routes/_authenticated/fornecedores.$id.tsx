@@ -50,6 +50,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { Flag } from "@/components/ui/flag";
 import {
   DropdownMenu,
@@ -127,6 +137,15 @@ function FornecedorDetailPage() {
   } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [confirmArquivar, setConfirmArquivar] = useState(false);
+  const [removerContatoAlvo, setRemoverContatoAlvo] = useState<{
+    id: string;
+    nome: string;
+  } | null>(null);
+  const [removerAnexoAlvo, setRemoverAnexoAlvo] = useState<{
+    id: string;
+    nome: string;
+  } | null>(null);
 
   function reset() {
     setForm(toForm(f, detail.data.categorias));
@@ -185,12 +204,18 @@ function FornecedorDetailPage() {
 
   const removeContato = useMutation({
     mutationFn: (cid: string) => removeContatoFornecedor({ data: { id: cid } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["fornecedor", id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["fornecedor", id] });
+      setRemoverContatoAlvo(null);
+    },
   });
 
   const removeAnexo = useMutation({
     mutationFn: (aid: string) => removeAnexoFornecedor({ data: { id: aid } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["fornecedor", id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["fornecedor", id] });
+      setRemoverAnexoAlvo(null);
+    },
   });
 
   const submissoes = useQuery({
@@ -357,7 +382,7 @@ function FornecedorDetailPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onSelect={() => {
-                        if (confirm("Arquivar fornecedor?")) archive.mutate();
+                        setConfirmArquivar(true);
                       }}
                     >
                       <Archive className="h-4 w-4" /> Arquivar
@@ -540,9 +565,7 @@ function FornecedorDetailPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => {
-                          if (confirm("Remover contato?")) removeContato.mutate(c.id);
-                        }}
+                        onClick={() => setRemoverContatoAlvo({ id: c.id, nome: c.nome })}
                       >
                         <Trash2 className="h-3.5 w-3.5 text-rose-600" />
                       </Button>
@@ -614,9 +637,7 @@ function FornecedorDetailPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => {
-                              if (confirm("Remover anexo?")) removeAnexo.mutate(a.id);
-                            }}
+                            onClick={() => setRemoverAnexoAlvo({ id: a.id, nome: a.nome_original })}
                           >
                             <Trash2 className="h-3.5 w-3.5 text-rose-600" />
                           </Button>
@@ -982,6 +1003,66 @@ function FornecedorDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={confirmArquivar} onOpenChange={(o) => !o && setConfirmArquivar(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Arquivar fornecedor?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {f.nome_fantasia || f.nome} deixará de aparecer nas listagens ativas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={archive.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => archive.mutate()} disabled={archive.isPending}>
+              {archive.isPending ? "Arquivando…" : "Arquivar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!removerContatoAlvo}
+        onOpenChange={(o) => !o && setRemoverContatoAlvo(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover contato?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removerContatoAlvo ? `"${removerContatoAlvo.nome}" será removido.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeContato.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removerContatoAlvo && removeContato.mutate(removerContatoAlvo.id)}
+              disabled={removeContato.isPending}
+            >
+              {removeContato.isPending ? "Removendo…" : "Remover"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!removerAnexoAlvo} onOpenChange={(o) => !o && setRemoverAnexoAlvo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover anexo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removerAnexoAlvo ? `"${removerAnexoAlvo.nome}" será removido.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeAnexo.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removerAnexoAlvo && removeAnexo.mutate(removerAnexoAlvo.id)}
+              disabled={removeAnexo.isPending}
+            >
+              {removeAnexo.isPending ? "Removendo…" : "Remover"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }

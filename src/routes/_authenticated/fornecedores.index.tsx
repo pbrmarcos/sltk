@@ -41,7 +41,6 @@ import {
   FORNECEDOR_STATUS_LABEL,
   FORNECEDOR_STATUS_COLOR,
   FORNECEDOR_RANKING_COLOR,
-  INCOTERMS,
   type FornecedorRanking,
   type FornecedorStatus,
 } from "@/lib/fornecedores.shared";
@@ -375,27 +374,26 @@ function FornecedoresListPage() {
           </SelectContent>
         </Select>
 
-        <Select
-          value={search.incoterm}
-          onValueChange={(v) =>
-            navigate({ search: (s: SearchParams) => ({ ...s, incoterm: v, page: 1 }) })
-          }
-        >
-          <SelectTrigger className="w-full lg:w-[140px]" aria-label="Filtrar por incoterm">
-            <SelectValue placeholder="Incoterm" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos incoterms</SelectItem>
-            {INCOTERMS.map((i) => (
-              <SelectItem key={i} value={i}>
-                {i}{" "}
-                <span className="text-[10px] opacity-60">
-                  ({countFor(filtrosPopulares.incoterm, i)})
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {filtrosPopulares.incoterm.length > 0 ? (
+          <Select
+            value={search.incoterm}
+            onValueChange={(v) =>
+              navigate({ search: (s: SearchParams) => ({ ...s, incoterm: v, page: 1 }) })
+            }
+          >
+            <SelectTrigger className="w-full lg:w-[140px]" aria-label="Filtrar por incoterm">
+              <SelectValue placeholder="Incoterm" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos incoterms</SelectItem>
+              {filtrosPopulares.incoterm.map((i) => (
+                <SelectItem key={i.value} value={i.value}>
+                  {i.value} <span className="text-[10px] opacity-60">({i.count})</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : null}
 
         {filtrosPopulares.moeda.length > 0 ? (
           <Select
