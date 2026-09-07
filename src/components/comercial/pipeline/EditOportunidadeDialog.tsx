@@ -70,6 +70,12 @@ import {
   removerOportunidadeNota,
 } from "@/lib/oportunidade-notas.functions";
 import {
+  listOportunidadeColaboradores,
+  convidarColaborador,
+  revogarColaborador,
+} from "@/lib/oportunidade-colaboradores.functions";
+import { listSalesUsers } from "@/lib/checklist.functions";
+import {
   listOportunidadeAnexos,
   uploadOportunidadeAnexo,
   removerOportunidadeAnexo,
@@ -140,12 +146,16 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
+type OportunidadeTab = "dados" | "agenda" | "orcamentos" | "notas" | "colaboradores" | "anexos";
+
 export function EditOportunidadeDialog({
   opp,
   onOpenChange,
+  initialTab = "dados",
 }: {
   opp: OportunidadeLite | null;
   onOpenChange: (open: boolean) => void;
+  initialTab?: OportunidadeTab;
 }) {
   const [titulo, setTitulo] = useState("");
   const [empresa, setEmpresa] = useState("");
@@ -162,7 +172,8 @@ export function EditOportunidadeDialog({
   const restoreMut = useRestoreOportunidade();
   const [lostMode, setLostMode] = useState(false);
   const [lostReason, setLostReason] = useState("");
-  const [tab, setTab] = useState<"dados" | "agenda" | "orcamentos" | "notas" | "anexos">("dados");
+  const [tab, setTab] = useState<OportunidadeTab>(initialTab);
+  const [novoColabId, setNovoColabId] = useState<string>("");
   const [pais, setPais] = useState<string>("BR");
   const [documento, setDocumento] = useState<string>("");
   const [novaNota, setNovaNota] = useState("");
@@ -242,6 +253,41 @@ export function EditOportunidadeDialog({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Colaboradores
+  const listColabFn = useServerFn(listOportunidadeColaboradores);
+  const convidarColabFn = useServerFn(convidarColaborador);
+  const revogarColabFn = useServerFn(revogarColaborador);
+  const listSalesFn = useServerFn(listSalesUsers);
+  const colabQ = useQuery({
+    queryKey: ["op-colaboradores", opp?.id],
+    queryFn: () => listColabFn({ data: { oportunidade_id: opp!.id } }),
+    enabled: !!opp?.id,
+  });
+  const salesUsersQ = useQuery({
+    queryKey: ["sales-users-comercial"],
+    queryFn: () => listSalesFn(),
+    enabled: tab === "colaboradores",
+  });
+  const colabAtivos = (colabQ.data ?? []).filter((c) => !c.revogado_em);
+  const convidarColabMut = useMutation({
+    mutationFn: (user_id: string) =>
+      convidarColabFn({ data: { oportunidade_id: opp!.id, user_id } }),
+    onSuccess: () => {
+      setNovoColabId("");
+      qc.invalidateQueries({ queryKey: ["op-colaboradores", opp?.id] });
+      toast.success("Colaborador convidado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const revogarColabMut = useMutation({
+    mutationFn: (id: string) => revogarColabFn({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["op-colaboradores", opp?.id] });
+      toast.success("Colaborador removido");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   // Anexos
   const listAnexosFn = useServerFn(listOportunidadeAnexos);
   const upAnexoFn = useServerFn(uploadOportunidadeAnexo);
@@ -292,11 +338,13 @@ export function EditOportunidadeDialog({
     setObs(opp.observacoes ?? "");
     setLostMode(false);
     setLostReason("");
-    setTab("dados");
+    setTab(initialTab);
     setNovaNota("");
+    setNovoColabId("");
     setPais("BR");
     setDocumento("");
     setWizardOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opp]);
 
   const initialDraft = useMemo(
@@ -619,6 +667,12 @@ export function EditOportunidadeDialog({
                   {notasQ.data?.length ?? 0}
                 </span>
               </TabsTrigger>
+              <TabsTrigger value="colaboradores" className="gap-1.5">
+                <UserPlus className="h-3.5 w-3.5" /> Colaboradores
+                <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
+                  {colabAtivos.length}
+                </span>
+              </TabsTrigger>
               <TabsTrigger value="anexos" className="gap-1.5">
                 <Paperclip className="h-3.5 w-3.5" /> Anexos
                 <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
@@ -939,6 +993,72 @@ export function EditOportunidadeDialog({
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="colaboradores" className="mt-3 space-y-3">
+              <p className="text-[12px] text-muted-foreground">
+                Convide outro pilar pra ver e comentar esta oportunidade. Só o dono ou admin/manager
+                pode convidar e remover.
+              </p>
+              <div className="flex items-center gap-2">
+                <Select value={novoColabId} onValueChange={setNovoColabId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Selecione um pilar…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(salesUsersQ.data ?? [])
+                      .filter((u) => !colabAtivos.some((c) => c.user_id === u.id))
+                      .map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.nome} — {u.email}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  disabled={!novoColabId || convidarColabMut.isPending}
+                  onClick={() => convidarColabMut.mutate(novoColabId)}
+                >
+                  {convidarColabMut.isPending && (
+                    <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                  )}
+                  Convidar
+                </Button>
+              </div>
+              <div className="space-y-2 max-h-[300px] overflow-auto pr-1">
+                {colabQ.isLoading && (
+                  <p className="text-center text-[12px] text-muted-foreground py-4">
+                    <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
+                  </p>
+                )}
+                {!colabQ.isLoading && colabAtivos.length === 0 && (
+                  <p className="text-center text-[12px] text-muted-foreground py-6">
+                    Nenhum colaborador convidado.
+                  </p>
+                )}
+                {colabAtivos.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between rounded-lg border bg-card p-3 text-[13px]"
+                  >
+                    <div>
+                      <div className="font-medium">{c.user_nome ?? "—"}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {c.user_email} • convidado em {formatDateTime(c.convidado_em)}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={revogarColabMut.isPending}
+                      onClick={() => revogarColabMut.mutate(c.id)}
+                    >
+                      <XCircle className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
                   </div>
                 ))}
               </div>

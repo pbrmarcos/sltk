@@ -73,6 +73,7 @@ export type OportunidadeLite = {
   lost_count: number;
   processo_id: string | null;
   created_at: string;
+  notas_count: number;
 };
 
 const stageSchema = z.enum(PIPELINE_STAGES);
@@ -108,7 +109,8 @@ export const listPipeline = createServerFn({ method: "POST" })
       ),
     );
 
-    const [{ data: clientes }, { data: profiles }] = await Promise.all([
+    const oppIds = rows.map((r) => r.id);
+    const [{ data: clientes }, { data: profiles }, { data: notas }] = await Promise.all([
       clienteIds.length > 0
         ? context.supabase
             .from("clientes")
@@ -126,12 +128,21 @@ export const listPipeline = createServerFn({ method: "POST" })
         : Promise.resolve({
             data: [] as Array<{ id: string; full_name: string | null; email: string | null }>,
           }),
+      (context.supabase as any)
+        .from("oportunidade_notas")
+        .select("oportunidade_id")
+        .in("oportunidade_id", oppIds)
+        .is("deleted_at", null),
     ]);
 
     const cliMap = new Map(
       (clientes ?? []).map((c) => [c.id, c.nome_fantasia || c.razao_social || ""]),
     );
     const proMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name || p.email || ""]));
+    const notasCountMap = new Map<string, number>();
+    for (const n of (notas ?? []) as Array<{ oportunidade_id: string }>) {
+      notasCountMap.set(n.oportunidade_id, (notasCountMap.get(n.oportunidade_id) ?? 0) + 1);
+    }
 
     return rows.map((r) => {
       const row = r as typeof r & {
@@ -176,6 +187,7 @@ export const listPipeline = createServerFn({ method: "POST" })
         email: r.email ?? null,
         telefone: r.telefone ?? null,
         observacoes: r.observacoes ?? null,
+        notas_count: notasCountMap.get(r.id) ?? 0,
       };
     });
   });

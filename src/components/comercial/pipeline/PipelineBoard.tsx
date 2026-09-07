@@ -22,7 +22,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Archive, Trophy, FileText, Plus } from "lucide-react";
+import { Archive, Trophy, FileText, Plus, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { pipelineQueryOptions, useUpdateStage } from "@/lib/oportunidades.queries";
 import {
@@ -83,7 +83,7 @@ function OportunidadeCard({
 }: {
   opp: OportunidadeLite;
   onWin: (o: OportunidadeLite) => void;
-  onOpen: (o: OportunidadeLite) => void;
+  onOpen: (o: OportunidadeLite, tab?: "dados" | "notas") => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: opp.id });
   const age = ageDays(opp.stage_entered_at);
@@ -122,7 +122,23 @@ function OportunidadeCard({
       </div>
       <div className="flex items-center justify-between text-[11px]">
         <span className="truncate text-muted-foreground">{opp.responsavel_nome}</span>
-        <span className={ageTone}>{age}d</span>
+        <div className="flex items-center gap-2 shrink-0">
+          {opp.notas_count > 0 && (
+            <button
+              type="button"
+              title="Ver anotações"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen(opp, "notas");
+              }}
+              className="inline-flex items-center gap-0.5 text-muted-foreground hover:text-foreground"
+            >
+              <MessageSquare className="h-3 w-3" /> {opp.notas_count}
+            </button>
+          )}
+          <span className={ageTone}>{age}d</span>
+        </div>
       </div>
       {opp.pipeline_stage !== "ganho" && opp.pipeline_stage !== "perdido" && (
         <Button
@@ -181,7 +197,7 @@ function StageColumn({
   items: OportunidadeLite[];
   totalValor: number;
   onWin: (o: OportunidadeLite) => void;
-  onOpen: (o: OportunidadeLite) => void;
+  onOpen: (o: OportunidadeLite, tab?: "dados" | "notas") => void;
   onNew: () => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
@@ -240,6 +256,7 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
   const [lostReason, setLostReason] = useState("");
   const [winDialog, setWinDialog] = useState<OportunidadeLite | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTab, setEditingTab] = useState<"dados" | "notas">("dados");
   const [newOpen, setNewOpen] = useState(false);
 
   useEffect(() => {
@@ -384,7 +401,13 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
 
       <div className="flex-1 min-h-0">
         {scope === "perdidas" ? (
-          <LostOportunidadesList items={lostItems} onOpen={(o) => setEditingId(o.id)} />
+          <LostOportunidadesList
+            items={lostItems}
+            onOpen={(o) => {
+              setEditingTab("dados");
+              setEditingId(o.id);
+            }}
+          />
         ) : view === "kanban" ? (
           <DndContext sensors={sensors} onDragEnd={onDragEnd}>
             <div className="flex h-full gap-3 overflow-x-auto pb-4 snap-x snap-mandatory sm:grid sm:grid-cols-5 sm:overflow-visible sm:snap-none w-full">
@@ -398,7 +421,10 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
                       items={items}
                       totalValor={total}
                       onWin={(o) => setWinDialog(o)}
-                      onOpen={(o) => setEditingId(o.id)}
+                      onOpen={(o, tab) => {
+                        setEditingTab(tab ?? "dados");
+                        setEditingId(o.id);
+                      }}
                       onNew={() => setNewOpen(true)}
                     />
                   </div>
@@ -407,7 +433,13 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
             </div>
           </DndContext>
         ) : (
-          <PipelineTable items={activeItems} onRowClick={(o) => setEditingId(o.id)} />
+          <PipelineTable
+            items={activeItems}
+            onRowClick={(o) => {
+              setEditingTab("dados");
+              setEditingId(o.id);
+            }}
+          />
         )}
       </div>
 
@@ -462,6 +494,7 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
 
       <EditOportunidadeDialog
         opp={editing}
+        initialTab={editingTab}
         onOpenChange={(o) => {
           if (!o) setEditingId(null);
         }}
