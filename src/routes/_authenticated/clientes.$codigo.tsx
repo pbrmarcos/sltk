@@ -1107,6 +1107,7 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
   const [openNew, setOpenNew] = useState(false);
   const [openWizard, setOpenWizard] = useState(false);
   const [selected, setSelected] = useState<EquipamentoRow | null>(null);
+  const [removerAlvo, setRemoverAlvo] = useState<{ id: string; codigo: string } | null>(null);
 
   const createMut = useMutation({
     mutationFn: (input: NovoEquipamentoInput) => createEquipamento({ data: input }),
@@ -1125,6 +1126,7 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
       qc.invalidateQueries({ queryKey: ["clientes", clienteId, "equipamentos"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao remover."),
+    onSettled: () => setRemoverAlvo(null),
   });
 
   if (isLoading) return <div className="text-[12px] text-muted-foreground">Carregando…</div>;
@@ -1374,8 +1376,7 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
                             <button
                               onClick={(ev) => {
                                 ev.stopPropagation();
-                                if (confirm(`Remover equipamento ${e.codigo}?`))
-                                  deleteMut.mutate(e.id);
+                                setRemoverAlvo({ id: e.id, codigo: e.codigo });
                               }}
                               className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-rose-700"
                               title="Remover"
@@ -1412,6 +1413,29 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
         onClose={() => setOpenWizard(false)}
         clienteId={clienteId}
       />
+
+      <AlertDialog
+        open={!!removerAlvo}
+        onOpenChange={(o) => !deleteMut.isPending && !o && setRemoverAlvo(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover equipamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removerAlvo ? `Equipamento ${removerAlvo.codigo} será removido.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMut.isPending}
+              onClick={() => removerAlvo && deleteMut.mutate(removerAlvo.id)}
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

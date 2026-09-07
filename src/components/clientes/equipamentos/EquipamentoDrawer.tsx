@@ -8,6 +8,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -430,6 +440,7 @@ function DocsArea({ area, equipamentoId }: { area: Area; equipamentoId: string }
   const qc = useQueryClient();
   const { data, isLoading } = useQuery(equipamentoDocumentosQueryOptions(equipamentoId));
   const [openUpload, setOpenUpload] = useState(false);
+  const [removerAlvo, setRemoverAlvo] = useState<{ id: string; nome: string } | null>(null);
 
   const areaCategorias = useMemo(
     () => EQUIPAMENTO_DOC_CATEGORIAS.filter((c) => EQUIPAMENTO_DOC_AREA[c] === area),
@@ -447,6 +458,7 @@ function DocsArea({ area, equipamentoId }: { area: Area; equipamentoId: string }
       qc.invalidateQueries({ queryKey: ["equipamentos", equipamentoId, "documentos"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao remover."),
+    onSettled: () => setRemoverAlvo(null),
   });
 
   return (
@@ -503,9 +515,7 @@ function DocsArea({ area, equipamentoId }: { area: Area; equipamentoId: string }
                 </a>
               )}
               <button
-                onClick={() => {
-                  if (confirm(`Remover ${d.nome_final}?`)) removeMut.mutate(d.id);
-                }}
+                onClick={() => setRemoverAlvo({ id: d.id, nome: d.nome_final })}
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-rose-700"
                 title="Remover"
               >
@@ -526,6 +536,29 @@ function DocsArea({ area, equipamentoId }: { area: Area; equipamentoId: string }
           setOpenUpload(false);
         }}
       />
+
+      <AlertDialog
+        open={!!removerAlvo}
+        onOpenChange={(o) => !removeMut.isPending && !o && setRemoverAlvo(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover documento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removerAlvo ? `"${removerAlvo.nome}" será removido.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={removeMut.isPending}
+              onClick={() => removerAlvo && removeMut.mutate(removerAlvo.id)}
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
