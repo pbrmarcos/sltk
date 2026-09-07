@@ -1,4 +1,4 @@
-import { Factory, ClipboardCheck, AlertTriangle } from "lucide-react";
+import { Factory, ClipboardCheck } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { GaugeCard } from "./GaugeCard";
 import { DashboardCard } from "./DashboardCard";
@@ -18,9 +18,8 @@ export function ProductionDashboard({ userName }: { userName: string }) {
       roleLabel="Automação · Produção"
       subtitle="Montagens em execução, aderência de prazo e não conformidades."
       actions={[
-        { label: "Kanban montagem", to: "/producao/montagem", icon: Factory },
+        { label: "Montagem", to: "/producao/montagem", icon: Factory },
         { label: "FAT", to: "/qualidade/fat", icon: ClipboardCheck },
-        { label: "NCs", to: "/qualidade/rnc", icon: AlertTriangle },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

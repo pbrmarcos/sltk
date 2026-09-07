@@ -133,7 +133,9 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .limit(500),
     sb
       .from("equipamento_montagens")
-      .select("id, status, progresso, fim_previsto, fim_real, updated_at, cliente_id")
+      .select(
+        "id, status, progresso, fim_previsto, fim_real, updated_at, cliente_id, equipamento_id, cliente_equipamentos(codigo, modelo)",
+      )
       .is("deleted_at", null)
       .limit(500),
     sb.from("fat_rnc").select("id, codigo, titulo, status, prazo").limit(500),
@@ -294,9 +296,12 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .slice(0, 6)
       .map((m: any) => {
         const atrasada = m.fim_previsto && new Date(m.fim_previsto).getTime() < now;
+        const eqp = m.cliente_equipamentos as { codigo?: string; modelo?: string } | null;
         return {
           id: m.id,
-          titulo: `Montagem ${m.id.slice(0, 8)}`,
+          titulo: eqp?.modelo
+            ? `${eqp.modelo} (${eqp.codigo ?? "—"})`
+            : `Montagem ${m.id.slice(0, 8)}`,
           meta: `Previsão ${fmtDate(m.fim_previsto)} · ${m.progresso ?? 0}%`,
           status: atrasada ? "ATRASADO" : m.status === "bloqueada" ? "BLOQUEADO" : "NO PRAZO",
           tone: (atrasada
@@ -309,22 +314,28 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   };
 
   // ---------- Montagem ----------
-  const etapasAbertas = rowsEtapas.filter((e: any) => !etapaConcluida(e.status));
-  const etapasConcluidas7d = rowsEtapas.filter(
+  // Etapas do próprio papel assembly — filtradas por disciplina "producao",
+  // diferente do KPI "Etapas abertas" do papel engineer (que cobre todas as
+  // disciplinas de propósito). Antes reusava o mesmo array não filtrado do
+  // engineer, mostrando o mesmo número sob um rótulo diferente, sem relação
+  // com o trabalho real de produção.
+  const rowsEtapasProducao = rowsEtapas.filter((e: any) => e.disciplina === "producao");
+  const etapasAbertas = rowsEtapasProducao.filter((e: any) => !etapaConcluida(e.status));
+  const etapasConcluidas7d = rowsEtapasProducao.filter(
     (e: any) => etapaConcluida(e.status) && e.updated_at && e.updated_at >= ago7d,
   );
   const assembly: AssemblyData = {
     kpis: {
       etapasAbertas: etapasAbertas.length,
-      emAndamento: rowsEtapas.filter(
+      emAndamento: rowsEtapasProducao.filter(
         (e: any) => e.status === "em_andamento" || e.status === "em_progresso",
       ).length,
       concluidas7d: etapasConcluidas7d.length,
-      atrasadas: rowsEtapas.filter(etapaAtrasada).length,
+      atrasadas: rowsEtapasProducao.filter(etapaAtrasada).length,
     },
     progresso: {
-      atual: rowsEtapas.filter(etapaConcluidaRow).length,
-      alvo: rowsEtapas.length,
+      atual: rowsEtapasProducao.filter(etapaConcluidaRow).length,
+      alvo: rowsEtapasProducao.length,
     },
     fila: etapasAbertas.slice(0, 6).map((e: any) => ({
       id: e.id,
