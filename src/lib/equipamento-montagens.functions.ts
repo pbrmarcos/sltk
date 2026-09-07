@@ -16,6 +16,31 @@ const listAllInput = z.object({
   per_page: z.number().int().min(1).max(100).optional().default(50),
 });
 
+/**
+ * Contagem por status, sem filtro de página/busca/status — alimenta os
+ * KPIs do topo da tela, que antes eram calculados em cima de `data.rows`
+ * (já paginado e filtrado), dando números errados assim que o usuário
+ * filtrava ou paginava.
+ */
+export const getMontagensKpis = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const counts = await Promise.all(
+      MONTAGEM_STATUS.map((s) =>
+        context.supabase
+          .from("equipamento_montagens")
+          .select("id", { count: "exact", head: true })
+          .is("deleted_at", null)
+          .eq("status", s),
+      ),
+    );
+    const kpis: Record<(typeof MONTAGEM_STATUS)[number], number> = {} as never;
+    MONTAGEM_STATUS.forEach((s, i) => {
+      kpis[s] = counts[i].count ?? 0;
+    });
+    return kpis;
+  });
+
 export const listAllMontagens = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => listAllInput.parse(input))

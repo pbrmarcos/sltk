@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { allMontagensQueryOptions } from "@/lib/engenharia.queries";
-import { createMontagem, updateMontagem } from "@/lib/equipamento-montagens.functions";
+import {
+  createMontagem,
+  updateMontagem,
+  getMontagensKpis,
+} from "@/lib/equipamento-montagens.functions";
 import {
   MONTAGEM_STATUS,
   MONTAGEM_STATUS_COLOR,
@@ -34,13 +38,16 @@ export function MontagemListPage() {
 
   const { data, isLoading } = useQuery(allMontagensQueryOptions({ q, status, page }));
 
-  const kpis = (data?.rows ?? []).reduce(
-    (acc: Record<MontagemStatus, number>, r: any) => {
-      acc[r.status as MontagemStatus] = (acc[r.status as MontagemStatus] ?? 0) + 1;
-      return acc;
-    },
-    { nao_iniciada: 0, em_andamento: 0, concluida: 0, bloqueada: 0 },
-  );
+  const { data: kpisData } = useQuery({
+    queryKey: ["producao", "montagens", "kpis"],
+    queryFn: () => getMontagensKpis(),
+  });
+  const kpis: Record<MontagemStatus, number> = kpisData ?? {
+    nao_iniciada: 0,
+    em_andamento: 0,
+    concluida: 0,
+    bloqueada: 0,
+  };
 
   const concluirMut = useMutation({
     mutationFn: (id: string) =>
