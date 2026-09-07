@@ -123,6 +123,7 @@ import { Route as AuthenticatedComprasAlmoxarifadoIdRouteImport } from './routes
 import { Route as AuthenticatedComercialOrcamentoNovoRouteImport } from './routes/_authenticated/comercial.orcamento.novo'
 import { Route as AuthenticatedComercialOrcamentoIdRouteImport } from './routes/_authenticated/comercial.orcamento.$id'
 import { Route as AuthenticatedComercialEntrevistasIdRouteImport } from './routes/_authenticated/comercial.entrevistas.$id'
+import { Route as AuthenticatedClientesCodigoEditarRouteImport } from './routes/_authenticated/clientes.$codigo.editar'
 import { Route as AuthenticatedAjudaDocumentacaoCategoriaRouteImport } from './routes/_authenticated/ajuda.documentacao.$categoria'
 import { Route as AuthenticatedAdminEtapasEquipamentosIdRouteImport } from './routes/_authenticated/admin.etapas-equipamentos.$id'
 import { Route as AuthenticatedAdminEntrevistasSegmentoIdRouteImport } from './routes/_authenticated/admin.entrevistas.$segmentoId'
@@ -781,6 +782,12 @@ const AuthenticatedComercialEntrevistasIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedComercialEntrevistasRoute,
   } as any)
+const AuthenticatedClientesCodigoEditarRoute =
+  AuthenticatedClientesCodigoEditarRouteImport.update({
+    id: '/editar',
+    path: '/editar',
+    getParentRoute: () => AuthenticatedClientesCodigoRoute,
+  } as any)
 const AuthenticatedAjudaDocumentacaoCategoriaRoute =
   AuthenticatedAjudaDocumentacaoCategoriaRouteImport.update({
     id: '/$categoria',
@@ -875,7 +882,7 @@ export interface FileRoutesByFullPath {
   '/ajuda/auditoria': typeof AuthenticatedAjudaAuditoriaRoute
   '/ajuda/documentacao': typeof AuthenticatedAjudaDocumentacaoRouteWithChildren
   '/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
-  '/clientes/$codigo': typeof AuthenticatedClientesCodigoRoute
+  '/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
@@ -907,6 +914,7 @@ export interface FileRoutesByFullPath {
   '/admin/entrevistas/$segmentoId': typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
   '/admin/etapas-equipamentos/$id': typeof AuthenticatedAdminEtapasEquipamentosIdRoute
   '/ajuda/documentacao/$categoria': typeof AuthenticatedAjudaDocumentacaoCategoriaRouteWithChildren
+  '/clientes/$codigo/editar': typeof AuthenticatedClientesCodigoEditarRoute
   '/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRoute
   '/comercial/orcamento/$id': typeof AuthenticatedComercialOrcamentoIdRouteWithChildren
   '/comercial/orcamento/novo': typeof AuthenticatedComercialOrcamentoNovoRoute
@@ -994,7 +1002,7 @@ export interface FileRoutesByTo {
   '/ajuda/atualizacoes': typeof AuthenticatedAjudaAtualizacoesRoute
   '/ajuda/auditoria': typeof AuthenticatedAjudaAuditoriaRoute
   '/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
-  '/clientes/$codigo': typeof AuthenticatedClientesCodigoRoute
+  '/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
@@ -1024,6 +1032,7 @@ export interface FileRoutesByTo {
   '/pos-vendas': typeof AuthenticatedPosVendasIndexRoute
   '/admin/entrevistas/$segmentoId': typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
   '/admin/etapas-equipamentos/$id': typeof AuthenticatedAdminEtapasEquipamentosIdRoute
+  '/clientes/$codigo/editar': typeof AuthenticatedClientesCodigoEditarRoute
   '/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRoute
   '/comercial/orcamento/$id': typeof AuthenticatedComercialOrcamentoIdRouteWithChildren
   '/comercial/orcamento/novo': typeof AuthenticatedComercialOrcamentoNovoRoute
@@ -1116,7 +1125,7 @@ export interface FileRoutesById {
   '/_authenticated/ajuda/auditoria': typeof AuthenticatedAjudaAuditoriaRoute
   '/_authenticated/ajuda/documentacao': typeof AuthenticatedAjudaDocumentacaoRouteWithChildren
   '/_authenticated/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
-  '/_authenticated/clientes/$codigo': typeof AuthenticatedClientesCodigoRoute
+  '/_authenticated/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/_authenticated/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/_authenticated/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
@@ -1148,6 +1157,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/entrevistas/$segmentoId': typeof AuthenticatedAdminEntrevistasSegmentoIdRoute
   '/_authenticated/admin/etapas-equipamentos/$id': typeof AuthenticatedAdminEtapasEquipamentosIdRoute
   '/_authenticated/ajuda/documentacao/$categoria': typeof AuthenticatedAjudaDocumentacaoCategoriaRouteWithChildren
+  '/_authenticated/clientes/$codigo/editar': typeof AuthenticatedClientesCodigoEditarRoute
   '/_authenticated/comercial/entrevistas/$id': typeof AuthenticatedComercialEntrevistasIdRoute
   '/_authenticated/comercial/orcamento/$id': typeof AuthenticatedComercialOrcamentoIdRouteWithChildren
   '/_authenticated/comercial/orcamento/novo': typeof AuthenticatedComercialOrcamentoNovoRoute
@@ -1272,6 +1282,7 @@ export interface FileRouteTypes {
     | '/admin/entrevistas/$segmentoId'
     | '/admin/etapas-equipamentos/$id'
     | '/ajuda/documentacao/$categoria'
+    | '/clientes/$codigo/editar'
     | '/comercial/entrevistas/$id'
     | '/comercial/orcamento/$id'
     | '/comercial/orcamento/novo'
@@ -1389,6 +1400,7 @@ export interface FileRouteTypes {
     | '/pos-vendas'
     | '/admin/entrevistas/$segmentoId'
     | '/admin/etapas-equipamentos/$id'
+    | '/clientes/$codigo/editar'
     | '/comercial/entrevistas/$id'
     | '/comercial/orcamento/$id'
     | '/comercial/orcamento/novo'
@@ -1512,6 +1524,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/entrevistas/$segmentoId'
     | '/_authenticated/admin/etapas-equipamentos/$id'
     | '/_authenticated/ajuda/documentacao/$categoria'
+    | '/_authenticated/clientes/$codigo/editar'
     | '/_authenticated/comercial/entrevistas/$id'
     | '/_authenticated/comercial/orcamento/$id'
     | '/_authenticated/comercial/orcamento/novo'
@@ -2384,6 +2397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComercialEntrevistasIdRouteImport
       parentRoute: typeof AuthenticatedComercialEntrevistasRoute
     }
+    '/_authenticated/clientes/$codigo/editar': {
+      id: '/_authenticated/clientes/$codigo/editar'
+      path: '/editar'
+      fullPath: '/clientes/$codigo/editar'
+      preLoaderRoute: typeof AuthenticatedClientesCodigoEditarRouteImport
+      parentRoute: typeof AuthenticatedClientesCodigoRoute
+    }
     '/_authenticated/ajuda/documentacao/$categoria': {
       id: '/_authenticated/ajuda/documentacao/$categoria'
       path: '/$categoria'
@@ -2578,6 +2598,21 @@ const AuthenticatedAjudaDocumentacaoRouteWithChildren =
     AuthenticatedAjudaDocumentacaoRouteChildren,
   )
 
+interface AuthenticatedClientesCodigoRouteChildren {
+  AuthenticatedClientesCodigoEditarRoute: typeof AuthenticatedClientesCodigoEditarRoute
+}
+
+const AuthenticatedClientesCodigoRouteChildren: AuthenticatedClientesCodigoRouteChildren =
+  {
+    AuthenticatedClientesCodigoEditarRoute:
+      AuthenticatedClientesCodigoEditarRoute,
+  }
+
+const AuthenticatedClientesCodigoRouteWithChildren =
+  AuthenticatedClientesCodigoRoute._addFileChildren(
+    AuthenticatedClientesCodigoRouteChildren,
+  )
+
 interface AuthenticatedComercialEntrevistasRouteChildren {
   AuthenticatedComercialEntrevistasIdRoute: typeof AuthenticatedComercialEntrevistasIdRoute
 }
@@ -2654,7 +2689,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjudaAuditoriaRoute: typeof AuthenticatedAjudaAuditoriaRoute
   AuthenticatedAjudaDocumentacaoRoute: typeof AuthenticatedAjudaDocumentacaoRouteWithChildren
   AuthenticatedAjudaFaqRoute: typeof AuthenticatedAjudaFaqRoute
-  AuthenticatedClientesCodigoRoute: typeof AuthenticatedClientesCodigoRoute
+  AuthenticatedClientesCodigoRoute: typeof AuthenticatedClientesCodigoRouteWithChildren
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
   AuthenticatedComercialChecklistsRoute: typeof AuthenticatedComercialChecklistsRoute
   AuthenticatedComercialEntrevistasRoute: typeof AuthenticatedComercialEntrevistasRouteWithChildren
@@ -2715,7 +2750,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAjudaDocumentacaoRoute:
     AuthenticatedAjudaDocumentacaoRouteWithChildren,
   AuthenticatedAjudaFaqRoute: AuthenticatedAjudaFaqRoute,
-  AuthenticatedClientesCodigoRoute: AuthenticatedClientesCodigoRoute,
+  AuthenticatedClientesCodigoRoute:
+    AuthenticatedClientesCodigoRouteWithChildren,
   AuthenticatedClientesNovoRoute: AuthenticatedClientesNovoRoute,
   AuthenticatedComercialChecklistsRoute: AuthenticatedComercialChecklistsRoute,
   AuthenticatedComercialEntrevistasRoute:

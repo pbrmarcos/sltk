@@ -62,7 +62,7 @@ import {
   type EquipamentoStatus,
   type EquipamentoFase,
 } from "@/lib/equipamentos.shared";
-import { addClienteInteracao, geocodeCliente } from "@/lib/clientes.functions";
+import { addClienteInteracao, geocodeCliente, deleteCliente } from "@/lib/clientes.functions";
 import { addClienteSocio, removerClienteSocio } from "@/lib/clientes.functions";
 import {
   uploadClienteDocumento,
@@ -128,7 +128,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   Cog,
+  Pencil,
+  Archive,
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 const TABS = [
   { id: "gestao", label: "Gestão" },
@@ -240,9 +243,13 @@ function ClientePage() {
   const { tab, sec } = Route.useSearch();
   const [showDetalhes, setShowDetalhes] = useState(false);
   const [novaOppOpen, setNovaOppOpen] = useState(false);
+  const [arquivarOpen, setArquivarOpen] = useState(false);
   const { canSee: canSeeSensivel } = useSensitiveAccess();
+  const auth = useAuth();
+  const canArquivar = auth.role === "admin" || auth.role === "manager";
 
   const navigate = useNavigate({ from: Route.fullPath });
+  const qcPage = useQueryClient();
   const { data } = useSuspenseQuery(clienteByCodigoQueryOptions(codigo));
   const paises = useSuspenseQuery(paisesQueryOptions());
   const cliente = data.cliente;
@@ -258,6 +265,17 @@ function ClientePage() {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
+  const arquivarMut = useMutation({
+    mutationFn: () => deleteCliente({ data: { id: cliente.id } }),
+    onSuccess: () => {
+      toast.success("Cliente arquivado.");
+      qcPage.invalidateQueries({ queryKey: ["clientes"] });
+      navigate({ to: "/clientes" });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao arquivar."),
+    onSettled: () => setArquivarOpen(false),
+  });
 
   const setTab = (next: TabId) =>
     navigate({
@@ -302,6 +320,21 @@ function ClientePage() {
             <Button variant="outline" size="sm" onClick={() => setNovaOppOpen(true)}>
               <Plus className="h-3.5 w-3.5" /> Nova oportunidade
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/clientes/$codigo/editar" params={{ codigo: cliente.codigo }}>
+                <Pencil className="h-3.5 w-3.5" /> Editar
+              </Link>
+            </Button>
+            {canArquivar && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-rose-700 hover:bg-rose-50"
+                onClick={() => setArquivarOpen(true)}
+              >
+                <Archive className="h-3.5 w-3.5" /> Arquivar
+              </Button>
+            )}
             <NewOportunidadeDialog
               open={novaOppOpen}
               onOpenChange={setNovaOppOpen}
@@ -526,11 +559,35 @@ function ClientePage() {
           {tab === "time" && (
             <div className="space-y-6">
               <ClienteTimeComercialTab clienteId={cliente.id} />
-              <ContatosTab contatos={contatos} editHref={`/clientes/${cliente.codigo}`} />
+              <ContatosTab contatos={contatos} editHref={`/clientes/${cliente.codigo}/editar`} />
             </div>
           )}
         </div>
       </main>
+
+      <AlertDialog
+        open={arquivarOpen}
+        onOpenChange={(o) => !arquivarMut.isPending && setArquivarOpen(o)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Arquivar {cliente.razao_social}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O cliente deixa de aparecer nas listas e telas do sistema. Oportunidades e processos
+              vinculados continuam intactos, mas ficam sem cliente ativo associado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={arquivarMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={arquivarMut.isPending}
+              onClick={() => arquivarMut.mutate()}
+            >
+              Arquivar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -1636,7 +1693,7 @@ const CONTATO_FILTER_LABEL: Record<ContatoFilter, string> = {
   com_telefone: "Com telefone",
 };
 
-function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editHref: string }) {
+function ContatosTab({ contatos, editHref }: { contatos: any[]; editHref: string }) {
   const [filter, setFilter] = useState<ContatoFilter>("todos");
   const [query, setQuery] = useState("");
 
@@ -1647,6 +1704,13 @@ function ContatosTab({ contatos, editHref: _editHref }: { contatos: any[]; editH
           icon={Users}
           title="Sem contatos"
           hint="Adicione contatos editando o cadastro do cliente."
+          action={
+            <Button asChild size="sm" variant="outline" className="mt-1">
+              <Link to={editHref}>
+                <Pencil className="h-3.5 w-3.5" /> Editar cadastro
+              </Link>
+            </Button>
+          }
         />
       </SectionCard>
     );

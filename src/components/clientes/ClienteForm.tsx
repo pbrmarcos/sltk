@@ -51,7 +51,7 @@ import {
   REGIMES_TRIBUTARIOS,
   MATRIZ_FILIAL,
 } from "@/lib/clientes.shared";
-import { createCliente } from "@/lib/clientes.functions";
+import { createCliente, updateCliente } from "@/lib/clientes.functions";
 import { cn } from "@/lib/utils";
 import { focusFirstError } from "@/lib/form-errors";
 import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
@@ -125,9 +125,13 @@ export type ClienteFormProps = {
   /** `page` = tela cheia (/clientes/novo). `modal` = versão mínima dentro de um diálogo. */
   variant?: "page" | "modal";
   initialValues?: Partial<ClienteInput>;
-  /** Quando informado, o formulário não navega após salvar — devolve o cliente criado. */
+  /** Quando informado, o formulário não navega após salvar — devolve o cliente criado/atualizado. */
   onCreated?: (cliente: { id: string; codigo: string }, values: ClienteInput) => void;
   onCancel?: () => void;
+  /** `edit` exige `clienteId` (e idealmente `clienteCodigo`, pra navegação/mensagens). */
+  mode?: "create" | "edit";
+  clienteId?: string;
+  clienteCodigo?: string;
 };
 
 export function ClienteForm({
@@ -135,8 +139,12 @@ export function ClienteForm({
   initialValues,
   onCreated,
   onCancel,
+  mode = "create",
+  clienteId,
+  clienteCodigo,
 }: ClienteFormProps = {}) {
   const isModal = variant === "modal";
+  const isEdit = mode === "edit";
   const statusLabel = useClienteStatusLabel();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -149,6 +157,7 @@ export function ClienteForm({
     staleTime: 60_000,
   });
   const create = useServerFn(createCliente);
+  const update = useServerFn(updateCliente);
   const enrich = useServerFn(enrichDocumento);
   const createSegmentoFn = useServerFn(createSegmento);
   const createOrigemFn = useServerFn(createLeadOrigem);
@@ -325,9 +334,16 @@ export function ClienteForm({
   }, [paisCodigo, documento, provedores.data]);
 
   const mutation = useMutation({
-    mutationFn: (input: ClienteInput) => create({ data: input }),
+    mutationFn: async (input: ClienteInput) => {
+      if (isEdit && clienteId) {
+        const { contatos, socios: _socios, ...patch } = input;
+        await update({ data: { id: clienteId, patch, contatos } });
+        return { id: clienteId, codigo: clienteCodigo ?? "" };
+      }
+      return create({ data: input });
+    },
     onSuccess: (res, vars) => {
-      toast.success(`Cliente ${res.codigo} criado.`);
+      toast.success(isEdit ? "Cliente atualizado." : `Cliente ${res.codigo} criado.`);
       if (onCreated) {
         // Fluxo em modal: quem chamou decide o que fazer (atualizar cache,
         // selecionar o cliente). Nada de navegação/refetch que remonte a tela.
@@ -335,6 +351,10 @@ export function ClienteForm({
         return;
       }
       qc.invalidateQueries({ queryKey: ["clientes"] });
+      if (isEdit) {
+        navigate({ to: "/clientes/$codigo", params: { codigo: res.codigo } });
+        return;
+      }
       if (closeAfter) navigate({ to: "/clientes" });
       else navigate({ to: "/clientes/$codigo", params: { codigo: res.codigo } });
     },
@@ -422,7 +442,11 @@ export function ClienteForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ to: "/clientes" })}
+            onClick={() =>
+              isEdit && clienteCodigo
+                ? navigate({ to: "/clientes/$codigo", params: { codigo: clienteCodigo } })
+                : navigate({ to: "/clientes" })
+            }
             disabled={mutation.isPending}
           >
             <X className="mr-1.5 h-4 w-4" /> Cancelar
