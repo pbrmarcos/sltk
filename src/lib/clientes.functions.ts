@@ -171,7 +171,7 @@ export const getClienteByCodigo = createServerFn({ method: "POST" })
 
 /* ===================== createCliente ===================== */
 
-async function loadPais(admin: SupabaseClient<Database>, codigo: string) {
+export async function loadPais(admin: SupabaseClient<Database>, codigo: string) {
   const { data, error } = await admin
     .from("paises_config")
     .select("codigo, documento_nome, documento_regex")
