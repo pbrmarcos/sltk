@@ -36,6 +36,8 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       fatRascunho,
       satRascunho,
       orcamentosRascunho,
+      montagensNaoIniciadas,
+      montagensBloqueadas,
     ] = await Promise.all([
       countHead(sb, "clientes", (q) => q.or("cnpj.is.null,cnpj.eq.")),
       countHead(sb, "fornecedores", (q) => q.or("cnpj.is.null,cnpj.eq.")),
@@ -58,6 +60,12 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       countHead(sb, "fat_relatorios", (q) => q.eq("status", "rascunho")),
       countHead(sb, "sat_relatorio", (q) => q.eq("status", "rascunho")),
       countHead(sb, "documentos", (q) => q.eq("tipo", "orcamento").eq("status", "rascunho")),
+      countHead(sb, "equipamento_montagens", (q) =>
+        q.eq("status", "nao_iniciada").is("deleted_at", null),
+      ),
+      countHead(sb, "equipamento_montagens", (q) =>
+        q.eq("status", "bloqueada").is("deleted_at", null),
+      ),
     ]);
 
     const chamadosTotal = chamadosAbertos;
@@ -71,6 +79,7 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       "/pos-vendas/chamados": chamadosTotal,
       "/pos-vendas/sat": satRascunho,
       "/qualidade/fat": fatRascunho,
+      "/producao/montagem": montagensNaoIniciadas + montagensBloqueadas,
     };
 
     type Detail = { label: string; count: number };
@@ -89,6 +98,10 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       ],
       "/pos-vendas/sat": [{ label: "SAT em rascunho", count: satRascunho }],
       "/qualidade/fat": [{ label: "FAT em rascunho", count: fatRascunho }],
+      "/producao/montagem": [
+        { label: "Não iniciadas", count: montagensNaoIniciadas },
+        { label: "Bloqueadas", count: montagensBloqueadas },
+      ],
     };
 
     return { map, details };
