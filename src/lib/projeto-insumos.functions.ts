@@ -331,6 +331,7 @@ export const restaurarInsumo = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), justificativa: z.string().min(3).max(500) }).parse(input),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
     const { error } = await sb
       .from("projeto_insumos")
@@ -771,6 +772,7 @@ export const atualizarEstoqueInsumo = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
     const { data: cur } = await sb
       .from("projeto_insumos")
@@ -814,6 +816,7 @@ export const enviarInsumosParaAprovacao = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
 
@@ -1004,6 +1007,7 @@ export const exportInsumosXlsx = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projeto_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const { default: ExcelJS } = await import("exceljs");
     const sb = context.supabase as unknown as SB;
 
@@ -1115,6 +1119,7 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
     const sb = context.supabase as unknown as SB;
 
     const { data: proj } = await sb
