@@ -459,7 +459,9 @@ export const setStatus = createServerFn({ method: "POST" })
         ? "embarque.despachado"
         : data.status === "entregue"
           ? "embarque.entregue"
-          : null;
+          : data.status === "cancelado"
+            ? "embarque.cancelado"
+            : null;
     if (eventKey && fromStatus !== data.status) {
       try {
         const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
@@ -471,6 +473,9 @@ export const setStatus = createServerFn({ method: "POST" })
         if (eventKey === "embarque.entregue") {
           vars.data = fmtDate(now);
           vars.recebedor = data.notas?.trim() || "";
+        }
+        if (eventKey === "embarque.cancelado") {
+          vars.motivo = data.notas?.trim() || "";
         }
         await safeDispatch({
           eventKey,

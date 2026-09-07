@@ -456,6 +456,18 @@ function EmbarqueDetalhe() {
                 <CheckCircle2 className="mr-1.5 h-4 w-4" /> Marcar entregue
               </Button>
             )}
+            {canEdit && s !== "entregue" && s !== "cancelado" && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-rose-600 hover:text-rose-700"
+                onClick={() =>
+                  setStatusDialog({ target: "cancelado", notas: "", files: [], uploading: false })
+                }
+              >
+                <X className="mr-1.5 h-4 w-4" /> Cancelar embarque
+              </Button>
+            )}
           </div>
         }
       />
