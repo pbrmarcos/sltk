@@ -1,26 +1,50 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { listProcessos } from "@/lib/processos.functions";
+import { listProcessos, getProcessoDetalhe } from "@/lib/processos.functions";
 import { createFat } from "@/lib/fat.functions";
 
+const searchSchema = z.object({
+  processo: z.string().uuid().optional(),
+});
+
 export const Route = createFileRoute("/_authenticated/qualidade/fat/novo")({
+  validateSearch: (s) => searchSchema.parse(s),
   component: NovoFatPage,
 });
 
+// Conexão mínima Montagem concluída -> FAT: só prefill de processo, sem
+// vínculo formal no banco entre equipamento_montagens e fat_relatorios.
 function NovoFatPage() {
   const nav = useNavigate();
+  const { processo: processoPrefill } = Route.useSearch();
   const fetchProc = useServerFn(listProcessos);
+  const fetchProcessoDetalhe = useServerFn(getProcessoDetalhe);
   const create = useServerFn(createFat);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!processoPrefill) return;
+    setSelected(processoPrefill);
+    fetchProcessoDetalhe({ data: { id: processoPrefill } })
+      .then((proc: any) => {
+        if (proc?.codigo) setQ(proc.codigo);
+      })
+      .catch(() => {
+        toast.error("Processo vinculado não encontrado.");
+        setSelected(null);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [processoPrefill]);
 
   const { data: processos = [], isLoading } = useQuery({
     queryKey: ["processos", "for-fat", q],

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -43,6 +43,7 @@ import { cn } from "@/lib/utils";
 
 export function MontagemListPage() {
   const qc = useQueryClient();
+  const nav = useNavigate();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"todos" | MontagemStatus>("todos");
   const [page, setPage] = useState(1);
@@ -274,6 +275,26 @@ export function MontagemListPage() {
                   {r.status === "bloqueada" && (
                     <Button size="sm" variant="outline" onClick={() => retomarMut.mutate(r.id)}>
                       Retomar
+                    </Button>
+                  )}
+                  {r.status === "concluida" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const processoId = (
+                          r.equipamento_projetos as
+                            | Array<{ processo_id?: string | null }>
+                            | undefined
+                        )?.find((p) => p.processo_id)?.processo_id;
+                        if (!processoId) {
+                          toast.error("Nenhum processo vinculado a este equipamento.");
+                          return;
+                        }
+                        nav({ to: "/qualidade/fat/novo", search: { processo: processoId } });
+                      }}
+                    >
+                      Abrir FAT
                     </Button>
                   )}
                 </div>
