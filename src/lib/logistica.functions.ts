@@ -4,6 +4,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { validarMotivo, patchParaStatusEmbarque } from "@/lib/logistica-status";
+import { logAuditServer } from "@/lib/audit.server";
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "";
@@ -267,6 +268,12 @@ export const createEmbarque = createServerFn({ method: "POST" })
     if (error) throw friendlyDbError(error);
     const embarque = row as { id: string; numero: string };
 
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "logistica_embarques",
+      record_id: embarque.id,
+      action: "INSERT",
+    });
+
     try {
       const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
       const ctx = await getEmbarqueEmailContext(context.supabase, embarque.id);
@@ -303,21 +310,51 @@ export const updateEmbarque = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => updateInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "logistica");
-    const patch: Record<string, unknown> = { updated_by: context.userId };
-    for (const k of [
+    const fields = [
       "transportadora_id",
       "previsao_saida",
       "nf_saida",
       "destino",
       "observacoes",
-    ] as const) {
+    ] as const;
+    const patch: Record<string, unknown> = { updated_by: context.userId };
+    for (const k of fields) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
+    const { data: before } = await (context.supabase as any)
+      .from("logistica_embarques")
+      .select(fields.join(","))
+      .eq("id", data.id)
+      .maybeSingle();
     const { error } = await (context.supabase as any)
       .from("logistica_embarques")
       .update(patch)
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+
+    const diff: Array<{
+      table_name: string;
+      record_id: string;
+      action: "UPDATE";
+      field_changed: string;
+      old_value: unknown;
+      new_value: unknown;
+    }> = [];
+    for (const k of fields) {
+      if (data[k] === undefined) continue;
+      const oldV = (before as Record<string, unknown> | null)?.[k];
+      if (JSON.stringify(oldV ?? null) === JSON.stringify(data[k] ?? null)) continue;
+      diff.push({
+        table_name: "logistica_embarques",
+        record_id: data.id,
+        action: "UPDATE",
+        field_changed: k,
+        old_value: oldV ?? null,
+        new_value: data[k] ?? null,
+      });
+    }
+    if (diff.length > 0) await logAuditServer(context.supabase as any, context.userId, diff);
+
     return { ok: true };
   });
 
@@ -371,6 +408,15 @@ export const setStatus = createServerFn({ method: "POST" })
           anexo_ids: data.anexo_ids ?? [],
         });
       if (logErr) throw friendlyDbError(logErr);
+
+      await logAuditServer(context.supabase as any, context.userId, {
+        table_name: "logistica_embarques",
+        record_id: data.id,
+        action: "UPDATE",
+        field_changed: "status",
+        old_value: fromStatus,
+        new_value: data.status,
+      });
     }
 
     const eventKey =
