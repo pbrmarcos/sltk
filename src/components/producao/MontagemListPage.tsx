@@ -117,6 +117,13 @@ export function MontagemListPage() {
     onError: (e: any) => toast.error(e?.message ?? "Falha ao retomar."),
   });
 
+  const progressoMut = useMutation({
+    mutationFn: ({ id, progresso }: { id: string; progresso: number }) =>
+      updateMontagem({ data: { id, progresso } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["producao", "montagens"] }),
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao atualizar progresso."),
+  });
+
   return (
     <PageContainer>
       <PageHeader
@@ -215,7 +222,23 @@ export function MontagemListPage() {
                   <div className="h-2 w-20 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
                     <div className="h-full bg-blue-500" style={{ width: `${r.progresso ?? 0}%` }} />
                   </div>
-                  <span className="text-xs tabular-nums">{r.progresso ?? 0}%</span>
+                  {r.status === "em_andamento" ? (
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      defaultValue={r.progresso ?? 0}
+                      onBlur={(e) => {
+                        const v = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+                        if (v !== (r.progresso ?? 0))
+                          progressoMut.mutate({ id: r.id, progresso: v });
+                      }}
+                      className="w-12 rounded border border-[var(--bg-border)] bg-transparent px-1 py-0.5 text-xs tabular-nums outline-none focus:border-primary"
+                      title="Progresso (%)"
+                    />
+                  ) : (
+                    <span className="text-xs tabular-nums">{r.progresso ?? 0}%</span>
+                  )}
                 </div>
                 <Badge
                   variant="outline"
