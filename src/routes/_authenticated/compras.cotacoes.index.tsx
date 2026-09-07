@@ -43,6 +43,22 @@ export const Route = createFileRoute("/_authenticated/compras/cotacoes/")({
   component: CotacoesListPage,
 });
 
+/** Rótulo do que precisa de atenção agora, além do status bruto — usa dados
+ * que já são buscados (convites/respondidos), sem query nova. */
+function situacaoCotacao(status: string, convites: number, respondidos: number) {
+  if (status === "aberta" || status === "respondida") {
+    if (convites === 0) return { label: "Sem fornecedor convidado", tone: "text-amber-700" };
+    if (respondidos === 0) return { label: "Aguardando fornecedor", tone: "text-amber-700" };
+    if (respondidos < convites)
+      return {
+        label: `Aguardando ${convites - respondidos} fornecedor(es)`,
+        tone: "text-amber-700",
+      };
+    return { label: "Pronta para decisão", tone: "text-emerald-700" };
+  }
+  return null;
+}
+
 function CotacoesListPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -196,36 +212,44 @@ function CotacoesListPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                rows.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
-                    <TableCell className="font-medium">{r.titulo}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={cn(COTACAO_STATUS_COLOR[r.status as CotacaoStatus])}
-                      >
-                        {COTACAO_STATUS_LABEL[r.status as CotacaoStatus]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {r.prazo_resposta
-                        ? new Date(r.prazo_resposta).toLocaleDateString("pt-BR")
-                        : "—"}
-                    </TableCell>
-                    <TableCell>{r.convites}</TableCell>
-                    <TableCell>
-                      {r.respondidos}/{r.convites}
-                    </TableCell>
-                    <TableCell>
-                      <Button asChild size="sm" variant="ghost">
-                        <Link to="/compras/cotacoes/$id" params={{ id: r.id }}>
-                          Abrir
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                rows.map((r) => {
+                  const situacao = situacaoCotacao(r.status, r.convites, r.respondidos);
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
+                      <TableCell className="font-medium">{r.titulo}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={cn(COTACAO_STATUS_COLOR[r.status as CotacaoStatus])}
+                        >
+                          {COTACAO_STATUS_LABEL[r.status as CotacaoStatus]}
+                        </Badge>
+                        {situacao && (
+                          <div className={cn("mt-1 text-[11px] font-medium", situacao.tone)}>
+                            {situacao.label}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {r.prazo_resposta
+                          ? new Date(r.prazo_resposta).toLocaleDateString("pt-BR")
+                          : "—"}
+                      </TableCell>
+                      <TableCell>{r.convites}</TableCell>
+                      <TableCell>
+                        {r.respondidos}/{r.convites}
+                      </TableCell>
+                      <TableCell>
+                        <Button asChild size="sm" variant="ghost">
+                          <Link to="/compras/cotacoes/$id" params={{ id: r.id }}>
+                            Abrir
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

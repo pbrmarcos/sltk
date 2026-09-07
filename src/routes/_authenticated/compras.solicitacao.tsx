@@ -29,6 +29,7 @@ import { AuditoriaSolicitacoesPanel } from "@/components/compras/AuditoriaSolici
 
 import type { InsumoRow } from "@/lib/projeto-insumos.functions";
 import { listInsumos, necessidadesPorCategoria } from "@/lib/projeto-insumos.functions";
+import { listAprovacoesPendentes } from "@/lib/insumo-aprovacoes.functions";
 import {
   INSUMO_CRITICIDADE,
   INSUMO_CRITICIDADE_COLOR,
@@ -93,6 +94,15 @@ function SolicitacoesPage() {
     queryFn: () => necessidadesPorCategoria(),
   });
 
+  const pendentesQ = useQuery({
+    queryKey: ["compras", "aprovacoes-pendentes"],
+    queryFn: () => listAprovacoesPendentes(),
+    retry: false,
+  });
+  // Só quem decide aprovação (engineer/manager/admin) tem acesso — pra
+  // qualquer outro papel a função nega, e a lista simplesmente não aparece.
+  const pendentes = pendentesQ.error ? [] : (pendentesQ.data ?? []);
+
   const rows = insumosQ.data?.rows ?? [];
   const total = insumosQ.data?.total ?? 0;
   const criticos = rows.filter(
@@ -126,6 +136,46 @@ function SolicitacoesPage() {
             />
             <KpiCard label="Categorias com demanda" value={catsQ.data?.length ?? 0} />
           </div>
+
+          {/* Aprovações pendentes — cruza todos os projetos, antes só dava pra
+              ver uma por vez dentro do dialog de cada insumo. */}
+          {pendentes.length > 0 && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-900">
+                <AlertTriangle className="h-4 w-4" />
+                {pendentes.length} aprovação(ões) de OC pendente(s)
+              </div>
+              <ul className="divide-y divide-amber-200">
+                {pendentes.map((p) => {
+                  const row = rows.find((r) => r.id === p.insumo_id);
+                  return (
+                    <li
+                      key={p.id}
+                      className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-medium">{p.insumo_descricao}</div>
+                        <div className="text-[11.5px] text-[var(--text-secondary)]">
+                          Solicitado por {p.solicitante_nome} em{" "}
+                          {new Date(p.created_at).toLocaleDateString("pt-BR")}
+                          {p.solicitacao_nota ? ` · ${p.solicitacao_nota}` : ""}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={!row}
+                        title={row ? undefined : "Ajuste os filtros pra localizar este insumo"}
+                        onClick={() => row && setSelected(row)}
+                        className="shrink-0 rounded-md border border-amber-300 bg-white px-2.5 py-1 text-xs font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+                      >
+                        Abrir e decidir
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
 
           {/* Categorias chips */}
           {catsQ.data && catsQ.data.length > 0 ? (
