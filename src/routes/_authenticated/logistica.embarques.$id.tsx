@@ -36,6 +36,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -212,10 +222,15 @@ function EmbarqueDetalhe() {
     },
     onError: (e: unknown) => toast.error((e as Error).message),
   });
+  const [removerItemAlvo, setRemoverItemAlvo] = useState<{
+    id: string;
+    descricao: string;
+  } | null>(null);
   const removeMut = useMutation({
     mutationFn: (itemId: string) => removeFn({ data: { id: itemId } }),
     onSuccess: () => {
       invalidate();
+      setRemoverItemAlvo(null);
       toast.success("Item removido.");
     },
     onError: (e: unknown) => toast.error((e as Error).message),
@@ -261,11 +276,13 @@ function EmbarqueDetalhe() {
     }
   }
 
+  const [removerAnexoAlvo, setRemoverAnexoAlvo] = useState<EmbarqueAnexo | null>(null);
   const removeAnexoMut = useMutation({
     mutationFn: (a: EmbarqueAnexo) =>
       removerAnexoFn({ data: { id: a.id, storage_path: a.storage_path } }),
     onSuccess: () => {
       invalidate();
+      setRemoverAnexoAlvo(null);
       toast.success("Anexo removido.");
     },
     onError: (e: unknown) => toast.error((e as Error).message),
@@ -493,7 +510,9 @@ function EmbarqueDetalhe() {
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7"
-                              onClick={() => removeMut.mutate(it.id)}
+                              onClick={() =>
+                                setRemoverItemAlvo({ id: it.id, descricao: it.descricao })
+                              }
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
@@ -702,7 +721,7 @@ function EmbarqueDetalhe() {
                   key={a.id}
                   anexo={a}
                   canEdit={canEdit}
-                  onRemove={() => removeAnexoMut.mutate(a)}
+                  onRemove={() => setRemoverAnexoAlvo(a)}
                 />
               ))}
               {anexos.length === 0 && (
@@ -889,6 +908,48 @@ function EmbarqueDetalhe() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!removerItemAlvo} onOpenChange={(o) => !o && setRemoverItemAlvo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover item do romaneio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removerItemAlvo ? `"${removerItemAlvo.descricao}" será removido.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removerItemAlvo && removeMut.mutate(removerItemAlvo.id)}
+              disabled={removeMut.isPending}
+            >
+              {removeMut.isPending ? "Removendo…" : "Remover"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!removerAnexoAlvo} onOpenChange={(o) => !o && setRemoverAnexoAlvo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover anexo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removerAnexoAlvo
+                ? `"${removerAnexoAlvo.nome_arquivo}" será removido, inclusive o arquivo no armazenamento.`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeAnexoMut.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removerAnexoAlvo && removeAnexoMut.mutate(removerAnexoAlvo)}
+              disabled={removeAnexoMut.isPending}
+            >
+              {removeAnexoMut.isPending ? "Removendo…" : "Remover"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
