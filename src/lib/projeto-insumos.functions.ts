@@ -1299,6 +1299,7 @@ export const liberarEquipamentoProducao = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
 
