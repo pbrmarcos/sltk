@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MOEDA_PADRAO, toMoedaISO, type MoedaISO } from "@/lib/moedas";
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { friendlyDbError } from "@/lib/db-errors";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
@@ -1644,12 +1646,18 @@ export async function generateFatDocumentInternal(args: {
   return { ok: true, documento_id: docId as string, codigo, versao, arquivos };
 }
 
+const generateFatDocumentInput = z.object({
+  fat_id: z.string().uuid(),
+  documento_id: z.string().uuid().optional(),
+  bump: z.enum(["minor", "patch"]).optional(),
+});
 export const generateFatDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { fat_id: string; documento_id?: string; bump?: "minor" | "patch" }) => d)
-  .handler(async ({ data, context }) =>
-    generateFatDocumentInternal({ ...data, actor_id: context.userId }),
-  );
+  .inputValidator((d: unknown) => generateFatDocumentInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
+    return generateFatDocumentInternal({ ...data, actor_id: context.userId });
+  });
 
 // ============================================================
 // SAT — gerar documento (PDF PT/ES/EN) reaproveitando sat_relatorio
@@ -1946,12 +1954,18 @@ export async function generateSatDocumentInternal(args: {
   return { ok: true, documento_id: docId as string, codigo, versao, arquivos };
 }
 
+const generateSatDocumentInput = z.object({
+  sat_id: z.string().uuid(),
+  documento_id: z.string().uuid().optional(),
+  bump: z.enum(["minor", "patch"]).optional(),
+});
 export const generateSatDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { sat_id: string; documento_id?: string; bump?: "minor" | "patch" }) => d)
-  .handler(async ({ data, context }) =>
-    generateSatDocumentInternal({ ...data, actor_id: context.userId }),
-  );
+  .inputValidator((d: unknown) => generateSatDocumentInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    return generateSatDocumentInternal({ ...data, actor_id: context.userId });
+  });
 
 // ============================================================
 // getOrcamentoForEdit — carrega o último payload para reabrir o wizard

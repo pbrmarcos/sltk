@@ -662,6 +662,7 @@ export const getFatFotoSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { path: string }) => z.object({ path: z.string().min(1).max(500) }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { data: signed, error } = await context.supabase.storage
       .from("fat-evidencias")
       .createSignedUrl(data.path, 900);
