@@ -124,15 +124,17 @@ export const listEmbarques = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => (input ? listInput.parse(input) : undefined))
   .handler(async ({ data, context }) => {
+    const LIMIT = 300;
     let query = (context.supabase as any)
       .from("logistica_embarques")
       .select(
         `id, numero, projeto_id, transportadora_id, status, previsao_saida, data_saida, data_entrega, nf_saida, destino, observacoes, created_at, updated_at,
          projeto:equipamento_projetos!inner(id, revisao, cliente_id, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)),
          transportadora:compras_transportadoras(id, nome)`,
+        { count: "exact" },
       )
       .order("created_at", { ascending: false })
-      .limit(300);
+      .limit(LIMIT);
 
     if (data?.status) query = query.eq("status", data.status);
     if (data?.projetoId) query = query.eq("projeto_id", data.projetoId);
@@ -145,9 +147,13 @@ export const listEmbarques = createServerFn({ method: "GET" })
       query = query.or(`numero.ilike.${like},nf_saida.ilike.${like},destino.ilike.${like}`);
     }
 
-    const { data: rows, error } = await query;
+    const { data: rows, count, error } = await query;
     if (error) throw friendlyDbError(error);
-    return rows ?? [];
+    return {
+      rows: (rows ?? []) as any[],
+      total: count ?? (rows ?? []).length,
+      truncated: (count ?? 0) > LIMIT,
+    };
   });
 
 // ---------- Clientes com embarques (para filtro) ----------

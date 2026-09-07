@@ -194,9 +194,17 @@ function EmbarquesIndex() {
             </Button>
           )}
           <div className="ml-auto text-xs text-[var(--text-muted)]">
-            {embarques.data ? `${embarques.data.length} embarque(s)` : ""}
+            {embarques.data
+              ? `${embarques.data.rows.length} de ${embarques.data.total} embarque(s)`
+              : ""}
           </div>
         </div>
+        {embarques.data?.truncated && (
+          <p className="text-xs text-amber-700">
+            Mostrando só os {embarques.data.rows.length} mais recentes de {embarques.data.total}.
+            Use os filtros para reduzir o resultado.
+          </p>
+        )}
       </div>
 
       {embarques.isLoading ? (
@@ -206,7 +214,7 @@ function EmbarquesIndex() {
           description={(embarques.error as Error).message}
           onRetry={() => embarques.refetch()}
         />
-      ) : (embarques.data?.length ?? 0) === 0 ? (
+      ) : (embarques.data?.rows.length ?? 0) === 0 ? (
         <div className="rounded-lg border border-dashed border-[var(--bg-border)] bg-[var(--bg-surface)] p-10 text-center">
           <Truck className="mx-auto mb-3 h-10 w-10 text-[var(--text-muted)] opacity-40" />
           <p className="text-sm text-[var(--text-muted)]">
@@ -237,7 +245,7 @@ function EmbarquesIndex() {
               </tr>
             </thead>
             <tbody>
-              {(embarques.data ?? []).map((e: any) => {
+              {(embarques.data?.rows ?? []).map((e: any) => {
                 const cli = e.projeto?.cliente;
                 const eq = e.projeto?.equipamento;
                 return (
