@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
+import { logAuditServer } from "@/lib/audit.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PROJETO_DISCIPLINAS, PROJETO_STATUS } from "@/lib/engenharia.shared";
@@ -179,6 +180,12 @@ export const updateProjeto = createServerFn({ method: "POST" })
       }
     }
 
+    const { data: before } = await context.supabase
+      .from("equipamento_projetos")
+      .select("status, equipamento_id")
+      .eq("id", id)
+      .maybeSingle();
+
     const { error } = await context.supabase
       .from("equipamento_projetos")
       .update({
@@ -188,6 +195,44 @@ export const updateProjeto = createServerFn({ method: "POST" })
       })
       .eq("id", id);
     if (error) throw friendlyDbError(error);
+
+    const liberando = status === "liberado_producao" && before?.status !== "liberado_producao";
+    if (liberando) {
+      await logAuditServer(context.supabase as any, context.userId, {
+        table_name: "equipamento_projetos",
+        record_id: id,
+        action: "UPDATE",
+        field_changed: "status",
+        old_value: before?.status ?? null,
+        new_value: "liberado_producao",
+      });
+
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        const { data: eq } = before?.equipamento_id
+          ? await context.supabase
+              .from("cliente_equipamentos")
+              .select("codigo, modelo")
+              .eq("id", before.equipamento_id)
+              .maybeSingle()
+          : { data: null };
+        await safeDispatch({
+          eventKey: "projeto.liberado_producao",
+          triggeredBy: context.userId,
+          entityTable: "equipamento_projetos",
+          entityId: id,
+          vars: {
+            codigo: (eq as { codigo?: string } | null)?.codigo ?? "",
+            modelo: (eq as { modelo?: string } | null)?.modelo ?? "",
+            observacoes: rest.observacoes ?? "",
+            link: appUrl("/producao/montagem"),
+          },
+        });
+      } catch (e) {
+        console.error("[equipamento-projetos/updateProjeto] email dispatch failed", e);
+      }
+    }
+
     return { ok: true };
   });
 

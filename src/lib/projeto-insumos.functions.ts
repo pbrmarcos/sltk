@@ -1326,5 +1326,42 @@ export const liberarEquipamentoProducao = createServerFn({ method: "POST" })
       }
     }
 
+    if (liberadosIds.length > 0) {
+      await logAuditServer(
+        sb as any,
+        uid,
+        liberadosIds.map((pid) => ({
+          table_name: "equipamento_projetos",
+          record_id: pid,
+          action: "UPDATE" as const,
+          field_changed: "status",
+          new_value: "liberado_producao",
+        })),
+      );
+
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        const { data: eq } = await sb
+          .from("cliente_equipamentos")
+          .select("codigo, modelo")
+          .eq("id", data.equipamento_id)
+          .maybeSingle();
+        await safeDispatch({
+          eventKey: "projeto.liberado_producao",
+          triggeredBy: uid,
+          entityTable: "equipamento_projetos",
+          entityId: liberadosIds[0],
+          vars: {
+            codigo: (eq as { codigo?: string } | null)?.codigo ?? "",
+            modelo: (eq as { modelo?: string } | null)?.modelo ?? "",
+            observacoes: data.observacoes ?? "",
+            link: appUrl("/producao/montagem"),
+          },
+        });
+      } catch (e) {
+        console.error("[projeto-insumos/liberarEquipamentoProducao] email dispatch failed", e);
+      }
+    }
+
     return { ok: true, liberados: liberadosIds.length };
   });

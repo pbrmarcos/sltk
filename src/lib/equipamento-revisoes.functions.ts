@@ -1,9 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
+import { logAuditServer } from "@/lib/audit.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { REVISAO_DISCIPLINAS, REVISAO_STATUS } from "@/lib/engenharia.shared";
+import {
+  REVISAO_DISCIPLINAS,
+  REVISAO_STATUS,
+  REVISAO_STATUS_LABEL,
+  type RevisaoStatus,
+} from "@/lib/engenharia.shared";
+
+const DECIDIDOS: readonly RevisaoStatus[] = ["aprovada", "aprovada_com_ressalvas", "reprovada"];
 
 const listAllInput = z.object({
   disciplina: z.enum(REVISAO_DISCIPLINAS),
@@ -101,11 +109,62 @@ export const updateRevisao = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "qualidade");
     const { id, ...rest } = data;
+
+    const { data: before } = await context.supabase
+      .from("equipamento_revisoes")
+      .select("status, disciplina, equipamento_id")
+      .eq("id", id)
+      .maybeSingle();
+
     const { error } = await context.supabase
       .from("equipamento_revisoes")
       .update({ ...rest, updated_by: context.userId })
       .eq("id", id);
     if (error) throw friendlyDbError(error);
+
+    const novoStatus = rest.status;
+    const decidida =
+      !!novoStatus && DECIDIDOS.includes(novoStatus) && before?.status !== novoStatus;
+    if (decidida) {
+      await logAuditServer(context.supabase as any, context.userId, {
+        table_name: "equipamento_revisoes",
+        record_id: id,
+        action: "UPDATE",
+        field_changed: "status",
+        old_value: before?.status ?? null,
+        new_value: novoStatus,
+      });
+
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        const { data: eq } = before?.equipamento_id
+          ? await context.supabase
+              .from("cliente_equipamentos")
+              .select("codigo, modelo")
+              .eq("id", before.equipamento_id)
+              .maybeSingle()
+          : { data: null };
+        const rota =
+          before?.disciplina === "eletrica"
+            ? "/qualidade/revisao-eletrica"
+            : "/qualidade/revisao-mecanica";
+        await safeDispatch({
+          eventKey: "revisao.decidida",
+          triggeredBy: context.userId,
+          entityTable: "equipamento_revisoes",
+          entityId: id,
+          vars: {
+            codigo: (eq as { codigo?: string } | null)?.codigo ?? "",
+            modelo: (eq as { modelo?: string } | null)?.modelo ?? "",
+            decisao: REVISAO_STATUS_LABEL[novoStatus as RevisaoStatus] ?? String(novoStatus),
+            link: appUrl(rota),
+          },
+        });
+      } catch (e) {
+        console.error("[revisoes/updateRevisao] email dispatch failed", e);
+      }
+    }
+
     return { ok: true };
   });
 

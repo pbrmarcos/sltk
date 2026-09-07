@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ETP_STATUS } from "@/lib/engenharia.shared";
 import { hasRole, assertAdminOrManager, assertCanAccessModule } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 
 /* ============= LIST: por equipamento ============= */
 
@@ -341,6 +342,29 @@ export const reabrirEtp = createServerFn({ method: "POST" })
         created_by: context.userId,
         created_by_nome: nome,
       });
+
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "equipamento_etps",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      old_value: "aprovado",
+      new_value: "em_revisao",
+    });
+
+    try {
+      const { safeDispatch } = await import("@/lib/email/safe-dispatch.server");
+      const vars = await etpEmailVars(context.supabase, data.id, context.userId);
+      await safeDispatch({
+        eventKey: "etp.reaberto",
+        triggeredBy: context.userId,
+        entityTable: "equipamento_etps",
+        entityId: data.id,
+        vars: { ...vars, justificativa: data.justificativa },
+      });
+    } catch (e) {
+      console.error("[etps/reabrirEtp] email dispatch failed", e);
+    }
 
     return { ok: true };
   });
