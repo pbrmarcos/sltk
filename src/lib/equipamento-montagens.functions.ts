@@ -149,7 +149,8 @@ export const updateMontagem = createServerFn({ method: "POST" })
     const atribuiuAgora =
       !!data.responsavel_id && data.responsavel_id !== (antes as any)?.responsavel_id;
     const bloqueouAgora = data.status === "bloqueada" && (antes as any)?.status !== "bloqueada";
-    if (atribuiuAgora || bloqueouAgora) {
+    const concluiuAgora = data.status === "concluida" && (antes as any)?.status !== "concluida";
+    if (atribuiuAgora || bloqueouAgora || concluiuAgora) {
       try {
         const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
         const eqp = (antes as any)?.cliente_equipamentos;
@@ -170,6 +171,15 @@ export const updateMontagem = createServerFn({ method: "POST" })
             entityTable: "equipamento_montagens",
             entityId: id,
             vars: { card, motivo: data.observacoes ?? "", link: appUrl(`/producao/montagem`) },
+          });
+        }
+        if (concluiuAgora) {
+          await safeDispatch({
+            eventKey: "montagem.concluida",
+            triggeredBy: context.userId,
+            entityTable: "equipamento_montagens",
+            entityId: id,
+            vars: { card, link: appUrl(`/producao/montagem`) },
           });
         }
       } catch (e) {
