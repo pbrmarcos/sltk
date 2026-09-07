@@ -703,7 +703,9 @@ export const publicSubmitAssinatura = createServerFn({ method: "POST" })
       };
       const { data: sat } = await (supabaseAdmin as any)
         .from("sat_relatorio")
-        .select("tecnicos")
+        .select(
+          "tecnicos, status, codigo, cliente_id, created_by, clientes(razao_social, nome_fantasia)",
+        )
         .eq("id", payload.rid)
         .maybeSingle();
       const tecnicos = Array.isArray(sat?.tecnicos) ? [...(sat!.tecnicos as any[])] : [];
@@ -725,6 +727,42 @@ export const publicSubmitAssinatura = createServerFn({ method: "POST" })
         .update(patch)
         .eq("id", payload.rid);
       if (error) throw friendlyDbError(error);
+
+      if (sat?.status !== "assinado") {
+        try {
+          const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+          const clienteNome =
+            (sat?.clientes as { razao_social?: string; nome_fantasia?: string } | null)
+              ?.nome_fantasia ||
+            (sat?.clientes as { razao_social?: string; nome_fantasia?: string } | null)
+              ?.razao_social ||
+            "Cliente";
+          const extraTo: string[] = [];
+          if (sat?.created_by) {
+            const { data: prof } = await (supabaseAdmin as any)
+              .from("profiles")
+              .select("email")
+              .eq("id", sat.created_by)
+              .maybeSingle();
+            if (prof?.email) extraTo.push(prof.email as string);
+          }
+          await safeDispatch({
+            eventKey: "sat.assinado",
+            triggeredBy: null,
+            triggeredByKind: "automation",
+            entityTable: "sat_relatorio",
+            entityId: payload.rid,
+            vars: {
+              codigo: sat?.codigo ?? "",
+              cliente_nome: clienteNome,
+              link: appUrl(`/pos-vendas/sat/${payload.rid}`),
+            },
+            extraTo,
+          });
+        } catch (e) {
+          console.error("[share-links/publicSubmitAssinatura] email dispatch failed", e);
+        }
+      }
     }
 
     await touchLink(link.id);
