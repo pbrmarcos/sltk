@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
@@ -13,6 +13,7 @@ import {
   Undo2,
   XCircle,
   Pencil,
+  Receipt,
   RefreshCw,
   RotateCcw,
   Save,
@@ -410,6 +411,13 @@ function EtpEditorPage() {
               }
               versao={(data?.versao as number) ?? 1}
             />
+          ) : null}
+          {status === "aprovado" ? (
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/comercial/orcamento/novo" search={{ etp: id }}>
+                <Receipt className="mr-1.5 h-4 w-4" /> Gerar orçamento
+              </Link>
+            </Button>
           ) : null}
           {status === "aprovado" && canApprove ? (
             <Button

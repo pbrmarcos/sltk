@@ -1,9 +1,9 @@
 ---
-question: Como transformo um orçamento em ETP?
+question: Como conecto ETP e orçamento?
 category: engenharia
 tags: [etp, orcamento, projeto]
 ---
 
-Em `/engenharia/etp` → **Novo ETP** → selecione o orçamento **Ganho** desejado. O wizard puxa cliente, equipamento e itens automaticamente. Após aprovação do gestor, as disciplinas Mecânica e Elétrica são criadas com as etapas padrão do template e o BOM inicial vai para `Projeto → Insumos`.
+Hoje a ligação é manual, sem wizard automático: o ETP nasce vinculado a um **equipamento** (não a um orçamento), criado em `/engenharia/etp` → **Novo ETP**. Depois de **aprovado**, o ETP mostra um botão **Gerar orçamento** que abre um novo orçamento em `/comercial/orcamento/novo` já com cliente e título pré-preenchidos a partir do ETP — sem vínculo formal no banco, é só um atalho pra não redigitar.
 
-Veja o guia em [Criar ETP a partir do orçamento](/ajuda/documentacao/engenharia/criar-etp).
+Veja o guia em [Criar ETP](/ajuda/documentacao/engenharia/criar-etp).
