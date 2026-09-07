@@ -12,7 +12,7 @@ export const resources = {
         statusLabel: "Status do cliente",
         status: {
           ativo: "Cliente Ativo",
-          suspect: "Suspect",
+          suspect: "Possível Cliente",
           prospect: "Prospect",
           inativo: "Inativo",
         },
@@ -28,7 +28,7 @@ export const resources = {
         statusLabel: "Estado del cliente",
         status: {
           ativo: "Cliente Activo",
-          suspect: "Suspect",
+          suspect: "Cliente Potencial",
           prospect: "Prospect",
           inativo: "Inactivo",
         },

@@ -2188,7 +2188,7 @@ function TimelineTab({ clienteId }: { clienteId: string }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[13px] font-semibold">{t.titulo}</span>
                     <Badge variant="outline" className="text-[10px] capitalize">
-                      {t.tipo.replace("_", " ")}
+                      {TIPO_LABEL[t.tipo] ?? t.tipo.replace("_", " ")}
                     </Badge>
                     <span className="ml-auto text-[11px] text-muted-foreground">
                       {fmtDateTime(t.ts)}
