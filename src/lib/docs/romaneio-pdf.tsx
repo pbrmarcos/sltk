@@ -12,6 +12,18 @@ const TOKENS = {
   zebra: "#F9FAFB",
 };
 
+const CATEGORIA_LABEL: Record<string, string> = {
+  foto: "Foto de embarque",
+  nf: "Nota fiscal / XML",
+  comprovante: "Comprovante de entrega",
+  outro: "Outro",
+  status: "Registro de status",
+};
+
+function categoriaLabel(categoria: string): string {
+  return CATEGORIA_LABEL[categoria] ?? categoria;
+}
+
 const styles = (accent: string) =>
   StyleSheet.create({
     page: { ...CHROME_PAGE_STYLE },
@@ -340,7 +352,7 @@ export function RomaneioPdf({
             <Text style={s.section}>Anexos referenciados</Text>
             {listOnlyAnexos.map((a, i) => (
               <Text key={i} style={{ fontSize: 9, marginBottom: 2 }}>
-                • [{a.categoria}] {a.nome_arquivo}
+                • [{categoriaLabel(a.categoria)}] {a.nome_arquivo}
               </Text>
             ))}
           </>
@@ -366,7 +378,7 @@ export function RomaneioPdf({
             tag={payload.numero}
           />
           <Text style={s.anexoTitle}>
-            [{a.categoria}] {a.nome_arquivo}
+            [{categoriaLabel(a.categoria)}] {a.nome_arquivo}
           </Text>
           {a.dataUrl ? <Image src={a.dataUrl} style={s.anexoImage} /> : null}
         </Page>

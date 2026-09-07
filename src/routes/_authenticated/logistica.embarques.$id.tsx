@@ -84,6 +84,18 @@ const STATUS_TONE: Record<LogisticaStatus, string> = {
   cancelado: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
+const CATEGORIA_LABEL: Record<string, string> = {
+  foto: "Foto de embarque",
+  nf: "Nota fiscal / XML",
+  comprovante: "Comprovante de entrega",
+  outro: "Outro",
+  status: "Registro de status",
+};
+
+function categoriaLabel(categoria: string): string {
+  return CATEGORIA_LABEL[categoria] ?? categoria;
+}
+
 function EmbarqueDetalhe() {
   const { id } = Route.useParams();
   const { role } = useAuth();
@@ -730,7 +742,7 @@ function EmbarqueDetalhe() {
                   <div className="min-w-0 flex-1">
                     <div className="truncate">{a.nome_arquivo}</div>
                     <div className="text-[10px] uppercase text-[var(--text-muted)]">
-                      {a.categoria} · {a.mime_type || "arquivo"}
+                      {categoriaLabel(a.categoria)} · {a.mime_type || "arquivo"}
                     </div>
                   </div>
                 </label>
@@ -1026,7 +1038,9 @@ function AnexoRow({
     <li className="flex items-center justify-between gap-2 rounded border border-[var(--bg-border)] px-2 py-1.5 text-sm">
       <div className="min-w-0 flex-1">
         <div className="truncate">{anexo.nome_arquivo}</div>
-        <div className="text-[10px] uppercase text-[var(--text-muted)]">{anexo.categoria}</div>
+        <div className="text-[10px] uppercase text-[var(--text-muted)]">
+          {categoriaLabel(anexo.categoria)}
+        </div>
       </div>
       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={open} disabled={loading}>
         <ExternalLink className="h-3.5 w-3.5" />
