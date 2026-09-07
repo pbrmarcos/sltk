@@ -478,7 +478,6 @@ export const listInsumosCotacao = createServerFn({ method: "POST" })
 
     const ids = list.map((r) => r.id);
     const docs: Record<string, number> = {};
-    const envios: Record<string, { total: number; respondidos: number }> = {};
     const ocs: Record<string, string> = {};
 
     if (ids.length) {
@@ -488,19 +487,6 @@ export const listInsumosCotacao = createServerFn({ method: "POST" })
         .in("insumo_id", ids);
       for (const r of (dg ?? []) as Array<{ insumo_id: string }>) {
         docs[r.insumo_id] = (docs[r.insumo_id] ?? 0) + 1;
-      }
-      const { data: env } = await sb
-        .from("insumo_cotacao_envios")
-        .select("insumo_id, data_resposta, status")
-        .in("insumo_id", ids);
-      for (const r of (env ?? []) as Array<{
-        insumo_id: string;
-        data_resposta: string | null;
-        status: string;
-      }>) {
-        const e = (envios[r.insumo_id] ??= { total: 0, respondidos: 0 });
-        e.total += 1;
-        if (r.data_resposta || r.status === "respondido") e.respondidos += 1;
       }
       const { data: oi } = await sb
         .from("ordem_compra_itens")
@@ -514,8 +500,12 @@ export const listInsumosCotacao = createServerFn({ method: "POST" })
     return list.map((r) => ({
       ...r,
       docs_gerados: docs[r.id] ?? 0,
-      convites: envios[r.id]?.total ?? 0,
-      respondidos: envios[r.id]?.respondidos ?? 0,
+      // convites/respondidos vinham de insumo_cotacao_envios, tabela morta
+      // (nada insere nela) — mantidos no formato de retorno pra não quebrar
+      // quem consome, mas hoje sempre 0. A fonte real de convite/resposta é
+      // cotacao_fornecedores, ligada por cotacao_itens.insumo_id.
+      convites: 0,
+      respondidos: 0,
       ordem_compra_id: ocs[r.id] ?? null,
     }));
   });

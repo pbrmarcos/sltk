@@ -3,9 +3,75 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanAccessModule } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 import { COTACAO_STATUS } from "@/lib/cotacoes.shared";
 
 type SB = { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+/**
+ * Dispara o e-mail de convite pro fornecedor de verdade (link público da
+ * cotação, extraTo com o e-mail dele) além do aviso interno pro papel
+ * purchasing — reutilizado por createCotacao (quando já cria convidando) e
+ * inviteFornecedores (convite avulso depois).
+ */
+async function dispatchCotacaoInviteEmails(
+  sb: SB,
+  cotacaoId: string,
+  fornecedorIds: string[],
+  userId: string,
+): Promise<void> {
+  try {
+    const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+    const { data: cot } = await sb
+      .from("cotacoes")
+      .select("codigo, titulo, prazo_resposta")
+      .eq("id", cotacaoId)
+      .maybeSingle();
+    const { data: convites } = await sb
+      .from("cotacao_fornecedores")
+      .select("token, fornecedor_id, fornecedores(nome_fantasia, razao_social, email_geral)")
+      .eq("cotacao_id", cotacaoId)
+      .in("fornecedor_id", fornecedorIds);
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", userId)
+      .maybeSingle();
+    const usuario = (prof as any)?.full_name ?? (prof as any)?.email ?? "Compras"; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const prazo = (cot as any)?.prazo_resposta // eslint-disable-line @typescript-eslint/no-explicit-any
+      ? new Date((cot as any).prazo_resposta).toLocaleDateString("pt-BR") // eslint-disable-line @typescript-eslint/no-explicit-any
+      : "";
+    for (const conv of (convites ?? []) as Array<{
+      token: string;
+      fornecedor_id: string;
+      fornecedores: {
+        nome_fantasia: string | null;
+        razao_social: string | null;
+        email_geral: string | null;
+      } | null;
+    }>) {
+      const f = conv.fornecedores;
+      await safeDispatch({
+        eventKey: "cotacao.enviada_fornecedor",
+        triggeredBy: userId,
+        entityTable: "cotacoes",
+        entityId: cotacaoId,
+        vars: {
+          codigo: (cot as any)?.codigo ?? "", // eslint-disable-line @typescript-eslint/no-explicit-any
+          item: (cot as any)?.titulo ?? "", // eslint-disable-line @typescript-eslint/no-explicit-any
+          fornecedor: f?.nome_fantasia || f?.razao_social || "",
+          destinatario_nome: f?.nome_fantasia || f?.razao_social || "",
+          prazo,
+          usuario,
+          link: appUrl(`/p/cotacao/${conv.token}`),
+        },
+        extraTo: f?.email_geral ? [f.email_geral] : [],
+      });
+    }
+  } catch (e) {
+    console.error("[cotacoes] invite email dispatch failed", e);
+  }
+}
 
 /* ============ LIST ============ */
 export const listCotacoes = createServerFn({ method: "POST" })
@@ -223,6 +289,10 @@ export const createCotacao = createServerFn({ method: "POST" })
       });
     }
 
+    if (data.fornecedor_ids.length) {
+      await dispatchCotacaoInviteEmails(sb, cot.id, data.fornecedor_ids, context.userId);
+    }
+
     return { id: cot.id as string, codigo: cot.codigo as string };
   });
 
@@ -255,38 +325,7 @@ export const inviteFornecedores = createServerFn({ method: "POST" })
       detalhes: { count: data.fornecedor_ids.length },
     });
 
-    try {
-      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
-      const { data: cot } = await sb
-        .from("cotacoes")
-        .select("codigo, titulo")
-        .eq("id", data.cotacao_id)
-        .maybeSingle();
-      const { data: fornecedores } = await sb
-        .from("fornecedores")
-        .select("id, nome_fantasia, razao_social")
-        .in("id", data.fornecedor_ids);
-      for (const f of (fornecedores ?? []) as Array<{
-        id: string;
-        nome_fantasia: string | null;
-        razao_social: string | null;
-      }>) {
-        await safeDispatch({
-          eventKey: "cotacao.enviada_fornecedor",
-          triggeredBy: context.userId,
-          entityTable: "cotacoes",
-          entityId: data.cotacao_id,
-          vars: {
-            codigo: (cot as any)?.codigo ?? "",
-            item: (cot as any)?.titulo ?? "",
-            fornecedor: f.nome_fantasia || f.razao_social || "",
-            link: appUrl(`/compras/cotacoes/${data.cotacao_id}`),
-          },
-        });
-      }
-    } catch (e) {
-      console.error("[cotacoes/inviteFornecedores] email dispatch failed", e);
-    }
+    await dispatchCotacaoInviteEmails(sb, data.cotacao_id, data.fornecedor_ids, context.userId);
 
     return { ok: true as const };
   });
@@ -307,6 +346,13 @@ export const setCotacaoStatus = createServerFn({ method: "POST" })
       evento: `status_${data.status}`,
       ator: context.userId,
     });
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "cotacoes",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: data.status,
+    });
     return { ok: true as const };
   });
 
@@ -325,6 +371,81 @@ export const escolherVencedor = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as unknown as SB;
     await assertCanAccessModule(context.supabase, context.userId, "compras");
+
+    // Dados do item cotado (qual insumo) e da proposta escolhida.
+    const { data: item } = await sb
+      .from("cotacao_itens")
+      .select("id, insumo_id, cotacao_id")
+      .eq("id", data.cotacao_item_id)
+      .maybeSingle();
+    if (!item) throw new Error("Item da cotação não encontrado.");
+
+    const { data: propostaItem } = await sb
+      .from("cotacao_proposta_itens")
+      .select("id, proposta_id, preco_unit, prazo_entrega_dias, valor_total")
+      .eq("id", data.proposta_item_id)
+      .maybeSingle();
+    if (!propostaItem) throw new Error("Item da proposta não encontrado.");
+
+    const { data: proposta } = await sb
+      .from("cotacao_propostas")
+      .select("id, convite_id")
+      .eq("id", propostaItem.proposta_id)
+      .maybeSingle();
+    const { data: convite } = await sb
+      .from("cotacao_fornecedores")
+      .select("id, fornecedor_id")
+      .eq("id", proposta?.convite_id ?? "")
+      .maybeSingle();
+    const { data: cotacao } = await sb
+      .from("cotacoes")
+      .select("codigo, moeda, condicoes_pagamento")
+      .eq("id", item.cotacao_id)
+      .maybeSingle();
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    // Escolha atual do item, se houver — pra atualizar o mesmo anexo em vez
+    // de duplicar quando o comprador troca de vencedor.
+    const { data: escolhaAtual } = await sb
+      .from("cotacao_escolhas")
+      .select("id, insumo_anexo_id")
+      .eq("cotacao_item_id", data.cotacao_item_id)
+      .maybeSingle();
+
+    // Ponte pra aprovação de OC: decidirAprovacaoOC só sabe ler
+    // insumo_anexos (kind='orcamento' + fornecedor_id) — sem isso, escolher
+    // vencedor pelo portal não servia pra aprovar a compra.
+    const anexoPayload = {
+      insumo_id: item.insumo_id,
+      kind: "orcamento" as const,
+      fornecedor_id: convite?.fornecedor_id ?? null,
+      valor: propostaItem.valor_total ?? propostaItem.preco_unit,
+      moeda: cotacao?.moeda ?? "BRL",
+      condicao_pagamento: cotacao?.condicoes_pagamento ?? null,
+      lead_time_dias: propostaItem.prazo_entrega_dias ?? null,
+      file_name: `Proposta - Cotação ${cotacao?.codigo ?? ""}`.trim(),
+      uploaded_by: context.userId,
+      uploaded_by_nome: prof?.full_name ?? prof?.email ?? "Usuário",
+    };
+
+    let anexoId: string | null = escolhaAtual?.insumo_anexo_id ?? null;
+    if (anexoId) {
+      const { error: eUpd } = await sb.from("insumo_anexos").update(anexoPayload).eq("id", anexoId);
+      if (eUpd) throw friendlyDbError(eUpd);
+    } else {
+      const { data: novoAnexo, error: eIns } = await sb
+        .from("insumo_anexos")
+        .insert(anexoPayload)
+        .select("id")
+        .single();
+      if (eIns) throw friendlyDbError(eIns);
+      anexoId = novoAnexo.id as string;
+    }
+
     const { error } = await sb.from("cotacao_escolhas").upsert(
       {
         cotacao_item_id: data.cotacao_item_id,
@@ -332,10 +453,23 @@ export const escolherVencedor = createServerFn({ method: "POST" })
         escolhido_por: context.userId,
         escolhido_em: new Date().toISOString(),
         justificativa: data.justificativa,
+        insumo_anexo_id: anexoId,
       },
       { onConflict: "cotacao_item_id" },
     );
     if (error) throw friendlyDbError(error);
+
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "cotacao_escolhas",
+      record_id: data.cotacao_item_id,
+      action: "INSERT",
+      new_value: {
+        proposta_item_id: data.proposta_item_id,
+        insumo_anexo_id: anexoId,
+        fornecedor_id: convite?.fornecedor_id ?? null,
+      },
+    });
+
     return { ok: true as const };
   });
 
@@ -522,6 +656,19 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
     if (error || !convite) throw new Error("Convite inválido");
     const c = convite as { id: string; cotacao_id: string; status: string };
 
+    // Bloqueia envio/edição depois que a cotação já saiu do "respondível" —
+    // sem isso, um link já fechado (vencedor escolhido/encerrada/cancelada)
+    // continuava aceitando alteração de preço indefinidamente.
+    const { data: cotAtual } = await sb
+      .from("cotacoes")
+      .select("status")
+      .eq("id", c.cotacao_id)
+      .maybeSingle();
+    const statusFechado = ["escolhida", "encerrada", "cancelada"];
+    if (cotAtual && statusFechado.includes((cotAtual as { status: string }).status)) {
+      throw new Error("Esta cotação já foi encerrada e não aceita mais respostas.");
+    }
+
     const total = data.itens.reduce((s, i) => s + Number(i.preco_unitario), 0);
 
     // Upsert proposta
@@ -565,12 +712,27 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
       propostaId = (prop as { id: string }).id;
     }
 
+    // Quantidade de cada item, pra quantidade_snapshot ficar correta (valor_total
+    // é coluna gerada em cima dela — sem isso o cálculo assume quantidade 1).
+    const itemIds = data.itens.map((it) => it.cotacao_item_id);
+    const { data: itensRef } = await sb
+      .from("cotacao_itens")
+      .select("id, quantidade")
+      .in("id", itemIds);
+    const qtyMap = new Map(
+      ((itensRef ?? []) as Array<{ id: string; quantidade: number }>).map((i) => [
+        i.id,
+        i.quantidade,
+      ]),
+    );
+
     const rows = data.itens.map((it) => ({
       proposta_id: propostaId,
       cotacao_item_id: it.cotacao_item_id,
-      preco_unitario: it.preco_unitario,
+      preco_unit: it.preco_unitario,
+      quantidade_snapshot: qtyMap.get(it.cotacao_item_id) ?? 1,
       prazo_entrega_dias: it.prazo_entrega_dias,
-      observacao: it.observacao,
+      observacoes: it.observacao,
     }));
     const { error: e3 } = await sb.from("cotacao_proposta_itens").insert(rows);
     if (e3) throw friendlyDbError(e3);
@@ -584,6 +746,15 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
       cotacao_id: c.cotacao_id,
       evento: "proposta_recebida",
       detalhes: { convite_id: c.id, total },
+    });
+
+    // Submissão pública (parte não-autenticada mais sensível do fluxo) —
+    // fica auditável mesmo sem um context.userId real por trás.
+    await logAuditServer(supabaseAdmin as any, null, {
+      table_name: "cotacao_propostas",
+      record_id: propostaId,
+      action: "INSERT",
+      new_value: { convite_id: c.id, cotacao_id: c.cotacao_id, total },
     });
 
     try {
@@ -608,6 +779,8 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
         vars: {
           codigo: (cot as any)?.codigo ?? "",
           fornecedor: fornecedor?.nome_fantasia || fornecedor?.razao_social || "",
+          valor: total.toLocaleString("pt-BR", { style: "currency", currency: data.moeda }),
+          data: new Date().toLocaleString("pt-BR"),
           link: appUrl(`/compras/cotacoes/${c.cotacao_id}`),
         },
       });

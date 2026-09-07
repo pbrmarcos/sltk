@@ -3,6 +3,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanAccessModule } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 import {
   OC_REQUIRED_FIELDS,
   OC_STATUS,
@@ -406,25 +407,12 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
       );
     }
 
-    // Fornecedor: usa o informado, senão o sugerido na aprovação,
-    // senão o último envio respondido, senão o último envio qualquer.
-    let fornecedor_id = data.fornecedor_id ?? aprov.fornecedor_id_sugerido ?? null;
-    if (!fornecedor_id) {
-      const { data: envios } = await sb
-        .from("insumo_cotacao_envios")
-        .select("fornecedor_id, data_resposta, data_envio, status, created_at")
-        .eq("insumo_id", data.insumo_id)
-        .order("data_resposta", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(5);
-      const respondido = (envios ?? []).find(
-        (e: any) => e.data_resposta || e.status === "respondido",
-      );
-      fornecedor_id = respondido?.fornecedor_id ?? (envios ?? [])[0]?.fornecedor_id ?? null;
-    }
+    // Fornecedor: usa o informado, senão o sugerido na aprovação (que já vem
+    // do anexo de orçamento vencedor escolhido na cotação).
+    const fornecedor_id = data.fornecedor_id ?? aprov.fornecedor_id_sugerido ?? null;
     if (!fornecedor_id)
       throw new Error(
-        "Nenhum fornecedor identificado. Informe o fornecedor manualmente ou registre um envio de checklist com resposta.",
+        "Nenhum fornecedor identificado. Informe o fornecedor manualmente ou aprove o insumo com um orçamento vinculado a um fornecedor.",
       );
 
     // Preço unitário: se houver orçamento anexado do fornecedor escolhido, usar.
@@ -660,6 +648,19 @@ export const setOcStatus = createServerFn({ method: "POST" })
       status_novo: data.status,
       detalhes: data.observacao ? { observacao: data.observacao } : undefined,
     });
+
+    if (data.status === "cancelada" && data.observacao) {
+      // Motivo de cancelamento não está entre as colunas rastreadas pelo
+      // trigger de auditoria da tabela — sem isso ficaria só no historico
+      // interno, nunca no audit_log oficial.
+      await logAuditServer(context.supabase as any, uid, {
+        table_name: "ordens_compra",
+        record_id: data.id,
+        action: "UPDATE",
+        field_changed: "motivo_cancelamento",
+        new_value: data.observacao,
+      });
+    }
 
     // Disparo de e-mail (assíncrono; falhas não bloqueiam a operação)
     try {
