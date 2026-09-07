@@ -106,7 +106,7 @@ function NovoEmbarque() {
           { label: "Novo embarque" },
         ]}
         title="Novo embarque"
-        subtitle="Selecione o projeto pronto para expedição."
+        subtitle="Selecione o projeto do equipamento a ser embarcado."
       />
 
       <div className="max-w-3xl space-y-4">
@@ -129,8 +129,8 @@ function NovoEmbarque() {
             </SelectContent>
           </Select>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Ideal: projetos com FAT já homologado. A liberação final acontece ao marcar como
-            embarcado.
+            Lista todos os projetos ativos (exceto obsoletos) — confira você mesmo se o equipamento
+            está pronto antes de criar o embarque.
           </p>
         </div>
 

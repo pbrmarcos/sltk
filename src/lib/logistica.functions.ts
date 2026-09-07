@@ -224,6 +224,7 @@ export const listProjetosDisponiveis = createServerFn({ method: "GET" })
         "id, revisao, fase, status, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)",
       )
       .is("deleted_at", null)
+      .neq("status", "obsoleto")
       .order("updated_at", { ascending: false })
       .limit(200);
     if (error) throw friendlyDbError(error);
