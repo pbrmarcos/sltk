@@ -39,8 +39,10 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       montagensNaoIniciadas,
       montagensBloqueadas,
     ] = await Promise.all([
-      countHead(sb, "clientes", (q) => q.or("cnpj.is.null,cnpj.eq.")),
-      countHead(sb, "fornecedores", (q) => q.or("cnpj.is.null,cnpj.eq.")),
+      countHead(sb, "clientes", (q) =>
+        q.or("documento_fiscal_numero.is.null,documento_fiscal_numero.eq."),
+      ),
+      countHead(sb, "fornecedores", (q) => q.or("tax_id.is.null,tax_id.eq.")),
       countHead(sb, "oportunidades", (q) => q.eq("status", "aberto")),
       countHead(sb, "ordens_compra", (q) => q.eq("status", "rascunho")),
       countHead(sb, "cotacoes", (q) => q.eq("status", "aberta")),
