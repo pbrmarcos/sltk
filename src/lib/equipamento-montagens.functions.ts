@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
+import { logAuditServer } from "@/lib/audit.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { MONTAGEM_STATUS } from "@/lib/engenharia.shared";
@@ -78,6 +79,12 @@ export const createMontagem = createServerFn({ method: "POST" })
       .single();
     if (error) throw friendlyDbError(error);
 
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "equipamento_montagens",
+      record_id: row.id,
+      action: "INSERT",
+    });
+
     if (data.responsavel_id) {
       try {
         const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
@@ -128,6 +135,17 @@ export const updateMontagem = createServerFn({ method: "POST" })
       .eq("id", id);
     if (error) throw friendlyDbError(error);
 
+    if (data.status && data.status !== (antes as any)?.status) {
+      await logAuditServer(context.supabase as any, context.userId, {
+        table_name: "equipamento_montagens",
+        record_id: id,
+        action: "UPDATE",
+        field_changed: "status",
+        old_value: (antes as any)?.status ?? null,
+        new_value: data.status,
+      });
+    }
+
     const atribuiuAgora =
       !!data.responsavel_id && data.responsavel_id !== (antes as any)?.responsavel_id;
     const bloqueouAgora = data.status === "bloqueada" && (antes as any)?.status !== "bloqueada";
@@ -172,5 +190,10 @@ export const removerMontagem = createServerFn({ method: "POST" })
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "equipamento_montagens",
+      record_id: data.id,
+      action: "DELETE",
+    });
     return { ok: true };
   });
