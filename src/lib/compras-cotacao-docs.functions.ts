@@ -10,19 +10,11 @@ import { z } from "zod";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { CotacaoPdf } from "@/lib/docs/pdf-cotacao";
 import type { Bloco, DocumentoLayoutConfig, Idioma } from "@/lib/docs/types";
 
 const IDIOMAS = ["pt", "es", "en"] as const;
-
-async function isPurchasing(supabase: any, uid: string): Promise<boolean> {
-  const roles = ["admin", "manager", "purchasing"] as const;
-  for (const r of roles) {
-    const { data } = await supabase.rpc("has_role", { _user_id: uid, _role: r });
-    if (data === true) return true;
-  }
-  return false;
-}
 
 /** Gera documento PDF em PT/ES/EN e salva no Google Drive.
  *  Estrutura: Compras / Solicitacoes / {cliente_codigo} / {projeto_codigo} / {tag}
@@ -46,7 +38,7 @@ export const gerarDocumentoCotacaoInsumo = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const uid = context.userId;
-    if (!(await isPurchasing(sb, uid))) throw new Error("Sem permissão");
+    await assertCanAccessModule(context.supabase, uid, "compras");
 
     // Carrega insumo + relacionamentos mínimos (cliente/projeto usados APENAS
     // para organizar a pasta no Drive — não aparecem no PDF).

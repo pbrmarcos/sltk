@@ -9,6 +9,8 @@ import {
   FORNECEDOR_STATUS,
 } from "@/lib/fornecedores.shared";
 import { assertCanAccessModule } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
+import { diffEntries } from "@/lib/audit";
 
 async function assertPurchasingRole(supabase: any, uid: string): Promise<void> {
   await assertCanAccessModule(
@@ -345,11 +347,25 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
 
     let id = data.id;
     if (id) {
+      const { data: before } = await supabase
+        .from("fornecedores")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
       const { error } = await supabase
         .from("fornecedores")
         .update(normalized as never)
         .eq("id", id);
       if (error) throw friendlyDbError(error);
+      if (before) {
+        const entries = diffEntries(
+          "fornecedores",
+          id,
+          before as Record<string, unknown>,
+          normalized as Record<string, unknown>,
+        );
+        await logAuditServer(supabase as any, context.userId, entries);
+      }
     } else {
       const { data: created, error } = await supabase
         .from("fornecedores")
@@ -358,6 +374,11 @@ export const upsertFornecedor = createServerFn({ method: "POST" })
         .single();
       if (error) throw friendlyDbError(error);
       id = created.id;
+      await logAuditServer(supabase as any, context.userId, {
+        table_name: "fornecedores",
+        record_id: id,
+        action: "INSERT",
+      });
     }
 
     // sincroniza categorias
@@ -389,6 +410,11 @@ export const archiveFornecedor = createServerFn({ method: "POST" })
       .update({ deleted_at: new Date().toISOString(), status: "inativo" })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "fornecedores",
+      record_id: data.id,
+      action: "DELETE",
+    });
     return { ok: true };
   });
 

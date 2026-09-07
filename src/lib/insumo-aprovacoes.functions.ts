@@ -65,6 +65,34 @@ export const solicitarAprovacaoOC = createServerFn({ method: "POST" })
       .eq("id", data.insumo_id)
       .in("status", ["em_cotacao", "cotado", "aprovado"]);
 
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      const { data: insumo } = await sb
+        .from("projeto_insumos")
+        .select("descricao")
+        .eq("id", data.insumo_id)
+        .maybeSingle();
+      const { data: prof } = await sb
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", uid)
+        .maybeSingle();
+      await safeDispatch({
+        eventKey: "insumo.aprovacao_solicitada",
+        triggeredBy: uid,
+        entityTable: "insumo_aprovacoes_oc",
+        entityId: row.id,
+        vars: {
+          insumo: insumo?.descricao ?? "",
+          solicitante: prof?.full_name ?? prof?.email ?? "Compras",
+          nota: data.nota ?? "",
+          link: appUrl("/compras/solicitacao"),
+        },
+      });
+    } catch (e) {
+      console.error("[insumo-aprovacoes/solicitarAprovacaoOC] email dispatch failed", e);
+    }
+
     return { id: row.id as string, already_pending: false };
   });
 
@@ -88,7 +116,7 @@ export const decidirAprovacaoOC = createServerFn({ method: "POST" })
 
     const { data: cur, error: e0 } = await sb
       .from("insumo_aprovacoes_oc")
-      .select("id, insumo_id, decidido_em")
+      .select("id, insumo_id, decidido_em, solicitado_por")
       .eq("id", data.aprovacao_id)
       .maybeSingle();
     if (e0 || !cur) throw new Error(e0?.message ?? "Aprovação não encontrada");
@@ -135,6 +163,40 @@ export const decidirAprovacaoOC = createServerFn({ method: "POST" })
         .update({ status: "cotado", updated_by: uid })
         .eq("id", cur.insumo_id);
     }
+
+    try {
+      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      const { getCriticalClient } = await import("@/lib/supabase-client.server");
+      const supabaseAdmin = await getCriticalClient();
+      const [{ data: insumo }, { data: solicitante }] = await Promise.all([
+        sb.from("projeto_insumos").select("descricao").eq("id", cur.insumo_id).maybeSingle(),
+        cur.solicitado_por
+          ? supabaseAdmin
+              .from("profiles")
+              .select("email")
+              .eq("id", cur.solicitado_por)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+      await safeDispatch({
+        eventKey: "insumo.aprovacao_decidida",
+        triggeredBy: uid,
+        entityTable: "insumo_aprovacoes_oc",
+        entityId: data.aprovacao_id,
+        vars: {
+          insumo: insumo?.descricao ?? "",
+          decisao: data.decisao === "aprovado" ? "Aprovada" : "Recusada",
+          nota: data.nota ?? "",
+          link: appUrl("/compras/solicitacao"),
+        },
+        extraTo: (solicitante as { email?: string | null } | null)?.email
+          ? [(solicitante as { email: string }).email]
+          : [],
+      });
+    } catch (e) {
+      console.error("[insumo-aprovacoes/decidirAprovacaoOC] email dispatch failed", e);
+    }
+
     return { ok: true };
   });
 
@@ -165,4 +227,61 @@ export const getAprovacaoAtualOC = createServerFn({ method: "POST" })
       atual: list[0] ?? null,
       historico: list,
     };
+  });
+
+/**
+ * Lista todas as aprovações de OC pendentes (decidido_em is null) cruzando
+ * projetos — hoje só dava pra ver uma por vez dentro do dialog do insumo,
+ * sem lista/fila cruzando projetos.
+ */
+export const listAprovacoesPendentes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase as any;
+    const uid = context.userId;
+    if (!(await hasAnyRole(sb, uid, ROLES_DECISORES))) {
+      throw new Error("Acesso restrito a quem pode decidir aprovações.");
+    }
+    const { data: rows, error } = await sb
+      .from("insumo_aprovacoes_oc")
+      .select("id, insumo_id, solicitado_por, solicitacao_nota, created_at")
+      .is("decidido_em", null)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (error) throw friendlyDbError(error);
+    const list = (rows ?? []) as Array<{
+      id: string;
+      insumo_id: string;
+      solicitado_por: string;
+      solicitacao_nota: string | null;
+      created_at: string;
+    }>;
+    if (list.length === 0) return [];
+
+    const insumoIds = Array.from(new Set(list.map((r) => r.insumo_id)));
+    const solicitanteIds = Array.from(new Set(list.map((r) => r.solicitado_por)));
+    const [{ data: insumos }, { data: profs }] = await Promise.all([
+      sb.from("projeto_insumos").select("id, descricao, projeto_id").in("id", insumoIds),
+      sb.from("profiles").select("id, full_name, email").in("id", solicitanteIds),
+    ]);
+    const insumoMap = new Map(
+      ((insumos ?? []) as Array<{ id: string; descricao: string; projeto_id: string | null }>).map(
+        (i) => [i.id, i],
+      ),
+    );
+    const profMap = new Map(
+      ((profs ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
+        (p) => [p.id, p],
+      ),
+    );
+
+    return list.map((r) => ({
+      id: r.id,
+      insumo_id: r.insumo_id,
+      insumo_descricao: insumoMap.get(r.insumo_id)?.descricao ?? "—",
+      solicitante_nome:
+        profMap.get(r.solicitado_por)?.full_name ?? profMap.get(r.solicitado_por)?.email ?? "—",
+      solicitacao_nota: r.solicitacao_nota,
+      created_at: r.created_at,
+    }));
   });
