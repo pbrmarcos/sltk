@@ -7,6 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { getRequest } from "@tanstack/react-start/server";
+import { patchParaStatusChamado, eventoDeEmail } from "@/lib/suporte-status";
 import { z } from "zod";
 
 const abrirSchema = z.object({
@@ -331,24 +332,67 @@ export const publicAcaoChamado = createServerFn({ method: "POST" })
 
     const { data: chamado } = await sb
       .from("chamados")
-      .select("id, status")
+      .select(
+        "id, status, codigo, assunto, visitante_nome, visitante_email, cliente_id, clientes(razao_social, nome_fantasia)",
+      )
       .eq("token_hash", hashToken(data.token))
       .maybeSingle();
     if (!chamado) throw new Error("Chamado não encontrado.");
 
-    if (data.acao === "resolver") {
-      const { error } = await sb
-        .from("chamados")
-        .update({ status: "resolvido", resolvido_em: new Date().toISOString() })
-        .eq("id", chamado.id);
-      if (error) throw friendlyDbError(error);
-    } else {
-      const { error } = await sb
-        .from("chamados")
-        .update({ status: "reaberto", reaberto_em: new Date().toISOString(), resolvido_em: null })
-        .eq("id", chamado.id);
-      if (error) throw friendlyDbError(error);
+    // Rate-limit: no máximo 5 mudanças de status por chamado a cada 5 min
+    // (o portador do token não tem login, então evita alternar resolver/
+    // reabrir indefinidamente). tg_chamados_audit já grava um evento
+    // 'status_change' a cada UPDATE de status, então só contamos.
+    const desde = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { count } = await sb
+      .from("chamado_eventos")
+      .select("id", { count: "exact", head: true })
+      .eq("chamado_id", chamado.id)
+      .eq("tipo", "status_change")
+      .gte("at", desde);
+    if ((count ?? 0) >= 5) {
+      throw new Error("Muitas alterações recentes. Aguarde alguns minutos e tente novamente.");
     }
+
+    const novoStatus = data.acao === "resolver" ? ("resolvido" as const) : ("reaberto" as const);
+    const patch = patchParaStatusChamado(novoStatus, new Date().toISOString());
+    const { error } = await sb.from("chamados").update(patch).eq("id", chamado.id);
+    if (error) throw friendlyDbError(error);
+
+    const eventKey = eventoDeEmail(novoStatus);
+    if (eventKey) {
+      try {
+        const { safeDispatch, appUrl, fmtDate } = await import("@/lib/email/safe-dispatch.server");
+        const clienteNome =
+          (chamado.clientes as { razao_social?: string; nome_fantasia?: string } | null)
+            ?.nome_fantasia ||
+          (chamado.clientes as { razao_social?: string; nome_fantasia?: string } | null)
+            ?.razao_social ||
+          chamado.visitante_nome ||
+          "Cliente";
+        await safeDispatch({
+          eventKey,
+          triggeredBy: null,
+          triggeredByKind: "automation",
+          entityTable: "chamados",
+          entityId: chamado.id,
+          vars: {
+            codigo: chamado.codigo ?? "",
+            chamado_codigo: chamado.codigo ?? "",
+            assunto: chamado.assunto ?? "",
+            titulo: chamado.assunto ?? "",
+            cliente_nome: clienteNome,
+            usuario: chamado.visitante_nome ?? "Cliente",
+            data: fmtDate(),
+            link: appUrl(`/pos-vendas/chamados/${chamado.id}`),
+          },
+          extraTo: chamado.visitante_email ? [chamado.visitante_email as string] : undefined,
+        });
+      } catch (e) {
+        console.error("[suporte-publico/publicAcaoChamado] email dispatch failed", e);
+      }
+    }
+
     return { ok: true };
   });
 
