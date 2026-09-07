@@ -693,6 +693,43 @@ export const aprovarInsumosEmLote = createServerFn({ method: "POST" })
     return { aprovados: aprovados.length };
   });
 
+/**
+ * Lista de insumos aguardando aprovação (status='pronto_aprovacao') cruzando
+ * todos os projetos — hoje só dava pra ver dentro do painel do projeto aberto.
+ */
+export const listInsumosPendentesAprovacao = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdminOrManager(context.supabase, context.userId);
+    const sb = context.supabase as unknown as SB;
+    const { data: rows, error } = await sb
+      .from("projeto_insumos")
+      .select(
+        "id, projeto_id, descricao, quantidade, unidade, criticidade, created_at" +
+          ", equipamento_projetos!inner(disciplina, revisao, cliente_equipamentos(codigo, modelo))",
+      )
+      .eq("status", "pronto_aprovacao")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (error) throw friendlyDbError(error);
+    return ((rows as any[]) ?? []).map((r) => ({
+      id: r.id as string,
+      projeto_id: r.projeto_id as string,
+      descricao: r.descricao as string,
+      quantidade: r.quantidade as number,
+      unidade: r.unidade as string,
+      criticidade: r.criticidade as string,
+      created_at: r.created_at as string,
+      disciplina: (r.equipamento_projetos?.disciplina as string | undefined) ?? null,
+      revisao: (r.equipamento_projetos?.revisao as string | undefined) ?? null,
+      equipamento_codigo:
+        (r.equipamento_projetos?.cliente_equipamentos?.codigo as string | undefined) ?? null,
+      equipamento_modelo:
+        (r.equipamento_projetos?.cliente_equipamentos?.modelo as string | undefined) ?? null,
+    }));
+  });
+
 /* ================================================================
  * INSUMOS — histórico, estoque, wizard xlsx e liberação p/ produção
  * ================================================================ */
