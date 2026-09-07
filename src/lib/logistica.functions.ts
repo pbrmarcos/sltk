@@ -5,6 +5,56 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { validarMotivo, patchParaStatusEmbarque } from "@/lib/logistica-status";
 
+function fmtDate(d: string | null | undefined): string {
+  if (!d) return "";
+  try {
+    return new Date(d).toLocaleDateString("pt-BR");
+  } catch {
+    return "";
+  }
+}
+
+/** Contexto comum pros e-mails de embarque: projeto/cliente/transportadora. */
+async function getEmbarqueEmailContext(
+  sb: any,
+  embarqueId: string,
+): Promise<{
+  codigo: string;
+  destino: string;
+  projeto: string;
+  cliente_nome: string;
+  transportadora: string;
+}> {
+  const { data } = await sb
+    .from("logistica_embarques")
+    .select(
+      `numero, destino,
+       projeto:equipamento_projetos(revisao, cliente:clientes(nome_fantasia, razao_social), equipamento:cliente_equipamentos(apelido, modelo)),
+       transportadora:compras_transportadoras(nome)`,
+    )
+    .eq("id", embarqueId)
+    .maybeSingle();
+  const projetoRow = data?.projeto as {
+    revisao?: string | null;
+    cliente?: { nome_fantasia?: string | null; razao_social?: string | null } | null;
+    equipamento?: { apelido?: string | null; modelo?: string | null } | null;
+  } | null;
+  const equipamento = projetoRow?.equipamento;
+  const projeto = equipamento
+    ? `${equipamento.apelido ?? equipamento.modelo ?? "Equipamento"}${projetoRow?.revisao ? ` (${projetoRow.revisao})` : ""}`
+    : "";
+  const cliente_nome =
+    projetoRow?.cliente?.nome_fantasia ?? projetoRow?.cliente?.razao_social ?? "";
+  const transportadora = (data?.transportadora as { nome?: string } | null)?.nome ?? "";
+  return {
+    codigo: data?.numero ?? "",
+    destino: data?.destino ?? "",
+    projeto,
+    cliente_nome,
+    transportadora,
+  };
+}
+
 export const LOGISTICA_STATUS = [
   "rascunho",
   "programado",
@@ -219,14 +269,15 @@ export const createEmbarque = createServerFn({ method: "POST" })
 
     try {
       const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+      const ctx = await getEmbarqueEmailContext(context.supabase, embarque.id);
       await safeDispatch({
         eventKey: "embarque.criado",
         triggeredBy: context.userId,
         entityTable: "logistica_embarques",
         entityId: embarque.id,
         vars: {
-          codigo: embarque.numero,
-          destino: data.destino ?? "",
+          ...ctx,
+          data_despacho: fmtDate(data.previsao_saida),
           link: appUrl(`/logistica/embarques/${embarque.id}`),
         },
       });
@@ -331,21 +382,21 @@ export const setStatus = createServerFn({ method: "POST" })
     if (eventKey && fromStatus !== data.status) {
       try {
         const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
-        const { data: emb } = await (context.supabase as any)
-          .from("logistica_embarques")
-          .select("numero, destino")
-          .eq("id", data.id)
-          .maybeSingle();
+        const ctx = await getEmbarqueEmailContext(context.supabase, data.id);
+        const vars: Record<string, string> = {
+          ...ctx,
+          link: appUrl(`/logistica/embarques/${data.id}`),
+        };
+        if (eventKey === "embarque.entregue") {
+          vars.data = fmtDate(now);
+          vars.recebedor = data.notas?.trim() || "";
+        }
         await safeDispatch({
           eventKey,
           triggeredBy: context.userId,
           entityTable: "logistica_embarques",
           entityId: data.id,
-          vars: {
-            codigo: emb?.numero ?? "",
-            destino: emb?.destino ?? "",
-            link: appUrl(`/logistica/embarques/${data.id}`),
-          },
+          vars,
         });
       } catch (e) {
         console.error("[logistica/setStatus] email dispatch failed", e);
