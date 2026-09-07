@@ -677,13 +677,16 @@ export async function recordClienteEvent(
     .eq("id", opts.userId)
     .maybeSingle();
   const nome = prof?.full_name ?? prof?.email ?? "Sistema";
-  await admin.from("cliente_interacoes").insert({
+  const { error } = await admin.from("cliente_interacoes").insert({
     cliente_id: opts.clienteId,
     tipo: opts.tipo,
     descricao: opts.descricao,
     user_id: opts.userId,
     user_nome: nome,
   } as never);
+  if (error) {
+    console.error("[clientes/recordClienteEvent] insert failed", opts.tipo, error);
+  }
 }
 
 /* ===================== Sócios (CRUD individual) ===================== */
