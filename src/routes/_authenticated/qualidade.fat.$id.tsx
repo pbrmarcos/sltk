@@ -822,7 +822,9 @@ function MedicoesCard({
                     size="sm"
                     variant="ghost"
                     disabled={disabled}
-                    onClick={() => removeRow(m.id)}
+                    onClick={() => {
+                      if (confirm(`Remover a medição "${m.parametro}"?`)) removeRow(m.id);
+                    }}
                   >
                     Remover
                   </Button>
@@ -1148,7 +1150,14 @@ function AssinaturaBox({
             hash {existing.hash_sha256?.slice(0, 12)}…
           </div>
           <div className="mt-2">
-            <Button size="sm" variant="outline" onClick={reset} disabled={disabled}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={disabled}
+              onClick={() => {
+                if (confirm("Apagar esta assinatura e coletar de novo?")) reset();
+              }}
+            >
               Refazer
             </Button>
           </div>

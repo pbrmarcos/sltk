@@ -8,6 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,6 +44,7 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
   const [status, setStatus] = useState<"todos" | RevisaoStatus>("todos");
   const [page, setPage] = useState(1);
   const [openNovo, setOpenNovo] = useState(false);
+  const [aprovarConfirmId, setAprovarConfirmId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery(allRevisoesQueryOptions({ disciplina, q, status, page }));
 
@@ -59,6 +70,7 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
       if (!mounted.current) return;
       toast.error(e?.message ?? "Falha ao aprovar.");
     },
+    onSettled: () => setAprovarConfirmId(null),
   });
 
   const title = disciplina === "mecanica" ? "Revisão Mecânica" : "Revisão Elétrica";
@@ -152,13 +164,7 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
                   {REVISAO_STATUS_LABEL[r.status as RevisaoStatus]}
                 </Badge>
                 {r.status !== "aprovada" && r.status !== "reprovada" ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (confirm("Marcar esta revisão como aprovada?")) aprovarMut.mutate(r.id);
-                    }}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => setAprovarConfirmId(r.id)}>
                     Aprovar
                   </Button>
                 ) : (
@@ -204,6 +210,29 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
           setOpenNovo(false);
         }}
       />
+
+      <AlertDialog
+        open={!!aprovarConfirmId}
+        onOpenChange={(o) => !aprovarMut.isPending && !o && setAprovarConfirmId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aprovar esta revisão?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A revisão passa para o status "Aprovada".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={aprovarMut.isPending}
+              onClick={() => aprovarConfirmId && aprovarMut.mutate(aprovarConfirmId)}
+            >
+              Aprovar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }

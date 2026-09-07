@@ -24,6 +24,13 @@ type Resposta = {
 };
 type Dados = Record<string, Resposta>;
 
+const SAT_STATUS_LABEL: Record<string, string> = {
+  rascunho: "Rascunho",
+  preenchendo: "Preenchendo",
+  assinado: "Assinado",
+  arquivado: "Arquivado",
+};
+
 export function SATFormPage({ id }: { id: string }) {
   const qc = useQueryClient();
   const getRelFn = useServerFn(getSATRelatorio);
@@ -162,7 +169,9 @@ export function SATFormPage({ id }: { id: string }) {
       <div className="flex items-center justify-between gap-3 sticky top-0 z-10 bg-[var(--bg-base)] py-2 border-b border-[var(--bg-border)]">
         <div className="flex items-center gap-2 text-[13px]">
           <span className="font-medium">{rel?.codigo}</span>
-          <Badge variant="outline">{rel?.status}</Badge>
+          <Badge variant="outline">
+            {rel?.status ? (SAT_STATUS_LABEL[rel.status] ?? rel.status) : ""}
+          </Badge>
           {rel?.clientes?.razao_social && (
             <span className="text-[var(--text-muted)]">{rel.clientes.razao_social}</span>
           )}
@@ -186,6 +195,12 @@ export function SATFormPage({ id }: { id: string }) {
           </Button>
         </div>
       </div>
+
+      {rel?.status && rel.status !== "assinado" && (
+        <p className="text-[12px] text-[var(--text-muted)]">
+          Para encerrar, gere o <strong>Link de campo</strong> e colha a assinatura do cliente.
+        </p>
+      )}
 
       {/* Dados gerais */}
       <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 grid grid-cols-2 gap-3">

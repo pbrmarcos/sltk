@@ -50,9 +50,8 @@ function SATDetailRoute() {
         actions={
           <>
             <Button
-              variant="outline"
               onClick={() => setShareOpen(true)}
-              title="Gera um link assinado para o técnico em campo abrir pelo tablet/celular"
+              title="Gera um link assinado para o técnico em campo abrir pelo tablet/celular — é assim que o SAT é encerrado"
             >
               <Share2 className="mr-1.5 h-4 w-4" />
               Link de campo

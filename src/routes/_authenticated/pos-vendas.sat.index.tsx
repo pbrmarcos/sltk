@@ -123,7 +123,6 @@ function SATListPage() {
             <SelectItem value="rascunho">Rascunho</SelectItem>
             <SelectItem value="preenchendo">Preenchendo</SelectItem>
             <SelectItem value="assinado">Assinado</SelectItem>
-            <SelectItem value="arquivado">Arquivado</SelectItem>
           </SelectContent>
         </Select>
       </div>
