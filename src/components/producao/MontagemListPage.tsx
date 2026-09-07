@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -166,6 +167,23 @@ export function MontagemListPage() {
                       ? ` · ${r.inicio_previsto ?? "—"} → ${r.fim_previsto ?? "—"}`
                       : ""}
                   </div>
+                  {Array.isArray(r.equipamento_projetos) && r.equipamento_projetos.length > 0 && (
+                    <div className="mt-0.5 flex flex-wrap gap-2">
+                      {r.equipamento_projetos.map((p: any) => (
+                        <Link
+                          key={p.id}
+                          to="/engenharia/projetos"
+                          search={{
+                            d: p.disciplina === "eletrico" ? "eletrico" : "mecanico",
+                            open: p.id,
+                          }}
+                          className="text-[11px] text-primary hover:underline"
+                        >
+                          Ver projeto ({p.disciplina === "eletrico" ? "elétrico" : "mecânico"})
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-20 overflow-hidden rounded-full bg-[var(--bg-elevated)]">

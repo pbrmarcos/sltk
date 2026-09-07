@@ -50,7 +50,8 @@ export const listAllMontagens = createServerFn({ method: "POST" })
     let q = context.supabase
       .from("equipamento_montagens")
       .select(
-        "id, equipamento_id, cliente_id, status, progresso, inicio_previsto, fim_previsto, inicio_real, fim_real, responsavel_id, updated_at, cliente_equipamentos!inner(codigo,modelo), clientes!inner(codigo,razao_social)",
+        "id, equipamento_id, cliente_id, status, progresso, inicio_previsto, fim_previsto, inicio_real, fim_real, responsavel_id, updated_at, cliente_equipamentos!inner(codigo,modelo), clientes!inner(codigo,razao_social)" +
+          ", equipamento_projetos!equipamento_projetos_montagem_id_fkey(id, disciplina, processo_id)",
         { count: "exact" },
       )
       .is("deleted_at", null);

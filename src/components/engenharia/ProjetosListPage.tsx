@@ -458,6 +458,11 @@ function ProjetoDetalheDialog({
                     </Link>
                   </Button>
                 )}
+                {!projeto.__demo && projeto.montagem_id && (
+                  <Button asChild variant="outline">
+                    <Link to="/producao/montagem">Ver montagem</Link>
+                  </Button>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="insumos">

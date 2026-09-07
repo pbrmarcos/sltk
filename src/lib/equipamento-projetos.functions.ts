@@ -47,7 +47,7 @@ export const listAllProjetos = createServerFn({ method: "POST" })
     let q = context.supabase
       .from("equipamento_projetos")
       .select(
-        "id, equipamento_id, cliente_id, disciplina, revisao, status, responsavel_id, liberado_em, hh_consumida, updated_at, cliente_equipamentos!inner(codigo,modelo), clientes!inner(codigo,razao_social)",
+        "id, equipamento_id, cliente_id, disciplina, revisao, status, responsavel_id, liberado_em, hh_consumida, montagem_id, updated_at, cliente_equipamentos!inner(codigo,modelo), clientes!inner(codigo,razao_social)",
         { count: "exact" },
       )
       .eq("disciplina", data.disciplina)
