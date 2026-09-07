@@ -136,6 +136,50 @@ export const createFat = createServerFn({ method: "POST" })
   });
 
 // ============================================================
+// NOVA TENTATIVA (a partir de um FAT reprovado)
+// ============================================================
+export const criarNovaTentativaFat = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { fat_origem_id: string }) =>
+    z.object({ fat_origem_id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "qualidade");
+    const { data: origem, error: oErr } = await context.supabase
+      .from("fat_relatorios")
+      .select(
+        "id, status, processo_id, cliente_id, os_codigo, tag_equipamento, testemunha_nome, local_ensaio, tensao_alimentacao, tecnicos",
+      )
+      .eq("id", data.fat_origem_id)
+      .is("deleted_at", null)
+      .single();
+    if (oErr || !origem) throw new Error("FAT de origem não encontrado.");
+    if (origem.status !== "reprovado") {
+      throw new Error("Só é possível criar uma nova tentativa a partir de um FAT reprovado.");
+    }
+
+    const { data: novo, error } = await context.supabase
+      .from("fat_relatorios")
+      .insert({
+        processo_id: origem.processo_id,
+        cliente_id: origem.cliente_id,
+        status: "rascunho",
+        inspetor_id: context.userId,
+        fat_origem_id: origem.id,
+        os_codigo: origem.os_codigo,
+        tag_equipamento: origem.tag_equipamento,
+        testemunha_nome: origem.testemunha_nome,
+        local_ensaio: origem.local_ensaio,
+        tensao_alimentacao: origem.tensao_alimentacao,
+        tecnicos: origem.tecnicos,
+      } as never)
+      .select("id")
+      .single();
+    if (error) throw friendlyDbError(error);
+    return { id: (novo as { id: string }).id };
+  });
+
+// ============================================================
 // GET DETALHE
 // ============================================================
 export const getFat = createServerFn({ method: "GET" })
@@ -150,6 +194,8 @@ export const getFat = createServerFn({ method: "GET" })
       .single();
     if (error || !fat) throw new Error("FAT não encontrado.");
 
+    const fatOrigemId = (fat as { fat_origem_id?: string | null }).fat_origem_id ?? null;
+
     const [
       { data: tpl },
       { data: resp },
@@ -158,6 +204,8 @@ export const getFat = createServerFn({ method: "GET" })
       { data: ass },
       { data: cli },
       { data: proc },
+      { data: origem },
+      { data: proximaTentativa },
     ] = await Promise.all([
       context.supabase
         .from("fat_checklist_template")
@@ -182,6 +230,19 @@ export const getFat = createServerFn({ method: "GET" })
         .select("id, codigo, titulo")
         .eq("id", fat.processo_id)
         .single(),
+      fatOrigemId
+        ? context.supabase
+            .from("fat_relatorios")
+            .select("id, codigo")
+            .eq("id", fatOrigemId)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      (context.supabase as any)
+        .from("fat_relatorios")
+        .select("id, codigo")
+        .eq("fat_origem_id", data.id)
+        .is("deleted_at", null)
+        .maybeSingle(),
     ]);
 
     return {
@@ -193,6 +254,8 @@ export const getFat = createServerFn({ method: "GET" })
       assinaturas: ass ?? [],
       cliente: cli ?? null,
       processo: proc ?? null,
+      origem: origem ?? null,
+      proximaTentativa: proximaTentativa ?? null,
     };
   });
 

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -41,6 +41,7 @@ import {
   removeAssinatura,
   homologarFat,
   reprovarFat,
+  criarNovaTentativaFat,
   getFatFotoSignedUrl,
   FAT_STATUS_LABEL,
   FAT_SECOES,
@@ -64,9 +65,11 @@ function FatDetailPage() {
   const fetchFn = useServerFn(getFat);
   const homologar = useServerFn(homologarFat);
   const reprovar = useServerFn(reprovarFat);
+  const novaTentativa = useServerFn(criarNovaTentativaFat);
   const genDoc = useServerFn(generateFatDocument);
   const [homologating, setHomologating] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState(false);
+  const [creatingRetry, setCreatingRetry] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [reprovarOpen, setReprovarOpen] = useState(false);
   const [motivoReprovacao, setMotivoReprovacao] = useState("");
@@ -82,6 +85,19 @@ function FatDetailPage() {
       toast.error(e?.message ?? "Erro ao gerar documento");
     } finally {
       setGeneratingDoc(false);
+    }
+  }
+
+  async function doNovaTentativa() {
+    setCreatingRetry(true);
+    try {
+      const res = await novaTentativa({ data: { fat_origem_id: id } });
+      toast.success("Nova tentativa criada.");
+      nav({ to: "/qualidade/fat/$id", params: { id: res.id } });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao criar nova tentativa");
+    } finally {
+      setCreatingRetry(false);
     }
   }
 
@@ -206,10 +222,47 @@ function FatDetailPage() {
         }
       />
 
+      {data.origem && (
+        <Alert className="mb-4">
+          <AlertTitle>Nova tentativa</AlertTitle>
+          <AlertDescription>
+            Esta é uma nova tentativa do FAT reprovado{" "}
+            <Link
+              to="/qualidade/fat/$id"
+              params={{ id: data.origem.id }}
+              className="underline hover:no-underline"
+            >
+              {data.origem.codigo}
+            </Link>
+            .
+          </AlertDescription>
+        </Alert>
+      )}
+
       {isReprovado && fat.motivo_reprovacao && (
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>FAT reprovado</AlertTitle>
-          <AlertDescription>{fat.motivo_reprovacao}</AlertDescription>
+          <AlertDescription>
+            <p>{fat.motivo_reprovacao}</p>
+            <div className="mt-2">
+              {data.proximaTentativa ? (
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/qualidade/fat/$id" params={{ id: data.proximaTentativa.id }}>
+                    Ver nova tentativa ({data.proximaTentativa.codigo})
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={doNovaTentativa}
+                  disabled={creatingRetry}
+                >
+                  {creatingRetry ? "Criando…" : "Criar nova tentativa"}
+                </Button>
+              )}
+            </div>
+          </AlertDescription>
         </Alert>
       )}
 
