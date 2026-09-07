@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assertCanAccessModule } from "@/lib/admin-guard";
+import { assertAdminOrManager } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -175,7 +175,7 @@ export const novaVersaoSATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => novaVersaoInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     // próxima versão
     const { data: maxRow } = await context.supabase
       .from("sat_template")
@@ -239,7 +239,7 @@ export const setSATTemplateAtivo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => setAtivoInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     const { error } = await context.supabase
       .from("sat_template")
       .update({ ativo: true, updated_by: context.userId } as never)
@@ -258,7 +258,7 @@ export const updateSATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updTplInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     const patch: Record<string, unknown> = { updated_by: context.userId };
     if (data.nome !== undefined) patch.nome = data.nome;
     if (data.descricao !== undefined) patch.descricao = data.descricao;
@@ -276,7 +276,7 @@ export const archiveSATTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => archiveInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     const { error } = await context.supabase
       .from("sat_template")
       .update({
@@ -303,7 +303,7 @@ export const upsertSATSecao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => secaoUpsert.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     if (data.id) {
       const { error } = await context.supabase
         .from("sat_template_secao")
@@ -335,7 +335,7 @@ export const deleteSATSecao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => deleteSecaoInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     const { error } = await context.supabase.from("sat_template_secao").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
@@ -357,7 +357,7 @@ export const upsertSATItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => itemUpsert.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     const payload = {
       secao_id: data.secao_id,
       ordem: data.ordem,
@@ -390,7 +390,7 @@ export const deleteSATItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => deleteItemInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
+    await assertAdminOrManager(context.supabase, context.userId);
     const { error } = await context.supabase.from("sat_template_item").delete().eq("id", data.id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
