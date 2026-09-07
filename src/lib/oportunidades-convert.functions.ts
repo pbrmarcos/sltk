@@ -3,6 +3,8 @@ import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAuditServer } from "@/lib/audit.server";
+import { notifyOportunidadeStageEmail } from "@/lib/oportunidades.functions";
 
 /**
  * Conversão em lote: a partir de uma empresa (lead OU cliente já cadastrado),
@@ -181,7 +183,7 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
     // Valida cliente
     const { data: cli, error: cliErr } = await context.supabase
       .from("clientes")
-      .select("id, codigo, status")
+      .select("id, codigo, status, razao_social, nome_fantasia")
       .eq("id", data.cliente_id)
       .is("deleted_at", null)
       .maybeSingle();
@@ -189,12 +191,36 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
     if (!cli) throw new Error("Cliente não encontrado.");
 
     // Promove para ativo, se ainda não estiver
-    if (cli.status !== "ativo") {
+    const promovido = cli.status !== "ativo";
+    if (promovido) {
       const { error } = await context.supabase
         .from("clientes")
         .update({ status: "ativo", updated_by: context.userId })
         .eq("id", data.cliente_id);
       if (error) throw friendlyDbError(error);
+      await logAuditServer(context.supabase as any, context.userId, {
+        table_name: "clientes",
+        record_id: data.cliente_id,
+        action: "UPDATE",
+        field_changed: "status",
+        old_value: cli.status,
+        new_value: "ativo",
+      });
+      try {
+        const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+        await safeDispatch({
+          eventKey: "cliente.promovido_ativo",
+          triggeredBy: context.userId,
+          entityTable: "clientes",
+          entityId: data.cliente_id,
+          vars: {
+            cliente_nome: cli.nome_fantasia || cli.razao_social || cli.codigo,
+            link: appUrl(`/clientes/${cli.codigo}`),
+          },
+        });
+      } catch (e) {
+        console.error("[oportunidades-convert] email dispatch failed", e);
+      }
     }
 
     const created: Array<{
@@ -264,6 +290,14 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
           .eq("id", opp.id);
         if (updErr) throw friendlyDbError(updErr);
 
+        await notifyOportunidadeStageEmail(
+          context.supabase as any,
+          context.userId,
+          opp,
+          "ganho",
+          opp.id,
+        );
+
         created.push({
           oportunidade_id: opp.id,
           processo_id: proc.id,
@@ -271,15 +305,25 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
           template_aplicado: aplicado,
         });
       } else if (item.action === "lose") {
+        const lostReason = item.lost_reason ?? "Convertida em outra oportunidade da mesma empresa.";
         const { error } = await context.supabase
           .from("oportunidades")
           .update({
             pipeline_stage: "perdido",
             cliente_id: data.cliente_id,
-            lost_reason: item.lost_reason ?? "Convertida em outra oportunidade da mesma empresa.",
+            lost_reason: lostReason,
           })
           .eq("id", opp.id);
         if (error) throw friendlyDbError(error);
+
+        await notifyOportunidadeStageEmail(
+          context.supabase as any,
+          context.userId,
+          opp,
+          "perdido",
+          opp.id,
+          lostReason,
+        );
       } else {
         // keep: apenas vincula o cliente
         if (opp.cliente_id !== data.cliente_id) {

@@ -180,6 +180,75 @@ export const listPipeline = createServerFn({ method: "POST" })
     });
   });
 
+/**
+ * Dispara o e-mail de mudança de estágio (ganho/perdido/alterado). Extraído
+ * de `updateStage` para ser reaproveitado por qualquer caminho de código que
+ * também muda o estágio de uma oportunidade (ex.: conversão em lote), sem
+ * duplicar a lógica de variáveis — nunca lança, só loga em caso de falha.
+ */
+export async function notifyOportunidadeStageEmail(
+  supabase: any,
+  userId: string,
+  antes: {
+    titulo?: string | null;
+    empresa_lead?: string | null;
+    valor_estimado?: number | null;
+    cliente_id?: string | null;
+    pipeline_stage?: PipelineStage | null;
+  } | null,
+  novoStage: PipelineStage,
+  oportunidadeId: string,
+  lostReason?: string | null,
+): Promise<void> {
+  try {
+    const eventKey =
+      novoStage === "ganho"
+        ? "oportunidade.ganha"
+        : novoStage === "perdido"
+          ? "oportunidade.perdida"
+          : "oportunidade.stage_alterado";
+    const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+    let clienteNome = antes?.empresa_lead || "";
+    if (antes?.cliente_id) {
+      const { data: cliente } = await supabase
+        .from("clientes")
+        .select("razao_social, nome_fantasia")
+        .eq("id", antes.cliente_id)
+        .maybeSingle();
+      clienteNome = cliente?.nome_fantasia || cliente?.razao_social || clienteNome;
+    }
+    const { data: perfil } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", userId)
+      .maybeSingle();
+    await safeDispatch({
+      eventKey,
+      triggeredBy: userId,
+      entityTable: "oportunidades",
+      entityId: oportunidadeId,
+      vars: {
+        titulo: antes?.titulo ?? "",
+        cliente_nome: clienteNome,
+        stage_anterior: STAGE_LABEL[(antes?.pipeline_stage as PipelineStage) ?? "novo"],
+        stage_novo: STAGE_LABEL[novoStage],
+        valor: antes?.valor_estimado
+          ? Number(antes.valor_estimado).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })
+          : "",
+        motivo: lostReason ?? "",
+        usuario: perfil?.full_name ?? "",
+        data: new Date().toLocaleString("pt-BR"),
+        link: appUrl(`/comercial/pipeline`),
+      },
+    });
+  } catch (e) {
+    console.error("[oportunidades] email dispatch failed", e);
+  }
+}
+
 export const updateStage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; stage: PipelineStage; lost_reason?: string }) =>
@@ -215,53 +284,14 @@ export const updateStage = createServerFn({ method: "POST" })
     const { error } = await context.supabase.from("oportunidades").update(patch).eq("id", data.id);
     if (error) throw friendlyDbError(error);
 
-    try {
-      const eventKey =
-        data.stage === "ganho"
-          ? "oportunidade.ganha"
-          : data.stage === "perdido"
-            ? "oportunidade.perdida"
-            : "oportunidade.stage_alterado";
-      const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
-      let clienteNome = antes?.empresa_lead || "";
-      if (antes?.cliente_id) {
-        const { data: cliente } = await sb
-          .from("clientes")
-          .select("razao_social, nome_fantasia")
-          .eq("id", antes.cliente_id)
-          .maybeSingle();
-        clienteNome = cliente?.nome_fantasia || cliente?.razao_social || clienteNome;
-      }
-      const { data: perfil } = await sb
-        .from("profiles")
-        .select("full_name")
-        .eq("id", context.userId)
-        .maybeSingle();
-      await safeDispatch({
-        eventKey,
-        triggeredBy: context.userId,
-        entityTable: "oportunidades",
-        entityId: data.id,
-        vars: {
-          titulo: antes?.titulo ?? "",
-          cliente_nome: clienteNome,
-          stage_anterior: STAGE_LABEL[(antes?.pipeline_stage as PipelineStage) ?? "novo"],
-          stage_novo: STAGE_LABEL[data.stage],
-          valor: antes?.valor_estimado
-            ? Number(antes.valor_estimado).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })
-            : "",
-          motivo: data.lost_reason ?? "",
-          usuario: perfil?.full_name ?? "",
-          data: new Date().toLocaleString("pt-BR"),
-          link: appUrl(`/comercial/pipeline`),
-        },
-      });
-    } catch (e) {
-      console.error("[oportunidades/updateStage] email dispatch failed", e);
-    }
+    await notifyOportunidadeStageEmail(
+      sb,
+      context.userId,
+      antes,
+      data.stage,
+      data.id,
+      data.lost_reason,
+    );
 
     return { ok: true };
   });
@@ -533,57 +563,6 @@ export const updateOportunidade = createServerFn({ method: "POST" })
       .eq("id", id);
     if (error) throw friendlyDbError(error);
     return { ok: true };
-  });
-
-export const convertToProcesso = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string; cliente_id?: string }) =>
-    z
-      .object({
-        id: z.string().uuid(),
-        cliente_id: z.string().uuid().optional(),
-      })
-      .parse(data),
-  )
-  .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "comercial");
-    const { data: opp, error: oppErr } = await context.supabase
-      .from("oportunidades")
-      .select("*")
-      .eq("id", data.id)
-      .single();
-    if (oppErr || !opp) throw new Error("Oportunidade não encontrada");
-    if (opp.processo_id) throw new Error("Já convertida em processo");
-
-    const clienteId = data.cliente_id ?? opp.cliente_id;
-    if (!clienteId) throw new Error("Selecione um cliente antes de converter");
-
-    const { data: proc, error: procErr } = await context.supabase
-      .from("processos")
-      .insert({
-        codigo: "",
-        titulo: opp.titulo,
-        cliente_id: clienteId,
-        pilar_id: opp.responsavel_id,
-        tipo: "projeto",
-        stage: "Lead",
-        valor: opp.valor_estimado,
-      })
-      .select("id, codigo")
-      .single();
-    if (procErr || !proc) throw new Error(procErr?.message ?? "Falha ao criar processo");
-
-    const { error: updErr } = await context.supabase
-      .from("oportunidades")
-      .update({
-        pipeline_stage: "ganho",
-        cliente_id: clienteId,
-        processo_id: proc.id,
-      })
-      .eq("id", data.id);
-    if (updErr) throw friendlyDbError(updErr);
-
-    return { processo_id: proc.id, processo_codigo: proc.codigo };
   });
 
 /** Contexto de uma oportunidade para pré-preencher o orçamento. */

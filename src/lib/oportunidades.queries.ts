@@ -7,7 +7,6 @@ import {
   restoreOportunidade,
   createOportunidade,
   updateOportunidade,
-  convertToProcesso,
   type PipelineStage,
   type OportunidadeLite,
 } from "@/lib/oportunidades.functions";
@@ -101,18 +100,5 @@ export function useUpdateOportunidade() {
       qc.invalidateQueries({ queryKey: ["oportunidades", "pipeline"] });
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Falha ao atualizar"),
-  });
-}
-
-export function useConvertToProcesso() {
-  const qc = useQueryClient();
-  const fn = useServerFn(convertToProcesso);
-  return useMutation({
-    mutationFn: (vars: { id: string; cliente_id?: string }) => fn({ data: vars }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["oportunidades", "pipeline"] });
-      toast.success("Convertida em processo");
-    },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Falha ao converter"),
   });
 }

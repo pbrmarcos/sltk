@@ -3,6 +3,7 @@ import { assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAuditServer } from "@/lib/audit.server";
 
 export type OportunidadeNota = {
   id: string;
@@ -57,7 +58,14 @@ export const addOportunidadeNota = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
-    return { id: (ins as { id: string }).id };
+    const id = (ins as { id: string }).id;
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "oportunidade_notas",
+      record_id: id,
+      action: "INSERT",
+      new_value: { oportunidade_id: data.oportunidade_id },
+    });
+    return { id };
   });
 
 export const removerOportunidadeNota = createServerFn({ method: "POST" })
@@ -70,5 +78,10 @@ export const removerOportunidadeNota = createServerFn({ method: "POST" })
       .update({ deleted_at: new Date().toISOString(), deleted_by: context.userId } as never)
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "oportunidade_notas",
+      record_id: data.id,
+      action: "DELETE",
+    });
     return { ok: true };
   });

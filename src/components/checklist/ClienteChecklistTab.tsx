@@ -22,12 +22,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, ExternalLink, FileText, Plus, Archive, CheckCircle2 } from "lucide-react";
+import { Copy, ExternalLink, FileText, Plus, Archive, CheckCircle2, Mail } from "lucide-react";
 import {
   listChecklistTipos,
   emitirChecklistLink,
   listChecklistLinksCliente,
   arquivarChecklistLink,
+  enviarChecklistLinkPorEmail,
   listChecklistSubmissoes,
   getChecklistTipoSchema,
   listOportunidadesDoCliente,
@@ -68,6 +69,12 @@ export function ClienteChecklistTab({ clienteId }: Props) {
       qc.invalidateQueries({ queryKey: ["checklist-links", clienteId] });
       toast.success("Link arquivado.");
     },
+  });
+
+  const enviarEmailMut = useMutation({
+    mutationFn: (link_id: string) => enviarChecklistLinkPorEmail({ data: { link_id } }),
+    onSuccess: (res) => toast.success(`Checklist enviado para ${res.email}.`),
+    onError: (e: any) => toast.error(e.message || "Erro ao enviar e-mail."),
   });
 
   function copiar(slug: string) {
@@ -131,6 +138,14 @@ export function ClienteChecklistTab({ clienteId }: Props) {
                     <>
                       <Button size="sm" variant="outline" onClick={() => copiar(l.slug)}>
                         <Copy className="h-3.5 w-3.5" /> Copiar link
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={enviarEmailMut.isPending}
+                        onClick={() => enviarEmailMut.mutate(l.id)}
+                      >
+                        <Mail className="h-3.5 w-3.5" /> Enviar por e-mail
                       </Button>
                       <Button
                         size="sm"

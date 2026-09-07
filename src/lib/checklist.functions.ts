@@ -4,6 +4,8 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { getSupabasePublicConfig } from "@/integrations/supabase/config";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertCanAccessModule } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 import type { FormularioSchema, Idioma } from "@/lib/checklist.shared";
 
 function randomToken(len = 6): string {
@@ -229,8 +231,8 @@ export const emitirChecklistLink = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
-    // RLS já garante permissão de INSERT (pode_ver_cliente).
     const expira = new Date(Date.now() + data.expira_em_dias * 86400000).toISOString();
 
     // Busca códigos legíveis para compor o slug (cliente + tipo).
@@ -266,7 +268,75 @@ export const emitirChecklistLink = createServerFn({ method: "POST" })
       .select("id, slug")
       .single();
     if (error) throw friendlyDbError(error);
+    await logAuditServer(sb, context.userId, {
+      table_name: "checklist_formulario_link",
+      record_id: inserted.id,
+      action: "INSERT",
+      new_value: { cliente_id: data.cliente_id, tipo_id: data.tipo_id, slug: inserted.slug },
+    });
     return inserted as { id: string; slug: string };
+  });
+
+// ------------------------------------------------------------------
+// Enviar link por e-mail ao contato principal do cliente
+// ------------------------------------------------------------------
+export const enviarChecklistLinkPorEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ link_id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
+    const sb = context.supabase as any;
+    const { data: link, error } = await sb
+      .from("checklist_formulario_link")
+      .select("id, slug, cliente_id")
+      .eq("id", data.link_id)
+      .maybeSingle();
+    if (error) throw friendlyDbError(error);
+    if (!link) throw new Error("Link não encontrado.");
+
+    const [{ data: cliente }, { data: contato }, { data: perfil }] = await Promise.all([
+      sb
+        .from("clientes")
+        .select("razao_social, nome_fantasia")
+        .eq("id", link.cliente_id)
+        .maybeSingle(),
+      sb
+        .from("cliente_contatos")
+        .select("nome, email")
+        .eq("cliente_id", link.cliente_id)
+        .eq("principal", true)
+        .is("deleted_at", null)
+        .maybeSingle(),
+      sb.from("profiles").select("full_name, email").eq("id", context.userId).maybeSingle(),
+    ]);
+    if (!contato?.email) {
+      throw new Error("Este cliente não tem um contato principal com e-mail cadastrado.");
+    }
+
+    const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
+    await safeDispatch({
+      eventKey: "checklist.link_enviado",
+      triggeredBy: context.userId,
+      entityTable: "checklist_formulario_link",
+      entityId: link.id,
+      vars: {
+        cliente_nome: cliente?.nome_fantasia || cliente?.razao_social || "Cliente",
+        destinatario_nome: contato.nome ?? "",
+        link: appUrl(`/checklist/${link.slug}`),
+        usuario: perfil?.full_name ?? perfil?.email ?? "Time comercial",
+      },
+      extraTo: [contato.email],
+    });
+
+    await logAuditServer(sb, context.userId, {
+      table_name: "checklist_formulario_link",
+      record_id: link.id,
+      action: "UPDATE",
+      field_changed: "enviado_por_email",
+      new_value: contato.email,
+    });
+
+    return { ok: true as const, email: contato.email as string };
   });
 
 // ------------------------------------------------------------------
@@ -293,12 +363,20 @@ export const arquivarChecklistLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ link_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { error } = await sb
       .from("checklist_formulario_link")
       .update({ status: "arquivado" })
       .eq("id", data.link_id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(sb, context.userId, {
+      table_name: "checklist_formulario_link",
+      record_id: data.link_id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: "arquivado",
+    });
     return { ok: true as const };
   });
 
@@ -454,6 +532,14 @@ export const liberarClienteParaSales = createServerFn({ method: "POST" })
         })
         .eq("id", existente.id);
       if (error) throw friendlyDbError(error);
+      await logAuditServer(sb, context.userId, {
+        table_name: "cliente_sales_liberacao",
+        record_id: existente.id,
+        action: "UPDATE",
+        field_changed: "revogado_em",
+        new_value: null,
+        old_value: { reativado_para: data.sales_id },
+      });
       return { ok: true as const, id: existente.id };
     }
     const { data: inserted, error } = await sb
@@ -467,6 +553,12 @@ export const liberarClienteParaSales = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
+    await logAuditServer(sb, context.userId, {
+      table_name: "cliente_sales_liberacao",
+      record_id: inserted.id,
+      action: "INSERT",
+      new_value: { cliente_id: data.cliente_id, sales_id: data.sales_id },
+    });
     return { ok: true as const, id: inserted.id };
   });
 
@@ -483,6 +575,13 @@ export const revogarLiberacaoSales = createServerFn({ method: "POST" })
       .update({ revogado_em: new Date().toISOString(), revogado_por: context.userId })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(sb, context.userId, {
+      table_name: "cliente_sales_liberacao",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "revogado_em",
+      new_value: new Date().toISOString(),
+    });
     return { ok: true as const };
   });
 
@@ -611,6 +710,7 @@ export const vincularSubmissaoOportunidade = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "comercial");
     const sb = context.supabase as any;
     const { error } = await sb
       .from("oportunidades")

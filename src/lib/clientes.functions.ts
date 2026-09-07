@@ -634,18 +634,28 @@ export const addClienteInteracao = createServerFn({ method: "POST" })
       .eq("id", context.userId)
       .maybeSingle();
     const nome = prof?.full_name ?? prof?.email ?? "Usuário";
-    const { error } = await admin.from("cliente_interacoes").insert({
-      cliente_id: data.clienteId,
-      tipo: data.tipo,
-      descricao: data.descricao,
-      user_id: context.userId,
-      user_nome: nome,
-    } as never);
+    const { data: ins, error } = await admin
+      .from("cliente_interacoes")
+      .insert({
+        cliente_id: data.clienteId,
+        tipo: data.tipo,
+        descricao: data.descricao,
+        user_id: context.userId,
+        user_nome: nome,
+      } as never)
+      .select("id")
+      .single();
     if (error) throw friendlyDbError(error);
     await admin
       .from("clientes")
       .update({ ultimo_contato_em: new Date().toISOString() } as never)
       .eq("id", data.clienteId);
+    await logAuditServer(admin as any, context.userId, {
+      table_name: "cliente_interacoes",
+      record_id: (ins as { id: string }).id,
+      action: "INSERT",
+      new_value: { cliente_id: data.clienteId, tipo: data.tipo },
+    });
     return { ok: true };
   });
 

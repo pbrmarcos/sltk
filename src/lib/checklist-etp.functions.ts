@@ -4,6 +4,7 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertEngineerOrHigher } from "@/lib/admin-guard";
+import { logAuditServer } from "@/lib/audit.server";
 
 /** Equipamentos de um cliente, para escolher onde o ETP será criado. */
 export const listEquipamentosDoCliente = createServerFn({ method: "POST" })
@@ -113,6 +114,13 @@ export const gerarEtpDeChecklist = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
+
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "equipamento_etps",
+      record_id: novo.id,
+      action: "INSERT",
+      new_value: { equipamento_id: data.equipamento_id, origem: "checklist", versao },
+    });
 
     const { data: prof } = await context.supabase
       .from("profiles")
