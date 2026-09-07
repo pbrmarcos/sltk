@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ArrowLeft, Save } from "lucide-react";
@@ -16,8 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ComboboxAdd } from "@/components/ui/combobox-add";
 import {
   createEmbarque,
+  createTransportadora,
   listProjetosDisponiveis,
   listTransportadoras,
 } from "@/lib/logistica.functions";
@@ -40,14 +42,21 @@ function NovoEmbarque() {
     queryFn: () => listProjetosDisponiveis(),
     enabled: canCreate,
   });
+  const qc = useQueryClient();
   const transportadoras = useQuery({
     queryKey: ["logistica", "transportadoras"],
     queryFn: () => listTransportadoras(),
     enabled: canCreate,
   });
+  const createTransportadoraFn = useServerFn(createTransportadora);
+  async function handleCreateTransportadora(nome: string) {
+    const created = await createTransportadoraFn({ data: { nome } });
+    await qc.invalidateQueries({ queryKey: ["logistica", "transportadoras"] });
+    return created;
+  }
 
   const [projetoId, setProjetoId] = useState("");
-  const [transportadoraId, setTransportadoraId] = useState<string>("none");
+  const [transportadoraId, setTransportadoraId] = useState<string | null>(null);
   const [previsaoSaida, setPrevisaoSaida] = useState("");
   const [destino, setDestino] = useState("");
   const [observacoes, setObservacoes] = useState("");
@@ -59,7 +68,7 @@ function NovoEmbarque() {
       return createFn({
         data: {
           projeto_id: projetoId,
-          transportadora_id: transportadoraId === "none" ? null : transportadoraId,
+          transportadora_id: transportadoraId,
           previsao_saida: previsaoSaida || null,
           destino: destino.trim() || null,
           observacoes: observacoes.trim() || null,
@@ -130,19 +139,13 @@ function NovoEmbarque() {
             <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
               Transportadora
             </Label>
-            <Select value={transportadoraId} onValueChange={setTransportadoraId}>
-              <SelectTrigger>
-                <SelectValue placeholder="A definir" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">A definir</SelectItem>
-                {(transportadoras.data ?? []).map((t: any) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ComboboxAdd
+              options={transportadoras.data ?? []}
+              value={transportadoraId}
+              onChange={setTransportadoraId}
+              placeholder="A definir"
+              onCreate={handleCreateTransportadora}
+            />
           </div>
           <div>
             <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">

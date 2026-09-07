@@ -58,6 +58,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ComboboxAdd } from "@/components/ui/combobox-add";
 import {
   getEmbarque,
   updateEmbarque,
@@ -68,6 +69,7 @@ import {
   removerAnexo,
   getAnexoSignedUrl,
   listTransportadoras,
+  createTransportadora,
   listStatusLog,
   generateRomaneioPdf,
   exportStatusLog,
@@ -124,6 +126,12 @@ function EmbarqueDetalhe() {
     queryFn: () => listTransportadoras(),
     enabled: canEdit,
   });
+  const createTransportadoraFn = useServerFn(createTransportadora);
+  async function handleCreateTransportadora(nome: string) {
+    const created = await createTransportadoraFn({ data: { nome } });
+    await qc.invalidateQueries({ queryKey: ["logistica", "transportadoras"] });
+    return created;
+  }
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["logistica", "embarque", id] });
 
@@ -463,6 +471,7 @@ function EmbarqueDetalhe() {
               embarque={embarque}
               transportadoras={transportadoras.data ?? []}
               canEdit={canEdit}
+              onCreateTransportadora={handleCreateTransportadora}
               onSave={async (patch) => {
                 await updateFn({ data: { id, ...patch } });
                 invalidate();
@@ -958,11 +967,13 @@ function CabecalhoForm({
   embarque,
   transportadoras,
   canEdit,
+  onCreateTransportadora,
   onSave,
 }: {
   embarque: any;
   transportadoras: Array<{ id: string; nome: string }>;
   canEdit: boolean;
+  onCreateTransportadora: (nome: string) => Promise<{ id: string; nome: string } | null>;
   onSave: (patch: {
     transportadora_id?: string | null;
     previsao_saida?: string | null;
@@ -971,8 +982,8 @@ function CabecalhoForm({
     observacoes?: string | null;
   }) => Promise<void>;
 }) {
-  const [transportadoraId, setTransportadoraId] = useState<string>(
-    embarque.transportadora_id ?? "none",
+  const [transportadoraId, setTransportadoraId] = useState<string | null>(
+    embarque.transportadora_id ?? null,
   );
   const [previsao, setPrevisao] = useState<string>(embarque.previsao_saida ?? "");
   const [nf, setNf] = useState<string>(embarque.nf_saida ?? "");
@@ -987,19 +998,14 @@ function CabecalhoForm({
           <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
             Transportadora
           </Label>
-          <Select value={transportadoraId} onValueChange={setTransportadoraId} disabled={!canEdit}>
-            <SelectTrigger>
-              <SelectValue placeholder="A definir" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">A definir</SelectItem>
-              {transportadoras.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ComboboxAdd
+            options={transportadoras}
+            value={transportadoraId}
+            onChange={setTransportadoraId}
+            placeholder="A definir"
+            disabled={!canEdit}
+            onCreate={onCreateTransportadora}
+          />
         </div>
         <div>
           <Label className="mb-1 block text-xs uppercase text-[var(--text-muted)]">
@@ -1041,7 +1047,7 @@ function CabecalhoForm({
               setSaving(true);
               try {
                 await onSave({
-                  transportadora_id: transportadoraId === "none" ? null : transportadoraId,
+                  transportadora_id: transportadoraId,
                   previsao_saida: previsao || null,
                   nf_saida: nf.trim() || null,
                   destino: destino.trim() || null,

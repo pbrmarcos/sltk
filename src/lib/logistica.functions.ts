@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assertCanAccessModule } from "@/lib/admin-guard";
+import { assertCanAccessModule, hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -241,6 +241,34 @@ export const listTransportadoras = createServerFn({ method: "GET" })
       .order("nome", { ascending: true });
     if (error) throw friendlyDbError(error);
     return data ?? [];
+  });
+
+const TRANSPORTADORA_WRITE_ROLES: AppRoleName[] = ["admin", "manager", "purchasing"];
+
+const createTransportadoraInput = z.object({
+  nome: z.string().trim().min(2).max(200),
+});
+
+export const createTransportadora = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => createTransportadoraInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const ok = await hasAnyRole(context.supabase, context.userId, TRANSPORTADORA_WRITE_ROLES);
+    if (!ok) throw new Error("Acesso restrito.");
+    const { data: existing } = await (context.supabase as any)
+      .from("compras_transportadoras")
+      .select("id, nome")
+      .ilike("nome", data.nome)
+      .eq("ativo", true)
+      .maybeSingle();
+    if (existing) return existing;
+    const { data: inserted, error } = await (context.supabase as any)
+      .from("compras_transportadoras")
+      .insert({ nome: data.nome, criado_por: context.userId })
+      .select("id, nome")
+      .single();
+    if (error) throw friendlyDbError(error);
+    return inserted;
   });
 
 // ---------- Criar embarque ----------
