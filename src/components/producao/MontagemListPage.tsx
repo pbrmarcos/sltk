@@ -6,6 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -47,6 +48,8 @@ export function MontagemListPage() {
   const [page, setPage] = useState(1);
   const [openNovo, setOpenNovo] = useState(false);
   const [concluirConfirmId, setConcluirConfirmId] = useState<string | null>(null);
+  const [bloquearId, setBloquearId] = useState<string | null>(null);
+  const [bloquearMotivo, setBloquearMotivo] = useState("");
 
   const { data, isLoading } = useQuery(allMontagensQueryOptions({ q, status, page }));
 
@@ -89,6 +92,29 @@ export function MontagemListPage() {
       qc.invalidateQueries({ queryKey: ["producao", "montagens"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao iniciar."),
+  });
+
+  const bloquearMut = useMutation({
+    mutationFn: ({ id, motivo }: { id: string; motivo: string }) =>
+      updateMontagem({ data: { id, status: "bloqueada", observacoes: motivo } }),
+    onSuccess: () => {
+      toast.success("Montagem bloqueada.");
+      qc.invalidateQueries({ queryKey: ["producao", "montagens"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao bloquear."),
+    onSettled: () => {
+      setBloquearId(null);
+      setBloquearMotivo("");
+    },
+  });
+
+  const retomarMut = useMutation({
+    mutationFn: (id: string) => updateMontagem({ data: { id, status: "em_andamento" } }),
+    onSuccess: () => {
+      toast.success("Montagem retomada.");
+      qc.invalidateQueries({ queryKey: ["producao", "montagens"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao retomar."),
   });
 
   return (
@@ -197,17 +223,37 @@ export function MontagemListPage() {
                 >
                   {MONTAGEM_STATUS_LABEL[r.status as MontagemStatus]}
                 </Badge>
-                {r.status === "nao_iniciada" ? (
-                  <Button size="sm" variant="outline" onClick={() => iniciarMut.mutate(r.id)}>
-                    Iniciar
-                  </Button>
-                ) : r.status === "em_andamento" ? (
-                  <Button size="sm" variant="outline" onClick={() => setConcluirConfirmId(r.id)}>
-                    Concluir
-                  </Button>
-                ) : (
-                  <span />
-                )}
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  {r.status === "nao_iniciada" && (
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => iniciarMut.mutate(r.id)}>
+                        Iniciar
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setBloquearId(r.id)}>
+                        Bloquear
+                      </Button>
+                    </>
+                  )}
+                  {r.status === "em_andamento" && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setConcluirConfirmId(r.id)}
+                      >
+                        Concluir
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setBloquearId(r.id)}>
+                        Bloquear
+                      </Button>
+                    </>
+                  )}
+                  {r.status === "bloqueada" && (
+                    <Button size="sm" variant="outline" onClick={() => retomarMut.mutate(r.id)}>
+                      Retomar
+                    </Button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -265,6 +311,47 @@ export function MontagemListPage() {
               onClick={() => concluirConfirmId && concluirMut.mutate(concluirConfirmId)}
             >
               Concluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!bloquearId}
+        onOpenChange={(o) => {
+          if (bloquearMut.isPending) return;
+          if (!o) {
+            setBloquearId(null);
+            setBloquearMotivo("");
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bloquear montagem</AlertDialogTitle>
+            <AlertDialogDescription>
+              Descreva o impedimento — a equipe responsável é avisada por e-mail.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            value={bloquearMotivo}
+            onChange={(e) => setBloquearMotivo(e.target.value)}
+            placeholder="Motivo do bloqueio…"
+            rows={3}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={bloquearMut.isPending || !bloquearMotivo.trim()}
+              onClick={(e) => {
+                if (!bloquearMotivo.trim() || !bloquearId) {
+                  e.preventDefault();
+                  return;
+                }
+                bloquearMut.mutate({ id: bloquearId, motivo: bloquearMotivo.trim() });
+              }}
+            >
+              Bloquear
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
