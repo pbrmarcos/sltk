@@ -43,7 +43,7 @@ type Convite = {
   fornecedores?: {
     codigo: string;
     nome_fantasia: string;
-    razao_social: string;
+    nome: string;
     pais: string;
   } | null;
 };
@@ -226,7 +226,7 @@ function CotacaoDetailPage() {
                   <tr key={c.id} className="border-t">
                     <td className="p-2">
                       <div className="font-medium">
-                        {c.fornecedores?.nome_fantasia || c.fornecedores?.razao_social}
+                        {c.fornecedores?.nome_fantasia || c.fornecedores?.nome}
                       </div>
                       <div className="text-xs text-[var(--text-muted)]">
                         {c.fornecedores?.codigo} • {c.fornecedores?.pais}
@@ -289,9 +289,7 @@ function CotacaoDetailPage() {
                   return (
                     <th key={p.id} className="p-2 min-w-[180px]">
                       <div className="font-medium">
-                        {conv?.fornecedores?.nome_fantasia ||
-                          conv?.fornecedores?.razao_social ||
-                          "—"}
+                        {conv?.fornecedores?.nome_fantasia || conv?.fornecedores?.nome || "—"}
                       </div>
                       <div className="text-[11px] text-[var(--text-muted)]">
                         {p.moeda}
@@ -410,7 +408,7 @@ function CotacaoDetailPage() {
                     id: string;
                     codigo: string;
                     nome_fantasia: string;
-                    razao_social: string;
+                    nome: string;
                     pais: string;
                   };
                   const checked = fornSel.has(it.id);
@@ -428,7 +426,7 @@ function CotacaoDetailPage() {
                         />
                       </td>
                       <td className="p-2">
-                        <div className="font-medium">{it.nome_fantasia || it.razao_social}</div>
+                        <div className="font-medium">{it.nome_fantasia || it.nome}</div>
                         <div className="text-xs text-[var(--text-muted)]">{it.codigo}</div>
                       </td>
                       <td className="p-2">{it.pais}</td>

@@ -29,7 +29,7 @@ async function dispatchCotacaoInviteEmails(
       .maybeSingle();
     const { data: convites } = await sb
       .from("cotacao_fornecedores")
-      .select("token, fornecedor_id, fornecedores(nome_fantasia, razao_social, email_geral)")
+      .select("token, fornecedor_id, fornecedores(nome_fantasia, nome, email_corporativo)")
       .eq("cotacao_id", cotacaoId)
       .in("fornecedor_id", fornecedorIds);
     const { data: prof } = await sb
@@ -46,8 +46,8 @@ async function dispatchCotacaoInviteEmails(
       fornecedor_id: string;
       fornecedores: {
         nome_fantasia: string | null;
-        razao_social: string | null;
-        email_geral: string | null;
+        nome: string | null;
+        email_corporativo: string | null;
       } | null;
     }>) {
       const f = conv.fornecedores;
@@ -59,13 +59,13 @@ async function dispatchCotacaoInviteEmails(
         vars: {
           codigo: (cot as any)?.codigo ?? "", // eslint-disable-line @typescript-eslint/no-explicit-any
           item: (cot as any)?.titulo ?? "", // eslint-disable-line @typescript-eslint/no-explicit-any
-          fornecedor: f?.nome_fantasia || f?.razao_social || "",
-          destinatario_nome: f?.nome_fantasia || f?.razao_social || "",
+          fornecedor: f?.nome_fantasia || f?.nome || "",
+          destinatario_nome: f?.nome_fantasia || f?.nome || "",
           prazo,
           usuario,
           link: appUrl(`/p/cotacao/${conv.token}`),
         },
-        extraTo: f?.email_geral ? [f.email_geral] : [],
+        extraTo: f?.email_corporativo ? [f.email_corporativo] : [],
       });
     }
   } catch (e) {
@@ -150,7 +150,7 @@ export const getCotacao = createServerFn({ method: "POST" })
       .order("created_at");
     const { data: convites } = await sb
       .from("cotacao_fornecedores")
-      .select("*, fornecedores(id, codigo, nome_fantasia, razao_social, pais)")
+      .select("*, fornecedores(id, codigo, nome_fantasia, nome, pais)")
       .eq("cotacao_id", data.id);
     const conviteIds = (convites ?? []).map((c: { id: string }) => c.id);
     let propostas: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -552,7 +552,7 @@ export const listFornecedoresParaCotacao = createServerFn({ method: "POST" })
     let q = sb
       .from("fornecedores")
       .select(
-        "id, codigo, nome_fantasia, razao_social, pais, email_geral, fornecedor_categoria_link!inner(categoria_slug)",
+        "id, codigo, nome_fantasia, nome, pais, email_corporativo, fornecedor_categoria_link!inner(categoria_slug)",
       )
       .is("deleted_at", null)
       .limit(300);
@@ -564,7 +564,7 @@ export const listFornecedoresParaCotacao = createServerFn({ method: "POST" })
       // fallback sem filtro de categoria se a join falhar
       const { data: r2, error: e2 } = await sb
         .from("fornecedores")
-        .select("id, codigo, nome_fantasia, razao_social, pais, email_geral")
+        .select("id, codigo, nome_fantasia, nome, pais, email_corporativo")
         .is("deleted_at", null)
         .order("nome_fantasia", { ascending: true })
         .limit(300);
@@ -583,7 +583,7 @@ export const publicGetCotacao = createServerFn({ method: "POST" })
     const sb = supabaseAdmin as unknown as SB;
     const { data: convite, error } = await sb
       .from("cotacao_fornecedores")
-      .select("*, fornecedores(id, codigo, nome_fantasia, razao_social, pais)")
+      .select("*, fornecedores(id, codigo, nome_fantasia, nome, pais)")
       .eq("token", data.token)
       .maybeSingle();
     if (error || !convite) throw new Error("Convite inválido");
@@ -761,7 +761,7 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
       const { safeDispatch, appUrl } = await import("@/lib/email/safe-dispatch.server");
       const { data: convite2 } = await sb
         .from("cotacao_fornecedores")
-        .select("fornecedor_id, fornecedores(nome_fantasia, razao_social)")
+        .select("fornecedor_id, fornecedores(nome_fantasia, nome)")
         .eq("id", c.id)
         .maybeSingle();
       const { data: cot } = await sb
@@ -778,7 +778,7 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
         entityId: c.cotacao_id,
         vars: {
           codigo: (cot as any)?.codigo ?? "",
-          fornecedor: fornecedor?.nome_fantasia || fornecedor?.razao_social || "",
+          fornecedor: fornecedor?.nome_fantasia || fornecedor?.nome || "",
           valor: total.toLocaleString("pt-BR", { style: "currency", currency: data.moeda }),
           data: new Date().toLocaleString("pt-BR"),
           link: appUrl(`/compras/cotacoes/${c.cotacao_id}`),

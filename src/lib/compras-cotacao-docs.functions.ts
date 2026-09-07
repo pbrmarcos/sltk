@@ -283,7 +283,7 @@ export const listCotacaoDocumentosGerados = createServerFn({ method: "GET" })
     const { data: rows, error } = await sb
       .from("insumo_documentos_gerados")
       .select(
-        "id, insumo_id, idioma, drive_view_url, drive_folder_url, file_name, fornecedor_id, criado_em, gerado_por, projeto_insumos:insumo_id(descricao, codigo_interno, projeto_id, equipamento_projetos(cliente_equipamentos(codigo))), fornecedores:fornecedor_id(razao_social, nome_fantasia)",
+        "id, insumo_id, idioma, drive_view_url, drive_folder_url, file_name, fornecedor_id, criado_em, gerado_por, projeto_insumos:insumo_id(descricao, codigo_interno, projeto_id, equipamento_projetos(cliente_equipamentos(codigo))), fornecedores:fornecedor_id(nome, nome_fantasia)",
       )
       .order("criado_em", { ascending: false })
       .limit(data.limit);
@@ -303,7 +303,7 @@ export const listCotacaoDocumentosGerados = createServerFn({ method: "GET" })
         codigo_interno?: string | null;
         equipamento_projetos?: { cliente_equipamentos?: { codigo?: string | null } | null } | null;
       } | null;
-      fornecedores?: { razao_social?: string | null; nome_fantasia?: string | null } | null;
+      fornecedores?: { nome?: string | null; nome_fantasia?: string | null } | null;
     };
 
     const list = (rows ?? []) as Row[];
@@ -335,7 +335,7 @@ export const listCotacaoDocumentosGerados = createServerFn({ method: "GET" })
         r.projeto_insumos?.descricao,
         r.projeto_insumos?.codigo_interno,
         r.projeto_insumos?.equipamento_projetos?.cliente_equipamentos?.codigo,
-        r.fornecedores?.razao_social,
+        r.fornecedores?.nome,
         r.fornecedores?.nome_fantasia,
         r.file_name,
       ]
@@ -357,7 +357,7 @@ export const listCotacaoDocumentosGerados = createServerFn({ method: "GET" })
         projeto_codigo:
           r.projeto_insumos?.equipamento_projetos?.cliente_equipamentos?.codigo ?? null,
         fornecedor_id: r.fornecedor_id,
-        fornecedor_nome: r.fornecedores?.nome_fantasia ?? r.fornecedores?.razao_social ?? null,
+        fornecedor_nome: r.fornecedores?.nome_fantasia ?? r.fornecedores?.nome ?? null,
         criado_em: r.criado_em,
         drive_folder_url: r.drive_folder_url,
         idiomas: {},

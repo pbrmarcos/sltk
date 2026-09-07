@@ -99,7 +99,7 @@ function PublicCotacaoPage() {
   const itens = (q.data.itens ?? []) as Item[];
   const fornecedor = (
     q.data.convite as {
-      fornecedores?: { nome_fantasia: string; razao_social: string; codigo: string } | null;
+      fornecedores?: { nome_fantasia: string; nome: string; codigo: string } | null;
     }
   ).fornecedores;
 
@@ -165,7 +165,7 @@ function PublicCotacaoPage() {
               {cot.descricao && <p className="mt-1 text-sm text-zinc-600">{cot.descricao}</p>}
               {fornecedor && (
                 <p className="mt-2 text-sm">
-                  Fornecedor: <strong>{fornecedor.nome_fantasia || fornecedor.razao_social}</strong>
+                  Fornecedor: <strong>{fornecedor.nome_fantasia || fornecedor.nome}</strong>
                 </p>
               )}
             </div>

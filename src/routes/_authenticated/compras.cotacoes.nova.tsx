@@ -418,9 +418,9 @@ function NovaCotacaoPage() {
                       id: string;
                       codigo: string;
                       nome_fantasia: string;
-                      razao_social: string;
+                      nome: string;
                       pais: string;
-                      email_geral: string | null;
+                      email_corporativo: string | null;
                     };
                     const checked = fornSel.has(it.id);
                     return (
@@ -437,9 +437,9 @@ function NovaCotacaoPage() {
                           />
                         </td>
                         <td className="p-2 font-mono text-xs">{it.codigo}</td>
-                        <td className="p-2 font-medium">{it.nome_fantasia || it.razao_social}</td>
+                        <td className="p-2 font-medium">{it.nome_fantasia || it.nome}</td>
                         <td className="p-2">{it.pais}</td>
-                        <td className="p-2 text-xs">{it.email_geral ?? "—"}</td>
+                        <td className="p-2 text-xs">{it.email_corporativo ?? "—"}</td>
                       </tr>
                     );
                   })}
