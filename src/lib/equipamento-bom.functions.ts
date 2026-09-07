@@ -2,8 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { DISCIPLINAS, type Disciplina } from "@/lib/equipamento-disciplina-etapas.functions";
-import { assertAdminOrManager, assertCanAccessModule } from "@/lib/admin-guard";
+import { DISCIPLINAS } from "@/lib/equipamento-disciplina-etapas.functions";
+import { assertAdminOrManager } from "@/lib/admin-guard";
+
+// Leituras do BOM do equipamento (drawer Cliente → Equipamento). A escrita/aprovação
+// dos insumos vive só em projeto-insumos.functions.ts / ProjetoInsumosPanel — ver
+// getProjetoParaEquipamento abaixo, usado pra levar o usuário até lá.
 
 type AnySb = any;
 
@@ -49,190 +53,31 @@ export const listEquipamentoBom = createServerFn({ method: "POST" })
     });
   });
 
-async function ensureProjetoForBom(
-  sb: AnySb,
-  equipamentoId: string,
-  equipamentoDisciplina: Disciplina,
-  userId: string,
-) {
-  const { data: eq, error: eqError } = await sb
-    .from("cliente_equipamentos")
-    .select("cliente_id")
-    .eq("id", equipamentoId)
-    .maybeSingle();
-  if (eqError) throw friendlyDbError(eqError);
-  if (!eq) throw new Error("Equipamento não encontrado");
-
-  const projetoDisciplina = equipamentoDisciplina === "producao" ? "eletrico" : "mecanico";
-  const { data: existing, error: selectError } = await sb
-    .from("equipamento_projetos")
-    .select("id")
-    .eq("equipamento_id", equipamentoId)
-    .eq("disciplina", projetoDisciplina)
-    .eq("revisao", "R00")
-    .maybeSingle();
-  if (selectError) throw friendlyDbError(selectError);
-  if (existing?.id) return { projeto_id: existing.id, cliente_id: eq.cliente_id };
-
-  const { data: projeto, error: insertError } = await sb
-    .from("equipamento_projetos")
-    .insert({
-      equipamento_id: equipamentoId,
-      cliente_id: eq.cliente_id,
-      disciplina: projetoDisciplina,
-      revisao: "R00",
-      status: "em_elaboracao",
-      created_by: userId,
-    })
-    .select("id")
-    .single();
-  if (insertError) throw friendlyDbError(insertError);
-  return { projeto_id: projeto.id, cliente_id: eq.cliente_id };
-}
-
-const createItemInput = z.object({
+// Resolve o projeto de Engenharia (equipamento_projetos) dono do BOM desse
+// equipamento+disciplina, pra linkar direto pro ProjetoInsumosPanel — só leitura,
+// nunca cria linha (diferente da antiga ensureProjetoForBom).
+const getProjetoInput = z.object({
   equipamento_id: z.string().uuid(),
   equipamento_disciplina: z.enum(DISCIPLINAS),
-  disciplina: z.enum(["mecanico", "eletrico", "automacao", "montagem", "outro"]).default("outro"),
-  descricao: z.string().min(1).max(400),
-  quantidade: z.number().min(0).default(1),
-  unidade: z.string().max(20).default("un"),
-  criticidade: z.enum(["baixa", "media", "alta", "critica"]).default("media"),
-  custo_unitario_estimado: z.number().min(0).nullable().optional(),
-  observacoes: z.string().max(2000).nullable().optional(),
 });
-export const createBomItem = createServerFn({ method: "POST" })
+export const getProjetoParaEquipamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => createItemInput.parse(i))
+  .inputValidator((i: unknown) => getProjetoInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
     const sb = context.supabase as AnySb;
-    const origem = await ensureProjetoForBom(
-      sb,
-      data.equipamento_id,
-      data.equipamento_disciplina,
-      context.userId,
-    );
+    const projetoDisciplina = data.equipamento_disciplina === "producao" ? "eletrico" : "mecanico";
     const { data: row, error } = await sb
-      .from("projeto_insumos")
-      .insert({
-        projeto_id: origem.projeto_id,
-        cliente_id: origem.cliente_id,
-        equipamento_id: data.equipamento_id,
-        equipamento_disciplina: data.equipamento_disciplina,
-        disciplina: data.disciplina,
-        descricao: data.descricao,
-        quantidade: data.quantidade,
-        unidade: data.unidade,
-        criticidade: data.criticidade,
-        custo_estimado_unit: data.custo_unitario_estimado ?? null,
-        observacoes: data.observacoes ?? null,
-        status: "rascunho",
-        created_by: context.userId,
-      })
+      .from("equipamento_projetos")
       .select("id")
-      .single();
-    if (error) throw friendlyDbError(error);
-    return { id: row.id };
-  });
-
-const updateItemInput = z.object({
-  id: z.string().uuid(),
-  descricao: z.string().min(1).max(400).optional(),
-  quantidade: z.number().min(0).optional(),
-  unidade: z.string().max(20).optional(),
-  criticidade: z.enum(["baixa", "media", "alta", "critica"]).optional(),
-  custo_unitario_estimado: z.number().min(0).nullable().optional(),
-  observacoes: z.string().max(2000).nullable().optional(),
-  disciplina: z.enum(["mecanico", "eletrico", "automacao", "montagem", "outro"]).optional(),
-});
-export const updateBomItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => updateItemInput.parse(i))
-  .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
-    const sb = context.supabase as AnySb;
-    const { id, ...rest } = data;
-    const patch: Record<string, unknown> = { ...rest };
-    if ("custo_unitario_estimado" in patch) {
-      patch.custo_estimado_unit = patch.custo_unitario_estimado;
-      delete patch.custo_unitario_estimado;
-    }
-    const { error } = await sb.from("projeto_insumos").update(patch).eq("id", id);
-    if (error) throw friendlyDbError(error);
-    return { ok: true };
-  });
-
-export const deleteBomItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
-    const sb = context.supabase as AnySb;
-    const { error } = await sb
-      .from("projeto_insumos")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", data.id);
-    if (error) throw friendlyDbError(error);
-    return { ok: true };
-  });
-
-// Submit todos os rascunhos da disciplina para aprovação
-const submitInput = z.object({
-  equipamento_id: z.string().uuid(),
-  equipamento_disciplina: z.enum(DISCIPLINAS),
-});
-export const submitBomForApproval = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => submitInput.parse(i))
-  .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "engenharia");
-    const sb = context.supabase as AnySb;
-    const { data: rows, error } = await sb
-      .from("projeto_insumos")
-      .update({ status: "pronto_aprovacao" })
       .eq("equipamento_id", data.equipamento_id)
-      .eq("equipamento_disciplina", data.equipamento_disciplina)
-      .eq("status", "rascunho")
-      .select("id");
+      .eq("disciplina", projetoDisciplina)
+      .eq("revisao", "R00")
+      .maybeSingle();
     if (error) throw friendlyDbError(error);
-    return { count: (rows ?? []).length };
-  });
-
-const approveInput = z.object({ id: z.string().uuid() });
-export const approveBomItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => approveInput.parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as AnySb;
-    // check manager/admin
-    await assertAdminOrManager(sb, context.userId).catch(() => {
-      throw new Error("Apenas manager/admin pode aprovar insumos.");
-    });
-    const { error } = await sb
-      .from("projeto_insumos")
-      .update({ status: "aprovado" })
-      .eq("id", data.id);
-    if (error) throw friendlyDbError(error);
-    return { ok: true };
-  });
-
-export const rejectBomItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({ id: z.string().uuid(), motivo: z.string().max(500).optional() }).parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as AnySb;
-    await assertAdminOrManager(sb, context.userId).catch(() => {
-      throw new Error("Apenas manager/admin pode rejeitar insumos.");
-    });
-    const { error } = await sb
-      .from("projeto_insumos")
-      .update({ status: "rascunho", observacoes: data.motivo ?? null })
-      .eq("id", data.id);
-    if (error) throw friendlyDbError(error);
-    return { ok: true };
+    return {
+      projeto_id: (row?.id as string | undefined) ?? null,
+      projeto_disciplina: projetoDisciplina,
+    };
   });
 
 // Resumo BOM para card Visão

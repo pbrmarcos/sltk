@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   d: z.enum(["mecanico", "eletrico"]).optional().default("mecanico"),
+  open: z.string().uuid().optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/engenharia/projetos")({
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/engenharia/projetos")({
 });
 
 function ProjetosUnified() {
-  const { d } = Route.useSearch();
+  const { d, open } = Route.useSearch();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // Guard: só renderiza os tabs quando estamos exatamente nesta rota
   const showTabs = pathname === "/engenharia/projetos";
@@ -48,7 +49,7 @@ function ProjetosUnified() {
         </div>
       )}
       {/* key força reset do estado interno ao alternar disciplina */}
-      <ProjetosListPage key={d} disciplina={d} />
+      <ProjetosListPage key={d} disciplina={d} openId={open} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assertCanAccessModule } from "@/lib/admin-guard";
+import { assertAdminOrManager, assertCanAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
+import { logAuditServer } from "@/lib/audit.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -211,7 +212,11 @@ export const setInsumoStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => setStatusInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    if (data.status === "aprovado") {
+      await assertAdminOrManager(context.supabase, context.userId);
+    } else {
+      await assertCanAccessModule(context.supabase, context.userId, "compras");
+    }
     const sb = context.supabase as unknown as SB;
     const patch: Record<string, unknown> = {
       status: data.status,
@@ -223,6 +228,15 @@ export const setInsumoStatus = createServerFn({ method: "POST" })
     }
     const { error } = await sb.from("projeto_insumos").update(patch).eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    if (data.status === "aprovado") {
+      await logAuditServer(sb as any, context.userId, {
+        table_name: "projeto_insumos",
+        record_id: data.id,
+        action: "UPDATE",
+        field_changed: "status",
+        new_value: "aprovado",
+      });
+    }
     return { ok: true as const };
   });
 
@@ -645,6 +659,7 @@ export const aprovarInsumosEmLote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => aprovarLoteInput.parse(input))
   .handler(async ({ data, context }) => {
+    await assertAdminOrManager(context.supabase, context.userId);
     const sb = context.supabase as unknown as SB;
     const now = new Date().toISOString();
     const { data: rows, error } = await sb
@@ -660,7 +675,21 @@ export const aprovarInsumosEmLote = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .select("id");
     if (error) throw friendlyDbError(error);
-    return { aprovados: ((rows as { id: string }[]) ?? []).length };
+    const aprovados = (rows as { id: string }[]) ?? [];
+    if (aprovados.length > 0) {
+      await logAuditServer(
+        sb as any,
+        context.userId,
+        aprovados.map((r) => ({
+          table_name: "projeto_insumos",
+          record_id: r.id,
+          action: "UPDATE" as const,
+          field_changed: "status",
+          new_value: "aprovado",
+        })),
+      );
+    }
+    return { aprovados: aprovados.length };
   });
 
 /* ================================================================

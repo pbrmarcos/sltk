@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { CalendarRange } from "lucide-react";
@@ -31,7 +31,13 @@ import {
 } from "@/lib/engenharia.shared";
 import { cn } from "@/lib/utils";
 
-export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina }) {
+export function ProjetosListPage({
+  disciplina,
+  openId,
+}: {
+  disciplina: ProjetoDisciplina;
+  openId?: string;
+}) {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"todos" | ProjetoStatus>("todos");
@@ -39,8 +45,22 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
   const [page, setPage] = useState(1);
   const [openNovo, setOpenNovo] = useState(false);
   const [detalhe, setDetalhe] = useState<any | null>(null);
+  const [detalheViaDeepLink, setDetalheViaDeepLink] = useState(false);
 
   const { data, isLoading } = useQuery(allProjetosQueryOptions({ disciplina, q, status, page }));
+
+  // Deep-link vindo do BomTable (drawer Cliente → Equipamento): abre o dialog
+  // do projeto correspondente, já na aba de insumos, sem precisar clicar na linha.
+  const triedAutoOpen = useRef(false);
+  useEffect(() => {
+    if (!openId || triedAutoOpen.current) return;
+    const row = (data?.rows ?? []).find((r: any) => r.id === openId);
+    if (row) {
+      triedAutoOpen.current = true;
+      setDetalhe(row);
+      setDetalheViaDeepLink(true);
+    }
+  }, [openId, data]);
   const realRows = (data?.rows ?? []).filter((r: any) =>
     revisao.trim()
       ? String(r.revisao ?? "")
@@ -185,7 +205,10 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
                     !isDemoRow && "cursor-pointer hover:bg-[var(--gantt-row-hover)]",
                   )}
                   onClick={() => {
-                    if (!isDemoRow) setDetalhe(r);
+                    if (!isDemoRow) {
+                      setDetalhe(r);
+                      setDetalheViaDeepLink(false);
+                    }
                   }}
                 >
                   <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
@@ -286,6 +309,7 @@ export function ProjetosListPage({ disciplina }: { disciplina: ProjetoDisciplina
       <ProjetoDetalheDialog
         projeto={detalhe}
         disciplina={disciplina}
+        initialTab={detalheViaDeepLink ? "insumos" : "resumo"}
         onClose={() => setDetalhe(null)}
       />
     </PageContainer>
@@ -354,10 +378,12 @@ function buildDemoProjetos(disciplina: ProjetoDisciplina) {
 function ProjetoDetalheDialog({
   projeto,
   disciplina,
+  initialTab,
   onClose,
 }: {
   projeto: any | null;
   disciplina: ProjetoDisciplina;
+  initialTab?: "resumo" | "insumos";
   onClose: () => void;
 }) {
   return (
@@ -373,7 +399,7 @@ function ProjetoDetalheDialog({
           </DialogTitle>
         </DialogHeader>
         {projeto && (
-          <Tabs defaultValue="resumo" className="w-full">
+          <Tabs defaultValue={initialTab ?? "resumo"} className="w-full">
             <TabsList>
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
               <TabsTrigger value="insumos" disabled={!!projeto.__demo}>
