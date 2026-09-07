@@ -8,6 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -35,6 +45,7 @@ export function MontagemListPage() {
   const [status, setStatus] = useState<"todos" | MontagemStatus>("todos");
   const [page, setPage] = useState(1);
   const [openNovo, setOpenNovo] = useState(false);
+  const [concluirConfirmId, setConcluirConfirmId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery(allMontagensQueryOptions({ q, status, page }));
 
@@ -64,6 +75,7 @@ export function MontagemListPage() {
       qc.invalidateQueries({ queryKey: ["producao", "montagens"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao concluir."),
+    onSettled: () => setConcluirConfirmId(null),
   });
 
   const iniciarMut = useMutation({
@@ -172,13 +184,7 @@ export function MontagemListPage() {
                     Iniciar
                   </Button>
                 ) : r.status === "em_andamento" ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (confirm("Marcar montagem como concluída?")) concluirMut.mutate(r.id);
-                    }}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => setConcluirConfirmId(r.id)}>
                     Concluir
                   </Button>
                 ) : (
@@ -222,6 +228,29 @@ export function MontagemListPage() {
           setOpenNovo(false);
         }}
       />
+
+      <AlertDialog
+        open={!!concluirConfirmId}
+        onOpenChange={(o) => !concluirMut.isPending && !o && setConcluirConfirmId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Marcar montagem como concluída?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O progresso vai pra 100% e a data de término real é registrada hoje.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={concluirMut.isPending}
+              onClick={() => concluirConfirmId && concluirMut.mutate(concluirConfirmId)}
+            >
+              Concluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
