@@ -1,67 +1,64 @@
 ---
 title: Publicar conteúdo (fluxo rascunho → revisão → publicado)
-description: Como criar um artigo, submeter a revisão, incorporar comentários e publicar — com a política de aprovação obrigatória.
+description: Como criar um item, enviar para revisão e ver o que acontece quando é aprovado ou devolvido para ajuste.
 category: know-how
 slug: publicar-conteudo
 tipo: passo-a-passo
 nivel: intermediario
 tags: [know-how, publicacao, revisao, aprovacao]
-papeis: [admin, manager, engineer, quality]
-atualizado_em: 2026-08-20
+papeis: [admin, manager, engineer]
+atualizado_em: 2026-09-07
 app_version: "0.99.4"
 ---
 
 :::tldr
-- Autoria: `engineer`, `quality`, `manager`, `admin` criam rascunho.
-- Publicar exige aprovação de **revisor** (`manager` ou dono da coleção) — imposto por RLS.
-- Blocos suportados: texto rich, imagem, vídeo (upload ou embed), checklist, anexo, código.
-- Edições em artigo publicado geram nova revisão — a versão anterior continua acessível pelo histórico.
+- Autoria: `engineer`, `manager`, `admin` criam rascunhos em `/know-how/novo`.
+- Publicar exige aprovação de `manager` ou `admin` na fila de revisão — não existe autopublicação.
+- Enquanto o item não é publicado, o próprio autor pode editá-lo livremente.
+- Depois de publicado, só `manager`/`admin` podem editar.
 :::
 
 ## Criar rascunho
 
-:::step{n="1" title="Novo artigo" img="know-how-novo.png" alt="Editor de novo artigo do Know-how com título, coleção, tags e blocos"}
-Em `/know-how/novo`, informe título, coleção e tags. Selecione papéis-alvo (quem verá o artigo publicado). Adicione blocos: texto, imagem, vídeo, checklist, anexo, código.
+:::step{n="1" title="Novo item"}
+Em `/know-how/novo`, escolha o tipo (artigo, vídeo, PDF ou checklist), a coleção, título, resumo, corpo e tags. Papéis-alvo é opcional e serve só como filtro de navegação — não restringe quem verá o item depois de publicado.
 :::
 
-## Submeter a revisão
-
-Ao terminar o rascunho, clique em **Enviar para revisão**. O sistema notifica o dono da coleção e os `manager`. O rascunho vira estado **Em revisão** e você não pode mais editar até receber feedback.
-
-:::step{n="2" title="Fila de revisão" img="know-how-revisar.png" alt="Lista de artigos aguardando revisão com autor, coleção e data"}
-Revisores acessam `/know-how/revisar`, abrem o artigo, comentam trecho a trecho e escolhem **Aprovar** ou **Devolver para ajustes**. O autor recebe notificação com os comentários.
+:::step{n="2" title="Anexar mídia (opcional)"}
+Para vídeo ou PDF, faça upload do arquivo. Ele fica em um bucket privado; o link de visualização é gerado sob demanda (expira depois de um tempo, então não compartilhe a URL diretamente).
 :::
 
-## Publicar
+## Enviar para revisão
 
-O botão **Publicar** só habilita depois da aprovação registrada. Após publicar:
+Ao terminar o rascunho, clique em **Enviar para revisão**. O item sai da lista de rascunhos e passa a aparecer em `/know-how/revisar`, visível para `manager`/`admin`.
 
-- O artigo aparece para os papéis-alvo.
-- Notificação é enviada aos usuários que seguem a coleção.
-- Contadores de leitura, favoritos e comentários começam a rodar.
-
-:::dica
-Antes de submeter, releia com o olhar do operacional (`production`/`assembly`): frases curtas, imagem por passo, checklist final. O quiz da trilha depende disso.
+:::step{n="1" title="Fila de revisão"}
+Em `/know-how/revisar`, `manager`/`admin` veem todos os itens com status "em revisão", de qualquer autor.
 :::
 
-## Editar depois de publicado
+:::step{n="2" title="Aprovar ou devolver"}
+O revisor escolhe **Aprovar** (publica o item imediatamente) ou **Solicitar ajuste** (devolve para rascunho, para o autor revisar e reenviar).
+:::
 
-Edições geram **nova revisão** — a anterior continua acessível pelo botão **Histórico**. Se a mudança altera procedimento (não só ortografia), marque **Requer relerão** — todos os certificados dessa trilha voltam a "pendente".
+## Depois de publicado
+
+- O item aparece nas listagens e na busca de `/know-how` para todos os usuários autenticados.
+- Uma cópia da versão anterior é salva internamente no momento da aprovação, mas hoje não há tela para consultá-la — trate a publicação como a versão vigente.
+- Só `manager`/`admin` podem editar um item já publicado.
 
 :::atencao
-`production`, `assembly`, `field`, `support`, `sales`, `purchasing` **não** criam item. Se um operador tem sugestão, ele comenta em artigo existente ou abre chamado interno para autoria produzir.
+`production`, `assembly`, `field`, `sales`, `purchasing` não criam nem aprovam itens — só consomem (leem, favoritam, imprimem). Se alguém desses papéis tiver uma sugestão de conteúdo, peça para um `engineer`/`manager` criar o item.
 :::
 
-:::erro{title="Botão Publicar está desabilitado"}
-Falta aprovação registrada — verifique em **Histórico de revisão** se o revisor aprovou ou apenas comentou. Reenvie se necessário.
+:::erro{title="Não consigo editar um item"}
+Se o item já está publicado, só `manager`/`admin` editam. Se é um rascunho seu que já foi enviado para revisão, espere o retorno do revisor (aprovado ou devolvido) antes de editar de novo.
 :::
 
 ## Imprimir ou exportar em PDF
 
-Todo material publicado tem a ação **Imprimir / PDF**, que abre uma versão limpa da página (sem menu lateral nem barras do app) pronta para "Salvar como PDF" no diálogo de impressão do navegador. Use para levar checklists ao chão de fábrica ou anexar um procedimento a um chamado.
+Todo item tem a ação **Imprimir / PDF** em `/know-how/imprimir/$slug`, que abre uma versão limpa da página (sem menu lateral) pronta para "Salvar como PDF" no diálogo de impressão do navegador. Útil para levar checklists ao chão de fábrica.
 
 ## Ver também
 
 - [Visão geral](/ajuda/documentacao/know-how/visao-geral)
-- [Trilhas](/ajuda/documentacao/know-how/trilhas)
-- [Certificações](/ajuda/documentacao/know-how/certificacoes)
+- [Busca e organização](/ajuda/documentacao/know-how/busca-e-organizacao)

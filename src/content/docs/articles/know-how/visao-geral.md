@@ -1,33 +1,33 @@
 ---
 title: Visão geral do Know-how
-description: Base de conhecimento interna com artigos, trilhas e certificações — como o time captura, organiza e valida saber técnico.
+description: Base de conhecimento interna com artigos, vídeos, PDFs e checklists — como o time captura, organiza e revisa saber técnico.
 category: know-how
 slug: visao-geral
 tipo: conceito
 nivel: iniciante
-tags: [know-how, base, treinamento, certificacao]
-papeis: [admin, manager, engineer, quality, production, assembly, field, support, sales, purchasing]
-atualizado_em: 2026-08-20
+tags: [know-how, base, treinamento]
+papeis: [admin, manager, engineer, production, assembly, field, sales, purchasing]
+atualizado_em: 2026-09-07
 app_version: "0.99.4"
 ---
 
 :::tldr
-- Base de conhecimento interna em `/know-how` — artigos, vídeos, checklists e trilhas.
-- **Autoria**: `engineer`, `quality`, `manager` e `admin`; **consumo**: todos os papéis.
-- Todo conteúdo passa por **revisão** antes de publicar (rascunho → revisão → publicado).
-- **Trilhas** juntam artigos em sequência com quiz e emitem **certificação**.
-- Busca global cobre título, corpo e legendas de vídeo indexadas.
+- Base de conhecimento interna em `/know-how` — artigos, vídeos, PDFs e checklists.
+- **Autoria**: `engineer`, `manager` e `admin`; **consumo**: todos os papéis autenticados.
+- Todo conteúdo passa por **revisão** antes de publicar (rascunho → em revisão → publicado).
+- **Aprovar/devolver para ajuste** é ação restrita a `manager`/`admin`.
+- Favoritos e histórico de leitura são pessoais, por usuário.
 :::
 
 ## Estrutura do módulo
 
 | Rota | O que faz |
 |---|---|
-| `/know-how` | Home com destaques, últimos publicados e sua trilha atual |
-| `/know-how/artigo/$slug` | Leitura do artigo com anexos e comentários |
-| `/know-how/trilha/$slug` | Trilha com progresso, artigos e quiz final |
-| `/know-how/novo` | Editor de novo artigo/vídeo/checklist |
-| `/know-how/revisar` | Fila de conteúdos aguardando revisão técnica |
+| `/know-how` | Lista de itens com abas Todos / Favoritos / Histórico, busca e filtros |
+| `/know-how/$slug` | Leitura do item, com mídia anexa quando houver |
+| `/know-how/novo` | Criar novo item (artigo, vídeo, PDF ou checklist) |
+| `/know-how/revisar` | Fila de itens em revisão (só `manager`/`admin`) |
+| `/know-how/imprimir/$slug` | Versão limpa para imprimir ou salvar como PDF |
 
 ## Tipos de conteúdo
 
@@ -35,51 +35,46 @@ app_version: "0.99.4"
 |---|---|
 | **Artigo** | Procedimento, referência técnica, troubleshooting |
 | **Vídeo** | Passo-a-passo prático de montagem, ajuste, inspeção |
+| **PDF** | Documento pronto (manual, desenho, ficha técnica) |
 | **Checklist** | Verificação campo-a-campo (start-up, manutenção preventiva) |
-| **Trilha** | Sequência formativa com quiz — onboarding, certificação interna |
+
+Itens são organizados em **coleções** fixas (Montagem, Elétrica, Comissionamento, FAT/SAT, Comercial, Compras, Segurança) — a coleção é escolhida na criação e usada como filtro.
 
 ## Papéis e permissões
 
-| Papel | Pode |
+| Ação | Quem pode |
 |---|---|
-| `engineer` | Criar/editar artigos técnicos; sugerir trilhas |
-| `quality` | Revisar checklists e conteúdos de qualidade |
-| `manager` | Aprovar publicação, montar trilhas, definir requisitos |
-| `admin` | Tudo, incluindo despublicar e gerenciar certificações |
-| Demais | Consumir, comentar, marcar favorito, marcar concluído |
+| Ver itens publicados | Qualquer usuário autenticado |
+| Criar item (rascunho) | `engineer`, `manager`, `admin` |
+| Editar um item | O próprio autor, enquanto o item não estiver publicado; ou `manager`/`admin` a qualquer momento |
+| Enviar para revisão | O próprio autor (rascunho dele) ou `manager`/`admin` |
+| Aprovar (publicar) ou devolver para ajuste | Só `manager`/`admin` |
 
-## Ciclo de vida de um artigo
+O campo **"Papéis-alvo"** de um item é só uma etiqueta de navegação/filtro — não restringe quem consegue ver o conteúdo publicado. Veja [Busca e organização](/ajuda/documentacao/know-how/busca-e-organizacao).
+
+## Ciclo de vida de um item
 
 :::step{n="1" title="Rascunho"}
-Autor escreve em `/know-how/novo` — markdown com blocos de callout, imagens, vídeos. Autosalva a cada 30s.
+Autor cria em `/know-how/novo`: tipo, coleção, título, resumo, corpo, tags e, opcionalmente, mídia anexada. Pode editar livremente enquanto não publicar.
 :::
 
-:::step{n="2" title="Envio para revisão"}
-Autor clica em **Enviar para revisão**. Sai da lista pessoal e entra em `/know-how/revisar`.
+:::step{n="2" title="Enviar para revisão"}
+Autor clica em **Enviar para revisão**. O item passa a aparecer em `/know-how/revisar` para `manager`/`admin`.
 :::
 
-:::step{n="3" title="Revisão técnica"}
-`engineer`/`quality`/`manager` revisa e aprova, comenta pedindo ajustes ou reprova. Comentários ficam por bloco.
+:::step{n="3" title="Revisão"}
+Um `manager`/`admin` abre o item na fila de revisão e escolhe **Aprovar** (publica) ou **Solicitar ajuste** (devolve para rascunho, para o autor corrigir e reenviar).
 :::
 
-:::step{n="4" title="Publicação"}
-Aprovado → publicado. Aparece na busca, home e trilhas vinculadas. Marca automaticamente notificação para os papéis-alvo.
-:::
-
-:::step{n="5" title="Manutenção"}
-Cada artigo tem `atualizado_em` e `app_version`. Após mudanças relevantes no sistema, revise para manter o passo-a-passo alinhado.
-:::
-
-:::dica
-Comece pelas **10 dúvidas mais recorrentes** do seu time — se você já respondeu por chat duas vezes, vira artigo.
+:::step{n="4" title="Publicado"}
+Aparece nas listagens e na busca do módulo para todos os usuários autenticados. Só `manager`/`admin` (ou o autor, se por algum motivo o item voltar a rascunho) podem editar a partir daqui.
 :::
 
 :::atencao
-Nunca copie procedimentos de fornecedor sem revisão. Conteúdo desatualizado no Know-how vira erro caro em campo.
+Não existe hoje uma tela de histórico de versões nem exclusão pela interface — publicar é a etapa final visível ao usuário comum.
 :::
 
 ## Ver também
 
-- [Trilhas de aprendizado](/ajuda/documentacao/know-how/trilhas)
+- [Publicar conteúdo](/ajuda/documentacao/know-how/publicar-conteudo)
 - [Busca e organização](/ajuda/documentacao/know-how/busca-e-organizacao)
-- [Certificações](/ajuda/documentacao/know-how/certificacoes)
