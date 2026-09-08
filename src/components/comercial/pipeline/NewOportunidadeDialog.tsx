@@ -181,7 +181,7 @@ export function NewOportunidadeDialog({
             Empresa e contato
           </p>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 items-start gap-3">
             <div className="grid gap-1">
               <Label htmlFor="opp-empresa">Empresa</Label>
               <Input
@@ -245,7 +245,7 @@ export function NewOportunidadeDialog({
             Valores e probabilidade
           </p>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 items-start gap-3">
             <div className="grid gap-1">
               <Label htmlFor="opp-valor">Valor estimado</Label>
               <div className="grid grid-cols-[88px_1fr]">
