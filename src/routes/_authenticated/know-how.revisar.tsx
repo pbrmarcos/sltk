@@ -6,7 +6,13 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { listRevisao, aprovarItem, solicitarAjuste } from "@/lib/know-how.functions";
+import {
+  listRevisao,
+  aprovarItem,
+  solicitarAjuste,
+  KH_TIPO_LABEL,
+  type KhTipo,
+} from "@/lib/know-how.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -97,7 +103,7 @@ function KnowHowRevisar() {
                     {it.titulo}
                   </Link>
                   <Badge variant="outline" className="text-[10px] uppercase">
-                    {it.tipo}
+                    {KH_TIPO_LABEL[it.tipo as KhTipo]}
                   </Badge>
                   <span className="text-xs text-[var(--text-muted)]">v{it.versao}</span>
                 </div>

@@ -35,6 +35,8 @@ import {
   listFavoritos,
   listHistorico,
   toggleFavorito,
+  KH_TIPO_LABEL,
+  KH_STATUS_LABEL,
 } from "@/lib/know-how.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -190,14 +192,14 @@ function KnowHowIndex() {
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1">
             <Badge variant="outline" className="text-[10px] uppercase">
-              {it.tipo}
+              {KH_TIPO_LABEL[it.tipo]}
             </Badge>
             {it.status !== "publicado" && (
               <Badge
                 variant="outline"
                 className="border-amber-200 bg-amber-50 text-[10px] text-amber-800"
               >
-                {it.status}
+                {KH_STATUS_LABEL[it.status]}
               </Badge>
             )}
             {visto && (

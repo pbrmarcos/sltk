@@ -12,6 +12,8 @@ import {
   getMediaSignedUrl,
   listFavoritos,
   toggleFavorito,
+  KH_TIPO_LABEL,
+  KH_STATUS_LABEL,
 } from "@/lib/know-how.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -134,10 +136,10 @@ function KnowHowDetail() {
 
       <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
         <Badge variant="outline" className="uppercase">
-          {it.tipo}
+          {KH_TIPO_LABEL[it.tipo]}
         </Badge>
         <Badge variant="outline" className={statusClass(it.status)}>
-          {it.status}
+          {KH_STATUS_LABEL[it.status]}
         </Badge>
         <span className="text-[var(--text-muted)]">v{it.versao}</span>
         <span className="text-[var(--text-muted)]">

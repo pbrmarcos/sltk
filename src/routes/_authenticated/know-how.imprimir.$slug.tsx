@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { ArrowLeft, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getItemBySlug } from "@/lib/know-how.functions";
+import { getItemBySlug, KH_TIPO_LABEL, KH_STATUS_LABEL } from "@/lib/know-how.functions";
 
 export const Route = createFileRoute("/_authenticated/know-how/imprimir/$slug")({
   head: () => ({
@@ -91,9 +91,9 @@ function KnowHowPrint() {
           <h1 className="mt-2 text-2xl font-bold leading-tight text-neutral-900">{it.titulo}</h1>
           {it.resumo && <p className="mt-2 text-sm text-neutral-600">{it.resumo}</p>}
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-neutral-500">
-            <span>Tipo: {it.tipo}</span>
+            <span>Tipo: {KH_TIPO_LABEL[it.tipo]}</span>
             <span>Versão: v{it.versao}</span>
-            <span>Status: {it.status}</span>
+            <span>Status: {KH_STATUS_LABEL[it.status]}</span>
             <span>Atualizado em {new Date(it.atualizado_em).toLocaleDateString("pt-BR")}</span>
           </div>
           {it.tags?.length > 0 && (
@@ -119,8 +119,8 @@ function KnowHowPrint() {
         )}
 
         {it.midia_url && (
-          <p className="mt-6 break-all border-t border-neutral-200 pt-3 text-[11px] text-neutral-500">
-            Mídia associada: {it.midia_url}
+          <p className="mt-6 border-t border-neutral-200 pt-3 text-[11px] text-neutral-500">
+            Este material tem mídia anexada — consulte a versão online para visualizá-la.
           </p>
         )}
 
