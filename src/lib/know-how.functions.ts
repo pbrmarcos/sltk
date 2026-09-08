@@ -147,6 +147,7 @@ export const listItens = createServerFn({ method: "GET" })
 
     if (data?.colecaoId) query = query.eq("colecao_id", data.colecaoId);
     if (data?.status) query = query.eq("status", data.status);
+    else query = query.neq("status", "arquivado");
     if (data?.onlyMine) query = query.eq("created_by", context.userId);
     if (data?.tags && data.tags.length > 0) query = query.overlaps("tags", data.tags);
     if (data?.papel) query = query.contains("papeis_alvo", [data.papel]);
@@ -419,6 +420,47 @@ export const solicitarAjuste = createServerFn({ method: "POST" })
       action: "UPDATE",
       field_changed: "status",
       new_value: "rascunho",
+    });
+    return { ok: true };
+  });
+
+// ---------- Arquivar / restaurar ----------
+export const arquivarItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdminOrManager(context.supabase, context.userId);
+    const { error } = await (context.supabase as any)
+      .from("kh_itens")
+      .update({ status: "arquivado" })
+      .eq("id", data.id);
+    if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: "arquivado",
+    });
+    return { ok: true };
+  });
+
+export const restaurarItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdminOrManager(context.supabase, context.userId);
+    const { error } = await (context.supabase as any)
+      .from("kh_itens")
+      .update({ status: "publicado" })
+      .eq("id", data.id);
+    if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: "publicado",
     });
     return { ok: true };
   });

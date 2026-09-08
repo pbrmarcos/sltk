@@ -1,14 +1,37 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Pencil, Send, Film, FileType2, Printer, Star } from "lucide-react";
+import { useState } from "react";
+import {
+  ArrowLeft,
+  Pencil,
+  Send,
+  Film,
+  FileType2,
+  Printer,
+  Star,
+  Archive,
+  ArchiveRestore,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
   getItemBySlug,
   enviarParaRevisao,
+  arquivarItem,
+  restaurarItem,
   getMediaSignedUrl,
   listFavoritos,
   toggleFavorito,
@@ -38,6 +61,28 @@ function KnowHowDetail() {
     mutationFn: (id: string) => enviarFn({ data: { id } }),
     onSuccess: () => {
       toast.success("Enviado para revisão.");
+      item.refetch();
+    },
+    onError: (e: unknown) => toast.error((e as Error).message),
+  });
+
+  const [confirmArquivar, setConfirmArquivar] = useState(false);
+  const arquivarFn = useServerFn(arquivarItem);
+  const arquivar = useMutation({
+    mutationFn: (id: string) => arquivarFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Item arquivado.");
+      setConfirmArquivar(false);
+      item.refetch();
+    },
+    onError: (e: unknown) => toast.error((e as Error).message),
+  });
+
+  const restaurarFn = useServerFn(restaurarItem);
+  const restaurar = useMutation({
+    mutationFn: (id: string) => restaurarFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Item restaurado.");
       item.refetch();
     },
     onError: (e: unknown) => toast.error((e as Error).message),
@@ -81,7 +126,8 @@ function KnowHowDetail() {
 
   const it = item.data;
   const isOwner = !!user && it.created_by === user.id;
-  const canEdit = isOwner || role === "admin" || role === "manager";
+  const canReview = role === "admin" || role === "manager";
+  const canEdit = isOwner || canReview;
 
   return (
     <PageContainer>
@@ -130,6 +176,23 @@ function KnowHowDetail() {
                 Editar
               </Button>
             )}
+            {canReview && it.status !== "arquivado" && (
+              <Button variant="outline" size="sm" onClick={() => setConfirmArquivar(true)}>
+                <Archive className="mr-1.5 h-4 w-4" />
+                Arquivar
+              </Button>
+            )}
+            {canReview && it.status === "arquivado" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => restaurar.mutate(it.id)}
+                disabled={restaurar.isPending}
+              >
+                <ArchiveRestore className="mr-1.5 h-4 w-4" />
+                Restaurar
+              </Button>
+            )}
           </div>
         }
       />
@@ -167,6 +230,23 @@ function KnowHowDetail() {
           {it.corpo}
         </article>
       )}
+
+      <AlertDialog open={confirmArquivar} onOpenChange={(o) => !o && setConfirmArquivar(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Arquivar item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{it.titulo}" deixará de aparecer nas listagens. Pode ser restaurado depois.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={arquivar.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => arquivar.mutate(it.id)} disabled={arquivar.isPending}>
+              {arquivar.isPending ? "Arquivando…" : "Arquivar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
