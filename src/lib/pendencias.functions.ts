@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ETP_STATUS_ABERTO, REVISAO_STATUS_PENDENTE } from "@/lib/dashboard-status-rules";
 
 type AnySb = any;
 
@@ -39,6 +40,11 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       montagensNaoIniciadas,
       montagensBloqueadas,
       embarquesRascunho,
+      etpsAbertos,
+      revisoesMecanica,
+      revisoesEletrica,
+      fatAguardandoHomolog,
+      khEmRevisao,
     ] = await Promise.all([
       countHead(sb, "clientes", (q) =>
         q.or("documento_fiscal_numero.is.null,documento_fiscal_numero.eq."),
@@ -70,6 +76,19 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
         q.eq("status", "bloqueada").is("deleted_at", null),
       ),
       countHead(sb, "logistica_embarques", (q) => q.eq("status", "rascunho")),
+      countHead(sb, "equipamento_etps", (q) =>
+        q.in("status", ETP_STATUS_ABERTO).is("deleted_at", null),
+      ),
+      countHead(sb, "equipamento_revisoes", (q) =>
+        q.eq("disciplina", "mecanica").in("status", REVISAO_STATUS_PENDENTE).is("deleted_at", null),
+      ),
+      countHead(sb, "equipamento_revisoes", (q) =>
+        q.eq("disciplina", "eletrica").in("status", REVISAO_STATUS_PENDENTE).is("deleted_at", null),
+      ),
+      countHead(sb, "fat_relatorios", (q) =>
+        q.eq("status", "aguardando_homologacao").is("deleted_at", null),
+      ),
+      countHead(sb, "kh_itens", (q) => q.eq("status", "em_revisao")),
     ]);
 
     const chamadosTotal = chamadosAbertos;
@@ -82,9 +101,13 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       "/compras/solicitacao": cotacoesAbertas,
       "/pos-vendas/chamados": chamadosTotal,
       "/pos-vendas/sat": satRascunho,
-      "/qualidade/fat": fatRascunho,
+      "/qualidade/fat": fatRascunho + fatAguardandoHomolog,
       "/producao/montagem": montagensNaoIniciadas + montagensBloqueadas,
       "/logistica/embarques": embarquesRascunho,
+      "/engenharia/etp": etpsAbertos,
+      "/qualidade/revisao-mecanica": revisoesMecanica,
+      "/qualidade/revisao-eletrica": revisoesEletrica,
+      "/know-how/revisar": khEmRevisao,
     };
 
     type Detail = { label: string; count: number };
@@ -102,12 +125,19 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
         { label: "SLA estourado", count: chamadosSlaEstourado },
       ],
       "/pos-vendas/sat": [{ label: "SAT em rascunho", count: satRascunho }],
-      "/qualidade/fat": [{ label: "FAT em rascunho", count: fatRascunho }],
+      "/qualidade/fat": [
+        { label: "FAT em rascunho", count: fatRascunho },
+        { label: "Aguardando homologação", count: fatAguardandoHomolog },
+      ],
       "/producao/montagem": [
         { label: "Não iniciadas", count: montagensNaoIniciadas },
         { label: "Bloqueadas", count: montagensBloqueadas },
       ],
       "/logistica/embarques": [{ label: "Embarques em rascunho", count: embarquesRascunho }],
+      "/engenharia/etp": [{ label: "ETPs abertos", count: etpsAbertos }],
+      "/qualidade/revisao-mecanica": [{ label: "Revisões pendentes", count: revisoesMecanica }],
+      "/qualidade/revisao-eletrica": [{ label: "Revisões pendentes", count: revisoesEletrica }],
+      "/know-how/revisar": [{ label: "Itens em revisão", count: khEmRevisao }],
     };
 
     return { map, details };
