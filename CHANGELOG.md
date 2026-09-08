@@ -1,3 +1,121 @@
+## 1.1.17 — Formulário "Nova oportunidade" reformulado — 2026-09-08
+
+- **Campo de valor unificado**: os dois campos separados (Valor estimado em R$ e em US$) viraram um único campo com seletor de moeda (R$/US$) ao lado, numa única caixa — mais simples de preencher e sem quebrar o alinhamento do formulário.
+- **Novo campo "Origem do lead"**: escolha de onde veio o lead (indicação, site, feira, LinkedIn, cold call…) direto na criação da oportunidade, com opção de cadastrar uma origem nova sem sair da tela. A informação já existia no banco para outros cadastros, mas nunca era pedida ao criar uma oportunidade.
+- Modal alargado e campos realinhados — títulos e caixas de "Valor estimado" e "Probabilidade" ficam simetricamente alinhados independente do texto de ajuda de cada um.
+
+---
+
+## 1.1.16 — Auditoria funcional: Know-how & Treinamentos — 2026-09-07
+
+- **Corrigida falha de segurança**: quem enviava um artigo para revisão conseguia aprovar (publicar) o próprio conteúdo, pulando a revisão por outra pessoa que o fluxo deveria exigir. Aprovar e devolver para ajuste agora são ações restritas a gestão/admin.
+- Criar, editar, enviar para revisão, aprovar e devolver um item de Know-how passam a ficar registrados na auditoria — antes nenhuma dessas ações deixava rastro.
+- Tipo de conteúdo e status (antes exibidos crus, como "em_revisao") agora aparecem traduzidos em todas as telas do módulo, inclusive na versão para impressão.
+- **Novo: Arquivar/Restaurar um item** (gestão/admin) — a opção existia no modelo de dados mas nenhuma tela permitia usá-la.
+- Corrigida a documentação de ajuda do módulo: os artigos descreviam trilhas de aprendizado com quiz e certificação, um sistema que nunca existiu no sistema. Reescritos para descrever o fluxo real (rascunho → revisão → publicado).
+
+---
+
+## 1.1.15 — Auditoria funcional: Fornecedores — 2026-09-07
+
+- **Corrigido bug crítico no ciclo de Cotações**: o convite de cotação a fornecedores usava nomes de coluna que nunca existiram no cadastro de fornecedor. Na prática isso fazia a tela de detalhe da cotação sempre mostrar "Nenhum fornecedor convidado", o diálogo de convidar fornecedores e o assistente de nova cotação não conseguirem listar fornecedores, o e-mail de convite ao fornecedor e o aviso de proposta recebida nunca dispararem, e o portal público onde o fornecedor responde a cotação sempre mostrar "Convite inválido".
+- Editar contato, anotação, anexo e o re-enriquecimento de dados de um fornecedor passam a ficar registrados na auditoria.
+- Confirmação antes de arquivar fornecedor, remover contato e remover anexo, no mesmo padrão usado no resto do sistema.
+- Corrigido o filtro de Incoterm na listagem, que sempre mostrava as 11 opções do padrão internacional mesmo sem nenhum fornecedor usando a maioria delas.
+
+---
+
+## 1.1.14 — Auditoria funcional: Logística & Embarque — 2026-09-07
+
+- Corrigido: um usuário de Produção ou Compras (que a matriz de permissões já libera para o módulo) não conseguia de fato criar ou editar embarques; e o papel "campo", que a tela achava que podia, era barrado na hora de gravar.
+- **E-mails de embarque completos**: criado, despachado e entregue passam a chegar com projeto, cliente e transportadora preenchidos — antes vinham com boa parte da tabela em branco.
+- Criar, editar e mudar status de um embarque passam a ficar registrados na auditoria.
+- Embarques em rascunho entram no indicador de pendências do menu lateral.
+- Aviso quando a lista de embarques ultrapassa o limite de exibição, em vez de simplesmente cortar resultados em silêncio.
+- Corrigida a categoria "status" de anexo, que aparecia crua ("STATUS") na lista de anexos, no diálogo de exportar PDF e no PDF gerado.
+- Confirmação antes de remover um item do romaneio ou um anexo (a remoção de anexo também apaga o arquivo do sistema).
+- **Cadastro de transportadora direto na tela de embarque**, sem precisar de tela separada — corrige um cadastro que, por uma falha de permissão no banco, nunca tinha conseguido gravar nada desde que foi criado.
+- Projetos já obsoletos somem do seletor de "Novo embarque".
+- **Novo botão "Cancelar embarque"**, com aviso por e-mail — antes não existia nenhum jeito de chegar a esse status pela tela.
+
+---
+
+## 1.1.13 — Auditoria funcional: Clientes — 2026-09-07
+
+- Corrigida uma falha de acesso que deixava contatos e sócios de qualquer cliente visíveis para usuários sem vínculo com ele.
+- Corrigida a importação em massa de clientes e fornecedores (bulkImport), que gravava em colunas erradas do banco.
+- Corrigido o indicador "sem CNPJ" da lista de clientes/fornecedores, que não refletia o cadastro real.
+- Status "Suspect" e outros valores internos, antes exibidos crus na linha do tempo do cliente, agora aparecem traduzidos.
+- Confirmação antes de remover um equipamento ou documento da ficha do cliente.
+- **Nova tela de edição de cliente e botão Arquivar**: a função para atualizar e arquivar um cliente já existia no servidor havia tempo, mas nenhuma tela chegava a usá-la.
+
+---
+
+## 1.1.12 — Auditoria funcional: Produção & Montagem — 2026-09-07
+
+- Criar, atualizar e remover uma montagem passam a ficar registrados na auditoria.
+- Novo e-mail automático quando uma montagem é concluída.
+- Montagens pendentes entram no indicador de pendências do menu lateral; KPIs do painel de Montagem corrigidos para refletir os totais reais.
+- **Botões Bloquear/Retomar** e **registro de progresso intermediário** na tela de Montagem.
+- **Handoff Montagem → FAT**: concluir uma montagem oferece abrir um novo FAT já com os dados do equipamento preenchidos.
+- Corrigidos nomenclatura confusa, um link quebrado e um indicador cruzado no painel de Produção; Engenharia e Produção passam a estar visivelmente ligadas na navegação.
+
+---
+
+## 1.1.11 — Auditoria funcional: Pós-vendas/SAT e Qualidade/FAT — 2026-09-07
+
+- **Corrigido bug ativo que impedia reprovar um FAT**: uma migração de banco quebrada travava a reprovação para qualquer FAT no sistema.
+- **Implementado o fluxo de reprovação de FAT**: o status "reprovado" existia na tela desde sempre, mas nenhuma ação do sistema conseguia de fato aplicá-lo. Agora reprovar exige um motivo, registra quem/quando/por quê e avisa por e-mail; nova tentativa de FAT fica vinculada à anterior, mantendo o histórico.
+- Novo e-mail quando um relatório de serviço em campo (SAT) é assinado e o atendimento é concluído.
+- Resolver ou reabrir um chamado pelo link público do cliente passa a seguir exatamente o mesmo caminho usado internamente (mesma auditoria, mesmo e-mail).
+- Ampliada a cobertura de auditoria em chamados e relatórios de SAT; corrigidas permissões que bloqueavam o acesso a algumas ações de FAT/SAT/geração de documento sem checagem nenhuma.
+
+---
+
+## 1.1.10 — Auditoria funcional: Comercial, Compras e Engenharia — 2026-09-07
+
+- **Consertado ciclo de Cotação → Aprovação de Ordem de Compra**: escolher um vencedor na cotação não gerava o documento que a aprovação da OC exigia para prosseguir — o ciclo simplesmente não fechava sem intervenção manual. Corrigido também o envio de propostas pelo portal público do fornecedor, que gravava em colunas erradas e sempre falhava, e a trava que faltava para impedir reenvio de preço numa cotação já encerrada.
+- **Fornecedor convidado para cotação passa a receber o link por e-mail de verdade** — antes só o time interno de Compras era avisado.
+- Consolidada a aprovação de itens de projeto (BOM) num único sistema — existiam dois caminhos de gravação para a mesma informação, e o botão de aprovação "de verdade" não tinha trava nenhuma.
+- Novo painel de **aprovações pendentes cruzando todos os projetos**, em Compras e em Engenharia, no lugar de precisar abrir projeto por projeto.
+- Novos e-mails: solicitação e decisão de aprovação de insumo; liberação de projeto para produção; decisão de revisão técnica; reabertura de ETP aprovado — nenhum desses momentos avisava ninguém antes.
+- **Convidar colaborador numa oportunidade**: o dono (ou admin/manager) pode dar acesso a outro vendedor para ver e comentar uma oportunidade específica.
+- **Conexão ETP → Orçamento**: um ETP aprovado ganha o botão "Gerar orçamento", com cliente e título já preenchidos.
+- Corrigidas diversas funções de escrita (criar ETP, itens de BOM, imagens de orçamento e outras) que não verificavam permissão nenhuma no servidor.
+
+---
+
+## 1.1.9 — Confirmações, telas de acesso restrito e limpeza de navegação — 2026-09-06
+
+- Adicionada confirmação antes de excluir em vários pontos que disparavam a exclusão direto no clique, sem aviso — inclusive a exclusão de uma credencial de integração, a mais arriscada por não ter como desfazer.
+- Unificado o visual das telas de "Acesso restrito" em todo o admin, antes reimplementado de formas ligeiramente diferentes em cada tela.
+- Diálogos de confirmação de ações destrutivas (reprovar FAT, mover/excluir entrevista) passam a usar o componente de alerta dedicado, mais consistente com o resto do sistema.
+- Os diálogos do funil comercial (marcar oportunidade como perdida, converter em cliente ativo) não podem mais ser fechados no meio do envio.
+- **Botão "Importar CSV"** agora aparece nas telas de Clientes e Fornecedores — a importação em massa já funcionava, mas só era alcançável digitando a URL direto.
+- Templates de documentos de FAT e SAT passam a ficar acessíveis para quem tem os módulos de Qualidade/Pós-vendas, sem depender do módulo de administração.
+- Removido de vez o apontamento de horas (ainda alcançável por dois atalhos secundários após ter sido tirado do menu principal); removida a exibição de "H/H consumida", um número que nunca refletia nada real.
+- Clientes migrou do menu "Operações" para "Comercial", ficando junto do Pipeline — mais alinhado com quem de fato usa a tela no dia a dia.
+
+---
+
+## 1.1.8 — Renomear RFQ para Cotação/Checklist e resolver colisões de nome — 2026-09-06
+
+- Concluído o rebranding de "RFQ": o termo interno (herdado do sistema anterior) foi totalmente substituído por **Cotação** em Compras e **Checklist** no fluxo comercial, incluindo os últimos rótulos, tooltips e o link público que o fornecedor recebe.
+- Resolvida a colisão entre duas telas diferentes que apareciam com o mesmo nome "Central de Documentos" — o editor de blocos/templates passa a se chamar "Editor de Blocos".
+- Resolvida a colisão entre a aba de administração "Mineração" (configuração do provedor) e a ferramenta comercial de prospecção de mesmo nome — a aba de admin virou "Provedor de Mineração".
+- O título de SAT agora explica a sigla ("SAT - Serviço de Atendimento Técnico"), no mesmo padrão já usado em FAT.
+
+---
+
+## 1.1.7 — Matriz de permissões dinâmica em todo o sistema — 2026-09-06
+
+- **Alinhadas ao módulo configurável em Usuários & Permissões** diversas telas que ainda decidiam quem pode criar/editar por uma lista fixa de papéis no código: Montagem e Revisões (Qualidade), Cotações e Ordens de Compra, Embarques (Logística), Chamados (Pós-vendas), Clientes, Fornecedores e Etapas de Equipamentos (Engenharia). Na prática, isso fazia com que desabilitar um módulo para um usuário em Permissões não tivesse efeito nenhum nessas telas — ou, na direção oposta, bloqueasse quem a própria tela deveria liberar.
+- Corrigidas 3 funções de escrita (criar ETP, imagem de orçamento, itens de lista de materiais) que não faziam nenhuma checagem de permissão no servidor.
+- Corrigida a tela de Chamados, que mostrava "Nenhum chamado encontrado" para quem não tinha acesso, em vez de indicar que o acesso foi negado.
+- Removido o módulo "Processos", que não tinha nenhuma função real além de aparecer na navegação.
+
+---
+
 ## 1.1.6 — Credenciais de integração configuráveis pela tela de administração — 2026-09-05
 
 - Em Configurações → Sistema → Chaves & Diagnóstico, cada integração externa (e-mail, IA, Google Drive, entre outras) ganhou um botão "Configurar" para cadastrar ou remover a credencial direto pela tela, sem precisar de acesso ao servidor.
