@@ -1,14 +1,43 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assertCanAccessModule } from "@/lib/admin-guard";
+import { assertAdminOrManager, assertEngineerOrHigher, hasAnyRole } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAuditServer } from "@/lib/audit.server";
+
+async function assertCanEditItem(supabase: any, userId: string, itemId: string): Promise<void> {
+  const isReviewer = await hasAnyRole(supabase, userId, ["admin", "manager"]);
+  if (isReviewer) return;
+  const { data: item } = await supabase
+    .from("kh_itens")
+    .select("created_by, status")
+    .eq("id", itemId)
+    .maybeSingle();
+  const isOwnerOfDraft = !!item && item.created_by === userId && item.status !== "publicado";
+  if (!isOwnerOfDraft) {
+    throw new Error("Apenas o autor (enquanto não publicado) ou admin/manager podem editar.");
+  }
+}
 
 export const KH_TIPOS = ["artigo", "video", "pdf", "checklist"] as const;
 export type KhTipo = (typeof KH_TIPOS)[number];
 
+export const KH_TIPO_LABEL: Record<KhTipo, string> = {
+  artigo: "Artigo",
+  video: "Vídeo",
+  pdf: "PDF",
+  checklist: "Checklist",
+};
+
 export const KH_STATUS = ["rascunho", "em_revisao", "publicado", "arquivado"] as const;
 export type KhStatus = (typeof KH_STATUS)[number];
+
+export const KH_STATUS_LABEL: Record<KhStatus, string> = {
+  rascunho: "Rascunho",
+  em_revisao: "Em revisão",
+  publicado: "Publicado",
+  arquivado: "Arquivado",
+};
 
 export const KH_MEDIA_BUCKET = "know-how-media";
 
@@ -226,7 +255,7 @@ export const createItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "know_how");
+    await assertEngineerOrHigher(context.supabase, context.userId);
     const base = slugify(data.titulo);
     const suffix = Math.random().toString(36).slice(2, 6);
     const slug = `${base}-${suffix}`;
@@ -250,6 +279,12 @@ export const createItem = createServerFn({ method: "POST" })
       .single();
 
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: (row as { id: string }).id,
+      action: "INSERT",
+      new_value: { titulo: data.titulo, colecao_id: data.colecao_id },
+    });
     return row as { id: string; slug: string };
   });
 
@@ -268,7 +303,7 @@ export const updateItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "know_how");
+    await assertCanEditItem(context.supabase, context.userId, data.id);
     const patch: Record<string, unknown> = {};
     for (const k of ["titulo", "resumo", "corpo", "midia_url", "tags", "papeis_alvo"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
@@ -278,6 +313,12 @@ export const updateItem = createServerFn({ method: "POST" })
       .update(patch)
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: data.id,
+      action: "UPDATE",
+      new_value: Object.keys(patch),
+    });
     return { ok: true };
   });
 
@@ -286,11 +327,19 @@ export const enviarParaRevisao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertCanEditItem(context.supabase, context.userId, data.id);
     const { error } = await (context.supabase as any)
       .from("kh_itens")
       .update({ status: "em_revisao" })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: "em_revisao",
+    });
     return { ok: true };
   });
 
@@ -314,7 +363,7 @@ export const aprovarItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "know_how");
+    await assertAdminOrManager(context.supabase, context.userId);
     // Registrar versão atual antes de publicar
     const { data: cur } = await (context.supabase as any)
       .from("kh_itens")
@@ -343,6 +392,13 @@ export const aprovarItem = createServerFn({ method: "POST" })
       })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: "publicado",
+    });
     return { ok: true };
   });
 
@@ -351,11 +407,18 @@ export const solicitarAjuste = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "know_how");
+    await assertAdminOrManager(context.supabase, context.userId);
     const { error } = await (context.supabase as any)
       .from("kh_itens")
       .update({ status: "rascunho", revisor_id: context.userId })
       .eq("id", data.id);
     if (error) throw friendlyDbError(error);
+    await logAuditServer(context.supabase as any, context.userId, {
+      table_name: "kh_itens",
+      record_id: data.id,
+      action: "UPDATE",
+      field_changed: "status",
+      new_value: "rascunho",
+    });
     return { ok: true };
   });
