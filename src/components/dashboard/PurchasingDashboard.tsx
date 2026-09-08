@@ -1,4 +1,4 @@
-import { ShoppingCart, FileSearch, PackageCheck } from "lucide-react";
+import { ShoppingCart, FileSearch, PackageCheck, Truck } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
@@ -25,9 +25,10 @@ export function PurchasingDashboard({ userName }: { userName: string }) {
         { label: "Ordens", to: "/compras/ordens", icon: ShoppingCart },
         { label: "Cotações", to: "/compras/cotacoes", icon: FileSearch },
         { label: "Solicitações", to: "/compras/solicitacao", icon: PackageCheck },
+        { label: "Embarques", to: "/logistica/embarques", icon: Truck },
       ]}
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <KpiCard
           label="OCs para aprovar"
           value={isLoading ? "…" : String(d?.kpis.ocsAprovar ?? 0)}
@@ -43,6 +44,11 @@ export function PurchasingDashboard({ userName }: { userName: string }) {
           label="Insumos aguardando"
           value={isLoading ? "…" : String(d?.kpis.insumosAguardando ?? 0)}
           accent="primary"
+        />
+        <KpiCard
+          label="Embarques pendentes"
+          value={isLoading ? "…" : String(d?.kpis.embarquesPendentes ?? 0)}
+          hint="Rascunho ou programado"
         />
       </div>
 

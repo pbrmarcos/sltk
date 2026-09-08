@@ -23,14 +23,26 @@ export type EngineeringData = {
 };
 
 export type ProductionData = {
-  kpis: { osExecucao: number; atrasadas: number; entregasSemana: number; ncAbertas: number };
+  kpis: {
+    osExecucao: number;
+    atrasadas: number;
+    entregasSemana: number;
+    ncAbertas: number;
+    embarquesPendentes: number;
+  };
   aderencia: number;
   etapasHeat: Segment[];
   entregas: ListItem[];
 };
 
 export type AssemblyData = {
-  kpis: { etapasAbertas: number; emAndamento: number; concluidas7d: number; atrasadas: number };
+  kpis: {
+    etapasAbertas: number;
+    emAndamento: number;
+    concluidas7d: number;
+    atrasadas: number;
+    fatAguardandoHomolog: number;
+  };
   progresso: { atual: number; alvo: number };
   fila: ListItem[];
 };
@@ -41,6 +53,7 @@ export type PurchasingData = {
     cotacoesAbertas: number;
     gastoMes: number;
     insumosAguardando: number;
+    embarquesPendentes: number;
   };
   ocs: ListItem[];
   cotacoes: ListItem[];
@@ -121,6 +134,10 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     formularios,
     enrichErros,
     audit,
+    embarques,
+    fatRelatorios,
+    khItens,
+    ocsAgregado,
   ] = await Promise.all([
     sb
       .from("equipamento_etps")
@@ -180,6 +197,20 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .select("id, action, table_name, record_id, created_at, user_id")
       .order("created_at", { ascending: false })
       .limit(8),
+    sb.from("logistica_embarques").select("id, status").in("status", ["rascunho", "programado"]),
+    sb
+      .from("fat_relatorios")
+      .select("id")
+      .eq("status", "aguardando_homologacao")
+      .is("deleted_at", null),
+    sb.from("kh_itens").select("id").eq("status", "em_revisao"),
+    // Sem .limit(): números agregados de OC não podem subcontar quando a base
+    // passar de 500 linhas — mesmo padrão enxuto (só as colunas que os
+    // agregados precisam) usado por getOrdensCompraKpis.
+    sb
+      .from("ordens_compra")
+      .select("status, valor_total, aprovado_em, created_at")
+      .is("deleted_at", null),
   ]);
 
   const rowsEtps = etps.data ?? [];
@@ -192,6 +223,9 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const rowsInsumos = insumos.data ?? [];
   const rowsSats = sats.data ?? [];
   const rowsCham = chamados.data ?? [];
+  const embarquesPendentes = embarques.data?.length ?? 0;
+  const fatAguardandoHomolog = fatRelatorios.data?.length ?? 0;
+  const khEmRevisao = khItens.data?.length ?? 0;
   const rowsForms = formularios.data ?? [];
 
   // ---------- Engenharia ----------
@@ -268,6 +302,7 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       ).length,
       ncAbertas: rowsRnc.filter((r: any) => r.status === "aberta" || r.status === "em_tratativa")
         .length,
+      embarquesPendentes,
     },
     aderencia: concluidas.length > 0 ? noPrazo.length / concluidas.length : 0,
     etapasHeat: [
@@ -332,6 +367,7 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       emAndamento: rowsEtapasProducao.filter((e: any) => e.status === "em_andamento").length,
       concluidas7d: etapasConcluidas7d.length,
       atrasadas: rowsEtapasProducao.filter(etapaAtrasada).length,
+      fatAguardandoHomolog,
     },
     progresso: {
       atual: rowsEtapasProducao.filter((e: any) => isEtapaConcluida(e.status)).length,
@@ -355,14 +391,15 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   };
 
   // ---------- Compras ----------
+  const rowsOcsAgregado = ocsAgregado.data ?? [];
   const ocsAprovar = rowsOcs.filter((o: any) => o.status === "aguardando_aprovacao");
   const purchasing: PurchasingData = {
     kpis: {
-      ocsAprovar: ocsAprovar.length,
+      ocsAprovar: rowsOcsAgregado.filter((o: any) => o.status === "aguardando_aprovacao").length,
       cotacoesAbertas: rowsCot.filter(
         (c: any) => c.status === "aberta" || c.status === "respondida",
       ).length,
-      gastoMes: rowsOcs
+      gastoMes: rowsOcsAgregado
         .filter(
           (o: any) => (o.aprovado_em ?? o.created_at) >= monthStart && o.status !== "cancelada",
         )
@@ -370,6 +407,7 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       insumosAguardando: rowsInsumos.filter(
         (i: any) => i.status === "pronto_aprovacao" || i.status === "em_cotacao",
       ).length,
+      embarquesPendentes,
     },
     ocs: ocsAprovar.slice(0, 6).map((o: any) => ({
       id: o.id,
@@ -450,7 +488,16 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const pendProducao = production.kpis.atrasadas + production.kpis.ncAbertas;
   const pendCompras = purchasing.kpis.ocsAprovar + purchasing.kpis.insumosAguardando;
   const pendPos = chamadosAbertos.length + field.kpis.satsPendentes;
-  const totalPend = pendComercial + pendEngenharia + pendProducao + pendCompras + pendPos;
+  const pendLogistica = embarquesPendentes;
+  const pendKnowHow = khEmRevisao;
+  const totalPend =
+    pendComercial +
+    pendEngenharia +
+    pendProducao +
+    pendCompras +
+    pendPos +
+    pendLogistica +
+    pendKnowHow;
   const criticos = foraSla.length + production.kpis.atrasadas + engineering.kpis.atrasadas;
 
   const admin: AdminData = {
@@ -467,6 +514,8 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       { label: "Produção", value: pendProducao, color: "#f59e0b" },
       { label: "Compras", value: pendCompras, color: "#0ea5e9" },
       { label: "Pós-vendas", value: pendPos, color: "#ef4444" },
+      { label: "Logística", value: pendLogistica, color: "#14b8a6" },
+      { label: "Know-how", value: pendKnowHow, color: "#a855f7" },
     ],
     fila: [
       {

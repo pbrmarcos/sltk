@@ -1,4 +1,4 @@
-import { Wrench, ListChecks } from "lucide-react";
+import { ListChecks, ClipboardCheck } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { MeterCard } from "./MeterCard";
 import { DashboardCard } from "./DashboardCard";
@@ -17,10 +17,10 @@ export function AssemblyDashboard({ userName }: { userName: string }) {
       subtitle="Sua fila de etapas e o andamento das entregas."
       actions={[
         { label: "Minhas etapas", to: "/producao/montagem", icon: ListChecks },
-        { label: "Ordens", to: "/producao/montagem", icon: Wrench },
+        { label: "FAT", to: "/qualidade/fat", icon: ClipboardCheck },
       ]}
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <KpiCard
           label="Etapas em aberto"
           value={isLoading ? "…" : String(d?.kpis.etapasAbertas ?? 0)}
@@ -36,6 +36,11 @@ export function AssemblyDashboard({ userName }: { userName: string }) {
           label="Atrasadas"
           value={isLoading ? "…" : String(d?.kpis.atrasadas ?? 0)}
           accent="danger"
+        />
+        <KpiCard
+          label="FAT aguardando homologação"
+          value={isLoading ? "…" : String(d?.kpis.fatAguardandoHomolog ?? 0)}
+          accent="warning"
         />
       </div>
 

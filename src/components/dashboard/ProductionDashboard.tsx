@@ -1,4 +1,4 @@
-import { Factory, ClipboardCheck } from "lucide-react";
+import { Factory, ClipboardCheck, Truck } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { GaugeCard } from "./GaugeCard";
 import { DashboardCard } from "./DashboardCard";
@@ -20,9 +20,10 @@ export function ProductionDashboard({ userName }: { userName: string }) {
       actions={[
         { label: "Montagem", to: "/producao/montagem", icon: Factory },
         { label: "FAT", to: "/qualidade/fat", icon: ClipboardCheck },
+        { label: "Embarques", to: "/logistica/embarques", icon: Truck },
       ]}
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <KpiCard
           label="Em execução"
           value={isLoading ? "…" : String(d?.kpis.osExecucao ?? 0)}
@@ -42,6 +43,11 @@ export function ProductionDashboard({ userName }: { userName: string }) {
           label="NCs abertas"
           value={isLoading ? "…" : String(d?.kpis.ncAbertas ?? 0)}
           accent="warning"
+        />
+        <KpiCard
+          label="Embarques pendentes"
+          value={isLoading ? "…" : String(d?.kpis.embarquesPendentes ?? 0)}
+          hint="Rascunho ou programado"
         />
       </div>
 
