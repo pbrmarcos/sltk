@@ -1,13 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Users, Briefcase } from "lucide-react";
+import { Users, Briefcase } from "lucide-react";
 import type { DashboardData } from "@/lib/dashboard.functions";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
+import { ShortcutsPanel } from "./ShortcutsPanel";
 import { PipelineFunnel } from "./PipelineFunnel";
 import { RevenueTrendChart } from "./RevenueTrendChart";
 import { HotOpportunitiesList } from "./HotOpportunitiesList";
 import { SatStatusCard } from "./SatStatusCard";
 import { TarefasAgendaCard } from "./TarefasAgendaCard";
+import { usePendenciasSidebar } from "@/hooks/use-pendencias";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", {
@@ -36,6 +38,7 @@ const STAGE_LABEL: Record<string, string> = {
 };
 
 export function ManagerDashboard({ data, userName }: { data: DashboardData; userName: string }) {
+  const { data: pendData } = usePendenciasSidebar();
   const funnel = data.funnel.map((f) => ({
     label: STAGE_LABEL[f.stage] ?? f.stage,
     valor: f.valor,
@@ -62,21 +65,15 @@ export function ManagerDashboard({ data, userName }: { data: DashboardData; user
             Visão executiva do comercial e dos processos em execução.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            to="/comercial/pipeline"
-            className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 py-2 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--primary)]/40 hover:bg-[var(--bg-elevated)]"
-          >
-            <Briefcase className="h-3.5 w-3.5" /> Pipeline <ArrowRight className="h-3 w-3" />
-          </Link>
-          <Link
-            to="/clientes"
-            className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 py-2 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--primary)]/40 hover:bg-[var(--bg-elevated)]"
-          >
-            <Users className="h-3.5 w-3.5" /> Clientes <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
       </div>
+
+      <ShortcutsPanel
+        actions={[
+          { label: "Pipeline", to: "/comercial/pipeline", icon: Briefcase },
+          { label: "Clientes", to: "/clientes", icon: Users },
+        ]}
+        pendMap={pendData?.map}
+      />
 
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
