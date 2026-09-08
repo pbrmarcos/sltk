@@ -1,4 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  isEtapaAtrasada,
+  isEtapaConcluida,
+  isEtpAberto,
+  isRevisaoPendente,
+} from "@/lib/dashboard-status-rules";
 
 export type ListItem = {
   id: string;
@@ -189,17 +195,13 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const rowsForms = formularios.data ?? [];
 
   // ---------- Engenharia ----------
-  const etpAberto = (s: string) => s === "rascunho" || s === "em_revisao";
-  const etapaConcluida = (s: string) => s === "concluida" || s === "concluido";
-  const etapaAtrasada = (e: any) =>
-    !etapaConcluida(e.status) && e.data_vencimento && new Date(e.data_vencimento).getTime() < now;
+  const etapaAtrasada = (e: any) => isEtapaAtrasada(e.status, e.data_vencimento, now);
 
   const engineering: EngineeringData = {
     kpis: {
-      etpsAbertos: rowsEtps.filter((e: any) => etpAberto(e.status)).length,
-      etapasAbertas: rowsEtapas.filter((e: any) => !etapaConcluida(e.status)).length,
-      revisoes: rowsRevisoes.filter((r: any) => r.status !== "aprovada" && r.status !== "aprovado")
-        .length,
+      etpsAbertos: rowsEtps.filter((e: any) => isEtpAberto(e.status)).length,
+      etapasAbertas: rowsEtapas.filter((e: any) => !isEtapaConcluida(e.status)).length,
+      revisoes: rowsRevisoes.filter((r: any) => isRevisaoPendente(r.status)).length,
       atrasadas: rowsEtapas.filter(etapaAtrasada).length,
     },
     kanban: [
@@ -225,7 +227,7 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       },
     ],
     criticas: rowsEtapas
-      .filter((e: any) => !etapaConcluida(e.status))
+      .filter((e: any) => !isEtapaConcluida(e.status))
       .sort((a: any, b: any) => {
         const av = a.data_vencimento ? new Date(a.data_vencimento).getTime() : Infinity;
         const bv = b.data_vencimento ? new Date(b.data_vencimento).getTime() : Infinity;
@@ -320,21 +322,19 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   // engineer, mostrando o mesmo número sob um rótulo diferente, sem relação
   // com o trabalho real de produção.
   const rowsEtapasProducao = rowsEtapas.filter((e: any) => e.disciplina === "producao");
-  const etapasAbertas = rowsEtapasProducao.filter((e: any) => !etapaConcluida(e.status));
+  const etapasAbertas = rowsEtapasProducao.filter((e: any) => !isEtapaConcluida(e.status));
   const etapasConcluidas7d = rowsEtapasProducao.filter(
-    (e: any) => etapaConcluida(e.status) && e.updated_at && e.updated_at >= ago7d,
+    (e: any) => isEtapaConcluida(e.status) && e.updated_at && e.updated_at >= ago7d,
   );
   const assembly: AssemblyData = {
     kpis: {
       etapasAbertas: etapasAbertas.length,
-      emAndamento: rowsEtapasProducao.filter(
-        (e: any) => e.status === "em_andamento" || e.status === "em_progresso",
-      ).length,
+      emAndamento: rowsEtapasProducao.filter((e: any) => e.status === "em_andamento").length,
       concluidas7d: etapasConcluidas7d.length,
       atrasadas: rowsEtapasProducao.filter(etapaAtrasada).length,
     },
     progresso: {
-      atual: rowsEtapasProducao.filter(etapaConcluidaRow).length,
+      atual: rowsEtapasProducao.filter((e: any) => isEtapaConcluida(e.status)).length,
       alvo: rowsEtapasProducao.length,
     },
     fila: etapasAbertas.slice(0, 6).map((e: any) => ({
@@ -353,10 +353,6 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
           : "neutral") as ListItem["tone"],
     })),
   };
-
-  function etapaConcluidaRow(e: any) {
-    return etapaConcluida(e.status);
-  }
 
   // ---------- Compras ----------
   const ocsAprovar = rowsOcs.filter((o: any) => o.status === "aguardando_aprovacao");
