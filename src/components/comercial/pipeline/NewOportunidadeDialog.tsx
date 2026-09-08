@@ -248,9 +248,9 @@ export function NewOportunidadeDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1">
               <Label htmlFor="opp-valor">Valor estimado</Label>
-              <div className="flex">
+              <div className="grid grid-cols-[88px_1fr]">
                 <Select value={moeda} onValueChange={(v) => setMoeda(v as Moeda)}>
-                  <SelectTrigger className="w-[84px] shrink-0 rounded-r-none border-r-0 px-3">
+                  <SelectTrigger className="w-full rounded-r-none border-r-0 px-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -264,7 +264,7 @@ export function NewOportunidadeDialog({
                   value={valor}
                   onChange={(e) => setValor(formatValor(e.target.value))}
                   placeholder="0,00"
-                  className="flex-1 rounded-l-none"
+                  className="w-full rounded-l-none"
                 />
               </div>
             </div>
