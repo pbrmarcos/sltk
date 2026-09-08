@@ -142,7 +142,7 @@ export function NewOportunidadeDialog({
         else onOpenChange(true);
       }}
     >
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent className="sm:max-w-[680px]">
         <DialogHeader>
           <DialogTitle>Nova oportunidade</DialogTitle>
           <DialogDescription>
@@ -248,9 +248,9 @@ export function NewOportunidadeDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1">
               <Label htmlFor="opp-valor">Valor estimado</Label>
-              <div className="flex gap-2">
+              <div className="flex">
                 <Select value={moeda} onValueChange={(v) => setMoeda(v as Moeda)}>
-                  <SelectTrigger className="w-[88px] shrink-0">
+                  <SelectTrigger className="w-[84px] shrink-0 rounded-r-none border-r-0 px-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -264,7 +264,7 @@ export function NewOportunidadeDialog({
                   value={valor}
                   onChange={(e) => setValor(formatValor(e.target.value))}
                   placeholder="0,00"
-                  className="flex-1"
+                  className="flex-1 rounded-l-none"
                 />
               </div>
             </div>
