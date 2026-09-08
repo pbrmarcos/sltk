@@ -1,5 +1,7 @@
 import * as React from "react";
-import { QuickActions, type QuickAction } from "./QuickActions";
+import { type QuickAction } from "./QuickActions";
+import { ShortcutsPanel } from "./ShortcutsPanel";
+import { usePendenciasSidebar } from "@/hooks/use-pendencias";
 
 type Props = {
   userName: string;
@@ -17,6 +19,7 @@ const PERIODS = [
 
 export function DashboardShell({ userName, roleLabel, subtitle, actions, children }: Props) {
   const [period, setPeriod] = React.useState("30d");
+  const { data: pendData } = usePendenciasSidebar();
   const today = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "2-digit",
@@ -56,9 +59,11 @@ export function DashboardShell({ userName, roleLabel, subtitle, actions, childre
               </button>
             ))}
           </div>
-          {actions && actions.length > 0 && <QuickActions actions={actions} />}
         </div>
       </div>
+      {actions && actions.length > 0 && (
+        <ShortcutsPanel actions={actions} pendMap={pendData?.map} />
+      )}
       {children}
     </div>
   );
