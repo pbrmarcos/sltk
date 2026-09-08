@@ -367,6 +367,7 @@ export const createOportunidade = createServerFn({ method: "POST" })
       valor_estimado_usd?: number;
       probabilidade?: number;
       cliente_id?: string;
+      origem_id?: string;
       /** Chave única por tentativa de criação — evita duplo submit / retry. */
       idempotency_key?: string;
       /** Usuário confirmou que quer criar mesmo havendo oportunidade parecida. */
@@ -383,6 +384,7 @@ export const createOportunidade = createServerFn({ method: "POST" })
           valor_estimado_usd: z.number().min(0).max(99999999).optional(),
           probabilidade: z.number().int().min(0).max(100).optional(),
           cliente_id: z.string().uuid().optional(),
+          origem_id: z.string().uuid().optional(),
           idempotency_key: z.string().min(8).max(64).optional(),
           confirmar_duplicata: z.boolean().optional(),
         })
@@ -456,6 +458,7 @@ export const createOportunidade = createServerFn({ method: "POST" })
         valor_estimado_usd: data.valor_estimado_usd ?? null,
         probabilidade: data.probabilidade ?? 10,
         cliente_id: data.cliente_id ?? null,
+        origem_id: data.origem_id ?? null,
         responsavel_id: context.userId,
         idempotency_key: data.idempotency_key ?? null,
       })

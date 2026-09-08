@@ -1,4 +1,6 @@
 import { useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +13,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ComboboxAdd } from "@/components/ui/combobox-add";
 import { useCreateOportunidade } from "@/lib/oportunidades.queries";
+import { leadOrigensQueryOptions } from "@/lib/cadastros.queries";
+import { createLeadOrigem } from "@/lib/lead-origens.functions";
 import { useFormDraft } from "@/hooks/use-form-draft";
 import { confirmDiscard } from "@/lib/unsaved-guard";
 import { toast } from "sonner";
 import type { OportunidadeDuplicada } from "@/lib/oportunidades.functions";
+
+type Moeda = "BRL" | "USD";
 
 export function NewOportunidadeDialog({
   open,
@@ -34,13 +48,18 @@ export function NewOportunidadeDialog({
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [origemId, setOrigemId] = useState<string | null>(null);
   const [valor, setValor] = useState("");
-  const [valorUsd, setValorUsd] = useState("");
+  const [moeda, setMoeda] = useState<Moeda>("BRL");
   const [prob, setProb] = useState("10");
   const create = useCreateOportunidade();
   /** Chave de idempotência: mesma tentativa nunca gera duas oportunidades. */
   const idemKey = useRef<string>(crypto.randomUUID());
   const [duplicatas, setDuplicatas] = useState<OportunidadeDuplicada[]>([]);
+
+  const qc = useQueryClient();
+  const origens = useQuery(leadOrigensQueryOptions());
+  const createOrigemFn = useServerFn(createLeadOrigem);
 
   const initialDraft = {
     titulo: "",
@@ -48,11 +67,12 @@ export function NewOportunidadeDialog({
     nome: "",
     email: "",
     telefone: "",
+    origemId: null as string | null,
     valor: "",
-    valorUsd: "",
+    moeda: "BRL" as Moeda,
     prob: "10",
   };
-  const draft = { titulo, empresa, nome, email, telefone, valor, valorUsd, prob };
+  const draft = { titulo, empresa, nome, email, telefone, origemId, valor, moeda, prob };
   const { clearDraft, isDirty } = useFormDraft({
     formKey: `oportunidade:nova:${clienteId ?? "pipeline"}`,
     value: draft,
@@ -64,8 +84,9 @@ export function NewOportunidadeDialog({
       setNome(saved.nome);
       setEmail(saved.email);
       setTelefone(saved.telefone);
+      setOrigemId(saved.origemId ?? null);
       setValor(saved.valor);
-      setValorUsd(saved.valorUsd ?? "");
+      setMoeda(saved.moeda ?? "BRL");
       setProb(saved.prob);
     },
   });
@@ -78,8 +99,9 @@ export function NewOportunidadeDialog({
     setNome("");
     setEmail("");
     setTelefone("");
+    setOrigemId(null);
     setValor("");
-    setValorUsd("");
+    setMoeda("BRL");
     setProb("10");
   }
 
@@ -198,6 +220,24 @@ export function NewOportunidadeDialog({
                 maxLength={16}
               />
             </div>
+            <div className="col-span-2 grid gap-1">
+              <Label>Origem do lead</Label>
+              <ComboboxAdd
+                options={origens.data ?? []}
+                value={origemId}
+                onChange={setOrigemId}
+                placeholder="De onde veio esse lead?"
+                emptyText="Nenhuma origem cadastrada — digite para adicionar."
+                onCreate={async (nomeOrigem) => {
+                  const r = await createOrigemFn({ data: { nome: nomeOrigem } });
+                  await qc.invalidateQueries({ queryKey: ["cadastros", "lead_origens"] });
+                  return r;
+                }}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Ex.: indicação, site, feira, LinkedIn, cold call…
+              </p>
+            </div>
           </div>
 
           <Separator />
@@ -207,27 +247,26 @@ export function NewOportunidadeDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1">
-              <Label htmlFor="opp-valor">Valor estimado (R$)</Label>
-              <Input
-                id="opp-valor"
-                inputMode="decimal"
-                value={valor}
-                onChange={(e) => setValor(formatValor(e.target.value))}
-                placeholder="0,00"
-              />
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="opp-valor-usd">Valor estimado (US$)</Label>
-              <Input
-                id="opp-valor-usd"
-                inputMode="decimal"
-                value={valorUsd}
-                onChange={(e) => setValorUsd(formatValor(e.target.value))}
-                placeholder="0,00"
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Informe quando a negociação for em dólar.
-              </p>
+              <Label htmlFor="opp-valor">Valor estimado</Label>
+              <div className="flex gap-2">
+                <Select value={moeda} onValueChange={(v) => setMoeda(v as Moeda)}>
+                  <SelectTrigger className="w-[88px] shrink-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BRL">R$</SelectItem>
+                    <SelectItem value="USD">US$</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  id="opp-valor"
+                  inputMode="decimal"
+                  value={valor}
+                  onChange={(e) => setValor(formatValor(e.target.value))}
+                  placeholder="0,00"
+                  className="flex-1"
+                />
+              </div>
             </div>
             <div className="grid gap-1">
               <Label htmlFor="opp-prob">Probabilidade (%)</Label>
@@ -287,8 +326,9 @@ export function NewOportunidadeDialog({
                   nome_lead: nome.trim() || undefined,
                   email: email.trim() || undefined,
                   telefone: telefone.trim() || undefined,
-                  valor_estimado: parseValor(valor),
-                  valor_estimado_usd: parseValor(valorUsd),
+                  origem_id: origemId ?? undefined,
+                  valor_estimado: moeda === "BRL" ? parseValor(valor) : undefined,
+                  valor_estimado_usd: moeda === "USD" ? parseValor(valor) : undefined,
                   probabilidade: prob ? Number(prob) : 10,
                   cliente_id: clienteId,
                   idempotency_key: idemKey.current,
