@@ -23,46 +23,52 @@ export function DashboardShell({ userName, roleLabel, subtitle, actions, childre
   });
   const first = userName.split(" ")[0];
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 text-[12px] uppercase tracking-wider text-[var(--text-muted)]">
-            <span>{today}</span>
-            <span className="rounded-full border border-[var(--bg-border)] bg-[var(--bg-elevated)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-              {roleLabel}
-            </span>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="shrink-0 space-y-3 pb-3">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
+              <span>{today}</span>
+              <span className="rounded-full border border-[var(--bg-border)] bg-[var(--bg-elevated)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                {roleLabel}
+              </span>
+            </div>
+            <h1 className="mt-0.5 truncate text-[19px] font-semibold tracking-tight text-[var(--text-primary)]">
+              Olá, <span className="text-[var(--primary)]">{first}</span> 👋
+              {subtitle && (
+                <span className="ml-2 truncate text-[12px] font-normal text-[var(--text-muted)]">
+                  {subtitle}
+                </span>
+              )}
+            </h1>
           </div>
-          <h1 className="mt-1 truncate text-[26px] font-semibold tracking-tight text-[var(--text-primary)]">
-            Olá, <span className="text-[var(--primary)]">{first}</span> 👋
-          </h1>
-          {subtitle && <p className="text-[13px] text-[var(--text-muted)]">{subtitle}</p>}
+          {totalPend !== undefined && (
+            <div
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border px-2.5 py-1 text-[11px] font-medium lg:self-auto",
+                totalPend === 0
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : totalPend > 15
+                    ? "border-red-500/30 bg-red-500/10 text-red-400"
+                    : "border-amber-500/30 bg-amber-500/10 text-amber-400",
+              )}
+            >
+              {totalPend === 0 ? (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              ) : (
+                <AlertTriangle className="h-3.5 w-3.5" />
+              )}
+              {totalPend === 0
+                ? "Tudo em dia"
+                : `${totalPend} ${totalPend === 1 ? "item pede" : "itens pedem"} atenção`}
+            </div>
+          )}
         </div>
-        {totalPend !== undefined && (
-          <div
-            className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-medium",
-              totalPend === 0
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : totalPend > 15
-                  ? "border-red-500/30 bg-red-500/10 text-red-400"
-                  : "border-amber-500/30 bg-amber-500/10 text-amber-400",
-            )}
-          >
-            {totalPend === 0 ? (
-              <CheckCircle2 className="h-3.5 w-3.5" />
-            ) : (
-              <AlertTriangle className="h-3.5 w-3.5" />
-            )}
-            {totalPend === 0
-              ? "Tudo em dia"
-              : `${totalPend} ${totalPend === 1 ? "item pede" : "itens pedem"} atenção`}
-          </div>
+        {actions && actions.length > 0 && (
+          <ShortcutsPanel actions={actions} pendMap={pendData?.map} />
         )}
       </div>
-      {actions && actions.length > 0 && (
-        <ShortcutsPanel actions={actions} pendMap={pendData?.map} />
-      )}
-      {children}
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">{children}</div>
     </div>
   );
 }

@@ -56,9 +56,9 @@ function AuthenticatedShell() {
   }, [profile?.must_change_password]);
 
   return (
-    <div className="flex min-h-screen w-full bg-[var(--bg-base)]">
+    <div className="flex h-screen w-full overflow-hidden bg-[var(--bg-base)]">
       <AppSidebar />
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 min-h-0">
         <header className="flex md:hidden items-center gap-2 h-14 border-b border-[var(--bg-border)] bg-[var(--bg-surface)] px-3">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
@@ -75,7 +75,7 @@ function AuthenticatedShell() {
             {brand?.system_name ?? "Solutek Operations"}
           </span>
         </header>
-        <main className="flex-1 overflow-auto flex flex-col">
+        <main className="flex-1 overflow-auto flex flex-col min-h-0">
           <ModuleGuard>
             <Outlet />
           </ModuleGuard>
