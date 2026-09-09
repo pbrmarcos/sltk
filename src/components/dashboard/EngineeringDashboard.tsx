@@ -4,6 +4,7 @@ import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
 import { HeatStrip } from "./HeatStrip";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
 import { useRoleDashboards } from "./useRoleDashboards";
 
 export function EngineeringDashboard({ userName }: { userName: string }) {
@@ -52,6 +53,8 @@ export function EngineeringDashboard({ userName }: { userName: string }) {
           empty="Nenhuma etapa de engenharia cadastrada ainda."
         />
       </DashboardCard>
+
+      <ModulesActiveGrid data={data} exclude={["engenharia"]} />
     </DashboardShell>
   );
 }

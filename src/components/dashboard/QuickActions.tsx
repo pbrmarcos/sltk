@@ -5,6 +5,7 @@ export type QuickAction = {
   label: string;
   to: string;
   icon: LucideIcon;
+  color?: string;
 };
 
 export function QuickActions({
@@ -15,22 +16,35 @@ export function QuickActions({
   pendMap?: Record<string, number>;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
       {actions.map((a) => {
         const pendCount = pendMap?.[a.to] ?? 0;
+        const color = a.color ?? "var(--primary)";
         return (
           <Link
             key={a.to + a.label}
             to={a.to}
-            className="relative inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 py-2 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--primary)]/40 hover:bg-[var(--bg-elevated)]"
+            className="group relative flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-elevated)]"
           >
-            <a.icon className="h-3.5 w-3.5" />
-            {a.label}
-            {pendCount > 0 && (
-              <span className="grid shrink-0 min-w-[16px] h-[16px] px-1 place-items-center rounded-full bg-red-500 text-[10px] font-bold tabular-nums text-white ring-1 ring-red-400/60">
-                {pendCount > 99 ? "99+" : pendCount}
-              </span>
-            )}
+            <span
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-transform group-hover:scale-105"
+              style={{ background: `${color}1A`, color }}
+            >
+              <a.icon className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[12.5px] font-medium text-[var(--text-primary)]">
+                {a.label}
+              </div>
+              {pendCount > 0 && (
+                <div className="text-[11px] tabular-nums text-[var(--text-muted)]">
+                  <span className="font-semibold text-[var(--danger,#ef4444)]">
+                    {pendCount > 99 ? "99+" : pendCount}
+                  </span>{" "}
+                  pendente{pendCount > 1 ? "s" : ""}
+                </div>
+              )}
+            </div>
           </Link>
         );
       })}

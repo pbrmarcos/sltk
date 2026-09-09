@@ -4,6 +4,7 @@ import { MeterCard } from "./MeterCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
 import { useRoleDashboards } from "./useRoleDashboards";
 
 export function FieldDashboard({ userName }: { userName: string }) {
@@ -62,6 +63,8 @@ export function FieldDashboard({ userName }: { userName: string }) {
       <DashboardCard title="SATs em preenchimento" hint="Aguardando conclusão">
         <StatusList items={d?.sats ?? []} empty="Nenhum SAT pendente." />
       </DashboardCard>
+
+      <ModulesActiveGrid data={data} exclude={["pos_vendas"]} />
     </DashboardShell>
   );
 }

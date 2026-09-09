@@ -5,6 +5,7 @@ import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
 import { HeatStrip } from "./HeatStrip";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
 import { useRoleDashboards } from "./useRoleDashboards";
 
 export function ProductionDashboard({ userName }: { userName: string }) {
@@ -70,6 +71,8 @@ export function ProductionDashboard({ userName }: { userName: string }) {
       <DashboardCard title="Próximas entregas" hint="Por previsão de término">
         <StatusList items={d?.entregas ?? []} empty="Nenhuma montagem cadastrada ainda." />
       </DashboardCard>
+
+      <ModulesActiveGrid data={data} exclude={["producao"]} />
     </DashboardShell>
   );
 }

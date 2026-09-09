@@ -1,7 +1,9 @@
 import * as React from "react";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { type QuickAction } from "./QuickActions";
 import { ShortcutsPanel } from "./ShortcutsPanel";
 import { usePendenciasSidebar } from "@/hooks/use-pendencias";
+import { cn } from "@/lib/utils";
 
 type Props = {
   userName: string;
@@ -11,15 +13,9 @@ type Props = {
   children: React.ReactNode;
 };
 
-const PERIODS = [
-  { key: "7d", label: "7 dias" },
-  { key: "30d", label: "30 dias" },
-  { key: "90d", label: "90 dias" },
-];
-
 export function DashboardShell({ userName, roleLabel, subtitle, actions, children }: Props) {
-  const [period, setPeriod] = React.useState("30d");
   const { data: pendData } = usePendenciasSidebar();
+  const totalPend = pendData ? Object.values(pendData.map).reduce((s, n) => s + n, 0) : undefined;
   const today = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "2-digit",
@@ -41,25 +37,27 @@ export function DashboardShell({ userName, roleLabel, subtitle, actions, childre
           </h1>
           {subtitle && <p className="text-[13px] text-[var(--text-muted)]">{subtitle}</p>}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex overflow-hidden rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
-            {PERIODS.map((p) => (
-              <button
-                key={p.key}
-                type="button"
-                onClick={() => setPeriod(p.key)}
-                className={
-                  "px-2.5 py-1.5 text-[11.5px] font-medium transition-colors " +
-                  (period === p.key
-                    ? "bg-[var(--primary)]/15 text-[var(--primary)]"
-                    : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]")
-                }
-              >
-                {p.label}
-              </button>
-            ))}
+        {totalPend !== undefined && (
+          <div
+            className={cn(
+              "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-medium",
+              totalPend === 0
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : totalPend > 15
+                  ? "border-red-500/30 bg-red-500/10 text-red-400"
+                  : "border-amber-500/30 bg-amber-500/10 text-amber-400",
+            )}
+          >
+            {totalPend === 0 ? (
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            ) : (
+              <AlertTriangle className="h-3.5 w-3.5" />
+            )}
+            {totalPend === 0
+              ? "Tudo em dia"
+              : `${totalPend} ${totalPend === 1 ? "item pede" : "itens pedem"} atenção`}
           </div>
-        </div>
+        )}
       </div>
       {actions && actions.length > 0 && (
         <ShortcutsPanel actions={actions} pendMap={pendData?.map} />

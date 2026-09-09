@@ -3,6 +3,7 @@ import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
 import { useRoleDashboards } from "./useRoleDashboards";
 
 const fmtBRL = (n: number) =>
@@ -60,6 +61,8 @@ export function PurchasingDashboard({ userName }: { userName: string }) {
           <StatusList items={d?.cotacoes ?? []} empty="Nenhuma cotação aberta." />
         </DashboardCard>
       </div>
+
+      <ModulesActiveGrid data={data} exclude={["compras"]} />
     </DashboardShell>
   );
 }

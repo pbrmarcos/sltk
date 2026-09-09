@@ -4,6 +4,7 @@ import { MeterCard } from "./MeterCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
 import { useRoleDashboards } from "./useRoleDashboards";
 
 export function AssemblyDashboard({ userName }: { userName: string }) {
@@ -57,6 +58,8 @@ export function AssemblyDashboard({ userName }: { userName: string }) {
           <StatusList items={d?.fila ?? []} empty="Nenhuma etapa atribuída no momento." />
         </DashboardCard>
       </div>
+
+      <ModulesActiveGrid data={data} exclude={["producao"]} />
     </DashboardShell>
   );
 }

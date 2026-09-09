@@ -61,12 +61,11 @@ function DashboardPage() {
 
   const userName = profile?.full_name ?? profile?.email ?? "Usuário";
 
-  // Manager/admin fallback keeps live pipeline data (real backend query).
   if (role === "manager") {
     return <ManagerInner userId={userId!} fetchDashboard={fetchDashboard} userName={userName} />;
   }
 
-  // Other roles: mocked, per-role dashboards.
+  // Demais roles: dashboards dedicados por papel, dados reais via useRoleDashboards().
   return (
     <PageContainer>
       {role === "admin" && <AdminDashboard userName={userName} />}

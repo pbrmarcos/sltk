@@ -6,6 +6,8 @@ import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
 import { PipelineFunnel } from "./PipelineFunnel";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
+import { useRoleDashboards } from "./useRoleDashboards";
 import { getManagerDashboard } from "@/lib/dashboard.functions";
 
 const fmtBRL = (n: number) =>
@@ -36,6 +38,7 @@ export function SalesDashboard({ userName }: { userName: string }) {
   });
 
   const loading = isLoading || !d;
+  const { data: roleData } = useRoleDashboards();
 
   return (
     <DashboardShell
@@ -113,6 +116,8 @@ export function SalesDashboard({ userName }: { userName: string }) {
           />
         </DashboardCard>
       </div>
+
+      <ModulesActiveGrid data={roleData} exclude={["comercial"]} />
     </DashboardShell>
   );
 }

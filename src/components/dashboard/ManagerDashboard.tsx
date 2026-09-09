@@ -3,13 +3,14 @@ import { Users, Briefcase } from "lucide-react";
 import type { DashboardData } from "@/lib/dashboard.functions";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
-import { ShortcutsPanel } from "./ShortcutsPanel";
+import { DashboardShell } from "./DashboardShell";
 import { PipelineFunnel } from "./PipelineFunnel";
 import { RevenueTrendChart } from "./RevenueTrendChart";
 import { HotOpportunitiesList } from "./HotOpportunitiesList";
 import { SatStatusCard } from "./SatStatusCard";
 import { TarefasAgendaCard } from "./TarefasAgendaCard";
-import { usePendenciasSidebar } from "@/hooks/use-pendencias";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
+import { useRoleDashboards } from "./useRoleDashboards";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", {
@@ -38,43 +39,24 @@ const STAGE_LABEL: Record<string, string> = {
 };
 
 export function ManagerDashboard({ data, userName }: { data: DashboardData; userName: string }) {
-  const { data: pendData } = usePendenciasSidebar();
+  const { data: roleData } = useRoleDashboards();
   const funnel = data.funnel.map((f) => ({
     label: STAGE_LABEL[f.stage] ?? f.stage,
     valor: f.valor,
     count: f.count,
     color: STAGE_COLORS[f.stage] ?? "#6366f1",
   }));
-  const today = new Date().toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="text-[12px] uppercase tracking-wider text-[var(--text-muted)]">
-            {today}
-          </div>
-          <h1 className="mt-1 text-[26px] font-semibold tracking-tight text-[var(--text-primary)]">
-            Olá, <span className="text-[var(--primary)]">{userName.split(" ")[0]}</span> 👋
-          </h1>
-          <p className="text-[13px] text-[var(--text-muted)]">
-            Visão executiva do comercial e dos processos em execução.
-          </p>
-        </div>
-      </div>
-
-      <ShortcutsPanel
-        actions={[
-          { label: "Pipeline", to: "/comercial/pipeline", icon: Briefcase },
-          { label: "Clientes", to: "/clientes", icon: Users },
-        ]}
-        pendMap={pendData?.map}
-      />
-
+    <DashboardShell
+      userName={userName}
+      roleLabel="Estratégico"
+      subtitle="Visão executiva do comercial e dos processos em execução."
+      actions={[
+        { label: "Pipeline", to: "/comercial/pipeline", icon: Briefcase },
+        { label: "Clientes", to: "/clientes", icon: Users },
+      ]}
+    >
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <KpiCard
@@ -173,6 +155,8 @@ export function ManagerDashboard({ data, userName }: { data: DashboardData; user
           <SatStatusCard byStatus={data.satByStatus} recent={data.recentSats} />
         </DashboardCard>
       </div>
-    </div>
+
+      <ModulesActiveGrid data={roleData} exclude={["comercial"]} />
+    </DashboardShell>
   );
 }

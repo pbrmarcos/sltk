@@ -5,6 +5,12 @@ import {
   isEtpAberto,
   isRevisaoPendente,
 } from "@/lib/dashboard-status-rules";
+import type { AppModule } from "@/lib/permissoes.functions";
+import { FAT_STATUS_LABEL } from "@/lib/fat.functions";
+import { LOGISTICA_STATUS } from "@/lib/logistica.functions";
+import { FORNECEDOR_STATUS, FORNECEDOR_STATUS_LABEL } from "@/lib/fornecedores.shared";
+import { CLIENTE_STATUS } from "@/lib/clientes.shared";
+import { KH_STATUS, KH_STATUS_LABEL } from "@/lib/know-how.functions";
 
 export type ListItem = {
   id: string;
@@ -79,6 +85,16 @@ export type AdminData = {
   auditoria: { id: string; actor: string; action: string; target: string; when: string }[];
 };
 
+export type ModuleSummary = {
+  kpis: {
+    label: string;
+    value: string;
+    accent?: "primary" | "success" | "warning" | "danger";
+  }[];
+  segments?: Segment[];
+  list?: ListItem[];
+};
+
 export type RoleDashboards = {
   generatedAt: string;
   engineering: EngineeringData;
@@ -87,6 +103,7 @@ export type RoleDashboards = {
   purchasing: PurchasingData;
   field: FieldData;
   admin: AdminData;
+  modules: Partial<Record<AppModule, ModuleSummary>>;
 };
 
 type SB = SupabaseClient<any, any, any>;
@@ -134,10 +151,13 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     formularios,
     enrichErros,
     audit,
-    embarques,
-    fatRelatorios,
-    khItens,
+    embarquesTodos,
+    fatRelatoriosTodos,
+    khItensTodos,
     ocsAgregado,
+    fornecedores,
+    oportunidadesAbertas,
+    clientesTodos,
   ] = await Promise.all([
     sb
       .from("equipamento_etps")
@@ -197,13 +217,9 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .select("id, action, table_name, record_id, created_at, user_id")
       .order("created_at", { ascending: false })
       .limit(8),
-    sb.from("logistica_embarques").select("id, status").in("status", ["rascunho", "programado"]),
-    sb
-      .from("fat_relatorios")
-      .select("id")
-      .eq("status", "aguardando_homologacao")
-      .is("deleted_at", null),
-    sb.from("kh_itens").select("id").eq("status", "em_revisao"),
+    sb.from("logistica_embarques").select("id, status"),
+    sb.from("fat_relatorios").select("id, status").is("deleted_at", null),
+    sb.from("kh_itens").select("id, status"),
     // Sem .limit(): números agregados de OC não podem subcontar quando a base
     // passar de 500 linhas — mesmo padrão enxuto (só as colunas que os
     // agregados precisam) usado por getOrdensCompraKpis.
@@ -211,6 +227,9 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .from("ordens_compra")
       .select("status, valor_total, aprovado_em, created_at")
       .is("deleted_at", null),
+    sb.from("fornecedores").select("id, status").limit(500),
+    sb.from("oportunidades").select("id, valor").eq("status", "aberto").limit(500),
+    sb.from("clientes").select("id, status").limit(1000),
   ]);
 
   const rowsEtps = etps.data ?? [];
@@ -223,10 +242,20 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const rowsInsumos = insumos.data ?? [];
   const rowsSats = sats.data ?? [];
   const rowsCham = chamados.data ?? [];
-  const embarquesPendentes = embarques.data?.length ?? 0;
-  const fatAguardandoHomolog = fatRelatorios.data?.length ?? 0;
-  const khEmRevisao = khItens.data?.length ?? 0;
+  const rowsEmbarques = embarquesTodos.data ?? [];
+  const embarquesPendentes = rowsEmbarques.filter(
+    (e: any) => e.status === "rascunho" || e.status === "programado",
+  ).length;
+  const rowsFat = fatRelatoriosTodos.data ?? [];
+  const fatAguardandoHomolog = rowsFat.filter(
+    (f: any) => f.status === "aguardando_homologacao",
+  ).length;
+  const rowsKh = khItensTodos.data ?? [];
+  const khEmRevisao = rowsKh.filter((k: any) => k.status === "em_revisao").length;
   const rowsForms = formularios.data ?? [];
+  const rowsFornecedores = fornecedores.data ?? [];
+  const rowsOportunidadesAbertas = oportunidadesAbertas.data ?? [];
+  const rowsClientes = clientesTodos.data ?? [];
 
   // ---------- Engenharia ----------
   const etapaAtrasada = (e: any) => isEtapaAtrasada(e.status, e.data_vencimento, now);
@@ -556,6 +585,223 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     })),
   };
 
+  // ---------- Módulos ativos (cards genéricos pro dashboard por role) ----------
+  const FAT_COLOR: Record<string, string> = {
+    rascunho: "#94a3b8",
+    em_execucao: "#6366f1",
+    aguardando_homologacao: "#f59e0b",
+    homologado: "#22c55e",
+    reprovado: "#ef4444",
+  };
+  const fatPorStatus = (s: string) => rowsFat.filter((f: any) => f.status === s).length;
+  const fatReprovados = fatPorStatus("reprovado");
+
+  const LOGISTICA_LABEL: Record<string, string> = {
+    rascunho: "Rascunho",
+    programado: "Programado",
+    embarcado: "Embarcado",
+    entregue: "Entregue",
+    cancelado: "Cancelado",
+  };
+  const LOGISTICA_COLOR: Record<string, string> = {
+    rascunho: "#94a3b8",
+    programado: "#6366f1",
+    embarcado: "#0ea5e9",
+    entregue: "#22c55e",
+    cancelado: "#ef4444",
+  };
+
+  const KH_COLOR: Record<string, string> = {
+    rascunho: "#94a3b8",
+    em_revisao: "#f59e0b",
+    publicado: "#22c55e",
+    arquivado: "#78716c",
+  };
+
+  const CLIENTE_LABEL: Record<string, string> = {
+    ativo: "Ativo",
+    suspect: "Suspect",
+    prospect: "Prospect",
+    inativo: "Inativo",
+  };
+  const CLIENTE_COLOR: Record<string, string> = {
+    ativo: "#22c55e",
+    suspect: "#94a3b8",
+    prospect: "#f59e0b",
+    inativo: "#78716c",
+  };
+
+  const fornecedoresPorStatus = (s: string) =>
+    rowsFornecedores.filter((f: any) => f.status === s).length;
+  const clientesPorStatus = (s: string) => rowsClientes.filter((c: any) => c.status === s).length;
+
+  const valorOportunidadesAbertas = rowsOportunidadesAbertas.reduce(
+    (sum: number, o: any) => sum + Number(o.valor ?? 0),
+    0,
+  );
+
+  const modules: Partial<Record<AppModule, ModuleSummary>> = {
+    engenharia: {
+      kpis: [
+        { label: "ETPs abertos", value: String(engineering.kpis.etpsAbertos) },
+        { label: "Etapas abertas", value: String(engineering.kpis.etapasAbertas) },
+        {
+          label: "Atrasadas",
+          value: String(engineering.kpis.atrasadas),
+          accent: engineering.kpis.atrasadas > 0 ? "danger" : "success",
+        },
+      ],
+      segments: engineering.kanban,
+    },
+    producao: {
+      kpis: [
+        { label: "Em execução", value: String(production.kpis.osExecucao) },
+        {
+          label: "Atrasadas",
+          value: String(production.kpis.atrasadas),
+          accent: production.kpis.atrasadas > 0 ? "danger" : "success",
+        },
+        { label: "Entregas na semana", value: String(production.kpis.entregasSemana) },
+      ],
+      segments: production.etapasHeat,
+    },
+    compras: {
+      kpis: [
+        {
+          label: "OCs para aprovar",
+          value: String(purchasing.kpis.ocsAprovar),
+          accent: purchasing.kpis.ocsAprovar > 0 ? "warning" : "success",
+        },
+        { label: "Cotações abertas", value: String(purchasing.kpis.cotacoesAbertas) },
+        { label: "Gasto no mês", value: brl(purchasing.kpis.gastoMes) },
+      ],
+      list: purchasing.ocs,
+    },
+    pos_vendas: {
+      kpis: [
+        { label: "Chamados abertos", value: String(field.kpis.chamadosAbertos) },
+        {
+          label: "SLA vencendo",
+          value: String(field.kpis.slaVencendo),
+          accent: field.kpis.slaVencendo > 0 ? "danger" : "success",
+        },
+        { label: "SATs pendentes", value: String(field.kpis.satsPendentes) },
+      ],
+      list: field.chamados,
+    },
+    qualidade: {
+      kpis: [
+        {
+          label: "Revisões pendentes",
+          value: String(engineering.kpis.revisoes),
+          accent: engineering.kpis.revisoes > 0 ? "warning" : "success",
+        },
+        {
+          label: "FAT aguardando homologação",
+          value: String(fatAguardandoHomolog),
+          accent: fatAguardandoHomolog > 0 ? "warning" : "success",
+        },
+        {
+          label: "FAT reprovados",
+          value: String(fatReprovados),
+          accent: fatReprovados > 0 ? "danger" : "success",
+        },
+      ],
+      segments: Object.keys(FAT_STATUS_LABEL).map((s) => ({
+        label: FAT_STATUS_LABEL[s],
+        value: fatPorStatus(s),
+        color: FAT_COLOR[s] ?? "#94a3b8",
+      })),
+    },
+    logistica: {
+      kpis: [
+        {
+          label: "Pendentes",
+          value: String(embarquesPendentes),
+          accent: embarquesPendentes > 0 ? "warning" : "success",
+        },
+        { label: "Total de embarques", value: String(rowsEmbarques.length) },
+      ],
+      segments: LOGISTICA_STATUS.map((s) => ({
+        label: LOGISTICA_LABEL[s],
+        value: rowsEmbarques.filter((e: any) => e.status === s).length,
+        color: LOGISTICA_COLOR[s],
+      })),
+    },
+    know_how: {
+      kpis: [
+        {
+          label: "Em revisão",
+          value: String(khEmRevisao),
+          accent: khEmRevisao > 0 ? "warning" : "success",
+        },
+        { label: "Total de itens", value: String(rowsKh.length) },
+      ],
+      segments: KH_STATUS.map((s) => ({
+        label: KH_STATUS_LABEL[s],
+        value: rowsKh.filter((k: any) => k.status === s).length,
+        color: KH_COLOR[s],
+      })),
+    },
+    fornecedores: {
+      kpis: [
+        {
+          label: "Em avaliação",
+          value: String(fornecedoresPorStatus("em_avaliacao")),
+          accent: fornecedoresPorStatus("em_avaliacao") > 0 ? "warning" : "success",
+        },
+        {
+          label: "Bloqueados",
+          value: String(fornecedoresPorStatus("bloqueado")),
+          accent: fornecedoresPorStatus("bloqueado") > 0 ? "danger" : "success",
+        },
+        { label: "Total cadastrados", value: String(rowsFornecedores.length) },
+      ],
+      segments: FORNECEDOR_STATUS.map((s) => ({
+        label: FORNECEDOR_STATUS_LABEL[s],
+        value: fornecedoresPorStatus(s),
+        color:
+          s === "ativo"
+            ? "#22c55e"
+            : s === "em_avaliacao"
+              ? "#f59e0b"
+              : s === "bloqueado"
+                ? "#ef4444"
+                : "#78716c",
+      })),
+    },
+    comercial: {
+      kpis: [
+        { label: "Oportunidades abertas", value: String(rowsOportunidadesAbertas.length) },
+        { label: "Valor em aberto", value: brl(valorOportunidadesAbertas) },
+      ],
+    },
+    clientes: {
+      kpis: [
+        { label: "Ativos", value: String(clientesPorStatus("ativo")) },
+        { label: "Prospects", value: String(clientesPorStatus("prospect")) },
+        { label: "Total cadastrados", value: String(rowsClientes.length) },
+      ],
+      segments: CLIENTE_STATUS.map((s) => ({
+        label: CLIENTE_LABEL[s],
+        value: clientesPorStatus(s),
+        color: CLIENTE_COLOR[s],
+      })),
+    },
+    admin: {
+      kpis: [
+        {
+          label: "Chamados fora do SLA",
+          value: String(admin.kpis.chamadosSla),
+          accent: admin.kpis.chamadosSla > 0 ? "danger" : "success",
+        },
+        { label: "OCs para aprovar", value: String(admin.kpis.ocsAprovar) },
+      ],
+      segments: admin.modulos,
+      list: admin.fila,
+    },
+  };
+
   return {
     generatedAt: new Date().toISOString(),
     engineering,
@@ -564,5 +810,6 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
     purchasing,
     field,
     admin,
+    modules,
   };
 }

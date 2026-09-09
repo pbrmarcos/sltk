@@ -5,6 +5,7 @@ import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
 import { HeatStrip } from "./HeatStrip";
+import { ModulesActiveGrid } from "./ModulesActiveGrid";
 import { useRoleDashboards } from "./useRoleDashboards";
 
 export function AdminDashboard({ userName }: { userName: string }) {
@@ -93,6 +94,8 @@ export function AdminDashboard({ userName }: { userName: string }) {
           )}
         </DashboardCard>
       </div>
+
+      <ModulesActiveGrid data={data} exclude={["admin"]} />
     </DashboardShell>
   );
 }
