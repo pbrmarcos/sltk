@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, Target, Users } from "lucide-react";
+import { FileText, Target, Users, MessageSquare, ClipboardList } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
@@ -47,8 +47,10 @@ export function SalesDashboard({ userName }: { userName: string }) {
       subtitle="Pipeline, conversão e próximas ações — dados reais do sistema."
       actions={[
         { label: "Nova oportunidade", to: "/comercial/pipeline", icon: Target },
-        { label: "Novo orçamento", to: "/comercial/orcamentos", icon: FileText },
+        { label: "Novo orçamento", to: "/comercial/orcamento", icon: FileText },
         { label: "Clientes", to: "/clientes", icon: Users },
+        { label: "Entrevistas", to: "/comercial/entrevistas", icon: MessageSquare },
+        { label: "Checklists", to: "/comercial/checklists", icon: ClipboardList },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

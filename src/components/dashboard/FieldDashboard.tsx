@@ -1,4 +1,4 @@
-import { HeadphonesIcon, Wrench, CalendarDays } from "lucide-react";
+import { HeadphonesIcon, Wrench, ClipboardCheck, BookOpen } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { MeterCard } from "./MeterCard";
 import { DashboardCard } from "./DashboardCard";
@@ -20,7 +20,8 @@ export function FieldDashboard({ userName }: { userName: string }) {
       actions={[
         { label: "Chamados", to: "/pos-vendas/chamados", icon: HeadphonesIcon },
         { label: "SATs", to: "/pos-vendas/sat", icon: Wrench },
-        { label: "Agenda", to: "/pos-vendas/agenda", icon: CalendarDays },
+        { label: "FAT", to: "/qualidade/fat", icon: ClipboardCheck },
+        { label: "Know-how", to: "/know-how", icon: BookOpen },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

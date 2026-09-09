@@ -1,4 +1,4 @@
-import { ListChecks, ClipboardCheck } from "lucide-react";
+import { ListChecks, ClipboardCheck, ClipboardList, BookOpen } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { MeterCard } from "./MeterCard";
 import { DashboardCard } from "./DashboardCard";
@@ -19,6 +19,8 @@ export function AssemblyDashboard({ userName }: { userName: string }) {
       actions={[
         { label: "Minhas etapas", to: "/producao/montagem", icon: ListChecks },
         { label: "FAT", to: "/qualidade/fat", icon: ClipboardCheck },
+        { label: "Revisão Mecânica", to: "/qualidade/revisao-mecanica", icon: ClipboardList },
+        { label: "Know-how", to: "/know-how", icon: BookOpen },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

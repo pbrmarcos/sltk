@@ -1,4 +1,4 @@
-import { ShoppingCart, FileSearch, PackageCheck, Truck } from "lucide-react";
+import { ShoppingCart, FileSearch, PackageCheck, Truck, Building2, Users } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
@@ -26,7 +26,9 @@ export function PurchasingDashboard({ userName }: { userName: string }) {
         { label: "Ordens", to: "/compras/ordens", icon: ShoppingCart },
         { label: "Cotações", to: "/compras/cotacoes", icon: FileSearch },
         { label: "Solicitações", to: "/compras/solicitacao", icon: PackageCheck },
+        { label: "Fornecedores", to: "/fornecedores", icon: Building2 },
         { label: "Embarques", to: "/logistica/embarques", icon: Truck },
+        { label: "Clientes", to: "/clientes", icon: Users },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

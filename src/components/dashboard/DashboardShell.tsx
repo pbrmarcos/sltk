@@ -23,8 +23,8 @@ export function DashboardShell({ userName, roleLabel, subtitle, actions, childre
   });
   const first = userName.split(" ")[0];
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <div className="shrink-0 space-y-3 pb-3">
+    <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
@@ -68,7 +68,7 @@ export function DashboardShell({ userName, roleLabel, subtitle, actions, childre
           <ShortcutsPanel actions={actions} pendMap={pendData?.map} />
         )}
       </div>
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">{children}</div>
+      {children}
     </div>
   );
 }

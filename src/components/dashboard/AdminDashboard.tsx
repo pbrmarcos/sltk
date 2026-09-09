@@ -1,4 +1,4 @@
-import { Users, Shield, Settings, ScrollText } from "lucide-react";
+import { Users, Shield, Settings, ScrollText, Mail, Activity } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { GaugeCard } from "./GaugeCard";
 import { DashboardCard } from "./DashboardCard";
@@ -22,6 +22,8 @@ export function AdminDashboard({ userName }: { userName: string }) {
         { label: "Usuários", to: "/admin/usuarios", icon: Users },
         { label: "SLA", to: "/admin/sla-chamados", icon: Shield },
         { label: "Auditoria", to: "/admin/auditoria", icon: ScrollText },
+        { label: "E-mails", to: "/admin/emails", icon: Mail },
+        { label: "Diagnóstico", to: "/admin/diagnostico", icon: Activity },
         { label: "Configurações", to: "/admin/configuracoes", icon: Settings },
       ]}
     >

@@ -16,9 +16,11 @@ const ACCENT_COLOR: Record<NonNullable<ModuleSummary["kpis"][number]["accent"]>,
 export function ModuleSectionCard({
   module,
   summary,
+  step,
 }: {
   module: AppModule;
   summary: ModuleSummary;
+  step?: number;
 }) {
   const meta = MODULE_DASHBOARD_META[module];
   if (!meta) return null;
@@ -28,6 +30,11 @@ export function ModuleSectionCard({
     <section className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
       <header className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
+          {step !== undefined && (
+            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--bg-elevated)] text-[10px] font-bold tabular-nums text-[var(--text-muted)]">
+              {step}
+            </span>
+          )}
           <span
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full"
             style={{ background: `${meta.color}1A`, color: meta.color }}

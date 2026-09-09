@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Users, Briefcase } from "lucide-react";
+import { Users, Briefcase, FileText, ShoppingCart } from "lucide-react";
 import type { DashboardData } from "@/lib/dashboard.functions";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
@@ -55,6 +55,8 @@ export function ManagerDashboard({ data, userName }: { data: DashboardData; user
       actions={[
         { label: "Pipeline", to: "/comercial/pipeline", icon: Briefcase },
         { label: "Clientes", to: "/clientes", icon: Users },
+        { label: "Orçamentos", to: "/comercial/orcamento", icon: FileText },
+        { label: "Compras", to: "/compras/ordens", icon: ShoppingCart },
       ]}
     >
       {/* KPI row */}

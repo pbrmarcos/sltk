@@ -1,4 +1,4 @@
-import { Factory, ClipboardCheck, Truck } from "lucide-react";
+import { Factory, ClipboardCheck, Truck, CalendarRange, BookOpen } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { GaugeCard } from "./GaugeCard";
 import { DashboardCard } from "./DashboardCard";
@@ -20,8 +20,10 @@ export function ProductionDashboard({ userName }: { userName: string }) {
       subtitle="Montagens em execução, aderência de prazo e não conformidades."
       actions={[
         { label: "Montagem", to: "/producao/montagem", icon: Factory },
+        { label: "Planejamento", to: "/engenharia/etapas", icon: CalendarRange },
         { label: "FAT", to: "/qualidade/fat", icon: ClipboardCheck },
         { label: "Embarques", to: "/logistica/embarques", icon: Truck },
+        { label: "Know-how", to: "/know-how", icon: BookOpen },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

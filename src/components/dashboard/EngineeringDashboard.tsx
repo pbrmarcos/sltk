@@ -1,4 +1,4 @@
-import { Ruler, FolderKanban } from "lucide-react";
+import { Ruler, FolderKanban, CalendarRange, ClipboardCheck } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
@@ -17,8 +17,10 @@ export function EngineeringDashboard({ userName }: { userName: string }) {
       roleLabel="Projeto · Engenharia"
       subtitle="ETPs em aberto, etapas de projeto e revisões críticas."
       actions={[
-        { label: "Projetos", to: "/engenharia/projetos", icon: FolderKanban },
         { label: "ETPs", to: "/engenharia/etp", icon: Ruler },
+        { label: "Projetos", to: "/engenharia/projetos", icon: FolderKanban },
+        { label: "Planejamento", to: "/engenharia/etapas", icon: CalendarRange },
+        { label: "Revisão Mecânica", to: "/qualidade/revisao-mecanica", icon: ClipboardCheck },
       ]}
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

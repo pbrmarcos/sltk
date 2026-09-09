@@ -16,7 +16,7 @@ export function QuickActions({
   pendMap?: Record<string, number>;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
+    <div className="flex flex-wrap gap-1.5">
       {actions.map((a) => {
         const pendCount = pendMap?.[a.to] ?? 0;
         const color = a.color ?? "var(--primary)";
@@ -24,7 +24,7 @@ export function QuickActions({
           <Link
             key={a.to + a.label}
             to={a.to}
-            className="group relative flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2 py-1.5 transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-elevated)]"
+            className="group relative flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2.5 py-1.5 transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-elevated)]"
           >
             <span
               className="grid h-6 w-6 shrink-0 place-items-center rounded-full transition-transform group-hover:scale-105"
