@@ -108,6 +108,18 @@ export const CAPABILITIES: CapabilityDef[] = [
     testavel: true,
   },
   {
+    id: "google_calendar",
+    label: "Google Calendar",
+    descricao:
+      "Cria eventos reais na agenda dos usuários e do administrador, via conta de serviço (Domain-Wide Delegation).",
+    impacto:
+      "Os botões de link/arquivo .ics continuam funcionando, mas nenhum evento real é criado nas agendas.",
+    area: "email",
+    criticidade: "opcional",
+    envs: ["GOOGLE_SERVICE_ACCOUNT_EMAIL", "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"],
+    testavel: false,
+  },
+  {
     id: "resend",
     label: "Resend (envio de e-mails)",
     descricao: "Provedor de disparo dos e-mails automáticos do sistema.",

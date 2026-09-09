@@ -149,11 +149,11 @@ function ProviderStatusBanner() {
   const fn = useServerFn(runDiagnosticoLimitado);
   const { data: res } = useQuery({
     queryKey: ["email-provider-status"],
-    queryFn: () => fn({ data: { ids: ["resend", "google_service_account"] } }),
+    queryFn: () => fn({ data: { ids: ["resend", "google_calendar"] } }),
   });
   if (!res) return null;
   const resend = res.itens.find((i) => i.id === "resend");
-  const calendar = res.itens.find((i) => i.id === "google_service_account");
+  const calendar = res.itens.find((i) => i.id === "google_calendar");
   const configured = resend?.status === "ok";
   const calendarConfigured = calendar?.status === "nao_testado";
   if (configured) {

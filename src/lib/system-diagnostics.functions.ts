@@ -20,7 +20,13 @@ export const runDiagnostico = createServerFn({ method: "POST" })
  * Só aceita capacidades de baixa sensibilidade — nunca supabase_service_role
  * nem outras que exponham detalhe de infraestrutura crítica.
  */
-const LOW_SENSITIVITY_IDS = new Set(["resend", "groq", "google_drive", "firecrawl"]);
+const LOW_SENSITIVITY_IDS = new Set([
+  "resend",
+  "groq",
+  "google_drive",
+  "google_calendar",
+  "firecrawl",
+]);
 
 export const runDiagnosticoLimitado = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
