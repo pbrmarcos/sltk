@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -173,6 +174,7 @@ function UsuariosPanel({
       email: string;
       password: string;
       roles: AppRole[];
+      require_password_change: boolean;
     }) => createFn({ data: values }),
     onSuccess: (_res, vars) => {
       toast.success("Usuário criado");
@@ -183,8 +185,12 @@ function UsuariosPanel({
   });
 
   const updateMut = useMutation({
-    mutationFn: (values: { id: string; full_name: string; roles: AppRole[] }) =>
-      updateFn({ data: values }),
+    mutationFn: (values: {
+      id: string;
+      full_name: string;
+      roles: AppRole[];
+      agenda_google_email: string | null;
+    }) => updateFn({ data: values }),
     onSuccess: () => {
       toast.success("Usuário atualizado");
       setDialog(null);
@@ -214,7 +220,8 @@ function UsuariosPanel({
   });
 
   const resetMut = useMutation({
-    mutationFn: (vars: { id: string; password: string }) => resetFn({ data: vars }),
+    mutationFn: (vars: { id: string; password: string; require_password_change: boolean }) =>
+      resetFn({ data: vars }),
     onSuccess: (_res, vars) => {
       toast.success("Senha redefinida");
       if (resetTarget) setResetResult({ row: resetTarget, password: vars.password });
@@ -488,6 +495,7 @@ function UsuariosPanel({
                 full_name: dialog.row.full_name ?? "",
                 email: dialog.row.email ?? "",
                 roles: dialog.row.roles,
+                agenda_google_email: dialog.row.agenda_google_email,
               }
             : undefined
         }
@@ -499,6 +507,7 @@ function UsuariosPanel({
               id: dialog.row.id,
               full_name: values.full_name,
               roles: values.roles,
+              agenda_google_email: values.agenda_google_email,
             });
           } else {
             createMut.mutate(values);
@@ -556,7 +565,14 @@ function UsuariosPanel({
       <ResetPasswordDialog
         target={resetTarget}
         onCancel={() => setResetTarget(null)}
-        onConfirm={(password) => resetTarget && resetMut.mutate({ id: resetTarget.id, password })}
+        onConfirm={(password, requirePasswordChange) =>
+          resetTarget &&
+          resetMut.mutate({
+            id: resetTarget.id,
+            password,
+            require_password_change: requirePasswordChange,
+          })
+        }
         submitting={resetMut.isPending}
       />
 
@@ -582,16 +598,18 @@ function ResetPasswordDialog({
 }: {
   target: AdminUserRow | null;
   onCancel: () => void;
-  onConfirm: (password: string) => void;
+  onConfirm: (password: string, requirePasswordChange: boolean) => void;
   submitting: boolean;
 }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
+  const [requirePasswordChange, setRequirePasswordChange] = useState(true);
 
   useEffect(() => {
     if (target) {
       setPassword(generatePassword());
       setShow(false);
+      setRequirePasswordChange(true);
     }
   }, [target?.id]);
 
@@ -636,6 +654,13 @@ function ResetPasswordDialog({
           </div>
           <p className="text-[11px] text-[var(--text-muted)]">Mínimo 12 caracteres.</p>
         </div>
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox
+            checked={requirePasswordChange}
+            onCheckedChange={(v) => setRequirePasswordChange(v === true)}
+          />
+          <span>Exigir troca de senha no primeiro acesso</span>
+        </label>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel} disabled={submitting}>
             Cancelar
@@ -646,7 +671,7 @@ function ResetPasswordDialog({
                 toast.error("Senha deve ter ao menos 12 caracteres.");
                 return;
               }
-              onConfirm(password);
+              onConfirm(password, requirePasswordChange);
             }}
             disabled={submitting}
           >

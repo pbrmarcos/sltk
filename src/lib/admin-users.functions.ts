@@ -22,6 +22,7 @@ export type AdminUserRow = {
   id: string;
   email: string | null;
   full_name: string | null;
+  agenda_google_email: string | null;
   roles: (typeof ROLES)[number][];
   deleted_at: string | null;
   created_at: string;
@@ -64,7 +65,9 @@ export const listAdminUsers = createServerFn({ method: "POST" })
 
     let q = admin
       .from("profiles")
-      .select("id, email, full_name, deleted_at, created_at", { count: "exact" });
+      .select("id, email, full_name, agenda_google_email, deleted_at, created_at", {
+        count: "exact",
+      });
 
     if (data.status === "active") q = q.is("deleted_at", null);
     else if (data.status === "inactive") q = q.not("deleted_at", "is", null);
@@ -116,6 +119,8 @@ export const listAdminUsers = createServerFn({ method: "POST" })
       id: p.id,
       email: p.email,
       full_name: p.full_name,
+      agenda_google_email:
+        (p as { agenda_google_email?: string | null }).agenda_google_email ?? null,
       roles: rolesByUser.get(p.id) ?? [],
       deleted_at: p.deleted_at,
       created_at: p.created_at,
@@ -128,6 +133,7 @@ const createInput = z.object({
   email: z.string().trim().email().max(255),
   password: z.string().min(12).max(72),
   roles: z.array(roleEnum).min(1).max(8),
+  require_password_change: z.boolean().optional().default(true),
 });
 
 export const createAdminUser = createServerFn({ method: "POST" })
@@ -205,9 +211,15 @@ export const createAdminUser = createServerFn({ method: "POST" })
     const uniqueRoles = Array.from(new Set(data.roles));
     if (privilegedClient) {
       // Trigger handle_new_user inserts profile; ensure full_name is set.
-      const { error: profileError } = await privilegedClient
-        .from("profiles")
-        .upsert({ id: newId, email: data.email, full_name: data.full_name }, { onConflict: "id" });
+      const { error: profileError } = await privilegedClient.from("profiles").upsert(
+        {
+          id: newId,
+          email: data.email,
+          full_name: data.full_name,
+          must_change_password: data.require_password_change,
+        },
+        { onConflict: "id" },
+      );
       if (profileError) throw friendlyDbError(profileError);
 
       const { error: rolesError } = await privilegedClient
@@ -229,6 +241,16 @@ export const createAdminUser = createServerFn({ method: "POST" })
         _roles: uniqueRoles,
       });
       if (finalizeError) throw friendlyDbError(finalizeError);
+
+      if (data.require_password_change) {
+        const { error: mcpError } = await (
+          context.supabase.rpc as unknown as (
+            fn: string,
+            args: Record<string, unknown>,
+          ) => Promise<{ error: { message: string } | null }>
+        )("admin_set_must_change_password", { _user_id: newId, _value: true });
+        if (mcpError) console.error("[admin-users/createAdminUser] mcp flag failed", mcpError);
+      }
     }
 
     // audit_log é append-only para usuários autenticados; no fallback, os
@@ -498,6 +520,7 @@ export const reactivateAdminUser = createServerFn({ method: "POST" })
 const resetInput = z.object({
   id: z.string().uuid(),
   password: z.string().min(12).max(72),
+  require_password_change: z.boolean().optional().default(true),
 });
 
 export const resetAdminUserPassword = createServerFn({ method: "POST" })
@@ -549,6 +572,14 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
         password: data.password,
       });
       if (error) throw friendlyDbError(error);
+      if (data.require_password_change) {
+        const { error: mcpError } = await supabaseAdmin
+          .from("profiles")
+          .update({ must_change_password: true } as never)
+          .eq("id", data.id);
+        if (mcpError)
+          console.error("[admin-users/resetAdminUserPassword] mcp flag failed", mcpError);
+      }
       try {
         await logAuditServer(supabaseAdmin, context.userId, [
           {
@@ -582,6 +613,15 @@ export const resetAdminUserPassword = createServerFn({ method: "POST" })
       _password: data.password,
     });
     if (rpcErr) throw friendlyDbError(rpcErr);
+    if (data.require_password_change) {
+      const { error: mcpError } = await (
+        context.supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ error: { message: string } | null }>
+      )("admin_set_must_change_password", { _user_id: data.id, _value: true });
+      if (mcpError) console.error("[admin-users/resetAdminUserPassword] mcp flag failed", mcpError);
+    }
     await notificarReset();
     return { ok: true, mode: "password" as const, email: null as string | null };
   });

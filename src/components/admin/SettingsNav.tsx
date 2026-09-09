@@ -26,6 +26,7 @@ const GROUPS: NavGroup[] = [
     title: "Sistema",
     items: [
       { label: "Chaves & Diagnóstico", to: "/admin/diagnostico", roles: ADMIN_ONLY },
+      { label: "Agenda & Calendário", to: "/admin/agenda", roles: ADMIN_ONLY },
       { label: "Provedor de Mineração", to: "/admin/mineracao", roles: ADMIN_ONLY },
       { label: "Migrations", to: "/admin/migrations", roles: ADMIN_ONLY },
     ],

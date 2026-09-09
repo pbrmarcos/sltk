@@ -89,6 +89,7 @@ import { Route as AuthenticatedAdminContatoRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin.configuracoes'
 import { Route as AuthenticatedAdminBancoRouteImport } from './routes/_authenticated/admin.banco'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin.auditoria'
+import { Route as AuthenticatedAdminAgendaRouteImport } from './routes/_authenticated/admin.agenda'
 import { Route as AuthenticatedQualidadeFatIndexRouteImport } from './routes/_authenticated/qualidade.fat.index'
 import { Route as AuthenticatedPosVendasSatIndexRouteImport } from './routes/_authenticated/pos-vendas.sat.index'
 import { Route as AuthenticatedLogisticaEmbarquesIndexRouteImport } from './routes/_authenticated/logistica.embarques.index'
@@ -580,6 +581,12 @@ const AuthenticatedAdminAuditoriaRoute =
     path: '/auditoria',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAgendaRoute =
+  AuthenticatedAdminAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedQualidadeFatIndexRoute =
   AuthenticatedQualidadeFatIndexRouteImport.update({
     id: '/qualidade/fat/',
@@ -859,6 +866,7 @@ export interface FileRoutesByFullPath {
   '/suporte/$token': typeof SuporteTokenRoute
   '/equipamentos/': typeof EquipamentosIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -981,6 +989,7 @@ export interface FileRoutesByTo {
   '/suporte/$token': typeof SuporteTokenRoute
   '/equipamentos': typeof EquipamentosIndexRoute
   '/suporte': typeof SuporteIndexRoute
+  '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -1102,6 +1111,7 @@ export interface FileRoutesById {
   '/suporte/$token': typeof SuporteTokenRoute
   '/equipamentos/': typeof EquipamentosIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/_authenticated/admin/agenda': typeof AuthenticatedAdminAgendaRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -1227,6 +1237,7 @@ export interface FileRouteTypes {
     | '/suporte/$token'
     | '/equipamentos/'
     | '/suporte/'
+    | '/admin/agenda'
     | '/admin/auditoria'
     | '/admin/banco'
     | '/admin/configuracoes'
@@ -1349,6 +1360,7 @@ export interface FileRouteTypes {
     | '/suporte/$token'
     | '/equipamentos'
     | '/suporte'
+    | '/admin/agenda'
     | '/admin/auditoria'
     | '/admin/banco'
     | '/admin/configuracoes'
@@ -1469,6 +1481,7 @@ export interface FileRouteTypes {
     | '/suporte/$token'
     | '/equipamentos/'
     | '/suporte/'
+    | '/_authenticated/admin/agenda'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/banco'
     | '/_authenticated/admin/configuracoes'
@@ -2159,6 +2172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAuditoriaRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/agenda': {
+      id: '/_authenticated/admin/agenda'
+      path: '/agenda'
+      fullPath: '/admin/agenda'
+      preLoaderRoute: typeof AuthenticatedAdminAgendaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/qualidade/fat/': {
       id: '/_authenticated/qualidade/fat/'
       path: '/qualidade/fat'
@@ -2475,6 +2495,7 @@ const AuthenticatedAdminEtapasEquipamentosRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAgendaRoute: typeof AuthenticatedAdminAgendaRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminBancoRoute: typeof AuthenticatedAdminBancoRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
@@ -2497,6 +2518,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAgendaRoute: AuthenticatedAdminAgendaRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminBancoRoute: AuthenticatedAdminBancoRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
