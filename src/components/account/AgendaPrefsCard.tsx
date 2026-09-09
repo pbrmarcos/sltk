@@ -67,9 +67,6 @@ export function AgendaPrefsCard() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const mostraGoogle = form.agenda_provider !== "teams";
-  const mostraTeams = form.agenda_provider !== "google";
-
   return (
     <section className="md:col-span-2 rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-sm)]">
       <div className="mb-1 flex items-center gap-2">
@@ -88,20 +85,14 @@ export function AgendaPrefsCard() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Provedor preferido</Label>
-            <Select
-              value={form.agenda_provider}
-              onValueChange={(v) => set("agenda_provider", v as AgendaPrefs["agenda_provider"])}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="google">Google Agenda (Workspace)</SelectItem>
-                <SelectItem value="teams">Microsoft Teams / Outlook</SelectItem>
-                <SelectItem value="ambos">Ambos</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>E-mail Google Workspace</Label>
+            <p className="rounded-md border border-[var(--bg-border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]">
+              {form.agenda_google_email ?? "Não configurado"}
+            </p>
+            <p className="text-[11px] text-[var(--text-muted)]">
+              Definido pelo administrador em Usuários & Permissões — é para onde os eventos reais de
+              agenda são criados.
+            </p>
           </div>
 
           <div className="space-y-1.5">
@@ -123,47 +114,28 @@ export function AgendaPrefsCard() {
             </Select>
           </div>
 
-          {mostraGoogle && (
-            <div className="space-y-1.5">
-              <Label htmlFor="ag-google">E-mail Google Workspace (organizador)</Label>
-              <Input
-                id="ag-google"
-                value={form.agenda_google_email ?? ""}
-                placeholder="voce@sltkamericas.com"
-                onChange={(e) => set("agenda_google_email", e.target.value)}
-              />
-              <p className="text-[11px] text-[var(--text-muted)]">
-                Conta que criará o evento e a sala do Google Meet.
-              </p>
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <Label htmlFor="ag-teams">E-mail / UPN do Microsoft Teams</Label>
+            <Input
+              id="ag-teams"
+              value={form.agenda_teams_email ?? ""}
+              placeholder="voce@sltkamericas.com"
+              onChange={(e) => set("agenda_teams_email", e.target.value)}
+            />
+            <p className="text-[11px] text-[var(--text-muted)]">
+              Preencha se você usa Teams/Outlook e quer os links de reunião apontando pra sua conta.
+            </p>
+          </div>
 
-          {mostraTeams && (
-            <div className="space-y-1.5">
-              <Label htmlFor="ag-teams">E-mail / UPN do Microsoft Teams</Label>
-              <Input
-                id="ag-teams"
-                value={form.agenda_teams_email ?? ""}
-                placeholder="voce@sltkamericas.com"
-                onChange={(e) => set("agenda_teams_email", e.target.value)}
-              />
-              <p className="text-[11px] text-[var(--text-muted)]">
-                Conta Microsoft 365 usada no Outlook/Teams corporativo.
-              </p>
-            </div>
-          )}
-
-          {mostraTeams && (
-            <div className="space-y-1.5">
-              <Label htmlFor="ag-tenant">Domínio / tenant da organização</Label>
-              <Input
-                id="ag-tenant"
-                value={form.agenda_teams_tenant ?? ""}
-                placeholder="sltkamericas.com"
-                onChange={(e) => set("agenda_teams_tenant", e.target.value)}
-              />
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <Label htmlFor="ag-tenant">Domínio / tenant da organização (Teams)</Label>
+            <Input
+              id="ag-tenant"
+              value={form.agenda_teams_tenant ?? ""}
+              placeholder="sltkamericas.com"
+              onChange={(e) => set("agenda_teams_tenant", e.target.value)}
+            />
+          </div>
 
           <div className="space-y-1.5">
             <Label>Fuso horário</Label>

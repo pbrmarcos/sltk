@@ -211,9 +211,12 @@ const emailOrNull = z
   .transform((v) => (v ? v : null))
   .refine((v) => v === null || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v), "E-mail inválido.");
 
+// agenda_provider/agenda_google_email não fazem parte deste schema de
+// propósito: são configurados pelo admin (updateAdminUser), não pelo
+// próprio usuário. Ficam fora daqui pra o .parse() já descartar qualquer
+// valor enviado por engano — getMyAgendaPrefs continua devolvendo os dois
+// pra exibição somente-leitura.
 const agendaInput = z.object({
-  agenda_provider: z.enum(["google", "teams", "ambos"]),
-  agenda_google_email: emailOrNull,
   agenda_teams_email: emailOrNull,
   agenda_teams_tenant: z
     .string()
