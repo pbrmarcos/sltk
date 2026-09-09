@@ -86,6 +86,8 @@ export interface CalendarEventInput {
   description: string;
   startISO: string;
   durationMin: number;
+  /** Convidados adicionais do evento (não afeta o dono/impersonado via DWD). */
+  attendees?: string[];
 }
 
 /**
@@ -117,6 +119,9 @@ export async function insertCalendarEvent(
         description: input.description,
         start: { dateTime: input.startISO },
         end: { dateTime: end },
+        ...(input.attendees && input.attendees.length
+          ? { attendees: input.attendees.map((email) => ({ email })) }
+          : {}),
       }),
     },
   );

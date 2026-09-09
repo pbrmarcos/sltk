@@ -252,6 +252,7 @@ const updateInput = z.object({
   id: z.string().uuid(),
   full_name: z.string().trim().min(1).max(120),
   roles: z.array(roleEnum).min(0).max(8),
+  agenda_google_email: z.string().trim().email().max(200).nullable().optional(),
 });
 
 export const updateAdminUser = createServerFn({ method: "POST" })
@@ -262,7 +263,7 @@ export const updateAdminUser = createServerFn({ method: "POST" })
 
     const { data: before, error: befErr } = await admin
       .from("profiles")
-      .select("full_name, email")
+      .select("full_name, email, agenda_google_email")
       .eq("id", data.id)
       .maybeSingle();
     if (befErr) throw friendlyDbError(befErr);
@@ -300,6 +301,27 @@ export const updateAdminUser = createServerFn({ method: "POST" })
         field_changed: "full_name",
         old_value: before.full_name,
         new_value: data.full_name,
+      });
+    }
+
+    if (
+      data.agenda_google_email !== undefined &&
+      data.agenda_google_email !==
+        (before as { agenda_google_email?: string | null }).agenda_google_email
+    ) {
+      const novoEmail = data.agenda_google_email;
+      const { error: agendaErr } = await admin
+        .from("profiles")
+        .update({ agenda_google_email: novoEmail } as never)
+        .eq("id", data.id);
+      if (agendaErr) throw friendlyDbError(agendaErr);
+      entries.push({
+        table_name: "profiles",
+        record_id: data.id,
+        action: "UPDATE",
+        field_changed: "agenda_google_email",
+        old_value: (before as { agenda_google_email?: string | null }).agenda_google_email,
+        new_value: novoEmail,
       });
     }
 
