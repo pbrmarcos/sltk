@@ -410,6 +410,7 @@ function EtpEditorPage() {
                   ?.codigo ?? "Equipamento"
               }
               versao={(data?.versao as number) ?? 1}
+              etpId={id}
             />
           ) : null}
           {status === "aprovado" ? (

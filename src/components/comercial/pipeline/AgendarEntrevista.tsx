@@ -25,6 +25,7 @@ import {
   type CalendarEvent,
 } from "@/lib/calendar-invite";
 import { addOportunidadeNota } from "@/lib/oportunidade-notas.functions";
+import { agendarEventoReal } from "@/lib/calendar.functions";
 import type { OportunidadeLite } from "@/lib/oportunidades.functions";
 
 const DURACOES = [30, 45, 60, 90, 120];
@@ -118,6 +119,37 @@ export function AgendarEntrevista({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const criarEventoFn = useServerFn(agendarEventoReal);
+  const criarEvento = useMutation({
+    mutationFn: async () => {
+      if (!evento) throw new Error("Informe data e hora válidas.");
+      return criarEventoFn({
+        data: {
+          categoria: "entrevista",
+          summary: evento.title,
+          description: evento.description ?? "",
+          startISO: evento.start.toISOString(),
+          durationMin: evento.durationMin,
+          attendees: evento.attendees ?? [],
+          entityTable: "oportunidades",
+          entityId: opp.id,
+        },
+      });
+    },
+    onSuccess: (res) => {
+      if (res.organizerEvent.status === "ok") {
+        toast.success(
+          res.mirrorEvent.status === "failed"
+            ? "Evento criado na sua agenda — a cópia na agenda do administrador falhou."
+            : "Evento criado na sua agenda Google.",
+        );
+      } else {
+        toast.error(res.organizerEvent.detail ?? "Não foi possível criar o evento real.");
+      }
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const abrir = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
 
   const mailto = () => {
@@ -196,7 +228,20 @@ export function AgendarEntrevista({
       <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
-          variant={prefs?.agenda_provider === "teams" ? "outline" : "default"}
+          variant="default"
+          disabled={!evento || criarEvento.isPending}
+          onClick={() => criarEvento.mutate()}
+        >
+          {criarEvento.isPending ? (
+            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <CalendarPlus className="mr-1.5 h-3.5 w-3.5" />
+          )}
+          Criar evento real (Google)
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
           disabled={!evento}
           onClick={() => evento && abrir(buildGoogleCalendarUrl(evento))}
         >
@@ -204,7 +249,7 @@ export function AgendarEntrevista({
         </Button>
         <Button
           size="sm"
-          variant={prefs?.agenda_provider === "teams" ? "default" : "outline"}
+          variant="outline"
           disabled={!evento}
           onClick={() => evento && abrir(buildOutlookUrl(evento, "office"))}
         >
