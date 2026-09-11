@@ -182,8 +182,7 @@ const SECTIONS: Section[] = [
   },
 
   {
-    title: "Produção",
-    module: "producao",
+    title: "Qualidade",
     items: [
       {
         label: "Relatório de Montagem",
@@ -192,11 +191,6 @@ const SECTIONS: Section[] = [
         roles: ["production", "assembly"],
         module: "producao",
       },
-    ],
-  },
-  {
-    title: "Qualidade",
-    items: [
       {
         label: "Revisão Mecânica",
         to: "/qualidade/revisao-mecanica",
