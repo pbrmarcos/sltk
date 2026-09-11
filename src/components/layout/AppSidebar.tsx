@@ -186,7 +186,7 @@ const SECTIONS: Section[] = [
     module: "producao",
     items: [
       {
-        label: "Montagem",
+        label: "Relatório de Montagem",
         to: "/producao/montagem",
         icon: Wrench,
         roles: ["production", "assembly"],

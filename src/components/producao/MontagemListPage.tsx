@@ -136,9 +136,13 @@ export function MontagemListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Produção" }, { label: "Montagem" }]}
-        title="Montagem"
-        subtitle="Acompanhamento da montagem de cada equipamento."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Produção" },
+          { label: "Relatório de Montagem" },
+        ]}
+        title="Relatório de Montagem"
+        subtitle="Acompanhamento da montagem de cada equipamento — clique numa linha para abrir o checklist e as evidências por sub-etapa."
         actions={<Button onClick={() => setOpenNovo(true)}>Nova montagem</Button>}
       />
 
