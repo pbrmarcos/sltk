@@ -47,11 +47,15 @@ export const listAllMontagens = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const from = (data.page - 1) * data.per_page;
     const to = from + data.per_page - 1;
-    let q = context.supabase
+    // Cast pra any: o embed de equipamento_montagem_etapas (fora dos tipos
+    // gerados até a próxima regeneração) quebra o parser de tipos do select
+    // string, derrubando a inferência de toda a query pra GenericStringError.
+    let q = (context.supabase as any)
       .from("equipamento_montagens")
       .select(
         "id, equipamento_id, cliente_id, status, progresso, inicio_previsto, fim_previsto, inicio_real, fim_real, responsavel_id, updated_at, cliente_equipamentos!inner(codigo,modelo), clientes!inner(codigo,razao_social)" +
-          ", equipamento_projetos!equipamento_projetos_montagem_id_fkey(id, disciplina, processo_id)",
+          ", equipamento_projetos!equipamento_projetos_montagem_id_fkey(id, disciplina, processo_id)" +
+          ", equipamento_montagem_etapas(tipo, status)",
         { count: "exact" },
       )
       .is("deleted_at", null);
@@ -68,7 +72,7 @@ export const listAllMontagens = createServerFn({ method: "POST" })
       error,
     } = await q.order("updated_at", { ascending: false }).range(from, to);
     if (error) throw friendlyDbError(error);
-    return { rows: rows ?? [], total: count ?? 0 };
+    return { rows: (rows ?? []) as any[], total: count ?? 0 };
   });
 
 const createInput = z.object({
@@ -104,6 +108,23 @@ export const createMontagem = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw friendlyDbError(error);
+
+    const etapasTipos: Array<{ tipo: string; ordem: number }> = [
+      { tipo: "pre_montagem", ordem: 1 },
+      { tipo: "mecanica", ordem: 2 },
+      { tipo: "eletrica", ordem: 3 },
+      { tipo: "testes", ordem: 4 },
+      { tipo: "embalagem", ordem: 5 },
+    ];
+    await (context.supabase as any).from("equipamento_montagem_etapas").insert(
+      etapasTipos.map((t) => ({
+        montagem_id: row.id,
+        equipamento_id: data.equipamento_id,
+        cliente_id: eqp.cliente_id,
+        tipo: t.tipo,
+        ordem: t.ordem,
+      })),
+    );
 
     await logAuditServer(context.supabase as any, context.userId, {
       table_name: "equipamento_montagens",
@@ -155,6 +176,25 @@ export const updateMontagem = createServerFn({ method: "POST" })
       .select("status, responsavel_id, equipamento_id, cliente_equipamentos(codigo, modelo)")
       .eq("id", id)
       .maybeSingle();
+
+    if (data.status === "concluida" && (antes as any)?.status !== "concluida") {
+      const { data: etapas } = await (context.supabase as any)
+        .from("equipamento_montagem_etapas")
+        .select("tipo, status")
+        .eq("montagem_id", id);
+      const pendentes = (etapas ?? []).filter((e: any) => e.status !== "concluida");
+      if (pendentes.length > 0) {
+        const { MONTAGEM_ETAPA_TIPO_LABEL } =
+          await import("@/lib/equipamento-montagem-etapas.functions");
+        const nomes = pendentes
+          .map(
+            (e: any) => MONTAGEM_ETAPA_TIPO_LABEL[e.tipo as keyof typeof MONTAGEM_ETAPA_TIPO_LABEL],
+          )
+          .join(", ");
+        throw new Error(`Sub-etapas pendentes: ${nomes}.`);
+      }
+    }
+
     const { error } = await context.supabase
       .from("equipamento_montagens")
       .update({ ...rest, updated_by: context.userId })

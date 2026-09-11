@@ -40,6 +40,8 @@ import {
   type MontagemStatus,
 } from "@/lib/engenharia.shared";
 import { cn } from "@/lib/utils";
+import { MontagemDetailDrawer } from "./MontagemDetailDrawer";
+import { MONTAGEM_ETAPA_TIPO_LABEL } from "@/lib/equipamento-montagem-etapas.functions";
 
 export function MontagemListPage() {
   const qc = useQueryClient();
@@ -48,6 +50,7 @@ export function MontagemListPage() {
   const [status, setStatus] = useState<"todos" | MontagemStatus>("todos");
   const [page, setPage] = useState(1);
   const [openNovo, setOpenNovo] = useState(false);
+  const [detalheId, setDetalheId] = useState<string | null>(null);
   const [concluirConfirmId, setConcluirConfirmId] = useState<string | null>(null);
   const [bloquearId, setBloquearId] = useState<string | null>(null);
   const [bloquearMotivo, setBloquearMotivo] = useState("");
@@ -64,6 +67,11 @@ export function MontagemListPage() {
     concluida: 0,
     bloqueada: 0,
   };
+
+  const concluirRow = data?.rows.find((r: any) => r.id === concluirConfirmId) as any;
+  const concluirEtapasPendentes = (
+    (concluirRow?.equipamento_montagem_etapas ?? []) as Array<{ status: string; tipo?: string }>
+  ).filter((e) => e.status !== "concluida");
 
   const concluirMut = useMutation({
     mutationFn: (id: string) =>
@@ -187,119 +195,136 @@ export function MontagemListPage() {
           </div>
         ) : (
           <ul className="divide-y divide-[var(--bg-border)]">
-            {data.rows.map((r: any) => (
-              <li
-                key={r.id}
-                className="grid grid-cols-[120px_1fr_120px_auto_auto] items-center gap-3 p-4 text-sm"
-              >
-                <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
-                <div className="min-w-0">
-                  <div className="truncate font-medium">{r.cliente_equipamentos?.modelo}</div>
-                  <div className="truncate text-xs text-[var(--text-muted)]">
-                    {r.clientes?.razao_social}
-                    {r.inicio_previsto || r.fim_previsto
-                      ? ` · ${r.inicio_previsto ?? "—"} → ${r.fim_previsto ?? "—"}`
-                      : ""}
-                  </div>
-                  {Array.isArray(r.equipamento_projetos) && r.equipamento_projetos.length > 0 && (
-                    <div className="mt-0.5 flex flex-wrap gap-2">
-                      {r.equipamento_projetos.map((p: any) => (
-                        <Link
-                          key={p.id}
-                          to="/engenharia/projetos"
-                          search={{
-                            d: p.disciplina === "eletrico" ? "eletrico" : "mecanico",
-                            open: p.id,
-                          }}
-                          className="text-[11px] text-primary hover:underline"
-                        >
-                          Ver projeto ({p.disciplina === "eletrico" ? "elétrico" : "mecânico"})
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-20 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
-                    <div className="h-full bg-blue-500" style={{ width: `${r.progresso ?? 0}%` }} />
-                  </div>
-                  {r.status === "em_andamento" ? (
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      defaultValue={r.progresso ?? 0}
-                      onBlur={(e) => {
-                        const v = Math.max(0, Math.min(100, Number(e.target.value) || 0));
-                        if (v !== (r.progresso ?? 0))
-                          progressoMut.mutate({ id: r.id, progresso: v });
-                      }}
-                      className="w-12 rounded border border-[var(--bg-border)] bg-transparent px-1 py-0.5 text-xs tabular-nums outline-none focus:border-primary"
-                      title="Progresso (%)"
-                    />
-                  ) : (
-                    <span className="text-xs tabular-nums">{r.progresso ?? 0}%</span>
-                  )}
-                </div>
-                <Badge
-                  variant="outline"
-                  className={cn("text-[11px]", MONTAGEM_STATUS_COLOR[r.status as MontagemStatus])}
+            {data.rows.map((r: any) => {
+              const etapas = (r.equipamento_montagem_etapas ?? []) as Array<{ status: string }>;
+              const etapasConcluidas = etapas.filter((e) => e.status === "concluida").length;
+              return (
+                <li
+                  key={r.id}
+                  onClick={() => setDetalheId(r.id)}
+                  className="grid cursor-pointer grid-cols-[120px_1fr_120px_auto_auto] items-center gap-3 p-4 text-sm transition-colors hover:bg-[var(--bg-elevated)]"
                 >
-                  {MONTAGEM_STATUS_LABEL[r.status as MontagemStatus]}
-                </Badge>
-                <div className="flex flex-wrap justify-end gap-1.5">
-                  {r.status === "nao_iniciada" && (
-                    <>
-                      <Button size="sm" variant="outline" onClick={() => iniciarMut.mutate(r.id)}>
-                        Iniciar
+                  <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{r.cliente_equipamentos?.modelo}</div>
+                    <div className="truncate text-xs text-[var(--text-muted)]">
+                      {r.clientes?.razao_social}
+                      {r.inicio_previsto || r.fim_previsto
+                        ? ` · ${r.inicio_previsto ?? "—"} → ${r.fim_previsto ?? "—"}`
+                        : ""}
+                      {etapas.length > 0
+                        ? ` · ${etapasConcluidas}/${etapas.length} sub-etapas`
+                        : ""}
+                    </div>
+                    {Array.isArray(r.equipamento_projetos) && r.equipamento_projetos.length > 0 && (
+                      <div
+                        className="mt-0.5 flex flex-wrap gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {r.equipamento_projetos.map((p: any) => (
+                          <Link
+                            key={p.id}
+                            to="/engenharia/projetos"
+                            search={{
+                              d: p.disciplina === "eletrico" ? "eletrico" : "mecanico",
+                              open: p.id,
+                            }}
+                            className="text-[11px] text-primary hover:underline"
+                          >
+                            Ver projeto ({p.disciplina === "eletrico" ? "elétrico" : "mecânico"})
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="h-2 w-20 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+                      <div
+                        className="h-full bg-blue-500"
+                        style={{ width: `${r.progresso ?? 0}%` }}
+                      />
+                    </div>
+                    {r.status === "em_andamento" ? (
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        defaultValue={r.progresso ?? 0}
+                        onBlur={(e) => {
+                          const v = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+                          if (v !== (r.progresso ?? 0))
+                            progressoMut.mutate({ id: r.id, progresso: v });
+                        }}
+                        className="w-12 rounded border border-[var(--bg-border)] bg-transparent px-1 py-0.5 text-xs tabular-nums outline-none focus:border-primary"
+                        title="Progresso (%)"
+                      />
+                    ) : (
+                      <span className="text-xs tabular-nums">{r.progresso ?? 0}%</span>
+                    )}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={cn("text-[11px]", MONTAGEM_STATUS_COLOR[r.status as MontagemStatus])}
+                  >
+                    {MONTAGEM_STATUS_LABEL[r.status as MontagemStatus]}
+                  </Badge>
+                  <div
+                    className="flex flex-wrap justify-end gap-1.5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {r.status === "nao_iniciada" && (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => iniciarMut.mutate(r.id)}>
+                          Iniciar
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setBloquearId(r.id)}>
+                          Bloquear
+                        </Button>
+                      </>
+                    )}
+                    {r.status === "em_andamento" && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setConcluirConfirmId(r.id)}
+                        >
+                          Concluir
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setBloquearId(r.id)}>
+                          Bloquear
+                        </Button>
+                      </>
+                    )}
+                    {r.status === "bloqueada" && (
+                      <Button size="sm" variant="outline" onClick={() => retomarMut.mutate(r.id)}>
+                        Retomar
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setBloquearId(r.id)}>
-                        Bloquear
-                      </Button>
-                    </>
-                  )}
-                  {r.status === "em_andamento" && (
-                    <>
+                    )}
+                    {r.status === "concluida" && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setConcluirConfirmId(r.id)}
+                        onClick={() => {
+                          const processoId = (
+                            r.equipamento_projetos as
+                              | Array<{ processo_id?: string | null }>
+                              | undefined
+                          )?.find((p) => p.processo_id)?.processo_id;
+                          if (!processoId) {
+                            toast.error("Nenhum processo vinculado a este equipamento.");
+                            return;
+                          }
+                          nav({ to: "/qualidade/fat/novo", search: { processo: processoId } });
+                        }}
                       >
-                        Concluir
+                        Abrir FAT
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setBloquearId(r.id)}>
-                        Bloquear
-                      </Button>
-                    </>
-                  )}
-                  {r.status === "bloqueada" && (
-                    <Button size="sm" variant="outline" onClick={() => retomarMut.mutate(r.id)}>
-                      Retomar
-                    </Button>
-                  )}
-                  {r.status === "concluida" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const processoId = (
-                          r.equipamento_projetos as
-                            | Array<{ processo_id?: string | null }>
-                            | undefined
-                        )?.find((p) => p.processo_id)?.processo_id;
-                        if (!processoId) {
-                          toast.error("Nenhum processo vinculado a este equipamento.");
-                          return;
-                        }
-                        nav({ to: "/qualidade/fat/novo", search: { processo: processoId } });
-                      }}
-                    >
-                      Abrir FAT
-                    </Button>
-                  )}
-                </div>
-              </li>
-            ))}
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
@@ -345,13 +370,29 @@ export function MontagemListPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Marcar montagem como concluída?</AlertDialogTitle>
             <AlertDialogDescription>
-              O progresso vai pra 100% e a data de término real é registrada hoje.
+              {concluirEtapasPendentes.length > 0 ? (
+                <>
+                  Ainda faltam sub-etapas:{" "}
+                  {concluirEtapasPendentes
+                    .map(
+                      (e) =>
+                        MONTAGEM_ETAPA_TIPO_LABEL[
+                          e.tipo as keyof typeof MONTAGEM_ETAPA_TIPO_LABEL
+                        ] ?? e.tipo,
+                    )
+                    .join(", ")}
+                  . Abra o card (clique na linha) e conclua o checklist + evidências de cada uma
+                  antes de concluir a montagem.
+                </>
+              ) : (
+                "O progresso vai pra 100% e a data de término real é registrada hoje."
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              disabled={concluirMut.isPending}
+              disabled={concluirMut.isPending || concluirEtapasPendentes.length > 0}
               onClick={() => concluirConfirmId && concluirMut.mutate(concluirConfirmId)}
             >
               Concluir
@@ -359,6 +400,19 @@ export function MontagemListPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {detalheId && (
+        <MontagemDetailDrawer
+          montagemId={detalheId}
+          titulo={
+            data?.rows.find((r: any) => r.id === detalheId)?.cliente_equipamentos?.modelo ??
+            "Montagem"
+          }
+          subtitulo={data?.rows.find((r: any) => r.id === detalheId)?.clientes?.razao_social}
+          open={!!detalheId}
+          onClose={() => setDetalheId(null)}
+        />
+      )}
 
       <AlertDialog
         open={!!bloquearId}
