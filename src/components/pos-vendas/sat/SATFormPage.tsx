@@ -203,7 +203,7 @@ export function SATFormPage({ id }: { id: string }) {
       )}
 
       {/* Dados gerais */}
-      <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 grid grid-cols-2 gap-3">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <Label>Período - De</Label>
           <Input
@@ -226,7 +226,7 @@ export function SATFormPage({ id }: { id: string }) {
             }}
           />
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Label>Local / Endereço da fábrica</Label>
           <Input
             value={local}
@@ -325,6 +325,7 @@ export function SATFormPage({ id }: { id: string }) {
                   {it.tipo === "numero" && (
                     <Input
                       type="number"
+                      inputMode="decimal"
                       step="0.01"
                       value={(resp.valor as number | undefined) ?? ""}
                       onChange={(e) =>
@@ -342,7 +343,7 @@ export function SATFormPage({ id }: { id: string }) {
                   )}
 
                   {it.tipo === "checkbox_multi" && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {it.opcoes.map((op) => {
                         const sel = resp.selecionadas ?? [];
                         const checked = sel.includes(op);

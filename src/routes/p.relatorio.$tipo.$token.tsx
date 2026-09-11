@@ -28,6 +28,25 @@ export const Route = createFileRoute("/p/relatorio/$tipo/$token")({
 
 type PublicData = Awaited<ReturnType<typeof publicGetRelatorio>>;
 
+/**
+ * `publicSetSatResposta` faz um read-modify-write do jsonb `dados` inteiro
+ * (lê o objeto, muda uma chave, grava o objeto de volta) — sem essa fila,
+ * salvar dois itens em sequência rápida (comum ao preencher no tablet) pode
+ * disparar chamadas paralelas que se sobrescrevem, perdendo a resposta que
+ * "chegou primeiro". Serializa por token: cada chamada só começa depois que
+ * a anterior termina.
+ */
+const satSaveQueues = new Map<string, Promise<unknown>>();
+function enqueueSatSave<T>(token: string, fn: () => Promise<T>): Promise<T> {
+  const prev = satSaveQueues.get(token) ?? Promise.resolve();
+  const next = prev.then(fn, fn);
+  satSaveQueues.set(
+    token,
+    next.catch(() => {}),
+  );
+  return next;
+}
+
 function PublicRelatorioPage() {
   const { tipo, token } = useParams({ from: "/p/relatorio/$tipo/$token" });
   const fetchFn = useServerFn(publicGetRelatorio);
@@ -545,14 +564,16 @@ function SatItemRow({
   async function persist(nextValor: any, nextComent?: string) {
     setSaving(true);
     try {
-      await setResp({
-        data: {
-          token,
-          item_id: item.id,
-          valor: nextValor ?? null,
-          comentario: (nextComent ?? comentario) || null,
-        },
-      });
+      await enqueueSatSave(token, () =>
+        setResp({
+          data: {
+            token,
+            item_id: item.id,
+            valor: nextValor ?? null,
+            comentario: (nextComent ?? comentario) || null,
+          },
+        }),
+      );
       onSaved();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao salvar");
