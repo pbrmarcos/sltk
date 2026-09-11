@@ -53,7 +53,7 @@ ON CONFLICT (event_key) DO UPDATE SET
   create_calendar_event = EXCLUDED.create_calendar_event,
   calendar_duration_min = EXCLUDED.calendar_duration_min;
 
-INSERT INTO public.email_event_recipients (event_key, role, kind) VALUES
+INSERT INTO public.email_event_recipients (event_key, role, mode) VALUES
   ('fat.reprovado', 'engineer', 'to'),
   ('fat.reprovado', 'manager', 'cc'),
   ('fat.reprovado', 'assembly', 'cc')
