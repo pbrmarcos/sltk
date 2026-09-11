@@ -85,6 +85,7 @@ import { Route as AuthenticatedAdminFormulariosRecebidosRouteImport } from './ro
 import { Route as AuthenticatedAdminEtapasEquipamentosRouteImport } from './routes/_authenticated/admin.etapas-equipamentos'
 import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
 import { Route as AuthenticatedAdminDiagnosticoRouteImport } from './routes/_authenticated/admin.diagnostico'
+import { Route as AuthenticatedAdminDadosDemoRouteImport } from './routes/_authenticated/admin.dados-demo'
 import { Route as AuthenticatedAdminContatoRouteImport } from './routes/_authenticated/admin.contato'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin.configuracoes'
 import { Route as AuthenticatedAdminBancoRouteImport } from './routes/_authenticated/admin.banco'
@@ -558,6 +559,12 @@ const AuthenticatedAdminDiagnosticoRoute =
     path: '/diagnostico',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDadosDemoRoute =
+  AuthenticatedAdminDadosDemoRouteImport.update({
+    id: '/dados-demo',
+    path: '/dados-demo',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminContatoRoute =
   AuthenticatedAdminContatoRouteImport.update({
     id: '/contato',
@@ -871,6 +878,7 @@ export interface FileRoutesByFullPath {
   '/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/contato': typeof AuthenticatedAdminContatoRoute
+  '/admin/dados-demo': typeof AuthenticatedAdminDadosDemoRoute
   '/admin/diagnostico': typeof AuthenticatedAdminDiagnosticoRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
@@ -994,6 +1002,7 @@ export interface FileRoutesByTo {
   '/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/contato': typeof AuthenticatedAdminContatoRoute
+  '/admin/dados-demo': typeof AuthenticatedAdminDadosDemoRoute
   '/admin/diagnostico': typeof AuthenticatedAdminDiagnosticoRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
@@ -1116,6 +1125,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/banco': typeof AuthenticatedAdminBancoRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/contato': typeof AuthenticatedAdminContatoRoute
+  '/_authenticated/admin/dados-demo': typeof AuthenticatedAdminDadosDemoRoute
   '/_authenticated/admin/diagnostico': typeof AuthenticatedAdminDiagnosticoRoute
   '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
@@ -1242,6 +1252,7 @@ export interface FileRouteTypes {
     | '/admin/banco'
     | '/admin/configuracoes'
     | '/admin/contato'
+    | '/admin/dados-demo'
     | '/admin/diagnostico'
     | '/admin/emails'
     | '/admin/etapas-equipamentos'
@@ -1365,6 +1376,7 @@ export interface FileRouteTypes {
     | '/admin/banco'
     | '/admin/configuracoes'
     | '/admin/contato'
+    | '/admin/dados-demo'
     | '/admin/diagnostico'
     | '/admin/emails'
     | '/admin/formularios-recebidos'
@@ -1486,6 +1498,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/banco'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/contato'
+    | '/_authenticated/admin/dados-demo'
     | '/_authenticated/admin/diagnostico'
     | '/_authenticated/admin/emails'
     | '/_authenticated/admin/etapas-equipamentos'
@@ -2144,6 +2157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDiagnosticoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/dados-demo': {
+      id: '/_authenticated/admin/dados-demo'
+      path: '/dados-demo'
+      fullPath: '/admin/dados-demo'
+      preLoaderRoute: typeof AuthenticatedAdminDadosDemoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/contato': {
       id: '/_authenticated/admin/contato'
       path: '/contato'
@@ -2500,6 +2520,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBancoRoute: typeof AuthenticatedAdminBancoRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminContatoRoute: typeof AuthenticatedAdminContatoRoute
+  AuthenticatedAdminDadosDemoRoute: typeof AuthenticatedAdminDadosDemoRoute
   AuthenticatedAdminDiagnosticoRoute: typeof AuthenticatedAdminDiagnosticoRoute
   AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminEtapasEquipamentosRoute: typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
@@ -2523,6 +2544,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBancoRoute: AuthenticatedAdminBancoRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminContatoRoute: AuthenticatedAdminContatoRoute,
+  AuthenticatedAdminDadosDemoRoute: AuthenticatedAdminDadosDemoRoute,
   AuthenticatedAdminDiagnosticoRoute: AuthenticatedAdminDiagnosticoRoute,
   AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminEtapasEquipamentosRoute:

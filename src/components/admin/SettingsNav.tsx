@@ -29,6 +29,7 @@ const GROUPS: NavGroup[] = [
       { label: "Agenda & Calendário", to: "/admin/agenda", roles: ADMIN_ONLY },
       { label: "Provedor de Mineração", to: "/admin/mineracao", roles: ADMIN_ONLY },
       { label: "Migrations", to: "/admin/migrations", roles: ADMIN_ONLY },
+      { label: "Dados de Demonstração", to: "/admin/dados-demo", roles: ADMIN_ONLY },
     ],
   },
   {
