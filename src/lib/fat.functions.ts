@@ -362,11 +362,6 @@ export const setChecklistResposta = createServerFn({ method: "POST" })
   });
 
 async function recalcContadores(supabase: any, fatId: string) {
-  const { data: total } = await supabase
-    .from("fat_checklist_template")
-    .select("id", { count: "exact", head: true })
-    .eq("ativo", true);
-  void total;
   const { count: totalCount } = await supabase
     .from("fat_checklist_template")
     .select("id", { count: "exact", head: true })
@@ -419,6 +414,10 @@ function computeStatus(
     const a = parseFloat(abs[1].replace(",", "."));
     lo = nominal - a;
     hi = nominal + a;
+  } else {
+    throw new Error(
+      `Tolerância "${tol}" não reconhecida — use "±5%" ou um valor absoluto como "5".`,
+    );
   }
   return med >= lo && med <= hi ? "Aprovado" : "Reprovado";
 }

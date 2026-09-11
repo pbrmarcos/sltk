@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { useCameraCaptureInputs } from "@/hooks/useCameraCaptureInputs";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import {
   getFat,
   updateFatIdentificacao,
@@ -50,7 +52,7 @@ import {
 import { generateFatDocument } from "@/lib/docs/docs.functions";
 import { ShareLinkDialog } from "@/components/share/ShareLinkDialog";
 import { ShareLinksManager } from "@/components/share/ShareLinksManager";
-import { FileText, Share2 } from "lucide-react";
+import { FileText, Share2, Camera, Paperclip, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/qualidade/fat/$id")({
   component: FatDetailPage,
@@ -458,21 +460,34 @@ function IdentificacaoCard({
   onSaved: () => void;
 }) {
   const update = useServerFn(updateFatIdentificacao);
-  const [form, setForm] = useState<any>({
-    os_codigo: fat.os_codigo ?? "",
-    tag_equipamento: fat.tag_equipamento ?? "",
-    data_ensaio: fat.data_ensaio ?? "",
-    hora_inicio: fat.hora_inicio ?? "",
-    testemunha_nome: fat.testemunha_nome ?? "",
-    local_ensaio: fat.local_ensaio ?? "",
-    temperatura_c: fat.temperatura_c ?? "",
-    umidade_rel: fat.umidade_rel ?? "",
-    tensao_alimentacao: fat.tensao_alimentacao ?? "",
-    motivos_viagem: fat.motivos_viagem ?? [],
-    tecnicos: fat.tecnicos ?? "",
-    observacoes_gerais: fat.observacoes_gerais ?? "",
-  });
+  const initialForm = useMemo(
+    () => ({
+      os_codigo: fat.os_codigo ?? "",
+      tag_equipamento: fat.tag_equipamento ?? "",
+      data_ensaio: fat.data_ensaio ?? "",
+      hora_inicio: fat.hora_inicio ?? "",
+      testemunha_nome: fat.testemunha_nome ?? "",
+      local_ensaio: fat.local_ensaio ?? "",
+      temperatura_c: fat.temperatura_c ?? "",
+      umidade_rel: fat.umidade_rel ?? "",
+      tensao_alimentacao: fat.tensao_alimentacao ?? "",
+      motivos_viagem: fat.motivos_viagem ?? [],
+      tecnicos: fat.tecnicos ?? "",
+      observacoes_gerais: fat.observacoes_gerais ?? "",
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fat.id],
+  );
+  const [form, setForm] = useState<any>(initialForm);
   const [saving, setSaving] = useState(false);
+
+  const { clearDraft } = useFormDraft({
+    formKey: `fat:${fat.id}:identificacao`,
+    value: form,
+    initialValue: initialForm,
+    enabled: !disabled,
+    onRestore: (v) => setForm(v),
+  });
 
   async function save() {
     setSaving(true);
@@ -489,6 +504,7 @@ function IdentificacaoCard({
           },
         },
       });
+      clearDraft();
       toast.success("Identificação salva");
       onSaved();
     } catch (e: any) {
@@ -557,6 +573,7 @@ function IdentificacaoCard({
         <Field label="Temperatura (°C)">
           <Input
             type="number"
+            inputMode="decimal"
             step="0.1"
             value={form.temperatura_c}
             onChange={(e) => setForm({ ...form, temperatura_c: e.target.value })}
@@ -566,6 +583,7 @@ function IdentificacaoCard({
         <Field label="Umidade (%)">
           <Input
             type="number"
+            inputMode="decimal"
             step="0.1"
             value={form.umidade_rel}
             onChange={(e) => setForm({ ...form, umidade_rel: e.target.value })}
@@ -668,6 +686,14 @@ function ChecklistCard({
   }
 
   async function uploadFoto(file: File, templateId: string) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Envie um arquivo de imagem.");
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máximo 25MB).");
+      return;
+    }
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `${fat.id}/${templateId}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage
@@ -718,7 +744,7 @@ function ChecklistCard({
                             type="button"
                             disabled={disabled}
                             onClick={() => update(t.id, { status: k })}
-                            className={`rounded border px-2.5 py-1 text-xs font-medium uppercase ${
+                            className={`rounded border px-4 py-2 text-sm font-medium uppercase ${
                               status === k
                                 ? k === "ok"
                                   ? "border-green-600 bg-green-600 text-white"
@@ -753,13 +779,9 @@ function ChecklistCard({
                         ) : (
                           <span className="text-red-600">Foto obrigatória</span>
                         )}
-                        <input
-                          type="file"
-                          accept="image/*"
+                        <NokFotoInput
                           disabled={disabled}
-                          onChange={(e) =>
-                            e.target.files?.[0] && uploadFoto(e.target.files[0], t.id)
-                          }
+                          onFile={(file) => uploadFoto(file, t.id)}
                         />
                       </div>
                     )}
@@ -770,6 +792,49 @@ function ChecklistCard({
           </Card>
         );
       })}
+    </div>
+  );
+}
+
+function NokFotoInput({ disabled, onFile }: { disabled?: boolean; onFile: (file: File) => void }) {
+  const [busy, setBusy] = useState(false);
+  const { renderInputs, openGaleria, openCamera, isTouch } = useCameraCaptureInputs(
+    (files) => {
+      const file = files[0];
+      if (!file) return;
+      setBusy(true);
+      Promise.resolve(onFile(file)).finally(() => setBusy(false));
+    },
+    { accept: "image/*" },
+  );
+  return (
+    <div className="flex items-center gap-1.5">
+      {renderInputs()}
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={disabled || busy}
+        onClick={openGaleria}
+      >
+        {busy ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Paperclip className="h-3.5 w-3.5" />
+        )}
+      </Button>
+      {isTouch && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={disabled || busy}
+          onClick={openCamera}
+          title="Abrir câmera"
+        >
+          <Camera className="h-3.5 w-3.5" />
+        </Button>
+      )}
     </div>
   );
 }
@@ -903,6 +968,7 @@ function MedicoesCard({
                 <td className="p-2">
                   <Input
                     type="number"
+                    inputMode="decimal"
                     value={novo.nominal}
                     onChange={(e) => setNovo({ ...novo, nominal: e.target.value })}
                   />
@@ -917,6 +983,7 @@ function MedicoesCard({
                 <td className="p-2">
                   <Input
                     type="number"
+                    inputMode="decimal"
                     value={novo.medido}
                     onChange={(e) => setNovo({ ...novo, medido: e.target.value })}
                   />
