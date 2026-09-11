@@ -379,7 +379,7 @@ export const publicGetRelatorio = createServerFn({ method: "POST" })
             .order("ordem"),
           (supabaseAdmin as any)
             .from("fat_checklist_resposta")
-            .select("id, template_id, status, comentario")
+            .select("id, template_id, status, comentario, foto_path")
             .eq("fat_id", payload.rid),
           (supabaseAdmin as any)
             .from("fat_assinaturas")
@@ -459,7 +459,7 @@ export const publicGetRelatorio = createServerFn({ method: "POST" })
         return (supabaseAdmin as any)
           .from("sat_template_secao")
           .select(
-            "id, ordem, titulo, descricao, sat_template_item(id, secao_id, ordem, label, tipo, obrigatorio, opcoes, ajuda)",
+            "id, ordem, titulo, descricao, sat_template_item(id, secao_id, ordem, label, tipo, obrigatorio, opcoes, ajuda, permite_anexo)",
           )
           .eq("template_id", s.data.template_id)
           .order("ordem");
@@ -525,6 +525,7 @@ export const publicGetRelatorio = createServerFn({ method: "POST" })
           obrigatorio: boolean;
           opcoes: string[] | null;
           ajuda: string | null;
+          permite_anexo: boolean;
         }>;
       }>,
       respostas: [],
@@ -597,6 +598,129 @@ export const publicSetChecklistResposta = createServerFn({ method: "POST" })
       user_agent: meta.user_agent,
     });
     return { ok: true, progresso };
+  });
+
+// ============================================================
+// PUBLIC UPLOAD FOTO NOK (FAT) — evidência exigida em item marcado NOK
+// ============================================================
+const FAT_FOTO_MIME_LIMITS: Record<string, number> = {
+  "image/jpeg": 25 * 1024 * 1024,
+  "image/jpg": 25 * 1024 * 1024,
+  "image/png": 25 * 1024 * 1024,
+  "image/webp": 25 * 1024 * 1024,
+  "image/heic": 25 * 1024 * 1024,
+};
+
+const uploadFatFotoInput = z.object({
+  token: z.string().min(10),
+  template_id: z.string().uuid(),
+  filename: z.string().min(1).max(200),
+  mime_type: z.string().min(3).max(100),
+  size_bytes: z.number().int().positive(),
+  data_base64: z.string().min(20),
+});
+
+export const publicUploadFatFoto = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => uploadFatFotoInput.parse(input))
+  .handler(async ({ data }) => {
+    const meta = readRequestMeta();
+    const { payload, link } = await loadActiveLink(data.token);
+    if (payload.tipo !== "fat") throw new Error("Token não é de um relatório FAT.");
+    if (!payload.scope.includes("checklist")) throw new Error("Link sem permissão de checklist.");
+
+    const limit = FAT_FOTO_MIME_LIMITS[data.mime_type];
+    if (!limit) throw new Error(`Tipo não permitido (${data.mime_type}). Envie uma imagem.`);
+    if (data.size_bytes > limit) {
+      throw new Error(`Imagem excede o limite (${(limit / 1024 / 1024).toFixed(0)}MB).`);
+    }
+
+    const { getCriticalClient } = await import("@/lib/supabase-client.server");
+    const supabaseAdmin = await getCriticalClient();
+
+    const ext = data.filename.includes(".") ? data.filename.split(".").pop() : "jpg";
+    const path = `${payload.rid}/${data.template_id}-${Date.now()}.${ext}`;
+    const bytes = Uint8Array.from(atob(data.data_base64), (c) => c.charCodeAt(0));
+    const { error: upErr } = await (supabaseAdmin as any).storage
+      .from("fat-evidencias")
+      .upload(path, bytes, { contentType: data.mime_type, upsert: true });
+    if (upErr) throw new Error(upErr.message);
+
+    // Atualiza (não upsert): a resposta já deve existir — a UI só oferece o
+    // upload depois que o item foi marcado NOK, o que já cria essa linha.
+    const { error, count } = await (supabaseAdmin as any)
+      .from("fat_checklist_resposta")
+      .update({ foto_path: path }, { count: "exact" })
+      .eq("fat_id", payload.rid)
+      .eq("template_id", data.template_id);
+    if (error) throw friendlyDbError(error);
+    if (!count) {
+      throw new Error("Marque o item como NOK antes de anexar a foto.");
+    }
+
+    await touchLink(link.id);
+    await logSubmissao({
+      share_link_id: link.id,
+      tipo: "fat",
+      relatorio_id: payload.rid,
+      acao: "foto_nok",
+      alvo_id: data.template_id,
+      payload: { filename: data.filename },
+      ip: meta.ip,
+      user_agent: meta.user_agent,
+    });
+    return { ok: true, path };
+  });
+
+// ============================================================
+// PUBLIC UPLOAD ANEXO (SAT) — link de campo, sem sessão autenticada
+// ============================================================
+const publicUploadSatAnexoInput = z.object({
+  token: z.string().min(10),
+  item_id: z.string().uuid().optional(),
+  secao_id: z.string().uuid().optional(),
+  filename: z.string().min(1).max(200),
+  mime_type: z.string().min(3).max(100),
+  size_bytes: z.number().int().positive(),
+  data_base64: z.string().min(20),
+  descricao: z.string().max(500).optional(),
+});
+
+export const publicUploadSatAnexo = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => publicUploadSatAnexoInput.parse(input))
+  .handler(async ({ data }) => {
+    const { performSatAnexoUpload } = await import("@/lib/sat-relatorios.functions");
+    const meta = readRequestMeta();
+    const { payload, link } = await loadActiveLink(data.token);
+    if (payload.tipo !== "sat") throw new Error("Token não é de um relatório SAT.");
+    if (!payload.scope.includes("checklist")) throw new Error("Link sem permissão de checklist.");
+
+    const { getCriticalClient } = await import("@/lib/supabase-client.server");
+    const supabaseAdmin = await getCriticalClient();
+    const anexo = await performSatAnexoUpload(supabaseAdmin, {
+      relatorio_id: payload.rid,
+      item_id: data.item_id ?? null,
+      secao_id: data.secao_id ?? null,
+      filename: data.filename,
+      mime_type: data.mime_type,
+      size_bytes: data.size_bytes,
+      data_base64: data.data_base64,
+      descricao: data.descricao ?? null,
+      userId: null,
+      userNome: "Técnico (link de campo)",
+    });
+
+    await touchLink(link.id);
+    await logSubmissao({
+      share_link_id: link.id,
+      tipo: "sat",
+      relatorio_id: payload.rid,
+      acao: "anexo",
+      alvo_id: data.item_id ?? null,
+      payload: { filename: data.filename },
+      ip: meta.ip,
+      user_agent: meta.user_agent,
+    });
+    return anexo;
   });
 
 // ============================================================

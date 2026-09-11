@@ -17,9 +17,21 @@ import {
   publicSetSatResposta,
   publicSubmitAssinatura,
   publicExportRelatorioPdf,
+  publicUploadFatFoto,
+  publicUploadSatAnexo,
 } from "@/lib/share-links.functions";
 import { FAT_SECOES } from "@/lib/fat.functions";
-import { CheckCircle2, XCircle, MinusCircle, ClipboardCheck, FileDown } from "lucide-react";
+import { useCameraCaptureInputs } from "@/hooks/useCameraCaptureInputs";
+import {
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
+  ClipboardCheck,
+  FileDown,
+  Camera,
+  Paperclip,
+  Loader2,
+} from "lucide-react";
 
 export const Route = createFileRoute("/p/relatorio/$tipo/$token")({
   ssr: false,
@@ -27,6 +39,17 @@ export const Route = createFileRoute("/p/relatorio/$tipo/$token")({
 });
 
 type PublicData = Awaited<ReturnType<typeof publicGetRelatorio>>;
+
+async function fileToBase64(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  let bin = "";
+  const bytes = new Uint8Array(buf);
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
 
 /**
  * `publicSetSatResposta` faz um read-modify-write do jsonb `dados` inteiro
@@ -269,13 +292,17 @@ function FatPublicForm({
     na_count?: number;
   };
   const respMap = useMemo(() => {
-    const m = new Map<string, { status: string; comentario: string | null }>();
+    const m = new Map<
+      string,
+      { status: string; comentario: string | null; foto_path: string | null }
+    >();
     for (const x of data.respostas as Array<{
       template_id: string;
       status: string;
       comentario: string | null;
+      foto_path: string | null;
     }>) {
-      m.set(x.template_id, { status: x.status, comentario: x.comentario });
+      m.set(x.template_id, { status: x.status, comentario: x.comentario, foto_path: x.foto_path });
     }
     return m;
   }, [data.respostas]);
@@ -283,13 +310,20 @@ function FatPublicForm({
   const grouped = useMemo(() => {
     const g = new Map<
       string,
-      Array<{ id: string; titulo: string; descricao: string | null; secao: string }>
+      Array<{
+        id: string;
+        titulo: string;
+        descricao: string | null;
+        secao: string;
+        requer_foto_nok: boolean;
+      }>
     >();
     for (const t of data.template as Array<{
       id: string;
       titulo: string;
       descricao: string | null;
       secao: string;
+      requer_foto_nok: boolean;
     }>) {
       const arr = g.get(t.secao) ?? [];
       arr.push(t);
@@ -326,6 +360,7 @@ function FatPublicForm({
                   templateId={it.id}
                   titulo={it.titulo}
                   descricao={it.descricao}
+                  requerFotoNok={it.requer_foto_nok}
                   current={respMap.get(it.id)}
                   token={token}
                   onSaved={onChange}
@@ -348,6 +383,7 @@ function FatChecklistRow({
   templateId,
   titulo,
   descricao,
+  requerFotoNok,
   current,
   token,
   onSaved,
@@ -355,14 +391,47 @@ function FatChecklistRow({
   templateId: string;
   titulo: string;
   descricao: string | null;
-  current?: { status: string; comentario: string | null };
+  requerFotoNok: boolean;
+  current?: { status: string; comentario: string | null; foto_path: string | null };
   token: string;
   onSaved: () => void;
 }) {
   const setResp = useServerFn(publicSetChecklistResposta);
+  const uploadFoto = useServerFn(publicUploadFatFoto);
   const [status, setStatus] = useState<string>(current?.status ?? "pendente");
   const [comentario, setComentario] = useState<string>(current?.comentario ?? "");
   const [saving, setSaving] = useState(false);
+  const [fotoPath, setFotoPath] = useState<string | null>(current?.foto_path ?? null);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+
+  const fotoCapture = useCameraCaptureInputs(
+    async (files) => {
+      const file = files[0];
+      if (!file) return;
+      setUploadingFoto(true);
+      try {
+        const b64 = await fileToBase64(file);
+        const res = await uploadFoto({
+          data: {
+            token,
+            template_id: templateId,
+            filename: file.name,
+            mime_type: file.type || "image/jpeg",
+            size_bytes: file.size,
+            data_base64: b64,
+          },
+        });
+        setFotoPath(res.path);
+        toast.success("Foto enviada.");
+        onSaved();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Erro ao enviar foto");
+      } finally {
+        setUploadingFoto(false);
+      }
+    },
+    { accept: "image/*" },
+  );
 
   async function save(next: "ok" | "nok" | "na", coment?: string) {
     setSaving(true);
@@ -433,6 +502,41 @@ function FatChecklistRow({
         }}
         rows={2}
       />
+      {status === "nok" && requerFotoNok && (
+        <div className="mt-2 flex items-center gap-2 text-xs">
+          {fotoCapture.renderInputs()}
+          {fotoPath ? (
+            <span className="text-green-600">Foto enviada ✓</span>
+          ) : (
+            <span className="text-red-600">Foto obrigatória</span>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={uploadingFoto}
+            onClick={fotoCapture.openGaleria}
+          >
+            {uploadingFoto ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Paperclip className="h-3.5 w-3.5" />
+            )}
+          </Button>
+          {fotoCapture.isTouch && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={uploadingFoto}
+              onClick={fotoCapture.openCamera}
+              title="Abrir câmera"
+            >
+              <Camera className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -495,6 +599,7 @@ function SatPublicForm({
       obrigatorio: boolean;
       opcoes: string[] | null;
       ajuda: string | null;
+      permite_anexo: boolean;
     }>;
   };
   const secoes = (data.template as unknown as Sec[]) ?? [];
@@ -551,15 +656,49 @@ function SatItemRow({
     obrigatorio: boolean;
     opcoes: string[] | null;
     ajuda: string | null;
+    permite_anexo: boolean;
   };
   current: any;
   token: string;
   onSaved: () => void;
 }) {
   const setResp = useServerFn(publicSetSatResposta);
+  const uploadAnexo = useServerFn(publicUploadSatAnexo);
   const [valor, setValor] = useState<any>(current?.valor ?? "");
   const [comentario, setComentario] = useState<string>(current?.comentario ?? "");
   const [saving, setSaving] = useState(false);
+  const [anexosCount, setAnexosCount] = useState(0);
+  const [uploadingAnexo, setUploadingAnexo] = useState(false);
+
+  const anexoCapture = useCameraCaptureInputs(
+    async (files) => {
+      setUploadingAnexo(true);
+      try {
+        for (const file of Array.from(files)) {
+          const b64 = await fileToBase64(file);
+          await enqueueSatSave(token, () =>
+            uploadAnexo({
+              data: {
+                token,
+                item_id: item.id,
+                filename: file.name,
+                mime_type: file.type || "application/octet-stream",
+                size_bytes: file.size,
+                data_base64: b64,
+              },
+            }),
+          );
+        }
+        setAnexosCount((c) => c + files.length);
+        toast.success("Anexo enviado.");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Erro ao enviar anexo");
+      } finally {
+        setUploadingAnexo(false);
+      }
+    },
+    { multiple: true, accept: "image/*,application/pdf" },
+  );
 
   async function persist(nextValor: any, nextComent?: string) {
     setSaving(true);
@@ -702,6 +841,43 @@ function SatItemRow({
         onBlur={() => void persist(valor, comentario)}
         rows={2}
       />
+
+      {item.permite_anexo && (
+        <div className="mt-2 flex items-center gap-2 text-xs">
+          {anexoCapture.renderInputs()}
+          {anexosCount > 0 && (
+            <span className="text-green-600">
+              {anexosCount} anexo{anexosCount > 1 ? "s" : ""} enviado{anexosCount > 1 ? "s" : ""} ✓
+            </span>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={uploadingAnexo}
+            onClick={anexoCapture.openGaleria}
+          >
+            {uploadingAnexo ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Paperclip className="h-3.5 w-3.5" />
+            )}
+            <span className="ml-1">Anexar</span>
+          </Button>
+          {anexoCapture.isTouch && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={uploadingAnexo}
+              onClick={anexoCapture.openCamera}
+              title="Abrir câmera"
+            >
+              <Camera className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

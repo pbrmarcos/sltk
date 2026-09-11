@@ -353,96 +353,123 @@ const uploadInput = z.object({
   descricao: z.string().max(400).nullable().optional(),
 });
 
+/**
+ * Núcleo reaproveitado tanto pelo upload autenticado (uploadSATAnexo) quanto
+ * pelo upload público via link de campo (publicUploadSatAnexo, em
+ * share-links.functions.ts não é possível — os helpers de Drive acima são
+ * privados deste arquivo — por isso o endpoint público também vive aqui).
+ */
+export async function performSatAnexoUpload(
+  supabase: any,
+  params: {
+    relatorio_id: string;
+    item_id?: string | null;
+    secao_id?: string | null;
+    filename: string;
+    mime_type: string;
+    size_bytes: number;
+    data_base64: string;
+    descricao?: string | null;
+    userId: string | null;
+    userNome: string;
+  },
+) {
+  const limit = MIME_LIMITS[params.mime_type];
+  if (!limit) {
+    throw new Error(
+      `Tipo não permitido (${params.mime_type}). Aceitos: PDF, JPG, PNG, WEBP, HEIC, ZIP.`,
+    );
+  }
+  if (params.size_bytes > limit) {
+    const mb = (limit / 1024 / 1024).toFixed(0);
+    throw new Error(`Arquivo excede o limite (${mb}MB).`);
+  }
+
+  const { data: rel, error: rErr } = await supabase
+    .from("sat_relatorio")
+    .select(
+      "id, codigo, cliente_id, processo_id, drive_folder_id, clientes(codigo, razao_social), processos(codigo)",
+    )
+    .eq("id", params.relatorio_id)
+    .maybeSingle();
+  if (rErr) throw friendlyDbError(rErr);
+  if (!rel) throw new Error("Relatório não encontrado ou sem acesso.");
+
+  const cli = (rel as { clientes?: { codigo?: string; razao_social?: string } }).clientes ?? null;
+  const proc = (rel as { processos?: { codigo?: string } }).processos ?? null;
+
+  const now = new Date();
+  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const parentId = await ensureSATFolder({
+    clienteCodigo: cli?.codigo ?? null,
+    clienteNome: cli?.razao_social ?? null,
+    processoCodigo: proc?.codigo ?? null,
+    relatorioCodigo: rel.codigo as string,
+    yyyymm,
+  });
+
+  const ext = params.filename.includes(".") ? "." + params.filename.split(".").pop() : "";
+  const base = params.filename.replace(/\.[^.]+$/, "");
+  const safe = base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
+  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
+  const finalName = `${safe}_${stamp}${ext}`;
+
+  const bytes = Uint8Array.from(atob(params.data_base64), (c) => c.charCodeAt(0)).buffer;
+  const up = await driveUploadMultipart({
+    parentId,
+    name: finalName,
+    mimeType: params.mime_type,
+    bytes,
+  });
+
+  if (!(rel as { drive_folder_id?: string | null }).drive_folder_id) {
+    await supabase
+      .from("sat_relatorio")
+      .update({ drive_folder_id: parentId } as never)
+      .eq("id", params.relatorio_id);
+  }
+
+  const { data: anexo, error: aErr } = await supabase
+    .from("sat_relatorio_anexo")
+    .insert({
+      relatorio_id: params.relatorio_id,
+      item_id: params.item_id ?? null,
+      secao_id: params.secao_id ?? null,
+      tipo_anexo: params.item_id ? "item" : "geral",
+      drive_file_id: up.id,
+      drive_view_url: up.webViewLink,
+      drive_folder_id: parentId,
+      nome_final: finalName,
+      nome_original: params.filename,
+      mime_type: params.mime_type,
+      tamanho_bytes: params.size_bytes,
+      descricao: params.descricao ?? null,
+      user_id: params.userId,
+      user_nome: params.userNome,
+    } as never)
+    .select("id, drive_view_url, nome_final, mime_type")
+    .single();
+  if (aErr) throw friendlyDbError(aErr);
+  return anexo as { id: string; drive_view_url: string; nome_final: string; mime_type: string };
+}
+
 export const uploadSATAnexo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => uploadInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertCanAccessModule(context.supabase, context.userId, "pos_vendas");
-    const limit = MIME_LIMITS[data.mime_type];
-    if (!limit) {
-      throw new Error(
-        `Tipo não permitido (${data.mime_type}). Aceitos: PDF, JPG, PNG, WEBP, HEIC, ZIP.`,
-      );
-    }
-    if (data.size_bytes > limit) {
-      const mb = (limit / 1024 / 1024).toFixed(0);
-      throw new Error(`Arquivo excede o limite (${mb}MB).`);
-    }
-
-    const { data: rel, error: rErr } = await context.supabase
-      .from("sat_relatorio")
-      .select(
-        "id, codigo, cliente_id, processo_id, drive_folder_id, clientes(codigo, razao_social), processos(codigo)",
-      )
-      .eq("id", data.relatorio_id)
-      .maybeSingle();
-    if (rErr) throw friendlyDbError(rErr);
-    if (!rel) throw new Error("Relatório não encontrado ou sem acesso.");
-
-    const cli = (rel as { clientes?: { codigo?: string; razao_social?: string } }).clientes ?? null;
-    const proc = (rel as { processos?: { codigo?: string } }).processos ?? null;
-
-    const now = new Date();
-    const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-
-    const parentId = await ensureSATFolder({
-      clienteCodigo: cli?.codigo ?? null,
-      clienteNome: cli?.razao_social ?? null,
-      processoCodigo: proc?.codigo ?? null,
-      relatorioCodigo: rel.codigo as string,
-      yyyymm,
-    });
-
-    const ext = data.filename.includes(".") ? "." + data.filename.split(".").pop() : "";
-    const base = data.filename.replace(/\.[^.]+$/, "");
-    const safe = base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
-    const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
-    const finalName = `${safe}_${stamp}${ext}`;
-
-    const bytes = Uint8Array.from(atob(data.data_base64), (c) => c.charCodeAt(0)).buffer;
-    const up = await driveUploadMultipart({
-      parentId,
-      name: finalName,
-      mimeType: data.mime_type,
-      bytes,
-    });
-
-    if (!(rel as { drive_folder_id?: string | null }).drive_folder_id) {
-      await context.supabase
-        .from("sat_relatorio")
-        .update({ drive_folder_id: parentId } as never)
-        .eq("id", data.relatorio_id);
-    }
-
     const { data: profile } = await context.supabase
       .from("profiles")
       .select("full_name, email")
       .eq("id", context.userId)
       .maybeSingle();
     const userNome = profile?.full_name ?? profile?.email ?? "Sistema";
-
-    const { data: anexo, error: aErr } = await context.supabase
-      .from("sat_relatorio_anexo")
-      .insert({
-        relatorio_id: data.relatorio_id,
-        item_id: data.item_id ?? null,
-        secao_id: data.secao_id ?? null,
-        tipo_anexo: data.item_id ? "item" : "geral",
-        drive_file_id: up.id,
-        drive_view_url: up.webViewLink,
-        drive_folder_id: parentId,
-        nome_final: finalName,
-        nome_original: data.filename,
-        mime_type: data.mime_type,
-        tamanho_bytes: data.size_bytes,
-        descricao: data.descricao ?? null,
-        user_id: context.userId,
-        user_nome: userNome,
-      } as never)
-      .select("id, drive_view_url, nome_final, mime_type")
-      .single();
-    if (aErr) throw friendlyDbError(aErr);
-    return anexo as { id: string; drive_view_url: string; nome_final: string; mime_type: string };
+    return performSatAnexoUpload(context.supabase, {
+      ...data,
+      userId: context.userId,
+      userNome,
+    });
   });
 
 const listAnexInput = z.object({ relatorio_id: z.string().uuid() });
