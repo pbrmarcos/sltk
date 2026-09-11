@@ -708,10 +708,16 @@ function SignaturePad({
   );
   const [saving, setSaving] = useState(false);
 
+  // O canvas tem resolução fixa (600x180) mas é esticado via CSS (w-full) —
+  // sem esse fator de escala, o traço desenhado não acompanha o toque em
+  // qualquer tela cuja largura renderizada seja diferente de 600px (ou seja,
+  // praticamente todo tablet/celular — justamente onde essa página é usada).
   function pos(e: RPointerEvent<HTMLCanvasElement>) {
     const c = canvasRef.current!;
     const rect = c.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const scaleX = c.width / rect.width;
+    const scaleY = c.height / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
   }
   function start(e: RPointerEvent<HTMLCanvasElement>) {
     drawing.current = true;

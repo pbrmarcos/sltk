@@ -1103,21 +1103,31 @@ function AssinaturaBox({
   const [cargo, setCargo] = useState(existing?.cargo ?? "");
   const drawing = useRef(false);
 
+  // O canvas tem resolução fixa (500x140) mas é esticado via CSS (w-full) —
+  // sem esse fator de escala, o traço desenhado não acompanha o toque em
+  // qualquer tela cuja largura renderizada seja diferente de 500px (ou seja,
+  // praticamente todo tablet).
+  function scaledPos(e: RPointerEvent, c: HTMLCanvasElement) {
+    const rect = c.getBoundingClientRect();
+    const scaleX = c.width / rect.width;
+    const scaleY = c.height / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
   function start(e: RPointerEvent) {
     if (disabled || existing) return;
     drawing.current = true;
     const c = canvasRef.current!;
     const ctx = c.getContext("2d")!;
-    const rect = c.getBoundingClientRect();
+    const p = scaledPos(e, c);
     ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.moveTo(p.x, p.y);
   }
   function move(e: RPointerEvent) {
     if (!drawing.current) return;
     const c = canvasRef.current!;
     const ctx = c.getContext("2d")!;
-    const rect = c.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    const p = scaledPos(e, c);
+    ctx.lineTo(p.x, p.y);
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#111";
     ctx.lineCap = "round";
