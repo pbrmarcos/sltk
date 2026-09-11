@@ -643,8 +643,13 @@ type ScanExtracted = {
   email_corporativo?: string | null;
   telefone_ddi?: string | null;
   telefone_numero?: string | null;
+  fax_numero?: string | null;
+  whatsapp_corp?: string | null;
+  wechat_corp?: string | null;
   idioma?: string | null;
   categorias_sugeridas?: string[] | null;
+  produtos_principais?: string[] | null;
+  certificacoes_visiveis?: string[] | null;
   contato_principal?: ScanContato | null;
   observacoes?: string | null;
 };
@@ -721,8 +726,13 @@ Analise as imagens enviadas e devolva APENAS um JSON válido (sem markdown, sem 
   "email_corporativo": "email principal",
   "telefone_ddi": "código do país (apenas dígitos, ex: 86, 55)",
   "telefone_numero": "número, apenas dígitos",
+  "fax_numero": "número de fax da empresa, se houver",
+  "whatsapp_corp": "WhatsApp corporativo (não o do contato pessoal), se houver",
+  "wechat_corp": "WeChat ID corporativo (não o do contato pessoal), se houver",
   "idioma": "en|zh|pt|es",
   "categorias_sugeridas": ["palavra-chave 1", "palavra-chave 2"],
+  "produtos_principais": ["produto ou linha mencionado no cartão/folder/catálogo"],
+  "certificacoes_visiveis": ["ISO 9001, CE ou outro selo/logo de certificação visível na imagem"],
   "contato_principal": {
     "nome": "nome da pessoa",
     "cargo": "cargo / position",
@@ -1126,6 +1136,7 @@ nome_fantasia: ${extracted.nome_fantasia ?? ""}`,
 
     // Enriquecimento web: Firecrawl busca + Groq sumariza em JSON estruturado.
     let web: WebEnrichment | null = null;
+    let webError: string | null = null;
     const pista = extracted.nome || extracted.nome_fantasia || extracted.site;
     const firecrawlKey = process.env.FIRECRAWL_API_KEY;
     if (data.enriquecer_web && pista && firecrawlKey) {
@@ -1190,8 +1201,9 @@ ${markdown.slice(0, 12000)}`;
             web.fontes = sources;
           }
         }
-      } catch {
+      } catch (err) {
         web = null;
+        webError = err instanceof Error ? err.message : "Falha no enriquecimento web.";
       }
 
       if (web) {
@@ -1217,7 +1229,7 @@ ${markdown.slice(0, 12000)}`;
       request_context: data.contexto ?? null,
     });
 
-    return { ok: true as const, raw: text, extracted, web };
+    return { ok: true as const, raw: text, extracted, web, webError };
   });
 
 const logsInput = z.object({

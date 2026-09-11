@@ -56,6 +56,7 @@ import {
 import { listPaises } from "@/lib/clientes.functions";
 import { enrichDocumento } from "@/lib/enrich.functions";
 import { Flag } from "@/components/ui/flag";
+import { useCameraCaptureInputs } from "@/hooks/useCameraCaptureInputs";
 
 export const Route = createFileRoute("/_authenticated/fornecedores/novo")({
   component: NovoFornecedorPage,
@@ -119,6 +120,7 @@ function NovoFornecedorPage() {
     categorias_match?: string[] | null;
     fontes?: string[] | null;
   } | null>(null);
+  const [webErrorMsg, setWebErrorMsg] = useState<string | null>(null);
   const [scanError, setScanError] = useState<{
     message: string;
     action?: string;
@@ -345,26 +347,41 @@ function NovoFornecedorPage() {
 
   const [lastExtracted, setLastExtracted] = useState<unknown>(null);
 
+  const scanCapture = useCameraCaptureInputs((files) => void handleScan(files), {
+    multiple: true,
+    accept: "image/*",
+  });
+
   async function handleScan(files: FileList | null) {
     if (!files || files.length === 0) return;
+    const arr = Array.from(files).slice(0, 6);
+    const previews: string[] = [];
+    const images = await Promise.all(
+      arr.map(async (f) => {
+        const { base64, mime } = await fileToBase64(f);
+        previews.push(`data:${mime};base64,${base64}`);
+        return { base64, mime };
+      }),
+    );
+    setScanPreview(previews);
+    setScanImages(images);
+    await runScan(images);
+  }
+
+  function handleRetryScan() {
+    if (scanImages.length === 0) return;
+    void runScan(scanImages);
+  }
+
+  async function runScan(images: Array<{ base64: string; mime: string }>) {
     setScanning(true);
     setScanError(null);
+    setWebErrorMsg(null);
     setEnrichment(null);
     setEnderecoOriginal(null);
     resetPhases();
     setPhases({ ocr: "running", translation: "running", enrichment: "running", drive: "idle" });
     try {
-      const arr = Array.from(files).slice(0, 6);
-      const previews: string[] = [];
-      const images = await Promise.all(
-        arr.map(async (f) => {
-          const { base64, mime } = await fileToBase64(f);
-          previews.push(`data:${mime};base64,${base64}`);
-          return { base64, mime };
-        }),
-      );
-      setScanPreview(previews);
-      setScanImages(images);
       const res = await scanFornecedorDocs({ data: { imagens: images } });
       if (!res.ok) {
         setScanError(res.error);
@@ -377,10 +394,11 @@ function NovoFornecedorPage() {
       setLastExtracted(res.extracted);
       if (e.endereco_original) setEnderecoOriginal(e.endereco_original);
       if (w) setEnrichment(w);
+      setWebErrorMsg(res.webError ?? null);
       setPhases({
         ocr: "done",
         translation: e.endereco_original ? "done" : "skipped",
-        enrichment: w ? "done" : "skipped",
+        enrichment: w ? "done" : res.webError ? "error" : "skipped",
         drive: "idle",
       });
       const matched = Array.isArray(w?.categorias_match) ? w!.categorias_match! : [];
@@ -406,11 +424,14 @@ function NovoFornecedorPage() {
             w?.certificacoes?.length ? `Certificações: ${w.certificacoes.join(", ")}.` : "",
             w?.mercados_atendidos?.length ? `Mercados: ${w.mercados_atendidos.join(", ")}.` : "",
             w?.fontes?.length ? `Fontes: ${w.fontes.slice(0, 3).join(" | ")}` : "",
+            e.fax_numero ? `Fax: ${e.fax_numero}` : "",
           ]
             .filter(Boolean)
             .join("\n")
             .trim() || prev.observacoes,
-        tags: e.categorias_sugeridas ?? prev.tags,
+        tags: Array.from(
+          new Set([...(e.categorias_sugeridas ?? prev.tags), ...(e.produtos_principais ?? [])]),
+        ),
         categorias: matched.length
           ? Array.from(new Set([...prev.categorias, ...matched]))
           : prev.categorias,
@@ -459,10 +480,12 @@ function NovoFornecedorPage() {
           prev.capacidade_mensal,
         whatsapp_corp:
           prev.whatsapp_corp ||
+          e.whatsapp_corp ||
           (w as { whatsapp_corp?: string | null } | null)?.whatsapp_corp ||
           prev.whatsapp_corp,
         wechat_corp:
           prev.wechat_corp ||
+          e.wechat_corp ||
           (w as { wechat_corp?: string | null } | null)?.wechat_corp ||
           prev.wechat_corp,
         linkedin_url:
@@ -488,6 +511,7 @@ function NovoFornecedorPage() {
         certificacoes: Array.from(
           new Set([
             ...prev.certificacoes,
+            ...(e.certificacoes_visiveis ?? []),
             ...((w as { certificacoes?: string[] | null } | null)?.certificacoes ?? []),
           ]),
         ),
@@ -722,24 +746,50 @@ function NovoFornecedorPage() {
               </kbd>
             </p>
 
-            <label className="mt-4 inline-flex">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                className="hidden"
-                disabled={scanning}
-                onChange={(e) => handleScan(e.target.files)}
-              />
-              <span className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90">
+            {scanCapture.renderInputs()}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <Button type="button" disabled={scanning} onClick={scanCapture.openGaleria}>
                 {scanning ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}
                 {scanning ? "Analisando…" : "Selecionar imagens"}
-              </span>
-            </label>
+              </Button>
+              {scanCapture.isTouch && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={scanning}
+                  onClick={scanCapture.openCamera}
+                  title="Abrir câmera"
+                >
+                  <ScanLine className="h-4 w-4" /> Foto
+                </Button>
+              )}
+              {scanError && scanImages.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={scanning}
+                  onClick={handleRetryScan}
+                >
+                  {scanning ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Tentar novamente
+                </Button>
+              )}
+            </div>
+
+            {webErrorMsg && (
+              <p className="mt-3 text-[11.5px] text-amber-600">
+                OCR concluído, mas o enriquecimento web falhou ({webErrorMsg}). Você pode tentar de
+                novo depois de salvar, pelo botão "Re-enriquecer dados" na tela do fornecedor.
+              </p>
+            )}
 
             {scanPreview.length > 0 ? (
               <div className="mt-6 flex flex-wrap justify-center gap-3">

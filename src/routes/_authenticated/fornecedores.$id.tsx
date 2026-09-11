@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 import {
@@ -61,6 +61,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Flag } from "@/components/ui/flag";
+import { useCameraCaptureInputs } from "@/hooks/useCameraCaptureInputs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -135,7 +136,6 @@ function FornecedorDetailPage() {
     id?: string;
     patch: ContatoFornecedorInput;
   } | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [confirmArquivar, setConfirmArquivar] = useState(false);
   const [removerContatoAlvo, setRemoverContatoAlvo] = useState<{
@@ -289,9 +289,10 @@ function FornecedorDetailPage() {
       toast.error((e as Error).message);
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
+
+  const anexoCapture = useCameraCaptureInputs((files) => void onUpload(files), { multiple: true });
 
   function toggleCategoria(slug: string) {
     setForm((prev) => ({
@@ -596,25 +597,33 @@ function FornecedorDetailPage() {
                   <h3 className="text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
                     Anexos ({detail.data.anexos.length})
                   </h3>
-                  <label>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => onUpload(e.target.files)}
-                    />
-                    <Button size="sm" variant="outline" asChild disabled={uploading}>
-                      <span className="cursor-pointer">
-                        {uploading ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Plus className="h-3.5 w-3.5" />
-                        )}
-                        Anexar
-                      </span>
+                  <div className="flex gap-2">
+                    {anexoCapture.renderInputs()}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={uploading}
+                      onClick={anexoCapture.openGaleria}
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="h-3.5 w-3.5" />
+                      )}
+                      Anexar
                     </Button>
-                  </label>
+                    {anexoCapture.isTouch && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={uploading}
+                        onClick={anexoCapture.openCamera}
+                        title="Abrir câmera"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" /> Foto
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 {detail.data.anexos.length === 0 ? (
                   <p className="text-[12.5px] text-[var(--text-muted)]">Nenhum anexo.</p>
