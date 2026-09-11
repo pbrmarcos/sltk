@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Paperclip, Camera, Loader2, X, FileText } from "lucide-react";
 import { uploadSATAnexo, deleteSATAnexo, type SATAnexo } from "@/lib/sat-relatorios.functions";
-import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
+import { useCameraCaptureInputs } from "@/hooks/useCameraCaptureInputs";
 
 async function fileToBase64(file: File): Promise<string> {
   const buf = await file.arrayBuffer();
@@ -34,10 +34,7 @@ export function SATAnexoUploader({
   const qc = useQueryClient();
   const uploadFn = useServerFn(uploadSATAnexo);
   const delFn = useServerFn(deleteSATAnexo);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const camRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const isTouch = useIsTouchDevice();
 
   const upload = useMutation({
     mutationFn: async (files: FileList) => {
@@ -68,6 +65,11 @@ export function SATAnexoUploader({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const { renderInputs, openGaleria, openCamera, isTouch } = useCameraCaptureInputs(
+    (files) => upload.mutate(files),
+    { multiple: true, accept: "image/*,application/pdf,application/zip" },
+  );
+
   const del = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["sat-anexos", relatorioId] }),
@@ -77,35 +79,12 @@ export function SATAnexoUploader({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
-        <input
-          ref={fileRef}
-          type="file"
-          multiple
-          accept="image/*,application/pdf,application/zip"
-          className="hidden"
-          onChange={(e) => {
-            if (e.target.files) upload.mutate(e.target.files);
-            e.target.value = "";
-          }}
-        />
-        {isTouch && (
-          <input
-            ref={camRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files) upload.mutate(e.target.files);
-              e.target.value = "";
-            }}
-          />
-        )}
+        {renderInputs()}
         <Button
           type="button"
           variant="outline"
           size={compact ? "sm" : "default"}
-          onClick={() => fileRef.current?.click()}
+          onClick={openGaleria}
           disabled={busy}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
@@ -115,7 +94,7 @@ export function SATAnexoUploader({
           type="button"
           variant="outline"
           size={compact ? "sm" : "default"}
-          onClick={() => (isTouch ? camRef.current?.click() : fileRef.current?.click())}
+          onClick={openCamera}
           disabled={busy}
           title={isTouch ? "Abrir câmera" : "Selecionar imagem"}
         >
