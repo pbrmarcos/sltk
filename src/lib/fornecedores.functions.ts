@@ -619,7 +619,7 @@ export const getAnexoSignedUrl = createServerFn({ method: "POST" })
   });
 
 /* =============================================================
- * Gemini OCR — leitura direta (sem Lovable AI Gateway).
+ * Gemini OCR — leitura por visão via ai-gateway.
  * Recebe imagens base64 de cartões de visita / folders / catálogos
  * e devolve um JSON estruturado para pré-preencher o cadastro.
  * ============================================================= */
@@ -746,7 +746,7 @@ Analise as imagens enviadas e devolva APENAS um JSON válido (sem markdown, sem 
 
 Se algum campo não estiver presente, devolva null. Não invente dados. Não traduza nomes próprios.`;
 
-/** Converte erro do gateway de IA (Gemini/Lovable) em ScanFailure amigável. */
+/** Converte erro do gateway de IA (Gemini) em ScanFailure amigável. */
 function scanFailureFromError(err: unknown): ScanFailure {
   const raw = err instanceof Error ? err.message : "Falha na leitura por IA.";
   if (/limite de requisi/i.test(raw)) {
@@ -771,7 +771,7 @@ function hasCJK(s: string | null | undefined): boolean {
   return /[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/.test(s);
 }
 
-/** JSON via gateway de IA (Gemini direto ou fallback Lovable), tolerante a falha. */
+/** JSON via gateway de IA (Gemini), tolerante a falha. */
 async function iaJsonSeguro<T>(prompt: string, maxTokens = 600): Promise<T | null> {
   try {
     const { aiJson } = await import("@/lib/ai-gateway.server");

@@ -155,7 +155,9 @@ export const uploadClienteDocumento = createServerFn({ method: "POST" })
     const now = new Date();
     const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    const root = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || "root";
+    const root =
+      (await (await import("@/lib/secrets.server")).getSecret("GOOGLE_DRIVE_ROOT_FOLDER_ID")) ||
+      "root";
     const clienteFolder = await ensureFolder(
       sanitizeFolderName(`${cliente.codigo} - ${cliente.razao_social}`),
       root,

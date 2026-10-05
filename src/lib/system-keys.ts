@@ -77,16 +77,6 @@ export const CAPABILITIES: CapabilityDef[] = [
     testavel: true,
   },
   {
-    id: "lovable_ai",
-    label: "Lovable AI Gateway",
-    descricao: "Fallback de IA usado apenas quando a chave do Gemini não está configurada.",
-    impacto: "Sem efeito se o Gemini estiver configurado.",
-    area: "ia",
-    criticidade: "opcional",
-    envs: ["LOVABLE_API_KEY"],
-    testavel: false,
-  },
-  {
     id: "google_drive",
     label: "Google Drive",
     descricao:
@@ -119,7 +109,6 @@ export const CAPABILITIES: CapabilityDef[] = [
     area: "email",
     criticidade: "importante",
     envs: ["RESEND_API_KEY"],
-    envsOpcionais: ["PUBLIC_APP_URL"],
     testavel: true,
   },
   {

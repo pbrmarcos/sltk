@@ -9,7 +9,7 @@ Estrutura real do menu principal (`src/components/layout/AppSidebar.tsx`, não c
 Convenções:
 - **Rotas** listadas na forma da URL final (sem o prefixo de layout).
 - **Guards**: rotas em `_authenticated/` exigem sessão; regras de papel são aplicadas por `has_role()` no Supabase e por checagens client-side em cada tela.
-- **Integrações**: Supabase (Postgres + Storage + Auth), edge functions em `supabase/functions/`, Lovable AI Gateway para geração de conteúdo, envio de e-mail transacional pelo domínio configurado.
+- **Integrações**: Supabase (Postgres + Storage + Auth), Google Gemini para IA (visão, tradução, qualificação de leads), envio de e-mail transacional pelo domínio configurado.
 
 ---
 

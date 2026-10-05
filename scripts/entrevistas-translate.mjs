@@ -2,23 +2,21 @@
 
 /**
  * Backfill translations (ES/EN) for entrevista_perguntas.enunciado_* and
- * entrevista_opcoes.label_*.  Uses Lovable AI Gateway.
+ * entrevista_opcoes.label_*.  Uses Google Gemini.
  *
- * Env: LOVABLE_API_KEY, SB_MANAGEMENT_ACCESS_TOKEN
+ * Env: GEMINI_API_KEY, SB_MANAGEMENT_ACCESS_TOKEN, SUPABASE_PROJECT_ID (opcional)
  */
 
-const PROJECT_REF = "zdrjvjwvrxwxztvrxtwp";
+const PROJECT_REF = process.env.SUPABASE_PROJECT_ID || "ehuzvwzonmsqqbpvdyza";
 const MGMT = process.env.SB_MANAGEMENT_ACCESS_TOKEN;
-const AI_KEY = process.env.GEMINI_API_KEY || process.env.LOVABLE_API_KEY;
-const USE_GEMINI = !!process.env.GEMINI_API_KEY;
+const AI_KEY = process.env.GEMINI_API_KEY;
 if (!MGMT || !AI_KEY) {
-  console.error("Missing SB_MANAGEMENT_ACCESS_TOKEN or GEMINI_API_KEY/LOVABLE_API_KEY");
+  console.error("Missing SB_MANAGEMENT_ACCESS_TOKEN or GEMINI_API_KEY");
   process.exit(1);
 }
 
 const BATCH = 25;
 const GEMINI_MODEL = "gemini-flash-lite-latest";
-const LOVABLE_MODEL = "google/gemini-flash-lite-latest";
 
 async function sql(query) {
   let lastErr;
@@ -85,7 +83,7 @@ async function translateBatch(items, target) {
 
   for (let attempt = 0; attempt < 4; attempt++) {
     let res, content;
-    if (USE_GEMINI) {
+    {
       res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${AI_KEY}`,
         {
@@ -106,30 +104,6 @@ async function translateBatch(items, target) {
       if (!res.ok) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
       const j = await res.json();
       content = j.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") ?? "[]";
-    } else {
-      res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${AI_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: LOVABLE_MODEL,
-          messages: [
-            {
-              role: "system",
-              content: "You are a precise industrial translator. Output valid JSON only.",
-            },
-            { role: "user", content: prompt },
-          ],
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (res.status === 429 || res.status >= 500) {
-        const wait = 1000 * Math.pow(2, attempt) * 15;
-        await new Promise((r) => setTimeout(r, wait));
-        continue;
-      }
-      if (!res.ok) throw new Error(`AI ${res.status}: ${await res.text()}`);
-      const j = await res.json();
-      content = j.choices?.[0]?.message?.content ?? "[]";
     }
     return extractArray(content);
   }

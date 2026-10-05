@@ -1,4 +1,121 @@
-## 1.1.17 — Formulário "Nova oportunidade" reformulado — 2026-09-08
+## 1.5.3 — Chaves & Diagnóstico enxuto, mineração restaurada e changelog completo — 05.10.2026
+
+- **Lovable AI removida**: o Google Gemini passa a ser o único provedor de IA do sistema. A capacidade "Lovable AI Gateway" saiu da tela de Chaves & Diagnóstico e o fallback interno foi retirado — menos uma chave para manter e nenhum tráfego indo para um provedor que não é mais usado.
+- **Pasta raiz do Google Drive configurável pela tela**: `GOOGLE_DRIVE_ROOT_FOLDER_ID` agora também é lida do cofre de credenciais — antes, salvar o valor em Chaves & Diagnóstico não tinha efeito nenhum.
+- `PUBLIC_APP_URL` saiu do editor de chaves: ela é lida só do ambiente do servidor (já configurada no deploy), e mantê-la na tela dava a falsa impressão de que dava para alterá-la por ali.
+- **Provedor de Mineração restaurado**: a configuração da Penta voltou com o endereço do serviço (`https://app.penta-transaction.com/PentaApi/api-v2`), país padrão BR e os limites do contrato (1000 consultas/dia, 25 bases, 15 premium, 30 NCMs, 1000 empresas). Usuário e senha da Penta precisam ser redigitados na tela.
+- **Changelog completo**: todas as versões passam a ter data, no formato DD.MM.AAAA, e as entregas de setembro e outubro que faltavam foram registradas.
+
+---
+
+## 1.5.2 — Correções da varredura de produção — 02.10.2026
+
+- **Cadastro de cliente voltou a funcionar**: a criação pelo formulário falhava para todos os usuários, inclusive admin. Três causas corrigidas — a regra de permissão recusava o cliente recém-criado, datas em branco chegavam ao banco como texto vazio e países com moeda local fora do catálogo gravavam uma moeda inválida.
+- **Moeda por país**: países cuja moeda local não está no catálogo do sistema (Argentina, Chile, México, Peru, Colômbia e outros) passam a usar USD automaticamente; a tela deixa de mostrar BRL enquanto gravava outra coisa.
+- **Limite de tentativas nas páginas públicas**: chamados, links de relatório FAT/SAT (incluindo a exportação de PDF), portal de cotação, checklist, entrevista e relatório de erros ganharam limite por IP. O IP é lido do proxy de forma que não possa ser falsificado pelo visitante.
+- **Links públicos com validade**: link de chamado expira 90 dias após resolvido (ou ao ser arquivado); convite de cotação expira no prazo de resposta (ou 30 dias) e pode ser revogado pelo comprador com o novo botão **Revogar**; entrevista vale 30 dias. Códigos e slugs públicos agora são gerados com aleatoriedade criptográfica.
+- **Uploads públicos mais seguros**: tamanho conferido no arquivo real (não no valor declarado pelo navegador) e extensão derivada do tipo validado.
+- **Foto de perfil**: corrigida falha que permitia a um usuário apagar a foto de outro.
+- **Contadores corrigidos**: os números de oportunidades abertas e orçamentos em rascunho, no menu e no dashboard de vendas, sempre apareciam zerados por consultarem colunas inexistentes.
+- **Erros que sumiam sem rastro** (backups de PDF, anexos no Drive, logística, compras) passam a ser registrados; a conversão de oportunidade avisa quando o modelo de etapas não foi aplicado ao processo.
+- **Banco reproduzível**: 14 funções e 7 automações que existiam só no banco de produção (totais de OC, auditoria de ETP, insumos, entrevista pública, administração de usuários) foram versionadas; funções de administração de usuários deixaram de aceitar chamadas sem login.
+- Removida a antiga automação de SLA de processos, que não era usada e gravava um e-mail fixo inválido.
+
+---
+
+## 1.5.1 — Varredura de robustez e permissões — 02.10.2026
+
+- **Permissões por função restauradas**: a matriz de módulos por função estava vazia no banco novo, então nenhum usuário além do admin enxergava módulo algum. Matriz padrão recriada para as 8 funções.
+- **Perfil criado no cadastro**: a automação que cria o perfil de cada novo usuário foi restaurada, com preenchimento retroativo dos usuários existentes.
+- **Usuário desativado bloqueado de verdade**: mesmo com a sessão ainda válida, um usuário desativado não consegue mais executar nenhuma ação no servidor.
+- **Reativação preserva as funções**: reativar um usuário devolve as funções que ele tinha — antes ele voltava sem acesso a nenhum módulo.
+- A configuração de layout dos documentos passou a exigir perfil gestor/admin no servidor.
+- Usuário sem função atribuída vê um aviso claro no dashboard, em vez do painel de vendas.
+
+---
+
+## 1.5.0 — Gemini assume a IA, qualificação de leads e Suspect por foto — 01.10.2026
+
+- **Google Gemini como IA do sistema**: o scan de fornecedores (leitura de cartões, folders e catálogos), as traduções e o enriquecimento web passaram do Groq para o Gemini. A tela de Chaves & Diagnóstico ganhou o card **Conta Gemini** com teste real da chave.
+- **Motor de qualificação de leads (nota A/B/C)**: antes de gastar IA, o sistema aplica filtros — nicho proibido, leitura do site, CNPJ sempre conferido na Receita (nunca inventado), checagem "já é cliente" e regras duras (sem contato, cadastro inativo, MEI). Só então o Gemini compara o lead com o perfil ideal e com os maiores clientes da SLTK e dá a nota, com motivo e abordagem sugerida.
+- **Critérios de Prospecção**: nova tela em Configurações para descrever o cliente ideal da SLTK, os nichos proibidos e as regras duras usados pela qualificação.
+- **IA automática nos leads da Penta**: cada busca na mineração qualifica os leads em segundo plano; a tabela mostra a nota A/B/C, a análise completa e o botão **Analisar com IA** para reanalisar os selecionados.
+- **Suspect por foto**: nova página para o celular — o vendedor fotografa um cartão de visita ou o rótulo de um produto, a IA extrai os dados, qualifica a empresa e o sistema cria o cliente como suspect e a oportunidade no pipeline. Fotos são comprimidas no próprio aparelho antes do envio.
+
+---
+
+## 1.4.1 — Modo manutenção — 30.09.2026
+
+- **Modo manutenção** em Configurações: liga e desliga o site para visitantes, com mensagem personalizada e previsão de retorno exibida como contagem regressiva.
+- **Página de status** no estilo das páginas de monitoramento: aplicação, banco de dados, autenticação, arquivos e API, cada um com indicador verde/vermelho e tempo de resposta, atualizados a cada 30 segundos.
+- Página na identidade visual do site público (fundo escuro, logo e cores da marca vindas das configurações).
+- **Acesso administrativo** pela própria página: o admin faz login e continua usando o sistema normalmente, com um aviso fixo de que a manutenção está ativa.
+
+---
+
+## 1.4.0 — Sistema em produção no novo servidor — 29.09.2026
+
+- Publicação do sistema em `sltkamericas.com` em infraestrutura própria (Coolify), a partir do novo repositório, com troca de domínio sem tirar o site do ar.
+- Banco de dados de produção novo, com todas as migrations aplicadas e o histórico de migrations corrigido.
+- Imagens das páginas públicas (soluções, checklist, entrevista) passaram a ser servidas pelo próprio site, sem depender de servidor externo; links de e-mail e documentos usam a marca `sltkamericas.com`.
+- Pastas de arquivos (logomarcas, avatares, fornecedores, documentos, anexos de etapas) criadas com as regras de acesso corretas — o envio de logomarcas e fotos de perfil voltou a funcionar.
+
+---
+
+## 1.3.2 — Dados de demonstração — 29.09.2026
+
+- **8 jornadas completas de cliente** para demonstração: cada cliente com contato, oportunidade, processo, equipamento, ETP, projetos mecânico e elétrico, montagem com sub-etapas, revisões, FAT, SAT, chamado, embarque e checklist técnico.
+- Nova tela **Dados de Demonstração** em Configurações, mostrando quantos registros de demonstração existem e permitindo **excluir todo o conteúdo DEMO** com um clique, sem tocar nos dados reais.
+- Corrigidas migrations com horários de criação duplicados, que impediam o banco de registrar quais já tinham sido aplicadas.
+
+---
+
+## 1.3.1 — Relatório de Montagem com sub-etapas — 28.09.2026
+
+- A montagem de cada equipamento agora é dividida em 5 sub-etapas (pré-montagem, mecânica, elétrica, testes e embalagem), cada uma com **checklist** próprio e **evidências** em foto.
+- Uma sub-etapa só é concluída com o checklist completo e as evidências exigidas, garantindo o registro do que foi feito.
+- **Relatório de Montagem** ganhou destaque no menu, dentro da seção **Qualidade**.
+
+---
+
+## 1.3.0 — Câmera e telas de toque em campo — 25.09.2026
+
+- Captura pela câmera do tablet/celular unificada em todo o sistema: scan de fornecedores, anexos de SAT, fotos de não conformidade do FAT.
+- **Scan de fornecedores** extrai mais campos e permite tentar de novo após uma falha.
+- **Assinatura digital** alinhada corretamente em telas de toque.
+- **FAT** com áreas de toque maiores, foto direto da câmera no item NOK, salvamento automático e teclado numérico nos campos certos.
+- **SAT** com grade responsiva e fila de gravação, evitando que respostas rápidas sobrescrevam umas às outras.
+- O formulário público de campo (FAT e SAT) passou a aceitar fotos.
+
+---
+
+## 1.2.2 — Ajustes de layout do dashboard — 24.09.2026
+
+- Atalhos do dashboard mais compactos e organizados pela ordem real do processo comercial e de operação.
+- Testada e revertida a altura fixa da área principal, que causava rolagem indevida no menu lateral.
+
+---
+
+## 1.2.1 — Integração real com Google Agenda — 24.09.2026
+
+- **Agendar entrevista e kickoff** agora cria o evento de verdade na agenda do Google, com convidados e link da reunião.
+- Admin pode configurar o Google Workspace de terceiros e definir o e-mail Google de cada usuário no cadastro.
+- Nova página **Agenda & Calendário** em Configurações e opção de senha provisória na criação de usuários.
+- O e-mail Google deixou de ser editável pelo próprio usuário em Minha conta (passa a ser definido pelo admin).
+- Corrigido o aviso de status do Google Agenda na tela de e-mails automáticos.
+
+---
+
+## 1.2.0 — Dashboard por função — 23.09.2026
+
+- Dashboard redesenhado por função, com grade dinâmica dos módulos ativos de cada usuário.
+- **Área de atalhos com contador de pendências** (ETPs, revisões, FAT, Know-how, orçamentos, compras e mais), também para o gestor.
+- Regras de status compartilhadas entre o menu e os dashboards, eliminando contagens divergentes entre telas.
+- Lacunas de dados preenchidas nos dashboards de Produção, Compras, Montagem e Admin.
+
+---
+
+## 1.1.17 — Formulário "Nova oportunidade" reformulado — 22.09.2026
 
 - **Campo de valor unificado**: os dois campos separados (Valor estimado em R$ e em US$) viraram um único campo com seletor de moeda (R$/US$) ao lado, numa única caixa — mais simples de preencher e sem quebrar o alinhamento do formulário.
 - **Novo campo "Origem do lead"**: escolha de onde veio o lead (indicação, site, feira, LinkedIn, cold call…) direto na criação da oportunidade, com opção de cadastrar uma origem nova sem sair da tela. A informação já existia no banco para outros cadastros, mas nunca era pedida ao criar uma oportunidade.
@@ -6,7 +123,7 @@
 
 ---
 
-## 1.1.16 — Auditoria funcional: Know-how & Treinamentos — 2026-09-07
+## 1.1.16 — Auditoria funcional: Know-how & Treinamentos — 22.09.2026
 
 - **Corrigida falha de segurança**: quem enviava um artigo para revisão conseguia aprovar (publicar) o próprio conteúdo, pulando a revisão por outra pessoa que o fluxo deveria exigir. Aprovar e devolver para ajuste agora são ações restritas a gestão/admin.
 - Criar, editar, enviar para revisão, aprovar e devolver um item de Know-how passam a ficar registrados na auditoria — antes nenhuma dessas ações deixava rastro.
@@ -16,7 +133,7 @@
 
 ---
 
-## 1.1.15 — Auditoria funcional: Fornecedores — 2026-09-07
+## 1.1.15 — Auditoria funcional: Fornecedores — 21.09.2026
 
 - **Corrigido bug crítico no ciclo de Cotações**: o convite de cotação a fornecedores usava nomes de coluna que nunca existiram no cadastro de fornecedor. Na prática isso fazia a tela de detalhe da cotação sempre mostrar "Nenhum fornecedor convidado", o diálogo de convidar fornecedores e o assistente de nova cotação não conseguirem listar fornecedores, o e-mail de convite ao fornecedor e o aviso de proposta recebida nunca dispararem, e o portal público onde o fornecedor responde a cotação sempre mostrar "Convite inválido".
 - Editar contato, anotação, anexo e o re-enriquecimento de dados de um fornecedor passam a ficar registrados na auditoria.
@@ -25,7 +142,7 @@
 
 ---
 
-## 1.1.14 — Auditoria funcional: Logística & Embarque — 2026-09-07
+## 1.1.14 — Auditoria funcional: Logística & Embarque — 18.09.2026
 
 - Corrigido: um usuário de Produção ou Compras (que a matriz de permissões já libera para o módulo) não conseguia de fato criar ou editar embarques; e o papel "campo", que a tela achava que podia, era barrado na hora de gravar.
 - **E-mails de embarque completos**: criado, despachado e entregue passam a chegar com projeto, cliente e transportadora preenchidos — antes vinham com boa parte da tabela em branco.
@@ -40,7 +157,7 @@
 
 ---
 
-## 1.1.13 — Auditoria funcional: Clientes — 2026-09-07
+## 1.1.13 — Auditoria funcional: Clientes — 17.09.2026
 
 - Corrigida uma falha de acesso que deixava contatos e sócios de qualquer cliente visíveis para usuários sem vínculo com ele.
 - Corrigida a importação em massa de clientes e fornecedores (bulkImport), que gravava em colunas erradas do banco.
@@ -51,7 +168,7 @@
 
 ---
 
-## 1.1.12 — Auditoria funcional: Produção & Montagem — 2026-09-07
+## 1.1.12 — Auditoria funcional: Produção & Montagem — 17.09.2026
 
 - Criar, atualizar e remover uma montagem passam a ficar registrados na auditoria.
 - Novo e-mail automático quando uma montagem é concluída.
@@ -62,7 +179,7 @@
 
 ---
 
-## 1.1.11 — Auditoria funcional: Pós-vendas/SAT e Qualidade/FAT — 2026-09-07
+## 1.1.11 — Auditoria funcional: Pós-vendas/SAT e Qualidade/FAT — 16.09.2026
 
 - **Corrigido bug ativo que impedia reprovar um FAT**: uma migração de banco quebrada travava a reprovação para qualquer FAT no sistema.
 - **Implementado o fluxo de reprovação de FAT**: o status "reprovado" existia na tela desde sempre, mas nenhuma ação do sistema conseguia de fato aplicá-lo. Agora reprovar exige um motivo, registra quem/quando/por quê e avisa por e-mail; nova tentativa de FAT fica vinculada à anterior, mantendo o histórico.
@@ -72,7 +189,7 @@
 
 ---
 
-## 1.1.10 — Auditoria funcional: Comercial, Compras e Engenharia — 2026-09-07
+## 1.1.10 — Auditoria funcional: Comercial, Compras e Engenharia — 15.09.2026
 
 - **Consertado ciclo de Cotação → Aprovação de Ordem de Compra**: escolher um vencedor na cotação não gerava o documento que a aprovação da OC exigia para prosseguir — o ciclo simplesmente não fechava sem intervenção manual. Corrigido também o envio de propostas pelo portal público do fornecedor, que gravava em colunas erradas e sempre falhava, e a trava que faltava para impedir reenvio de preço numa cotação já encerrada.
 - **Fornecedor convidado para cotação passa a receber o link por e-mail de verdade** — antes só o time interno de Compras era avisado.
@@ -85,7 +202,7 @@
 
 ---
 
-## 1.1.9 — Confirmações, telas de acesso restrito e limpeza de navegação — 2026-09-06
+## 1.1.9 — Confirmações, telas de acesso restrito e limpeza de navegação — 15.09.2026
 
 - Adicionada confirmação antes de excluir em vários pontos que disparavam a exclusão direto no clique, sem aviso — inclusive a exclusão de uma credencial de integração, a mais arriscada por não ter como desfazer.
 - Unificado o visual das telas de "Acesso restrito" em todo o admin, antes reimplementado de formas ligeiramente diferentes em cada tela.
@@ -98,7 +215,7 @@
 
 ---
 
-## 1.1.8 — Renomear RFQ para Cotação/Checklist e resolver colisões de nome — 2026-09-06
+## 1.1.8 — Renomear RFQ para Cotação/Checklist e resolver colisões de nome — 14.09.2026
 
 - Concluído o rebranding de "RFQ": o termo interno (herdado do sistema anterior) foi totalmente substituído por **Cotação** em Compras e **Checklist** no fluxo comercial, incluindo os últimos rótulos, tooltips e o link público que o fornecedor recebe.
 - Resolvida a colisão entre duas telas diferentes que apareciam com o mesmo nome "Central de Documentos" — o editor de blocos/templates passa a se chamar "Editor de Blocos".
@@ -107,7 +224,7 @@
 
 ---
 
-## 1.1.7 — Matriz de permissões dinâmica em todo o sistema — 2026-09-06
+## 1.1.7 — Matriz de permissões dinâmica em todo o sistema — 11.09.2026
 
 - **Alinhadas ao módulo configurável em Usuários & Permissões** diversas telas que ainda decidiam quem pode criar/editar por uma lista fixa de papéis no código: Montagem e Revisões (Qualidade), Cotações e Ordens de Compra, Embarques (Logística), Chamados (Pós-vendas), Clientes, Fornecedores e Etapas de Equipamentos (Engenharia). Na prática, isso fazia com que desabilitar um módulo para um usuário em Permissões não tivesse efeito nenhum nessas telas — ou, na direção oposta, bloqueasse quem a própria tela deveria liberar.
 - Corrigidas 3 funções de escrita (criar ETP, imagem de orçamento, itens de lista de materiais) que não faziam nenhuma checagem de permissão no servidor.
@@ -116,7 +233,7 @@
 
 ---
 
-## 1.1.6 — Credenciais de integração configuráveis pela tela de administração — 2026-09-05
+## 1.1.6 — Credenciais de integração configuráveis pela tela de administração — 10.09.2026
 
 - Em Configurações → Sistema → Chaves & Diagnóstico, cada integração externa (e-mail, IA, Google Drive, entre outras) ganhou um botão "Configurar" para cadastrar ou remover a credencial direto pela tela, sem precisar de acesso ao servidor.
 - Os valores digitados nunca são exibidos de volta — a tela mostra apenas se a credencial está configurada ou não.
@@ -124,7 +241,7 @@
 
 ---
 
-## 1.1.5 — E-mails automáticos revisados e ampliados — 2026-09-05
+## 1.1.5 — E-mails automáticos revisados e ampliados — 10.09.2026
 
 - E-mails que já existiam foram conferidos um a um: assunto, conteúdo e o momento certo de disparo.
 - Configurações de e-mail que nunca chegaram a ser usadas foram removidas, mantendo só o que o sistema realmente dispara.
@@ -132,7 +249,7 @@
 
 ---
 
-## 1.1.4 — Orçamento herda a qualificação da oportunidade — 2026-09-04
+## 1.1.4 — Orçamento herda a qualificação da oportunidade — 09.09.2026
 
 - **Gerar orçamento a partir da oportunidade usa a qualificação do card**: o passo inicial do orçamento deixa de ser uma busca em branco. Se a oportunidade tem cliente vinculado, ele aparece selecionado com opção de "Trocar cliente"; se é um lead sem cliente, o cartão mostra empresa, contato, e-mail e telefone qualificados, com os caminhos "Criar cliente com estes dados" (modal já preenchido) ou "Vincular a um cliente existente".
 - **Vínculo automático de volta**: o cliente escolhido ou criado é vinculado à oportunidade, que deixa de aparecer como "Lead (sem cliente)" no pipeline. Antes de criar, o sistema sugere clientes semelhantes para evitar duplicidade.
@@ -141,7 +258,7 @@
 
 ---
 
-## 1.1.3 — Ficha do cliente: orçamento antes da aprovação — 2026-09-04
+## 1.1.3 — Ficha do cliente: orçamento antes da aprovação — 08.09.2026
 
 - **Cartão "Valor ganho" removido** do cabeçalho da ficha do cliente; os indicadores restantes (oportunidades abertas, processos ativos e último contato) ficam mais largos e legíveis.
 - **Novo botão "Criar orçamento"** na aba Equipamentos: abre o orçamento já com o cliente preenchido, sem tela de busca. O orçamento nasce como rascunho — nenhum equipamento é criado nesse momento.
@@ -150,7 +267,7 @@
 
 ---
 
-## 1.1.2 — Almoxarifado: documentação e testes (Fase 6) — 2026-09-04
+## 1.1.2 — Almoxarifado: documentação e testes (Fase 6) — 07.09.2026
 
 - **Novo artigo "Almoxarifado — estoque, reserva e custo médio"** em Ajuda → Documentação → Compras: conceitos, cadastro de item, entrada por OC, retirada/devolução/ajuste, reserva por projeto, fórmula do custo médio e tabela de permissões.
 - **Botão "Ajuda desta tela"** passa a funcionar nas telas de almoxarifado (estoque, ordens de compra e ficha do item).
@@ -159,7 +276,7 @@
 
 ---
 
-## 1.1.1 — Almoxarifado ligado à Engenharia (Fase 3) — 2026-09-04
+## 1.1.1 — Almoxarifado ligado à Engenharia (Fase 3) — 07.09.2026
 
 - **Coluna "Almoxarifado" nos insumos do projeto**: cada linha mostra o item de estoque vinculado, o saldo realmente disponível (verde quando cobre a necessidade, âmbar quando não cobre) e o quanto já está reservado para aquele projeto, com link direto para a ficha do item.
 - **Vincular insumo a item do catálogo**: busca por código ou descrição; quando a unidade do insumo é diferente da unidade de estoque, o sistema exige o fator de conversão e passa a converter o saldo exibido — nada de comparar quantidades em unidades diferentes em silêncio.
@@ -172,7 +289,7 @@
 
 ---
 
-## 1.1.0 — Almoxarifado dentro de Compras (Fase 1 + Fase 2) — 2026-09-03
+## 1.1.0 — Almoxarifado dentro de Compras (Fase 1 + Fase 2) — 04.09.2026
 
 ### Base de dados (Fase 1)
 - **Catálogo único de itens** (`almox_itens`) com código automático `ALM-#####`, unicidade de part number e de código do fabricante ignorando acentos e maiúsculas, e busca por descrição semelhante (índice trigram) para evitar cadastro duplicado da mesma peça.
@@ -190,7 +307,7 @@
 
 ---
 
-## 1.0.5 — Origem do lead gerenciável e cadastro rápido de cliente — 2026-09-03
+## 1.0.5 — Origem do lead gerenciável e cadastro rápido de cliente — 03.09.2026
 
 ### Origem do lead (lead_origens)
 - **Tabela própria** (`lead_origens` com `nome`, `ativo`, `ordem`) populada com as 11 origens padrão (Campanha Google ADS, Feiras, Indicações, Site Institucional, Minerações Penta/Apollo/API PAÍS, Pesquisas Comerciais, Representante) e com as antigas origens "DEMO" removidas.
@@ -201,7 +318,7 @@
 
 ---
 
-## 1.0.4 — Status do cliente unificado e estágio do funil destravado — 2026-09-01
+## 1.0.4 — Status do cliente unificado e estágio do funil destravado — 01.09.2026
 
 ### Status do cliente (fonte única)
 - **Causa identificada**: `clientes.status` (manual) e `clientes.lifecycle_stage` (derivado) eram dois campos independentes renderizados lado a lado — origem das tags conflitantes "Cliente ativo" + "Prospect".
@@ -214,7 +331,7 @@
 
 ---
 
-## 1.0.3 — Moeda ISO, RUC equatoriano e anti-duplicidade — 2026-08-31
+## 1.0.3 — Moeda ISO, RUC equatoriano e anti-duplicidade — 31.08.2026
 
 ### Moeda do orçamento
 - **BRL fixo removido**: a moeda vem do cadastro do cliente, editável no orçamento, via `Select` ISO 4217 (USD, EUR, BRL, PYG) com código + nome + símbolo; persiste sempre o código ISO.
@@ -230,7 +347,7 @@
 
 ---
 
-## 1.0.2 — Conversão lead → cliente e erros de validação sem perda de dados — 2026-08-27
+## 1.0.2 — Conversão lead → cliente e erros de validação sem perda de dados — 27.08.2026
 
 ### Conversão do pipeline
 - **Mapeamento completo** empresa/nome/e-mail/telefone na conversão; resumo editável dos dados transferidos com obrigatórios faltantes destacados antes de confirmar.
@@ -242,7 +359,7 @@
 
 ---
 
-## 1.0.1 — Datas padronizadas, agrupamento por continente e histórico da mineração — 2026-08-26
+## 1.0.1 — Datas padronizadas, agrupamento por continente e histórico da mineração — 26.08.2026
 
 - **Mineração de leads**: bases agrupadas por continente › país, campos de data padronizados e busca por código (ex.: NCM 1006 na base de importações da Argentina) com colunas padrão e mapeamento dinâmico.
 - **Resultados enriquecidos**: "Contraparte" e "Valor" corrigidos, exportação para Excel, usuário autor da busca visível e Histórico destacado; "Rota comercial" como tipo de consulta padrão.
@@ -250,7 +367,7 @@
 
 ---
 
-## 1.0.0 — Estabilidade sistêmica: formulários nunca mais perdem dados — 2026-08-25
+## 1.0.0 — Estabilidade sistêmica: formulários nunca mais perdem dados — 24.08.2026
 
 > **Marco 1.0.** Encerramento do ciclo beta com a correção do bug de maior impacto reportado pelos usuários.
 
@@ -264,7 +381,7 @@
 
 ---
 
-## 0.99.7 — Painéis com dados reais e limpeza do conteúdo de demonstração — 2026-08-20
+## 0.99.7 — Painéis com dados reais e limpeza do conteúdo de demonstração — 20.08.2026
 
 ### Painéis por papel
 - Dashboards de Comercial, Engenharia, Produção, Montagem, Compras, Campo e Administração agora leem do banco (nova função de servidor `getRoleDashboards`); todos os arquivos de mock (`src/mocks/dashboard`, `admin-overview.mock`, `crm`) foram removidos.
@@ -276,7 +393,9 @@
 - Base limpa: apagados clientes, fornecedores, oportunidades, processos, equipamentos, etapas, ETPs, projetos, montagens, FAT/SAT, cotações, ordens de compra, insumos, documentos, entrevistas, embarques, chamados, mensagens de contato, resultados de mineração, logs e auditoria de teste.
 - Preservados: usuários e permissões, marca, catálogos, todos os templates e a base de Know-how.
 
-## 0.99.6 — Auditoria confiável: autoria, cobertura e exportação — 2026-08-20
+---
+
+## 0.99.6 — Auditoria confiável: autoria, cobertura e exportação — 19.08.2026
 
 ### Autoria dos registros
 - Nova função `public.audit_actor()` resolve o autor em cascata: `auth.uid()` → claim `sub` do JWT → header `x-audit-actor` (escritas com service role) → GUC `app.audit_user_id` (scripts/manutenção).
@@ -295,7 +414,9 @@
 ### Documentação
 - Artigo de auditoria corrigido: retenção real (sem expurgo automático), lista real do que é auditado (removida a afirmação de que leitura de documentos restritos era registrada) e novo comportamento da exportação. FAQ atualizado.
 
-## 0.99.5 — Liberação para usuários, hardening de permissões e correção de configuração — 2026-08-20
+---
+
+## 0.99.5 — Liberação para usuários, hardening de permissões e correção de configuração — 17.08.2026
 
 ### Varredura de liberação (go-live readiness)
 - **63 rotas autenticadas e 14 rotas públicas validadas** via automação Playwright, garantindo que nenhuma rota quebre com erro de autorização ou crash ao carregar.
@@ -324,7 +445,7 @@
 
 ---
 
-## 0.99.4 — Mineração de leads, limites reais do provedor e documentação em dia — 2026-08-20
+## 0.99.4 — Mineração de leads, limites reais do provedor e documentação em dia — 13.08.2026
 
 ### Mineração de leads (`/comercial/mineracao`)
 - **Bases sincronizadas no banco** (`penta_bases`): o seletor "Base de dados" lê da tabela local, nunca da API. Sincronização manual em lotes de países, com progresso na tela.
@@ -347,7 +468,7 @@
 
 ---
 
-## 0.99.3.4 — Rotina comercial no card, guias do funil e mineração por rota comercial — 2026-08-19
+## 0.99.3.4 — Rotina comercial no card, guias do funil e mineração por rota comercial — 12.08.2026
 
 ### Pipeline comercial
 - **Barra "Próximo passo"** no card da oportunidade (`ProximoPassoBar`): Dados → Entrevista → Checklist → Orçamento → Ganho → Cliente ativo, com um único botão primário por estágio.
@@ -365,7 +486,7 @@
 
 ---
 
-## 0.99.3.3 — RFQ vira Checklist e nova Mineração de Leads (Penta-Transaction) — 2026-08-18
+## 0.99.3.3 — RFQ vira Checklist e nova Mineração de Leads (Penta-Transaction) — 10.08.2026
 
 ### Renomeação RFQ → Checklist
 - **Navegação**: "Formulários RFQ" → **Checklists** (`/comercial/checklists`), "Tipos de RFQ" → **Tipos de Checklist** (`/admin/checklist-tipos`), link público `/rfq/{slug}` → `/checklist/{slug}` — URLs antigas mantidas com redirecionamento permanente.
@@ -378,7 +499,7 @@
 
 ---
 
-## 0.99.3.2 — Sanitização de telas, sitemap e agenda corporativa — 2026-08-13
+## 0.99.3.2 — Sanitização de telas, sitemap e agenda corporativa — 06.08.2026
 
 - **Fichas padronizadas** em layout de duas colunas com abas carregadas sob demanda (cliente, fornecedor, equipamento), quebrando os arquivos gigantes em componentes por aba sem mudar regras de negócio.
 - **`public/robots.txt` e `sitemap.xml`** gerados por rota de servidor, cobrindo home, soluções, equipamentos (inclusive slugs dinâmicos) e contato; rotas autenticadas ficam fora.
@@ -388,7 +509,7 @@
 
 ---
 
-## 0.99.3.1 — Central de Chaves & Diagnóstico e correção definitiva da Service Role — 2026-08-11
+## 0.99.3.1 — Central de Chaves & Diagnóstico e correção definitiva da Service Role — 05.08.2026
 
 ### Chaves & Diagnóstico
 - **Nova aba única** em `/admin/configuracoes` listando todas as chaves do sistema por área (Banco, IA, Documentos & Drive, E-mail, Enriquecimento fiscal, Assinatura de links públicos), com finalidade, impacto da ausência, status, valor mascarado e latência — o valor nunca é exibido.
@@ -402,9 +523,7 @@
 
 ---
 
-
-
-## 0.99.3-beta — Know-how, correções do site público e materiais de apresentação — 2026-08-06
+## 0.99.3-beta — Know-how, correções do site público e materiais de apresentação — 03.08.2026
 
 > **Publicação BETA.** Esta versão foi publicada como beta para validação com o cliente antes do 1.0.
 
@@ -425,7 +544,7 @@
 
 ---
 
-## 0.99.2 — Entrevistas na Central de Documentos + Drive — 2026-07-28
+## 0.99.2 — Entrevistas na Central de Documentos + Drive — 31.07.2026
 
 - **PDFs de entrevista arquivados**: nova tabela `entrevista_documentos_gerados` registra cada PDF gerado, com link no storage e no Drive.
 - **Geração server-side** (`entrevistas-docs.functions.ts`) com `@react-pdf/renderer`, upload ao storage e sincronização em `Comercial / Entrevistas / {segmento} / ENT-{codigo}`.
@@ -434,7 +553,7 @@
 
 ---
 
-## 0.99.1 — Entrevista pública sem service role + ajustes de UI — 2026-07-27
+## 0.99.1 — Entrevista pública sem service role + ajustes de UI — 31.07.2026
 
 - **Correção crítica**: a entrevista pública quebrava em produção por depender de `SUPABASE_SERVICE_ROLE_KEY`. Criadas as funções `SECURITY DEFINER` `get_public_entrevista` e `submit_public_entrevista`; as rotas `api/public/entrevista.*` agora usam RPC com a chave publicável.
 - **Splash da entrevista** sem imagem de marca e com tratamento correto de "link expirado".
@@ -443,7 +562,7 @@
 
 ---
 
-## 0.99.0 — Site público: soluções, equipamentos e formulários recebidos — 2026-07-26
+## 0.99.0 — Site público: soluções, equipamentos e formulários recebidos — 30.07.2026
 
 - **Três páginas institucionais** (Projetos Industriais & Automação, Tecnologia de Processos, Consultoria & Implementação) com `SolucaoPageTemplate`, hero navy, galeria com lazy loading e cards de diferenciais.
 - **Header público**: novo item "Equipamentos", dropdown "Soluções" realinhado e traduções PT/EN/ES para as novas rotas.
@@ -453,7 +572,7 @@
 
 ---
 
-## 0.98.1 — Entrevista pública: Sim/Não, contato reforçado, i18n e UX — 2026-07-23
+## 0.98.1 — Entrevista pública: Sim/Não, contato reforçado, i18n e UX — 30.07.2026
 
 ### Correções pedidas
 - **Sim/Não → "Descreva"**: novo detector `detectYesNo` casa variações ("Sim, temos", "Não possuímos", "Sí — parcial", "No, we don't"…) em PT/ES/EN. Sempre que uma opção Sim/Não estiver selecionada o textarea "Descreva" aparece, mesmo sem `tem_descricao`.
@@ -506,7 +625,7 @@
 
 ---
 
-## 0.97.4 — Corpo dos e-mails por etapas + visualizador dedicado — 2026-07-21
+## 0.97.4 — Corpo dos e-mails por etapas + visualizador dedicado — 30.07.2026
 
 ### Layout com logo
 - `src/lib/email/layout.ts` agora renderiza um **header com a logomarca Solutek Hub** (imagem CDN em `9a11ce2a…logo-email.png`), eyebrow do módulo em caixa alta e o assunto como `<h1>`. Rodapé com nota de disparo + remetente `system@sltkamericas.com`. Botão CTA aparece só quando o dispatch fornece `{{link}}`. Todos os disparos passam pelo mesmo wrapper.
@@ -537,7 +656,7 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 
 ---
 
-## 0.97.3 — Prévia de e-mail + wiring de mais eventos + layout padrão — 2026-07-21
+## 0.97.3 — Prévia de e-mail + wiring de mais eventos + layout padrão — 29.07.2026
 
 ### Layout padrão de e-mail
 - Novo `src/lib/email/layout.ts` envelopa todo disparo com header/footer Solutek, botão CTA opcional (usa `{{link}}`) e nota de rodapé com "disparado por / origem / timestamp". Compatível com Gmail, Outlook e clientes móveis (tabelas + estilos inline, sem `<style>`).
@@ -555,7 +674,9 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 ### Banner de status atualizado
 - `/admin/emails` agora indica **Resend** como provedor ativo (via conector Lovable → gateway) e marca Google Calendar como opcional. Remetente segue fixo em **system@sltkamericas.com**.
 
-## 0.97.0 — Fundação de e-mails automáticos + agenda Google Workspace — 2026-07-21
+---
+
+## 0.97.0 — Fundação de e-mails automáticos + agenda Google Workspace — 29.07.2026
 
 ### Novo módulo `/admin/emails`
 - Tabelas `email_event_config`, `email_event_recipients` e `email_send_log` criadas com RLS (admin edita; admin/manager lêem; service_role escreve logs).
@@ -564,7 +685,9 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 - Provider `Gmail API` + `Google Calendar` via Service Account com Domain-Wide Delegation, impersonando o remetente fixo **system@sltkamericas.com**. Sem as secrets `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`, o dispatcher registra `provider_not_configured` no log e não derruba a operação de negócio — permitindo configurar todos os templates antes de ligar o envio real.
 - `dispatchEmail(admin, {...})` centraliza o disparo: carrega config → resolve papéis → renderiza subject/body → chama Gmail → opcionalmente cria evento no Calendar de cada destinatário → grava linha no `email_send_log` com autor (usuário/automation/cron/test), timestamp e IDs do Gmail/Calendar. Toda mudança em config/matriz também vai para `audit_log`.
 
-## 0.96.6 — Auditoria: varredura por módulos e etapas — 2026-07-17
+---
+
+## 0.96.6 — Auditoria: varredura por módulos e etapas — 29.07.2026
 
 ### Auditoria estendida
 - `scripts/docs-audit.mjs` ganhou 6 novas verificações: frontmatter incompleto, `app_version` defasada (≥ 2 minors atrás do app), screenshots referenciados que não existem no disco, headings duplicados no mesmo artigo, rotas sem `<PageHeader />` (sem botão "Ajuda desta tela") e papéis fora do enum `DocPapel`.
@@ -578,7 +701,9 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 ### Snapshot atual
 - 0 erros, 15 avisos, 41 informativos. Cobertura 100% em todas as 7 etapas do fluxo e no bloco de suporte transversal — os avisos restantes são screenshots quebrados pontuais e papéis herdados (`assembly`, `field`, `logistics`) fora do enum.
 
-## 0.96.5 — Ajuda: relatório de auditoria, artigos recomendados e busca avançada — 2026-07-17
+---
+
+## 0.96.5 — Ajuda: relatório de auditoria, artigos recomendados e busca avançada — 28.07.2026
 
 ### Relatório de auditoria com histórico
 - `scripts/docs-audit.mjs` agora gera `src/content/docs/audit-report.json` a cada execução — snapshot machine-readable para versionar no repositório e acompanhar correções ao longo do tempo.
@@ -600,7 +725,7 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 
 ---
 
-## 0.96.4 — Ajuda: índice organizado, 404 dedicado e auditoria estendida — 2026-07-17
+## 0.96.4 — Ajuda: índice organizado, 404 dedicado e auditoria estendida — 28.07.2026
 
 ### Índice organizado por seção
 - `/ajuda/documentacao` agora exibe, além dos cards de módulo, um **índice completo** agrupado por categoria (na mesma ordem do menu) listando todos os artigos de cada seção — inclui Admin e Logística.
@@ -620,7 +745,7 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 
 ---
 
-## 0.96.2 — Ajuda: link contextual, mapa Rota↔Doc e auditoria automática — 2026-07-16
+## 0.96.2 — Ajuda: link contextual, mapa Rota↔Doc e auditoria automática — 28.07.2026
 
 ### Índice + links cruzados
 - Novo mapa canônico `src/content/docs/route-map.ts` (`ROUTE_DOC_MAP`) associando cada rota autenticada ao artigo de referência. Cobertura atual: 62 entradas / 71 rotas ativas (100% das telas de módulo).
@@ -639,8 +764,7 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 
 ---
 
-## 0.96.1 — Ajuda: varredura + módulos atuais (Logística, Editor de blocos, Tipos de RFQ, SLA, Páginas/Etapas de Equipamentos) — 2026-07-16
-
+## 0.96.1 — Ajuda: varredura + módulos atuais (Logística, Editor de blocos, Tipos de RFQ, SLA, Páginas/Etapas de Equipamentos) — 27.07.2026
 
 ### Varredura de artigos defasados
 - **H/H não é mais item de menu**: virou aba dentro de **Operações → Planejamento** (`/engenharia/etapas`). Corrigido em 6 artigos (`engenharia/apontar-hh`, `relatorios-hh`, `visao-geral`, `etapas-e-kanban`, `criar-etp`, `liberacao-para-producao`) e 4 FAQs (`hh-retroativo`, `corrigir-hh`, `apontar-hh-varios-projetos`, `hh-orcado-vs-apontado`).
@@ -657,8 +781,9 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
 - `admin/sla-chamados.md` — configuração de janela útil e prazos por prioridade.
 - `admin/paginas-e-etapas-equipamentos.md` — CMS do catálogo público + template de etapas/H/H por equipamento.
 
-## 0.96.0 — Dashboard por papel com layout estilo Atlassian — 2026-07-16
+---
 
+## 0.96.0 — Dashboard por papel com layout estilo Atlassian — 27.07.2026
 
 ### Home operacional (`/dashboard`) por papel
 - Nova casca `DashboardShell` com saudação, chip do papel, seletor de período (mock) e ações rápidas.
@@ -674,7 +799,9 @@ Assuntos padronizados com prefixo `[Solutek]` + módulo + código, todos abaixo 
   - `field` → SATs pendentes, chamados em campo, aderência de SLA (meter), agenda de visitas.
 - Mocks tipados em `src/mocks/dashboard/` isolados por papel — trocáveis por server functions reais sem mexer na UI.
 
-## 0.95.0 — Ajuda: Lote 6 — Conta + Administração + Site público (16 artigos ricos) — 2026-07-15
+---
+
+## 0.95.0 — Ajuda: Lote 6 — Conta + Administração + Site público (16 artigos ricos) — 27.07.2026
 
 ### Lote 6 — Conta (5) + Administração (5) + Site público (6)
 Reescrita completa no novo padrão: TL;DR, passos numerados com screenshots reais, callouts (dica/atenção/erro) e "Ver também".
@@ -703,7 +830,9 @@ Site público:
 
 Novos assets em `src/assets/docs/conta/` (1), `src/assets/docs/admin/` (3) e `src/assets/docs/site-publico/` (3).
 
-## 0.94.0 — Ajuda: Lote 5 — Documentos + Know-how (10 artigos ricos) — 2026-07-15
+---
+
+## 0.94.0 — Ajuda: Lote 5 — Documentos + Know-how (10 artigos ricos) — 24.07.2026
 
 ### Lote 5 — Documentos (5) + Know-how (5)
 Reescrita completa no novo padrão: TL;DR, passos numerados com screenshots reais, callouts (dica/atenção/erro) e "Ver também".
@@ -724,7 +853,9 @@ Know-how:
 
 Novos assets em `src/assets/docs/documentos/` (5) e `src/assets/docs/know-how/` (3).
 
-## 0.93.0 — Ajuda: Lote 4 — Pós-vendas + Clientes & Fornecedores (11 artigos ricos) — 2026-07-15
+---
+
+## 0.93.0 — Ajuda: Lote 4 — Pós-vendas + Clientes & Fornecedores (11 artigos ricos) — 24.07.2026
 
 ### Lote 4 — Pós-vendas (6) + Clientes & Fornecedores (5)
 Reescrita completa no novo padrão: TL;DR, passos numerados com screenshots reais, callouts (dica/atenção/erro) e "Ver também".
@@ -747,7 +878,9 @@ Clientes & Fornecedores:
 ### Assets
 - 8 screenshots reais capturados via Playwright autenticado: `src/assets/docs/pos-vendas/` (chamados, SAT, SLA config) e `src/assets/docs/clientes-fornecedores/` (cliente novo, fornecedor novo, fornecedores lista, importar, clientes lista).
 
-## 0.92.0 — Ajuda: Lote 3 — Produção + Qualidade (11 artigos ricos) — 2026-07-15
+---
+
+## 0.92.0 — Ajuda: Lote 3 — Produção + Qualidade (11 artigos ricos) — 24.07.2026
 
 ### Lote 3 — Produção (5) + Qualidade (6)
 Reescrita completa dos 11 artigos no novo padrão: TL;DR, passos numerados com screenshots reais, callouts (dica/atenção/erro) e "Ver também".
@@ -770,7 +903,9 @@ Qualidade:
 ### Assets
 - 6 screenshots reais capturados via Playwright autenticado: `src/assets/docs/producao/` (1: montagem) e `src/assets/docs/qualidade/` (5: FAT lista, FAT novo, revisão mecânica, revisão elétrica, FAT detalhe).
 
-## 0.91.0 — Ajuda: Lote 2 — Compras + Engenharia (11 artigos ricos) — 2026-07-15
+---
+
+## 0.91.0 — Ajuda: Lote 2 — Compras + Engenharia (11 artigos ricos) — 23.07.2026
 
 ### Lote 2 — Compras (5) + Engenharia (6)
 Todos os artigos dos módulos receberam o novo padrão: TL;DR, passos numerados com screenshots reais do sistema, callouts de dica/atenção/erro e seção "Ver também".
@@ -793,7 +928,9 @@ Engenharia:
 ### Assets
 - 13 screenshots reais capturados via Playwright autenticado em `src/assets/docs/compras/` (6) e `src/assets/docs/engenharia/` (7): solicitações, cotações, ordens, nova OC, auditoria, projetos, ETP, kanban de etapas, mecânico, elétrico, H/H.
 
-## 0.90.0 — Ajuda: artigos ricos com TL;DR, passos e screenshots — Lote 1 Comercial — 2026-07-15
+---
+
+## 0.90.0 — Ajuda: artigos ricos com TL;DR, passos e screenshots — Lote 1 Comercial — 23.07.2026
 
 ### Infraestrutura de conteúdo
 - **Novos blocos de conteúdo** (`src/components/ajuda/DocBlocks.tsx`) — `TldrBox` (resumo destacado no topo), `Step` (passo numerado com imagem à direita e link para ampliar), `Callout` (variantes `dica`/`atencao`/`erro`/`nota`) e `Figure`. Componentes acessíveis (role="note", aria-labels) e responsivos.
@@ -817,15 +954,18 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 ### Dependências
 - `remark-directive@4.0.0` e `rehype-raw@7.0.0`.
 
-## 0.89.3 — Ajuda: Administração e Site público documentados — 2026-07-15
+---
 
+## 0.89.3 — Ajuda: Administração e Site público documentados — 23.07.2026
 
 ### Central de ajuda
 - **Cards corrigidos** — a categoria Administração agora usa o mesmo identificador dos artigos (`admin`), então o card abre a lista de artigos existentes em vez de cair em categoria vazia. Mantido alias para `/ajuda/documentacao/administracao`.
 - **Site público documentado** — adicionados 5 artigos em `src/content/docs/articles/site-publico/`: visão geral, home/SEO, catálogo de equipamentos, formulários RFQ públicos, contato/captação e links públicos/segurança.
 - **Categorias alinhadas** — Know-how passa a aparecer na Central de ajuda com os artigos já existentes.
 
-## 0.89.2 — Logística: motivo obrigatório, anexos na trilha e export PDF/CSV — 2026-07-15
+---
+
+## 0.89.2 — Logística: motivo obrigatório, anexos na trilha e export PDF/CSV — 23.07.2026
 
 ### Módulo `/logistica/embarques`
 - **Motivo obrigatório para transições críticas** — ao mudar o status para `embarcado`, `entregue` ou `cancelado` o motivo passa a ser exigido (mínimo 5 caracteres). O diálogo destaca o campo com asterisco, mostra mensagem de validação inline e o botão "Confirmar" fica desabilitado até o motivo ser preenchido. `programado` continua opcional. Validação replicada no servidor em `setStatus` para impedir bypass.
@@ -833,7 +973,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - **Exportar trilha em PDF ou CSV** — novo botão "Exportar" (dropdown PDF/CSV) no cabeçalho da seção de auditoria. Server function `exportStatusLog` retorna o arquivo em base64: CSV `;`-separado com BOM UTF-8 (Excel-friendly) contendo data/hora, transição, autor, motivo e nomes dos anexos; PDF A4 tabular gerado com `@react-pdf/renderer`.
 - **Migração aplicada** — `20260718120000_logistica_status_log_anexos.sql` adiciona `anexo_ids uuid[]` (default `{}`) + índice GIN em `logistica_embarque_status_log`.
 
-## 0.89.1 — Logística: PDF do romaneio, trilha de auditoria e filtros avançados — 2026-07-15
+---
+
+## 0.89.1 — Logística: PDF do romaneio, trilha de auditoria e filtros avançados — 22.07.2026
 
 ### Módulo `/logistica/embarques`
 - **Exportar romaneio em PDF** — nova ação no topo do detalhe (`FileText` "Exportar PDF") gera um PDF A4 com o cabeçalho da empresa (via `documento_layout_config` do tipo `romaneio`, com fallback), dados de cliente/equipamento/transporte, tabela de itens com totais de quantidade/peso/volume, observações, trilha de status e área de assinaturas (Expedidor · Transportadora · Recebedor). Um diálogo permite escolher anexos: imagens (`image/*`) são embutidas como páginas dedicadas; demais tipos aparecem listados como referência. Servidor: `generateRomaneioPdf` em `src/lib/logistica.functions.ts` + componente `src/lib/docs/romaneio-pdf.tsx` (react-pdf).
@@ -841,10 +983,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - **Filtros e busca no grid** — a listagem `/logistica/embarques` ganhou filtros por **cliente**, **transportadora** e **faixa de datas** (previsão de saída), somados aos filtros existentes de status e busca livre por número/NF/destino. Botão "Limpar filtros" e contador de resultados. Novo endpoint `listClientesComEmbarques` lista apenas os clientes que já possuem embarques.
 - **Migração aplicada** — `20260717120000_logistica_status_log.sql` com GRANTs e RLS (SELECT autenticado; INSERT para `admin`/`manager`/`field`).
 
-## 0.89.0 — Logística & Embarque: MVP funcional — 2026-07-15
+---
 
-
-
+## 0.89.0 — Logística & Embarque: MVP funcional — 22.07.2026
 
 ### Módulo `/logistica/embarques`
 - **Migração aplicada** (`20260716120000_logistica_embarques.sql`) — 3 tabelas: `logistica_embarques` (cabeçalho com `numero` auto `EMB-YYYY-NNNN`, projeto, transportadora, status, previsão/data de saída, data de entrega, NF, destino, observações), `logistica_embarque_itens` (romaneio com descrição, quantidade, peso, volume, serial) e `logistica_embarque_anexos` (fotos, NF/XML, comprovantes). Enum `logistica_embarque_status` (rascunho/programado/embarcado/entregue/cancelado). Sequence + trigger para número legível. GRANTs padrão. RLS: leitura para autenticados, escrita para `field`/`manager`/`admin`, delete apenas `admin`.
@@ -861,7 +1002,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.88.1 — Changelog agora renderiza direto do CHANGELOG.md — 2026-07-15
+## 0.88.1 — Changelog agora renderiza direto do CHANGELOG.md — 22.07.2026
 
 ### Correção
 - Página `/changelog` deixou de depender de um array hardcoded em `src/routes/_authenticated/changelog.tsx` e passa a ler o `CHANGELOG.md` da raiz do projeto via `?raw` no build do Vite. Toda entrada nova adicionada ao arquivo aparece automaticamente na UI — não é mais possível "esquecer" de espelhar no TSX (motivo pelo qual as versões 0.85.x, 0.86.x, 0.87.x e 0.88.0 não estavam listadas).
@@ -871,7 +1012,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.88.0 — Know-how & Treinamentos: MVP funcional — 2026-07-15
+## 0.88.0 — Know-how & Treinamentos: MVP funcional — 21.07.2026
 
 ### Módulo `/know-how`
 - **Migração aplicada** (`20260715120000_know_how.sql`) — 4 tabelas: `kh_colecoes`, `kh_itens`, `kh_item_versoes`, `kh_visualizacoes`. Enums `kh_item_tipo` (artigo/video/pdf/checklist) e `kh_item_status` (rascunho/em_revisao/publicado/arquivado). RLS: leitura pública para autenticados quando `publicado`; escrita restrita a autor + `engineer`/`manager`/`admin`; publicação apenas `manager`/`admin`. GRANTs padrão + gin index em `tags`. Seed com 7 coleções default (Montagem, Elétrica, Comissionamento, FAT/SAT, Comercial, Compras, Segurança).
@@ -891,9 +1032,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-
-
-## 0.87.2 — Documentação & FAQ: Etapa 4 sprint 11 (Comercial complemento) — 2026-07-15
+## 0.87.2 — Documentação & FAQ: Etapa 4 sprint 11 (Comercial complemento) — 21.07.2026
 
 ### Comercial (`src/content/docs/articles/comercial/`)
 - +3 artigos complementares: `visao-geral`, `fechar-oportunidade`, `previsao-e-saude` (soma com `novo-orcamento`, `corrigir-orcamento`, `converter-oportunidade-em-orcamento`, `pipeline-de-oportunidades`, `rfq-publico-e-formularios` já existentes).
@@ -905,7 +1044,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.87.1 — Documentação & FAQ: Etapa 4 sprint 10 (Know-how & Treinamentos) — 2026-07-15
+## 0.87.1 — Documentação & FAQ: Etapa 4 sprint 10 (Know-how & Treinamentos) — 21.07.2026
 
 ### Know-how (`src/content/docs/articles/know-how/`)
 - 5 artigos: `visao-geral`, `publicar-conteudo`, `trilhas`, `certificacoes`, `busca-e-organizacao`.
@@ -917,7 +1056,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.87.0 — Documentação & FAQ: Etapa 4 sprint 9 (Administração) — 2026-07-15
+## 0.87.0 — Documentação & FAQ: Etapa 4 sprint 9 (Administração) — 20.07.2026
 
 ### Administração (`src/content/docs/articles/admin/`)
 - 5 artigos: `visao-geral`, `gerenciar-usuarios`, `permissoes-por-papel`, `auditoria`, `configuracoes`.
@@ -929,7 +1068,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.9 — Documentação & FAQ: Etapa 4 sprint 8 (Documentos) — 2026-07-14
+## 0.86.9 — Documentação & FAQ: Etapa 4 sprint 8 (Documentos) — 20.07.2026
 
 ### Documentos (`src/content/docs/articles/documentos/`)
 - 5 artigos: `visao-geral`, `anexar-evidencias-por-etapa`, `indexacao-por-cliente-e-projeto`, `templates-e-versionamento`, `permissoes-e-compartilhamento`.
@@ -941,7 +1080,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.8 — Documentação & FAQ: Etapa 4 sprint 7 (Produção) — 2026-07-14
+## 0.86.8 — Documentação & FAQ: Etapa 4 sprint 7 (Produção) — 20.07.2026
 
 ### Produção (`src/content/docs/articles/producao/`)
 - 5 artigos: `visao-geral`, `kanban-montagem`, `executar-etapa`, `retrabalho-e-nc-interna`, `liberar-para-fat`.
@@ -953,7 +1092,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.7 — Documentação & FAQ: Etapa 4 sprint 6 (Pós-vendas) — 2026-07-14
+## 0.86.7 — Documentação & FAQ: Etapa 4 sprint 6 (Pós-vendas) — 17.07.2026
 
 ### Pós-vendas (`src/content/docs/articles/pos-vendas/`)
 - 6 artigos: `visao-geral`, `abrir-chamado`, `atender-chamado`, `sat-em-campo`, `sla-e-alertas`, `encerrar-e-reabrir`.
@@ -965,7 +1104,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.6 — Documentação & FAQ: Etapa 4 sprint 5 (Qualidade + FAT) — 2026-07-14
+## 0.86.6 — Documentação & FAQ: Etapa 4 sprint 5 (Qualidade + FAT) — 17.07.2026
 
 ### Qualidade (`src/content/docs/articles/qualidade/`)
 - 6 artigos: `visao-geral`, `agendar-e-preparar-fat`, `executar-fat`, `rnc-e-reprovacao`, `encerrar-fat`, `templates-fat`.
@@ -977,7 +1116,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.5 — Documentação & FAQ: Etapa 4 sprint 4 (Compras) — 2026-07-14
+## 0.86.5 — Documentação & FAQ: Etapa 4 sprint 4 (Compras) — 17.07.2026
 
 ### Compras (`src/content/docs/articles/compras/`)
 - 5 artigos: `visao-geral`, `criar-solicitacao`, `cotacao-multiplos-fornecedores`, `emitir-e-aprovar-oc`, `auditoria-de-compras`.
@@ -989,7 +1128,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.4 — Documentação & FAQ: Etapa 4 sprint 3 (Engenharia + H/H) — 2026-07-14
+## 0.86.4 — Documentação & FAQ: Etapa 4 sprint 3 (Engenharia + H/H) — 16.07.2026
 
 ### Engenharia (`src/content/docs/articles/engenharia/`)
 - 6 artigos: `visao-geral`, `criar-etp`, `etapas-e-kanban`, `apontar-hh`, `relatorios-hh`, `liberacao-para-producao`.
@@ -1001,7 +1140,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.3 — Documentação & FAQ: Etapa 4 sprint 2 (Clientes & Fornecedores) — 2026-07-14
+## 0.86.3 — Documentação & FAQ: Etapa 4 sprint 2 (Clientes & Fornecedores) — 16.07.2026
 
 ### Clientes & Fornecedores (`src/content/docs/articles/clientes-fornecedores/`)
 - 5 artigos: `cadastrar-cliente`, `importar-clientes-em-lote`, `mesclar-clientes-duplicados`, `cadastrar-fornecedor`, `categorias-e-homologacao`.
@@ -1016,7 +1155,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.2 — Documentação & FAQ: Etapa 4 sprint 1 (Comercial) — 2026-07-14
+## 0.86.2 — Documentação & FAQ: Etapa 4 sprint 1 (Comercial) — 16.07.2026
 
 ### Comercial (`src/content/docs/articles/comercial/`)
 - 5 artigos: `pipeline-de-oportunidades`, `novo-orcamento`, `corrigir-orcamento`, `converter-oportunidade-em-orcamento`, `rfq-publico-e-formularios`.
@@ -1032,7 +1171,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.1 — Documentação & FAQ: Etapas 1+2+3 (infra + piloto "Conta") — 2026-07-14
+## 0.86.1 — Documentação & FAQ: Etapas 1+2+3 (infra + piloto "Conta") — 15.07.2026
 
 ### Infra de conteúdo (Markdown no repositório)
 - Deps: `react-markdown`, `remark-gfm`, `rehype-slug`, `rehype-autolink-headings`, `fuse.js`.
@@ -1071,7 +1210,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.86.0 — Documentação & FAQ: Etapa 0 (mapa do sistema) — 2026-07-14
+## 0.86.0 — Documentação & FAQ: Etapa 0 (mapa do sistema) — 15.07.2026
 
 ### Planejamento aprovado
 - Plano de 6 etapas para produção da Documentação e FAQ salvo em `docs/plan.md`. Decisões: escopo apenas dentro de `_authenticated`, pt-BR na v1, ordem Conta → Comercial → Engenharia → Compras → Qualidade → Pós-vendas → Produção → Administração → Site público, conteúdo em **MDX no repositório** (`src/content/docs/*.mdx`, `src/content/faq/*.mdx`).
@@ -1086,7 +1225,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.85.2 — Canonical/og consistency para sltkamericas.com + status E2E — 2026-07-14
+## 0.85.2 — Canonical/og consistency para sltkamericas.com + status E2E — 15.07.2026
 
 ### SEO — canonical e og:image sem duplicidade nas rotas públicas
 - Removidas as tags `og:image` e `twitter:image` de `src/routes/__root.tsx`. Regra do TanStack: `head()` do root concatena em toda match, então uma imagem no root sobrescreve toda leaf. Agora ficam **apenas** nas folhas que definem imagem própria.
@@ -1109,7 +1248,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.85.1 — Preparação para domínio sltkamericas.com (domain-portability audit) — 2026-07-14
+## 0.85.1 — Preparação para domínio sltkamericas.com (domain-portability audit) — 14.07.2026
 
 ### Portabilidade de domínio
 - Varredura de URLs hardcoded no front: nenhum acoplamento a `*.app` no fluxo runtime. Auth reset (`resetPasswordForEmail`) já usa `${window.location.origin}/reset-password`, portanto adapta-se automaticamente a `https://sltkamericas.com`.
@@ -1130,7 +1269,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.85.0 — Varredura Usuários & Permissões: mapeamento de rotas e validação das camadas — 2026-07-14
+## 0.85.0 — Varredura Usuários & Permissões: mapeamento de rotas e validação das camadas — 14.07.2026
 
 ### Auditoria de segurança do módulo Usuários
 - Mapeadas as rotas admin (`/admin`, `/admin/usuarios`, `/admin/auditoria`, `/admin/configuracoes`, `/admin/sla-chamados`, `/admin/suporte`, `/admin/rfq-tipos`, `/admin/paginas-equipamentos`, `/admin/etapas-equipamentos`, `/admin/banco`, `/admin/contato`) e confirmado que `admin.tsx` renderiza `<Outlet />` corretamente para o layout com tabs.
@@ -1139,20 +1278,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - Nova suíte E2E `e2e/usuarios-permissoes.spec.ts` (Playwright) cobrindo: CRUD de usuários (criar com senha temporária revelada uma vez, editar roles, reset de senha, desativar/reativar), autoproteção do admin logado, filtros por role/status/busca, deep-link `?tab=permissoes`, regras da matriz (`qualidade-requires-processos`, `admin-only-manager`) e guards de hierarquia (engineer, manager e sem-role bloqueados; último admin não pode ser desativado). Segue o padrão scaffold — requer `E2E_BASE_URL` + `E2E_STORAGE_ADMIN` (e opcionalmente `E2E_STORAGE_{MANAGER,ENGINEER,NOROLE}`); ausentes, os testes são pulados mantendo o CI verde.
 - Typecheck `tsgo --noEmit` limpo.
 
-## 0.83.0 — Caixa de entrada unificada: Contato + Chamados com SLA, prioridade e filtros 'meus' — 2026-07-08
+---
 
-### Pós-vendas / Chamados
-- Mensagens do formulário `/contato` do site institucional agora entram como chamados (origem `contato_site`), consolidadas em `/pos-vendas/chamados`. Item **Mensagens de contato** removido do Admin; `/admin/contato` redireciona para a lista de chamados filtrada por origem.
-- Novas colunas em `chamados`: `origem` (Suporte/Contato do site/Interno), `prioridade` (Baixa/Média/Alta/Crítica) e SLA calculado por trigger no INSERT/UPDATE (Crítica 1h/4h · Alta 4h/24h · Média 8h/72h · Baixa 24h/7d). `first_response_at` gravado automaticamente na primeira resposta do atendente.
-- Tela `/pos-vendas/chamados` ganhou filtros por origem, prioridade, escopo ('Meus chamados' / 'Sem atendente') e checkbox 'SLA estourado'; filtros persistem em search params. Novas colunas: badge de origem, prioridade, relógio de SLA (verde/âmbar/vermelho).
-- Detalhe do chamado exibe selectors de prioridade (recalcula SLA on-change) e de atendente (reatribuir para qualquer admin/manager/engineer). Cabeçalho mostra badges de origem, status, prioridade e dois relógios de SLA (resposta e resolução). Card de equipamento fica oculto para mensagens do site.
-- Pendências do sidebar agora detalham o balde de Chamados em quatro linhas: abertos, aguardando resposta interna, mensagens do site e SLA estourado. Contagem de `/admin/contato` removida.
-
-### Banco & backend
-- Migração `20260708120000_chamados_unificados.sql`: colunas `prioridade`, `sla_resposta_at`, `sla_resolucao_at`, `first_response_at`; novo enum `chamado_prioridade`; valor `contato_site` adicionado ao enum `chamado_origem`; `numero_serie` relaxado para nullable.
-- Migração `20260708120100_migrar_contato_para_chamados.sql`: dados legados de `contato_mensagens`/`contato_respostas` migrados 1:1 para `chamados` + `chamado_mensagens` (idempotente).
-
-## 0.84.0 — Configuração de SLA por categoria de chamado + notificações lidas/não lidas — 2026-07-07
+## 0.84.0 — Configuração de SLA por categoria de chamado + notificações lidas/não lidas — 13.07.2026
 
 ### Admin
 - Nova página **Admin › SLA de Chamados** (`/admin/sla-chamados`) para editar prazos de resposta, resolução e estagnação por origem (site público, interno, contato do site) e prioridade (crítica, alta, média, baixa).
@@ -1166,7 +1294,24 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - Tabela `notificacoes_usuario` ganha coluna `lida_em`; server functions `marcarComoLida` e `marcarTodasLidas` em `src/lib/notificacoes.functions.ts`.
 - `NotificationsBell` mostra filtro **Todas / Não lidas**, highlight em itens não lidos e ação "Marcar todas como lidas".
 
-## 0.76.0 — Etapas por disciplina + BOM auto-seed no equipamento + refino do fluxo Compras/BOM — 2026-07-05
+---
+
+## 0.83.0 — Caixa de entrada unificada: Contato + Chamados com SLA, prioridade e filtros 'meus' — 10.07.2026
+
+### Pós-vendas / Chamados
+- Mensagens do formulário `/contato` do site institucional agora entram como chamados (origem `contato_site`), consolidadas em `/pos-vendas/chamados`. Item **Mensagens de contato** removido do Admin; `/admin/contato` redireciona para a lista de chamados filtrada por origem.
+- Novas colunas em `chamados`: `origem` (Suporte/Contato do site/Interno), `prioridade` (Baixa/Média/Alta/Crítica) e SLA calculado por trigger no INSERT/UPDATE (Crítica 1h/4h · Alta 4h/24h · Média 8h/72h · Baixa 24h/7d). `first_response_at` gravado automaticamente na primeira resposta do atendente.
+- Tela `/pos-vendas/chamados` ganhou filtros por origem, prioridade, escopo ('Meus chamados' / 'Sem atendente') e checkbox 'SLA estourado'; filtros persistem em search params. Novas colunas: badge de origem, prioridade, relógio de SLA (verde/âmbar/vermelho).
+- Detalhe do chamado exibe selectors de prioridade (recalcula SLA on-change) e de atendente (reatribuir para qualquer admin/manager/engineer). Cabeçalho mostra badges de origem, status, prioridade e dois relógios de SLA (resposta e resolução). Card de equipamento fica oculto para mensagens do site.
+- Pendências do sidebar agora detalham o balde de Chamados em quatro linhas: abertos, aguardando resposta interna, mensagens do site e SLA estourado. Contagem de `/admin/contato` removida.
+
+### Banco & backend
+- Migração `20260708120000_chamados_unificados.sql`: colunas `prioridade`, `sla_resposta_at`, `sla_resolucao_at`, `first_response_at`; novo enum `chamado_prioridade`; valor `contato_site` adicionado ao enum `chamado_origem`; `numero_serie` relaxado para nullable.
+- Migração `20260708120100_migrar_contato_para_chamados.sql`: dados legados de `contato_mensagens`/`contato_respostas` migrados 1:1 para `chamados` + `chamado_mensagens` (idempotente).
+
+---
+
+## 0.76.0 — Etapas por disciplina + BOM auto-seed no equipamento + refino do fluxo Compras/BOM — 10.07.2026
 
 ### Etapas por disciplina (novo módulo dentro do modal do equipamento)
  - Tabelas `equipamento_disciplina_etapas` (Kanban de etapas por disciplina, com `parent_id` para subtarefas, `status`, `prioridade`, `data_vencimento`, `responsavel_id`, `ordem`, `deleted_at`) e `equipamento_etapa_comentarios` (thread por etapa).
@@ -1198,7 +1343,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - UI: **Clientes › (cliente) › Equipamentos › (equipamento) → Drawer → aba Disciplina**. Cada aba (Planejamento/Engenharia/Produção/Qualidade/Pós-venda) tem Kanban com criar/editar/arrastar/comentar/excluir; subtarefas via botão "+" dentro da etapa-pai; BOM na aba **Visão** (`BomSummaryCard` / `BomTable`).
 - Template das etapas (o que é criado automaticamente): editar diretamente a função `public.seed_equipamento_disciplinas` na migration `supabase/migrations/20260707120000_disciplina_etapas_bom.sql` (lista de INSERTs por disciplina + blocos `IF v_familia =...` para etapas específicas por família). Uma nova migration com `CREATE OR REPLACE FUNCTION` substitui o template para os próximos equipamentos.
 
-## 0.75.0 — Catálogo de equipamentos ativo no site público — 2026-07-05
+---
+
+## 0.75.0 — Catálogo de equipamentos ativo no site público — 09.07.2026
 
 ### Site público
 - Home (`/`) agora consome o catálogo real: seção **Equipamentos** puxa as páginas publicadas em `equipamento_pagina` via `listPaginasPublicadas`, com skeleton de carregamento, contador ("N equipamentos no catálogo") e CTA "Ver todos os equipamentos" apontando para `/equipamentos`. Removidos os 4 cards de teste hardcoded (empacotadora vertical, checkpeso, sacheteira, envasadora) e o link estático para `/equipamentos/envasadora`.
@@ -1208,7 +1355,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 ### Banco
 - Ativadas 25 páginas de equipamentos previamente em `publicado=false` (`envasadora-linear`, `rotuladora`, `paletizadora`, `empacotamento-horizontal`, `empacotamento-pouch-doypack`, `empacotamento-sache`, `empacotamento-termoformado`, `empacotamento-termoselado`, `empacotamento-vertical`, `encaixotamento`, `encartuchamento`, `enfardadora`, `ensacadora`, `ensaque-de-big-bag`, `etiquetadora`, `frigorifico`, `inspecao`, `linha-processo-graos-secos`, `linhas-saladas`, `linhas-de-envase`, `paletizador`, `selecionadora-por-cor`, `sistema-troca-de-bobina-automatico`, `sistema-de-alimentacao-linha-empacotamento`, `transporte-interno`).
 
-## 0.74.0 — Ciclo de Engenharia Mec + Elet com histórico auditável — 2026-07-05
+---
+
+## 0.74.0 — Ciclo de Engenharia Mec + Elet com histórico auditável — 09.07.2026
 
 ### Engenharia — Ciclos (novo módulo)
 - Nova tela **Engenharia › Ciclos** (`/engenharia/ciclos`) em formato Kanban por fase (Briefing → Análise técnica → Entregáveis → Liberação), com cards de ciclo mostrando barras de progresso paralelas para Mecânica e Elétrica, badge "Liberado" ao final e ações rápidas para abrir o Briefing e o Pacote técnico.
@@ -1221,7 +1370,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - Nova migration `20260705140000_equipamento_pagina_grants.sql`: `GRANT SELECT/INSERT/UPDATE/DELETE` para `authenticated`, `GRANT ALL` para `service_role`, `GRANT SELECT` para `anon` em `equipamento_pagina` e `equipamento_pagina_bloco` — corrige `permission denied for table equipamento_pagina` no admin.
 - Server functions `getCicloEngenharia`, `listCiclosEngenharia`, `criarCicloEngenharia`, `atualizarDisciplinaCiclo`, `liberarCiclo`, `snapshotBriefingDaOportunidade`, `getHistoricoCiclo` em `src/lib/engenharia-ciclo.functions.ts`. `atualizarDisciplinaCiclo` e `liberarCiclo` gravam diff no `audit_log` (fase, progresso, status, observações).
 
-## 0.73.0 — CMS de páginas de equipamentos + BOM rica + upload público de RFQ — 2026-07-04
+---
+
+## 0.73.0 — CMS de páginas de equipamentos + BOM rica + upload público de RFQ — 08.07.2026
 
 ### Site público
 - Nova rota `/equipamentos` como landing do catálogo, listando todas as páginas publicadas em grade responsiva com badge de família e fallback `Factory` quando não há `og_image_url`.
@@ -1239,12 +1390,16 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 ### RFQ público
 - Upload público de anexos em RFQ de fornecedor: migration `20260704180000_rfq_public_upload.sql` habilita bucket dedicado e políticas `TO anon` restritas ao token do formulário; endpoint `POST /api/public/rfq.upload` valida MIME/tamanho e retorna URL assinada de leitura.
 
-## 0.72.0 — Aba Contato pública com anonimato controlado — 2026-07-03
+---
+
+## 0.72.0 — Aba Contato pública com anonimato controlado — 08.07.2026
 
 ### Site público / Banco
 - `brand_settings` passou a expor os campos de contato (`contact_*`, `social_*`) via política `TO anon` restrita a leitura das colunas públicas — migration `20260703180000_brand_settings_anon_contato.sql` — para alimentar footer e `/contato` sem exigir autenticação.
 
-## 0.71.0 — RFQ público, cotações comparativas e OC com aprovação em 2 passos — 2026-07-03
+---
+
+## 0.71.0 — RFQ público, cotações comparativas e OC com aprovação em 2 passos — 07.07.2026
 
 ### Compras
 - **Ordem de Compra em 2 passos**: nova migration `20260703120000_oc_aprovacao.sql` adiciona `insumo_aprovacoes_oc` (aprovação técnica) e trigger que só permite emissão da OC após aprovação de escopo pelo gestor + aprovação financeira pelo diretor conforme faixa de valor.
@@ -1256,8 +1411,7 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 
 ---
 
-## 0.70.0 — Central de mensagens de contato no Admin — 2026-07-03
-
+## 0.70.0 — Central de mensagens de contato no Admin — 07.07.2026
 
 ### Admin
 - Nova página **Admin › Mensagens de contato** (`/admin/contato`) com listagem paginada, busca (nome/e-mail/assunto) e filtro por status (novo, lido, respondido, arquivado).
@@ -1273,8 +1427,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 ### Site público
 - Fluxo do formulário `/contato` validado ponta-a-ponta: honeypot ativo, rate-limit por IP (5/15min) e feedback de sucesso/erro no formulário.
 
-## 0.69.0 — Página de contato + aba Contato em Configurações — 2026-07-02
+---
 
+## 0.69.0 — Página de contato + aba Contato em Configurações — 06.07.2026
 
 ### Site público
 - Nova rota `/contato` com hero, cards de canais diretos (endereço, telefone, WhatsApp, e-mail, horário) e formulário com aceite LGPD.
@@ -1289,7 +1444,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 ### Admin
 - Nova aba **Contato** em Admin › Configurações para editar todos os campos acima e prever o comportamento no site.
 
-## 0.68.0 — Header e footer unificados em todas as páginas públicas — 2026-07-02
+---
+
+## 0.68.0 — Header e footer unificados em todas as páginas públicas — 06.07.2026
 
 ### Site público
 - Novo `PublicSiteShell` compartilhado por `/`, `/equipamentos/envasadora`, `/suporte` e `/suporte/$token`.
@@ -1298,11 +1455,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - Seletor de idioma PT/EN/ES, logo (claro/escuro) e CTA de login idênticos em todas as páginas.
 - `TopBar` e `Foot` legados de `/equipamentos/envasadora` e `PublicSuporteShell` de `/suporte/*` removidos — a marca é uma só em todo o site.
 
-## 0.67.0 — Pós-venda: Chamados públicos com chat auditável — 2026-07-02
+---
 
-
-
-
+## 0.67.0 — Pós-venda: Chamados públicos com chat auditável — 03.07.2026
 
 ### Novo módulo
 - Fluxo de suporte pelo site público (`/p/suporte/novo`): visitante informa nº de série, dados e descrição, aceita os termos e recebe um código curto (TCK-XXXX-XXXX) + link direto de conversa.
@@ -1328,7 +1483,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - Hook `notificacao_pendente` já grava evento — disparo de e-mail (Brevo/Emails) entra sem tocar no resto do fluxo.
 - Anexos e Realtime ficam para a próxima entrega.
 
-## 0.66.0 — Fluxo de aprovação da OC em 2 passos — 2026-07-02
+---
+
+## 0.66.0 — Fluxo de aprovação da OC em 2 passos — 03.07.2026
 
 ### Aprovação (Manager / Engenharia)
 - Ao aprovar a emissão da OC agora é obrigatório escolher qual orçamento venceu (radio com fornecedor, valor, prazo, Incoterm; badges de melhor preço/menor prazo).
@@ -1340,8 +1497,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - `/compras/solicitacao` mostra badge âmbar "Aguardando OC" para insumos já aprovados, explicando por que o botão "Promover" some para o comprador.
 - `InsumoOverviewPanel`: banner verde pós-aprovação com atalho direto para a lista de OCs.
 
-## 0.65.0 — Auditoria global de Solicitações + validações e testes E2E — 2026-07-05
+---
 
+## 0.65.0 — Auditoria global de Solicitações + validações e testes E2E — 02.07.2026
 
 ### Auditoria & Reversão
 - Nova aba **Auditoria** em `/compras/solicitacao` com timeline global consolidando todas as mudanças em Solicitações (status, campos, anexos, orçamentos e comentários) via `listAtividadesSolicitacoes`.
@@ -1365,8 +1523,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 ### Testes
 - Novo `e2e/compras-solicitacao.spec.ts` cobrindo: aba Auditoria com filtros, validação obrigatória em Ações, upload de anexo com links do Drive e reflexo do trigger no Histórico.
 
-## 0.61.0 — Modal de Necessidade vira ferramenta do Compras
+---
 
+## 0.61.0 — Modal de Necessidade vira ferramenta do Compras — 01.07.2026
 
 ### UX / Compras
 - Ao clicar em uma linha em **Compras → Necessidades**, o modal agora é uma
@@ -1387,7 +1546,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
  `validateSearch` e pré-seleciona o insumo no passo 1, além de sugerir o
  título "RFQ — {descrição}".
 
-## 0.60.1 — Rastreabilidade Venda → Projeto → OC
+---
+
+## 0.60.1 — Rastreabilidade Venda → Projeto → OC — 01.07.2026
 
 ### Banco
 - `equipamento_projetos` ganhou FKs opcionais `oportunidade_id`
@@ -1408,8 +1569,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
 - `listInsumos` aceita filtro `oportunidade_id` para consolidar
  necessidades de compra por oportunidade comercial.
 
-## 0.60.0 — Limpeza do Sidebar
+---
 
+## 0.60.0 — Limpeza do Sidebar — 01.07.2026
 
 ### Navegação
 - Removida a seção **Suprimentos** (Ordem de Compra e Compra de Terceiros).
@@ -1422,7 +1584,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
  de Projeto) da navegação principal; rotas permanecem em
  `src/routes/_authenticated/logistica.*`.
 
-## 0.45.0 — Deploy Coolify (Node SSR), usuários demo e validações
+---
+
+## 0.45.0 — Deploy Coolify (Node SSR), usuários demo e validações — 30.06.2026
 
 ### Infra / Deploy
 - **Dockerfile** reescrito para Coolify: multi-stage Bun (builder) +
@@ -1462,9 +1626,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
  upload de imagem em orçamento, geração de PDF, favicon, imagens
  da landing pública e health-check do container.
 
+---
 
-## 0.44.0 — Supabase server fallbacks e imagens públicas do site
-
+## 0.44.0 — Supabase server fallbacks e imagens públicas do site — 30.06.2026
 
 - Fallback das credenciais públicas do Supabase em `client.server.ts` e
  `auth-middleware.ts` para evitar 500 em server functions quando
@@ -1479,8 +1643,9 @@ Todos os artigos do módulo Comercial receberam o novo padrão: TL;DR no topo, p
  páginas públicas e edição de title/description/og/canonical/noindex
  por rota.
 
+---
 
-## 0.31.0 — Correção de orçamento e versionamento semântico
+## 0.31.0 — Correção de orçamento e versionamento semântico — 30.06.2026
 
 Orçamentos publicados agora podem ser reabertos para correção em um
 wizard pré-preenchido, gerando uma nova versão com numeração calculada
@@ -1515,8 +1680,9 @@ automaticamente pelo tipo de alteração.
  schema).
 - Nova server fn `getOrcamentoForEdit` para carregar a última versão.
 
+---
 
-## 0.30.0 — Logomarca customizável nos PDFs
+## 0.30.0 — Logomarca customizável nos PDFs — 30.06.2026
 
 Cabeçalho dos documentos passa a usar a logomarca enviada pelo
 administrador, com controle fino de tamanho e espaçamento, garantindo
@@ -1547,8 +1713,9 @@ consistência entre a prévia da tela e o PDF gerado.
 - Correção de hidratação em `admin.documentos.tsx`: `<Badge>` movido de
  dentro de `<p>` para `<div>` (evita aninhamento DOM inválido).
 
+---
 
-## 0.29.0 — Reorganização do menu lateral
+## 0.29.0 — Reorganização do menu lateral — 30.06.2026
 
 Sidebar passa por uma limpeza estrutural para refletir o mapa real do
 sistema e remover ruído visual.
@@ -1576,8 +1743,9 @@ sistema e remover ruído visual.
 - Itens de Engenharia renomeados para "Mecânico"/"Elétrico" (sem o
  prefixo "Projeto") e H/H passa a se chamar "H/H Estimado vs Real".
 
+---
 
-## 0.28.0 — Filtros, validações de H/H e busca global na sidebar
+## 0.28.0 — Filtros, validações de H/H e busca global na sidebar — 29.06.2026
 
 Refinamentos de usabilidade no módulo de Engenharia e nova busca rápida
 global acessível por Ctrl+K.
@@ -1603,8 +1771,9 @@ global acessível por Ctrl+K.
  Ctrl+K (Cmd+K no Mac). Busca em navegação, clientes, equipamentos,
  processos e revisões de projeto, com debounce de 250ms.
 
+---
 
-## 0.27.0 — Engenharia: sidebar, H/H lançável e Gantt arrastável
+## 0.27.0 — Engenharia: sidebar, H/H lançável e Gantt arrastável — 29.06.2026
 
 Ajustes finos no módulo de Engenharia para acelerar o uso diário e
 aproximar o fluxo de planejamento da realidade da fábrica.
@@ -1632,8 +1801,9 @@ aproximar o fluxo de planejamento da realidade da fábrica.
  listas de Projeto Mecânico e Elétrico (botão "Gantt" em cada linha).
 - Editor de etapas ganha colunas de H/H realizada por etapa.
 
+---
 
-## 0.26.0 — Produção & Qualidade: Montagem e Revisões Mecânica/Elétrica
+## 0.26.0 — Produção & Qualidade: Montagem e Revisões Mecânica/Elétrica — 29.06.2026
 
 Saem do placeholder os módulos de Produção & Qualidade. Cada
 **Equipamento** ganha controle de montagem e inspeções de qualidade
@@ -1658,8 +1828,9 @@ Saem do placeholder os módulos de Produção & Qualidade. Cada
  `/producao/montagem`; novo grupo "Revisões" mantém os links de
  Revisão Mecânica e Elétrica.
 
+---
 
-## 0.25.0 — Engenharia: ETPs, Gantt/Etapas, H/H, Projetos Mecânico e Elétrico
+## 0.25.0 — Engenharia: ETPs, Gantt/Etapas, H/H, Projetos Mecânico e Elétrico — 29.06.2026
 
 Os módulos de Engenharia deixam de ser placeholders. Cada **Equipamento**
 passa a ser o pai do seu próprio pacote técnico: ETPs versionados, plano de
@@ -1697,7 +1868,9 @@ Mecânico e Elétrico com fluxo de liberação para produção.
 - Aprovar ETP e liberar projeto: apenas `admin` ou `manager` (validado
  no servidor, frontend apenas oculta os botões).
 
-## 0.24.0 — Equipamentos: ciclo de vida + biblioteca de documentos
+---
+
+## 0.24.0 — Equipamentos: ciclo de vida + biblioteca de documentos — 26.06.2026
 
 A aba **Equipamentos** deixa de ser apenas "base instalada" e passa a cobrir
 todo o ciclo de vida da máquina — do **planejamento** (engenharia/ETP) até o
@@ -1731,7 +1904,7 @@ certificados — tudo subindo direto para o SLTK Drive.
 
 ---
 
-## 0.23.0 — Ficha 360º: aba Equipamentos (base instalada)
+## 0.23.0 — Ficha 360º: aba Equipamentos (base instalada) — 26.06.2026
 
 Primeira release da linha **v0.23.x**. A aba **Oportunidades** da Ficha 360º
 do cliente foi substituída por **Equipamentos** — agora cada cliente exibe a
@@ -1761,7 +1934,7 @@ Arquivos afetados: `src/lib/equipamentos.{shared,functions,queries}.ts` (novos),
 
 ---
 
-## 0.22.1 — Ficha 360º: abas Contatos e Documentos consolidadas + dados de exemplo
+## 0.22.1 — Ficha 360º: abas Contatos e Documentos consolidadas + dados de exemplo — 26.06.2026
 
 Segunda release da linha **v0.22.x**. Agora as abas `Contatos` e
 `Documentos` deixam o estilo "lista crua" e ganham KPIs, busca instantânea,
@@ -1789,7 +1962,7 @@ Sem mudanças de schema — apenas UI/UX em `src/routes/_authenticated/clientes.
 
 ---
 
-## 0.22.0 — Ficha 360º: abas Oportunidades e Processos consolidadas
+## 0.22.0 — Ficha 360º: abas Oportunidades e Processos consolidadas — 26.06.2026
 
 Primeira release da linha **v0.22.x** (consolidação da Ficha 360º). As abas
 `Oportunidades` e `Processos` deixam de ser tabelas simples e ganham KPIs,
@@ -1817,7 +1990,9 @@ estágio e atalhos para os módulos correspondentes — sem novas tabelas, só U
 
 Sem mudanças de banco, sem novas server functions — apenas frontend.
 
-## 0.21.8 — Clientes 360º (Fase 8): Sócios com validações fortes e remoção segura
+---
+
+## 0.21.8 — Clientes 360º (Fase 8): Sócios com validações fortes e remoção segura — 26.06.2026
 
 ### Aba Sócios — formulário
 - Validação inline (sem `alert`/toast solto): `Nome` (2-180, obrigatório), `Desde` (regex AAAA-MM-DD + data real + não futura).
@@ -1834,7 +2009,9 @@ Sem mudanças de banco, sem novas server functions — apenas frontend.
 - `addClienteSocio` agora rejeita duplicidade no servidor (ILIKE no nome, escopo do mesmo cliente, ignorando soft-deleted) — defesa em profundidade contra a validação do client.
 - `socioCreateInput`: `desde` agora também valida data real (não só regex) e impede datas futuras.
 
-## 0.21.7 — Clientes 360º (Fase 7): cache de geocoding, timeline tipada e aba de Sócios
+---
+
+## 0.21.7 — Clientes 360º (Fase 7): cache de geocoding, timeline tipada e aba de Sócios — 25.06.2026
 
 ### Backend
 - `geocodeCliente` agora consulta `enrich_cache` (provider=`nominatim`, TTL 90 dias) antes de chamar Nominatim. Chave: (pais, endereço normalizado). Resposta inclui `cached: boolean`.
@@ -1847,7 +2024,9 @@ Sem mudanças de banco, sem novas server functions — apenas frontend.
 - Nova aba **Sócios** com lista, busca por nome/qualificação, formulário de adição e remoção com confirmação.
 - Novos tipos de evento são reconhecidos pelo filtro 'Sistema' da Timeline.
 
-## 0.21.6 — Clientes 360º: feedback do geocoding na ficha
+---
+
+## 0.21.6 — Clientes 360º: feedback do geocoding na ficha — 25.06.2026
 
 Refinamento do botão **Geocodificar** introduzido na 0.21.5: agora o usuário enxerga claramente os estados de loading e erro e sabe quando o cliente foi posicionado pela última vez.
 
@@ -1866,7 +2045,9 @@ Refinamento do botão **Geocodificar** introduzido na 0.21.5: agora o usuário e
 - 0.21.7 — Cache de geocoding (`enrich_cache`) para evitar refazer chamadas a Nominatim em alterações pequenas de endereço.
 - 0.21.8 — Aba de Sócios com CRUD reaproveitando `cliente_socios`.
 
-## 0.21.5 — Clientes 360º (Fase 6): geocoding leve + filtros na Timeline
+---
+
+## 0.21.5 — Clientes 360º (Fase 6): geocoding leve + filtros na Timeline — 25.06.2026
 
 Sexta fase do **Módulo de Clientes 360º**. Ficha agora consegue posicionar o cliente no mapa (Nominatim/OpenStreetMap) e a Timeline ganhou filtros por categoria.
 
@@ -1889,7 +2070,9 @@ Sexta fase do **Módulo de Clientes 360º**. Ficha agora consegue posicionar o c
 - 0.21.6 — Aba de Sócios com CRUD reaproveitando `cliente_socios`.
 - 0.21.7 — Cache de geocoding (`enrich_cache`) para evitar refazer chamadas a Nominatim em alterações pequenas de endereço.
 
-## 0.21.4 — Clientes 360º (Fase 5): wizard de conversão reforçado
+---
+
+## 0.21.4 — Clientes 360º (Fase 5): wizard de conversão reforçado — 25.06.2026
 
 Quinta fase do **Módulo de Clientes 360º**. O `ConvertWizardDialog` (pipeline comercial → cliente ativo) ganhou contexto de ciclo de vida em todas as etapas e finaliza levando o usuário direto para a ficha 360º recém-promovida.
 
@@ -1908,7 +2091,9 @@ Quinta fase do **Módulo de Clientes 360º**. O `ConvertWizardDialog` (pipeline 
 - 0.21.5 — Geocoding leve para o mapa da ficha 360º (Nominatim/Mapbox) e filtros por tipo na Timeline.
 - 0.21.6 — Aba de Sócios com CRUD reaproveitando `cliente_socios`.
 
-## 0.21.3 — Clientes 360º (Fase 4): filtro e badge de ciclo de vida na listagem
+---
+
+## 0.21.3 — Clientes 360º (Fase 4): filtro e badge de ciclo de vida na listagem — 25.06.2026
 
 Quarta fase do **Módulo de Clientes 360º**. A listagem `/clientes` agora expõe o `lifecycle_stage` calculado pelo banco — fica fácil isolar suspects, prospects, clientes ativos e inativos sem abrir cada ficha.
 
@@ -1924,7 +2109,9 @@ Quarta fase do **Módulo de Clientes 360º**. A listagem `/clientes` agora expõ
 - 0.21.4 — Wizard de conversão suspect → prospect → cliente reforçado (passo "Cliente" no `ConvertWizardDialog`).
 - 0.21.5 — Geocoding leve para o mapa da ficha 360º (Nominatim/Mapbox) e timeline com filtros por tipo.
 
-## 0.21.2 — Clientes 360º (Fase 3): upload de documentos cadastrais no Drive
+---
+
+## 0.21.2 — Clientes 360º (Fase 3): upload de documentos cadastrais no Drive — 24.06.2026
 
 Terceira fase do **Módulo de Clientes 360º**. A aba **Documentos** da ficha do cliente agora aceita upload direto para o SLTK Drive, seguindo o mesmo padrão dos anexos de oportunidades/processos.
 
@@ -1944,7 +2131,9 @@ Terceira fase do **Módulo de Clientes 360º**. A aba **Documentos** da ficha do
 - 0.21.3 — Filtro por `lifecycle_stage` na listagem `/clientes` + badge na lista.
 - 0.21.4 — Wizard de conversão suspect → prospect → cliente reforçado.
 
-## 0.21.1 — Clientes 360º (Fase 2): ficha refatorada com dados reais
+---
+
+## 0.21.1 — Clientes 360º (Fase 2): ficha refatorada com dados reais — 24.06.2026
 
 Segunda fase do **Módulo de Clientes 360º**. A ficha `/clientes/$codigo` foi reescrita do zero, removendo os mocks da ACME e passando a consumir o banco — KPIs do header, oportunidades, processos, documentos e timeline agora vêm das tabelas reais alimentadas na 0.21.0.
 
@@ -1974,7 +2163,9 @@ Segunda fase do **Módulo de Clientes 360º**. A ficha `/clientes/$codigo` foi r
 - 0.21.3 — Filtro por `lifecycle_stage` na listagem `/clientes` + badge na lista.
 - 0.21.4 — Wizard de conversão suspect → prospect → cliente reforçado.
 
-## 0.21.0 — Clientes 360º (Fase 1): ciclo de vida, documentos e timeline (banco)
+---
+
+## 0.21.0 — Clientes 360º (Fase 1): ciclo de vida, documentos e timeline (banco) — 24.06.2026
 
 Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil que começa no Pipeline Comercial (suspect → prospect) e amadurece via Processos (cliente ativo). Esta release entrega o backbone de dados; as próximas releases (0.21.x) entregam as abas e o upload de documentos no Drive.
 
@@ -1997,14 +2188,18 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - 0.21.4 — Filtro por `lifecycle_stage` na listagem `/clientes` e badge no header da ficha.
 - 0.21.5 — Wizard de conversão reforçado: passo "Cliente" no `ConvertWizardDialog` que cria/vincula automaticamente.
 
-## 0.20.2 — Fallback de SSR: tela em branco evitada quando o reporter falha
+---
+
+## 0.20.2 — Fallback de SSR: tela em branco evitada quando o reporter falha — 24.06.2026
 
 - Adicionada truncagem no client-side do `AuthenticatedErrorBoundary` para mensagens longas (`message` ≤500, `stack` ≤2000, `url` ≤500, `userAgent` ≤300, `route` ≤200), evitando que um `ZodError` no `reportClientError` cause tela em branco.
 - Chamada de erro para o servidor agora é envolta em `try/catch`, garantindo que falhas de comunicação ou validação nunca derrubem a UI de fallback.
 - Server function `reportClientError` já truncava strings; o client-side trunca antes como camada dupla de defesa.
 - Fallback de SSR continua sendo o `renderErrorPage()` em `src/server.ts`, mantendo Incident ID, botão "Tentar novamente" e link "Ir para início" visíveis mesmo em falhas catastróficas.
 
-## 0.20.1 — Pipeline Comercial: modal de oportunidade ampliado com Enriquecer e Insights
+---
+
+## 0.20.1 — Pipeline Comercial: modal de oportunidade ampliado com Enriquecer e Insights — 24.06.2026
 
 - Modal de edição da oportunidade expandido para layout maior (5xl em desktop), com 2 colunas: formulário à esquerda e sidebar de insights à direita.
 - Bloco **Enriquecer dados da empresa** no formulário: selecione país (BR/AR/PY/PE/UY/CL/CO/EC/CR/PA) e documento para auto-preencher razão social, e-mail e telefone via fontes oficiais (preserva valores já preenchidos).
@@ -2014,7 +2209,9 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - Cartão de contato rápido com e-mail e telefone clicáveis para copiar.
 - Campos `email`, `telefone` e `observacoes` agora são pré-carregados do banco ao abrir o modal.
 
-## 0.20.0 — Pipeline Comercial: Wizard de Conversão em Cliente Ativo
+---
+
+## 0.20.0 — Pipeline Comercial: Wizard de Conversão em Cliente Ativo — 23.06.2026
 
 - Novo Wizard em 3 passos abre ao marcar uma oportunidade como ganha: escolher cliente, decidir destino das oportunidades da empresa, confirmar.
 - Passo 1: vincular cliente existente (busca por razão social, fantasia, código ou documento) ou criar novo cliente com **Enriquecer** (CNPJ/CUIT/RUT/RUC) para auto-preencher.
@@ -2023,7 +2220,9 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - Todas as oportunidades da empresa passam a apontar para o cliente final, mesmo as mantidas.
 - Novas server fns `listOportunidadesByEmpresa` e `convertOportunidadesToCliente`.
 
-## 0.19.3 — Templates de Projeto: editor moderno com drag and drop
+---
+
+## 0.19.3 — Templates de Projeto: editor moderno com drag and drop — 23.06.2026
 
 - **Editor reformulado**: cabeçalho com gradiente sutil, abas com ícones (CheckSquare/ListTodo/CalendarClock/History) e contadores em pill, linhas como cards com hover e sombra.
 - **Drag and drop** em Checklist, Tarefas e Eventos (via `@dnd-kit`) — arraste pelo handle para reordenar; nova ordem é persistida no servidor.
@@ -2031,7 +2230,9 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - **Tooltips explicativas** nos cabeçalhos **Tarefas** e **Eventos** da listagem (`/admin/templates-projeto`) e em cada badge dentro do editor (obrigatório, requer arquivo, D+dias, role, tipo de evento).
 - Novas server fns `reorderTemplateItens`, `reorderTemplateTarefas`, `reorderTemplateEventos`.
 
-## 0.19.2 — Templates de Projeto: histórico, duplicar, restaurar e auditoria
+---
+
+## 0.19.2 — Templates de Projeto: histórico, duplicar, restaurar e auditoria — 23.06.2026
 
 - **Histórico de versões**: toda alteração no template (dados gerais, checklist, tarefas, eventos, arquivamento) gera automaticamente um snapshot na nova tabela `processo_template_versoes`. Botão "Salvar versão" permite anotar marcos com um motivo.
 - **Restaurar versão anterior** pela aba **Histórico** do editor — o estado atual é salvo como versão antes da restauração.
@@ -2041,7 +2242,9 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - **Capitalização automática** do título e subtítulo (nome, descrição, seções, itens, tarefas, eventos) — sempre começa com letra maiúscula.
 - Editor maior (5xl) com cabeçalho de autoria e botão de salvar versão.
 
-## 0.19.1 — Templates de Projeto: CRUD e aplicação ao criar processo
+---
+
+## 0.19.1 — Templates de Projeto: CRUD e aplicação ao criar processo — 23.06.2026
 
 - Nova página **Modelos › Templates de Projeto** (`/admin/templates-projeto`) para admin/manager/engineer.
 - Editor com três abas: **Checklist** (seção, título, obrigatório, requer arquivo), **Tarefas** (título, D+ dias, role responsável), **Eventos** (título, tipo marco/reunião/entrega/outro, D+ dias).
@@ -2050,7 +2253,9 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - Server fns com `requireSupabaseAuth` + verificação de role no servidor (não confia em UI).
 - **Sidebar**: "Templates de Projeto" sai de **Administração** e ganha seu próprio grupo **Modelos**, acessível a admin/manager/engineer.
 
-## 0.19.0 — Projetos/Atendimentos/Instalações: modal grande, assinaturas, anexos no Drive (parcial)
+---
+
+## 0.19.0 — Projetos/Atendimentos/Instalações: modal grande, assinaturas, anexos no Drive (parcial) — 22.06.2026
 
 - Modal lateral dos processos substituído por **Dialog grande (5xl)** com aba **Anexos**.
 - **Checklist com assinatura**: cada item exibe quem marcou/desmarcou e quando; trigger no banco grava `processo_checklist_acoes` (append-only) automaticamente.
@@ -2059,24 +2264,32 @@ Primeira fase do **Módulo de Clientes 360º** — alinha o cadastro ao funil qu
 - Novas tabelas: `processo_checklist_acoes`, `processo_anexos`, `processo_templates` (+ filhos) com RLS, GRANTs e soft delete.
 - **Pendente nesta entrega**: página de UI para criar templates (CRUD), aplicar template ao criar processo, e enum de ações `marcou_nok`/`marcou_na` na UI. Backend já está pronto.
 
-## 0.18.3 — Ajustes de layout, seed de processos e padronização de labels
+---
+
+## 0.18.3 — Ajustes de layout, seed de processos e padronização de labels — 22.06.2026
 
 - Layout de `/processos` reorganizado: removidos 2 conjuntos de abas sobrepostos; filtros por tipo (Projeto / Atendimento / Instalação) e status (Ativos / Arquivados) agora convivem em uma única barra de ferramentas clara.
 - Seed de dados de exemplo para processos: 5 atendimentos, 5 instalações e 2 processos arquivados (perdidos) inseridos para enriquecer o ambiente de demonstração.
 - Pipeline Comercial: label **Responsável** padronizado para **Pilar** na tabela e no modal de edição, alinhado à nomenclatura do sistema.
 
-## 0.18.2 — Pipeline Comercial: perdidas e restauração
+---
+
+## 0.18.2 — Pipeline Comercial: perdidas e restauração — 22.06.2026
 
 - Corrigido o fluxo **Marcar como perdida** para arquivar a oportunidade com motivo obrigatório, data/hora, usuário responsável e auditoria.
 - Novo botão **Perdidas** no Pipeline Comercial, exibindo lista de oportunidades arquivadas com quem marcou, quando marcou, motivo e valor perdido.
 - Oportunidades perdidas podem ser **restauradas** pela lista ou pela ficha; após restaurar, exibem badge **Restaurado por...** por 48 horas.
 
-## 0.18.1 — Pipeline Comercial: botão de arquivar (perdida) na ficha
+---
+
+## 0.18.1 — Pipeline Comercial: botão de arquivar (perdida) na ficha — 22.06.2026
 
 - Botão **Marcar como perdida** adicionado ao modal de edição da oportunidade, com campo de motivo obrigatório (até 500 chars) antes de arquivar.
 - Oportunidades arquivadas exibem aviso de leitura no modal; podem ser reativadas arrastando para outro estágio no kanban.
 
-## 0.18.0 — Arquivamento e restauração de processos (Lost)
+---
+
+## 0.18.0 — Arquivamento e restauração de processos (Lost) — 22.06.2026
 
 Sistema completo para o pilar (ou manager/admin) marcar um processo como **perdido**, com auditoria, bloqueio de edição enquanto arquivado e restauração com badge temporário.
 
@@ -2093,7 +2306,9 @@ Sistema completo para o pilar (ou manager/admin) marcar um processo como **perdi
  - Card e drawer mostram badge **"Restaurado por X · há Yh"** por 48h após restauração (expira sozinho, sem cron).
  - Dialogs com botões Save / Save & Close / Cancel no topo (regra do design system).
 
-## 0.17.1 — Pipeline Comercial: edição, tabela e responsivo
+---
+
+## 0.17.1 — Pipeline Comercial: edição, tabela e responsivo — 19.06.2026
 
 - Botão **Nova oportunidade** movido para o slot de actions do `PageHeader` (à direita do breadcrumb).
 - Click em qualquer card do kanban (ou linha da tabela) abre **modal de edição** com título, contato, valor, probabilidade, data de fechamento e observações; respeita Save / Save & Close / Cancel no topo do formulário (regra do design system).
@@ -2104,7 +2319,9 @@ Sistema completo para o pilar (ou manager/admin) marcar um processo como **perdi
  - **Celular**: kanban com snap por coluna (85vw cada) e versão da tabela em cards empilhados; botão "Nova" compacto.
 - Novo server function `updateOportunidade` com validação Zod (titulo 2-200, email, valores, datas) e hook `useUpdateOportunidade`.
 
-## 0.17.0 — Pipeline Comercial (Suspect → Prospect → Cliente)
+---
+
+## 0.17.0 — Pipeline Comercial (Suspect → Prospect → Cliente) — 19.06.2026
 
 Primeiro CRM real do sistema: kanban visual de oportunidades com conversão em 1 clique para Processo de engenharia/produção.
 
@@ -2117,7 +2334,9 @@ Primeiro CRM real do sistema: kanban visual de oportunidades com conversão em 1
 - Dialog "Nova oportunidade" com validação Zod (titulo 2-200, email válido, probabilidade 0-100).
 - Sidebar CRM atualizado: submenu de Processos agora inclui **Pipeline Comercial** + **Processos (Projetos)** (substitui labels antigos sem rota).
 
-## 0.16.4 — Schema de oportunidades comerciais
+---
+
+## 0.16.4 — Schema de oportunidades comerciais — 19.06.2026
 
 Modelo de dados que sustenta o módulo Comercial real, separando jornada de venda (uma empresa pode ter N oportunidades ao longo do tempo) do cadastro de cliente.
 
@@ -2139,25 +2358,33 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
  - Histórico segue as mesmas regras de visibilidade.
 - GRANTs explícitos para `authenticated` e `service_role` em ambas as tabelas + USAGE na sequence.
 
-## 0.16.3 — Submenu do FAT corrigido
+---
+
+## 0.16.3 — Submenu do FAT corrigido — 19.06.2026
 
 - Submenus inválidos do item **FAT** no sidebar ("Agendados", "Em execução", "Homologados") substituídos por entradas reais e navegáveis:
  - **Lista de FATs** → `/qualidade/fat`
  - **Novo FAT** → `/qualidade/fat/novo`
 - Antes os subitens não tinham `to` definido e não levavam a lugar nenhum ao clicar; agora cada filho navega para uma rota existente registrada em `routeTree.gen.ts`.
 
-## 0.16.2 — Cache de role e módulos sempre atualizado
+---
+
+## 0.16.2 — Cache de role e módulos sempre atualizado — 19.06.2026
 
 - `useAuth` (`useQuery(["user-role", userId])`) agora usa `staleTime: 0`, `refetchOnMount: "always"`, `refetchOnWindowFocus: true` e `refetchOnReconnect: true`. A role exibida no rodapé do sidebar e usada para filtrar itens não fica mais presa em um valor antigo após login/troca de role.
 - `useMyModules` (`useQuery(["my-modules", userId])`) recebeu a mesma estratégia de cache, garantindo que mudanças em `role_module_permissions` apareçam no sidebar sem precisar limpar storage ou recarregar com hard refresh.
 - Efeito prático: o item **FAT** (e demais itens dependentes de role/módulo) reaparece imediatamente após o usuário receber a permissão correta.
 
-## 0.16.1 — Role admin no sidebar
+---
+
+## 0.16.1 — Role admin no sidebar — 18.06.2026
 
 - Corrigido o rótulo da role `admin` no rodapé do sidebar de "Geral" para "Admin".
 - A resolução da role atual agora considera todas as roles do usuário e prioriza `admin`, evitando que outra role retornada primeiro esconda itens como FAT.
 
-## 0.16.0 — FAT detalhe, novo FAT e homologação validada
+---
+
+## 0.16.0 — FAT detalhe, novo FAT e homologação validada — 18.06.2026
 
 - **Rota `/qualidade/fat/novo`**: seletor de processo (busca + lista) que cria o FAT via `createFat` e redireciona para a página de detalhe.
 - **Rota `/qualidade/fat/$id`**: página completa com abas Identificação, Checklist, Medições, RNCs, Assinaturas e Histórico.
@@ -2170,7 +2397,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
  - **Histórico**: lê `audit_log` (admin/manager) e mostra cronologia de alterações no FAT.
 - **Homologação validada na UI**: painel "Pendências para homologação" lista bloqueadores por etapa antes mesmo de chamar o servidor — TAG/data faltando, checklist < 100%, NOK sem foto obrigatória, RNCs em aberto, assinaturas faltando. Botão "Homologar" desabilitado enquanto houver pendência; após homologar, o formulário entra em modo somente leitura com alerta de confirmação.
 
-## 0.15.4 — Guarda admin server-side, sugestão de correção e E2E Playwright
+---
+
+## 0.15.4 — Guarda admin server-side, sugestão de correção e E2E Playwright — 18.06.2026
 
 - **Guarda admin-only server-side**: `listRoleModulePermissions` agora chama `assertAdmin` antes de qualquer leitura (defesa em profundidade sobre o RLS). `bulkSetRolePermissions` já validava admin via `applyBulkSetRolePermissions`; testes cobrem explicitamente a tentativa de bulk update por non-admin (rejeição imediata, zero `upsert`).
 - **Regras com `suggestion`**: cada `RuleViolation` agora carrega `{ action, module, label }` — a "alternativa válida mais próxima". O builder `requires()` e cada regra (`dashboard-required`, `admin-only-manager`, `qualidade-requires-processos`, `comercial-requires-clientes`, `pos_vendas-requires-clientes`) emitem a sugestão correspondente. Novo teste vitest cobre todas as regras.
@@ -2178,7 +2407,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **Playwright E2E** (`e2e/permissoes.spec.ts` + `playwright.config.ts`): cenários cobrindo (i) habilitar Qualidade sem Processos para engineer → exibe `permissoes-violation-code` = `qualidade-requires-processos`, hint estruturado, botão Salvar desabilitado, e "Aplicar correção" liga Processos; (ii) habilitar Administração para sales → bloqueia com código `admin-only-manager` e sugere desabilitar. Configuração via `E2E_BASE_URL` + `E2E_STORAGE_STATE` (admin logado); ausentes, a suite é pulada.
 - Script `bun run test:e2e`; `@playwright/test` adicionado como devDependency.
 
-## 0.15.3 — Regras centralizadas + testes de integração das permissões
+---
+
+## 0.15.3 — Regras centralizadas + testes de integração das permissões — 18.06.2026
 
 - **Regras centralizadas** em `PERMISSION_RULES` (`src/lib/permissoes.functions.ts`) com formato estruturado `{ id, description, check }`. Cada violação devolve `{ ruleId, role, modulesInvolved, message, hint }`, permitindo destacar a célula exata e mostrar o motivo da regra.
 - **UI**: cada toggle inválido fica com fundo âmbar, badge "inválido" e `title` com mensagem + hint; o banner do topo lista o motivo de cada bloqueio com a explicação por baixo.
@@ -2189,7 +2420,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
  - `assertAdmin` passa para admin e propaga erro do banco.
 - Adicionados scripts `test` e `test:watch`; vitest 4 instalado como devDependency. O servidor continua validando independentemente do cliente (defense in depth).
 
-## 0.15.2 — Auditoria e validação de permissões
+---
+
+## 0.15.2 — Auditoria e validação de permissões — 18.06.2026
 
 - **Painel de auditoria** colapsável dentro da aba Permissões, listando os últimos 100 eventos (`INSERT`/`UPDATE`/`DELETE`) com quem fez, quando, qual role, qual módulo e o valor anterior → novo.
 - Server fn `listPermissoesAuditLog` (admin-only) lê `audit_log` filtrado por `role_module_permissions`, resolve nomes via `profiles` e completa role/módulo para eventos `UPDATE` via lookup em `role_module_permissions`.
@@ -2200,7 +2433,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
  - `Pós-venda` e `Comercial` requerem `Clientes`.
 - Banner amarelo lista os erros pendentes por role e desabilita "Salvar alterações" até a correção.
 
-## 0.15.1 — Permissões por módulo
+---
+
+## 0.15.1 — Permissões por módulo — 17.06.2026
 
 - Nova aba **Permissões** em `/admin/usuarios` com matriz Role × Módulo controlada por toggles, salvamento em lote, descarte e indicador "alterado" por célula.
 - Nova tabela `role_module_permissions` (RLS: leitura para todo autenticado, escrita só admin) + enum `app_module` cobrindo os 12 agrupamentos navegáveis. Seed inicial conservador por role; admin sempre total.
@@ -2208,7 +2443,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Hook `useMyModules` consumido pela `AppSidebar`: itens e seções somente aparecem quando a role do usuário tem o módulo habilitado (admin enxerga tudo).
 - Trigger dedicada de auditoria grava INSERT/UPDATE/DELETE em `audit_log`.
 
-## 0.15.0 — Tipos de processo + checklists por estágio
+---
+
+## 0.15.0 — Tipos de processo + checklists por estágio — 17.06.2026
 
 - **Três tipos de processo** (`projeto`, `atendimento`, `instalacao`) com pipelines distintos vindos de `PIPELINE_BY_TIPO`. Tabs no topo de `/processos` filtram por tipo (com contagem por aba) e o select de Estágio do modo Tabela passa a usar o pipeline do tipo ativo.
 - **`NovoProcessoForm`** ganha campo "Tipo de processo"; o estágio inicial é re-resetado para o primeiro do pipeline ao trocar o tipo. `createProcesso` valida o tipo via Zod e persiste em `processos.tipo`.
@@ -2217,14 +2454,18 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **Drawer**: nova aba "Checklist" agrupada por estágio, com destaque no estágio atual, contador `feitos/total`, descrição, marcador `*` para obrigatórios e checkbox que dispara `toggleChecklistItem` (RLS + auditoria).
 - Versão `APP_VERSION` mantida — bump para 0.15.0 será feito ao fechar a fase 2 (bifurcações e sub-status).
 
-## 0.14.1 — Estados de carregamento e falha dos Processos
+---
+
+## 0.14.1 — Estados de carregamento e falha dos Processos — 17.06.2026
 
 - **Rota `/processos`** ganha `pendingComponent` (skeleton de 10 colunas com placeholders animados) e `errorComponent` (mensagem + "Tentar novamente" via `router.invalidate()` e atalho para "Novo processo"), evitando a tela em branco enquanto o React Query carrega ou falha.
 - **Kanban** mostra CTA de pipeline vazio (criar primeiro processo / revisar filtros) quando a lista retorna sem registros, mantendo o board interativo.
 - **Novo processo**: banner de erro consolidado para falhas em clientes/pilares com botão "Recarregar"; selects exibem placeholders distintos para carregando/erro/vazio; "Salvar" desabilita durante carregamento de dependências ou submit; spinner no botão durante a criação.
 - **`/admin/erros-drawer`** mantido como tela oficial de monitoramento (filtros por rota e versão, stack/componentStack expansíveis e contagem por ocorrência).
 
-## 0.14.0 — Processos persistidos no Supabase
+---
+
+## 0.14.0 — Processos persistidos no Supabase — 17.06.2026
 
 - **Persistência real**: removido o store in-memory `src/lib/processos/store.ts`. Novas tabelas no banco — `processos`, `processo_eventos`, `processo_tarefas`, `processo_emails`, `processo_notificacoes` — com RLS escopada por Pilar (vendedor enxerga só os seus; admin/manager enxergam tudo) e GRANTs explícitos para `authenticated` + `service_role`. Trigger de auditoria grava em `audit_log`. Código `PRJ-YYYY-NNN` gerado por sequence.
 - **Server functions** (`src/lib/processos.functions.ts`) com `requireSupabaseAuth` + Zod: `listProcessos`, `getProcessoDetalhe`, `createProcesso`, `moveProcesso`, `concluirTarefa`, `runSlaAutomations`, `listPilares`, `seedProcessosDemo` (gate admin/manager).
@@ -2237,7 +2478,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **Regressão**: teste em `src/components/processos/__tests__/ProcessoDrawer.regression.test.ts` agora garante que o Drawer NÃO importa mais o store mock e que consome React Query.
 - **Fora desta versão**: realtime (`postgres_changes`), envio real de e-mail, cron server-side de SLA e migração dos erros do Drawer para tabela `client_errors`.
 
-## 0.13.2 — Diagnóstico do Drawer de Processos
+---
+
+## 0.13.2 — Diagnóstico do Drawer de Processos — 16.06.2026
 
 - **Fallback rico no `ProcessoDrawerErrorBoundary`**: mostra resumo do processo (código, título, cliente, pilar, estágio, risco, progresso, valor, previsão e badge de SLA), botão "Recarregar dados" (força re-mount), botão "Fechar" e aviso de falhas recorrentes (≥3) com bloqueio do recarregar.
 - O Kanban continua interativo mesmo se o drawer falhar várias vezes — o boundary só envolve o painel lateral.
@@ -2248,7 +2491,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Constante `APP_VERSION` em `src/lib/app-version.ts` (mantém-se sincronizada com a release vigente).
 - TODO: persistir registros em tabela `client_errors` no Supabase (v0.14).
 
-## 0.13.1 — Estabilidade do Drawer de Processos
+---
+
+## 0.13.1 — Estabilidade do Drawer de Processos — 16.06.2026
 
 - Corrigido `Maximum update depth exceeded` em `/processos` causado por seletores `useSyncExternalStore` que retornavam novos arrays a cada chamada (`s.eventos.filter(...)`, `s.processos.find(...)`). Agora o `ProcessoDrawer` lê o estado bruto e deriva via `useMemo`.
 - Novo `ProcessoDrawerErrorBoundary` isola falhas do drawer: a lista de processos continua utilizável e o usuário vê o ID do incidente + botão "Tentar novamente".
@@ -2256,7 +2501,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Teste de regressão em `src/components/processos/__tests__/ProcessoDrawer.regression.test.ts` (bun test) trava o padrão: proíbe `.filter/.find/.map/.slice/.concat/.reduce` dentro de seletores `useProcessosState` e exige o boundary na rota.
 - Validado em `/processos`: Kanban carrega, drawer abre sem loop.
 
-## 0.13.0 — Pipeline de Processos (Kanban + SLA + Pilar)
+---
+
+## 0.13.0 — Pipeline de Processos (Kanban + SLA + Pilar) — 16.06.2026
 
 - **Board Kanban** em `/processos` com 10 colunas (Lead → Pós-venda), cartões com cliente, pilar, progresso, risco, valor e badge de SLA.
 - **Drag & drop** entre colunas (via `@dnd-kit`) atualiza o estágio e registra evento na timeline do processo.
@@ -2268,13 +2515,17 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **Formulário Novo Processo** funcional substituindo o placeholder, com seleção de cliente, pilar, estágio inicial, risco, valor e previsão.
 - Store de processos em memória (singleton `useSyncExternalStore`) — TODO migrar para tabelas `processos`, `processo_eventos`, `processo_tarefas` no Supabase.
 
-## 0.12.6 — Logs detalhados e fallback de queries em PA/UY/PY
+---
+
+## 0.12.6 — Logs detalhados e fallback de queries em PA/UY/PY — 16.06.2026
 
 - `firecrawlSearchEnrich` agora emite logs estruturados (`[enrich:pa|uy|py]`) com query, status HTTP, URLs candidatas, tamanho do markdown, validação anti-alucinação e JSON extraído por resultado — facilitando diagnosticar por que Panamá/Uruguai falham.
 - Provedores PA e UY tentam até três queries (oficiais + opencorporates/guias) antes de desistir; cada miss aparece nos logs.
 - Orquestrador `enrichDocumento` registra provider em execução e chaves dos campos retornados antes/depois do `sanitizeResult`.
 
-## 0.12.5 — Correções em enrichment PA/UY/PY
+---
+
+## 0.12.5 — Correções em enrichment PA/UY/PY — 16.06.2026
 
 - Máscara de documento aceita `#`, `9` e `0` como placeholders de dígito (além de `X`/`A`), eliminando o efeito "########-#80019270" no campo RUC do Paraguai.
 - Sanitizer de enrichment descarta strings tipo `/null/` e `/undefined/` que alguns provedores via Firecrawl retornam, evitando que campos sejam preenchidos com "/null/".
@@ -2282,23 +2533,31 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Provedor Uruguai (DGI) migrado para busca web validada pelo RUT — mesma limitação da SPA original.
 - Cache de enrichment de PA/UY/PY limpo e máscara do Paraguai reforçada para `XXXXXXXX-X`.
 
-## 0.12.4 — Correção de travamento na segunda consulta de CNPJ
+---
+
+## 0.12.4 — Correção de travamento na segunda consulta de CNPJ — 15.06.2026
 
 - Corrigido travamento ao consultar um segundo CNPJ no formulário de cliente: a lista de sócios agora é limpa/substituída em uma única operação, evitando loop de atualizações no React.
 - Mantida a limpeza automática dos campos enriquecidos antes de cada nova consulta para impedir mistura de dados entre CNPJs diferentes.
 
-## 0.12.3 — Fallback universal de logos e validação de persistência
+---
+
+## 0.12.3 — Fallback universal de logos e validação de persistência — 15.06.2026
 
 - **Validação em tempo de salvamento**: ao salvar na aba Configurações, `logo_url` e `logo_url_dark` são automaticamente preenchidas com o valor da versão colapsada quando estiverem vazias, garantindo que a logo expandida nunca fique sem referência.
 - **Backfill de registros existentes**: migration para copiar URLs colapsadas (`logo_url_collapsed` / `logo_url_collapsed_dark`) para os campos expandidos de qualquer registro que ainda estivesse incompleto.
 - **Fallback em todos os pontos de exibição**: landing page (header e footer), sidebar (expandido e recolhido) e painéis de autenticação (`/auth/*`) agora usam cadeia de fallback (`logo_url` → colapsada → escura → colapsada escura), assegurando que a logo cadastrada apareça em toda a aplicação independentemente de qual campo foi preenchido.
 
-## 0.12.1 — Logos dinâmicas preservadas
+---
+
+## 0.12.1 — Logos dinâmicas preservadas — 15.06.2026
 
 - Corrigido carregamento público de `brand_settings` para buscar apenas colunas liberadas, restaurando a logo na página inicial e em todas as telas de autenticação.
 - Ajustado salvamento da aba Configurações para ler o registro singleton existente antes de salvar, preservando versões de logo já enviadas e evitando recriar a configuração.
 
-## 0.12.0 — Autocompletar fiscal LATAM com auditoria e auto-busca
+---
+
+## 0.12.0 — Autocompletar fiscal LATAM com auditoria e auto-busca — 15.06.2026
 
 - **9 países suportados**: Brasil (BrasilAPI + ReceitaWS), Paraguai (SET), Argentina (CUIT Online), Uruguai (DGI), Peru (apis.net.pe), Costa Rica (Hacienda) e Equador (SRI) ativos por padrão; Chile (SII), Panamá (DGI/MEF) e Colômbia (RUES) cadastrados e desativados por padrão (sujeitos a captcha).
 - **Arquitetura**: `src/lib/enrich/*.server.ts` com um provider por país; `enrichDocumento` orquestra ordem de preferência, lê `integracoes_config` e cacheia respostas por 7 dias em `enrich_cache`. Firecrawl integrado via connector para portais sem API. Validação de formato por país antes da consulta.
@@ -2306,11 +2565,15 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **UX no formulário**: badge de status do provedor por país (Ativo / Desativado / Sem provedor) ao lado do documento; mensagens inline e toasts distintos para "Consultando…", "Dados preenchidos" e erros; indicador quando vem do cache; botão "Buscar" desabilitado com tooltip explicativo quando não há provedor.
 - **Auto-busca Paraguai**: RUC válido (8–9 dígitos) com razão social vazia dispara consulta SET automaticamente (debounce 600 ms).
 
-## 0.11.1 — Aba Integrações no admin
+---
+
+## 0.11.1 — Aba Integrações no admin — 15.06.2026
 
 - Nova aba **Integrações** em `/admin/configuracoes` (admin-only) lista todos os provedores fiscais por país com toggle ativo/inativo persistido em `integracoes_config` (com RLS, GRANTs e auditoria). Mostra origem da chave (env var, connector ou sem chave) e estado de disponibilidade.
 
-## 0.11.0 — Clientes: internacionalização e cadastros auxiliares
+---
+
+## 0.11.0 — Clientes: internacionalização e cadastros auxiliares — 12.06.2026
 
 - **URL canônica por código**: perfil do cliente em `/clientes/CLI-0001` (substitui UUID); listagem e redirect pós-create usam `params: { codigo }`. Nova server function `getClienteByCodigo`.
 - **Bandeira do país**: emoji (helper `flagEmoji` via Regional Indicators) no select de país, filtro da listagem e coluna País.
@@ -2319,7 +2582,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **Autocomplete CNPJ (BR)**: botão "🔄 Buscar dados" consulta BrasilAPI com fallback ReceitaWS via `enrichDocumento`. Só preenche campos vazios e popula sócios quando ainda não há nenhum.
 - **UX**: seções colapsáveis para Sócios, Fiscal BR e Redes sociais.
 
-## 0.10.0 — Clientes (Américas)
+---
+
+## 0.10.0 — Clientes (Américas) — 12.06.2026
 
 - **Banco**: `paises_config` (17 países com regex/máscara/moeda ISO 4217 e idioma padrão), `clientes` (país FK, documento fiscal internacional, idioma, moeda, endereço, lat/long, soft delete, código `CLI-XXXX` via trigger) e `cliente_contatos` (DDI + telefone, principal). RLS em todas: SELECT para autenticados, mutações `admin/manager/sales`; soft delete só `admin/manager`.
 - **Seed**: 25 clientes de demonstração (15 Brasil/SC, 6 Paraguai, 4 Bolívia) com contatos.
@@ -2327,12 +2592,16 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - **Validação de documento internacional**: normalização preserva `[A-Z0-9Ñ&]` (RFC mexicano), valida contra `documento_regex` do país e bloqueia duplicidade `(país, documento)`. Gravado sem máscara e em maiúsculas; exibido com máscara do país.
 - **Telas**: `/clientes` com dados reais, filtro por país e documento mascarado; perfil `/clientes/:codigo` com cabeçalho/breadcrumb/status vindos do banco; formulário `/clientes/novo` com select de país (auto-preenche moeda/idioma), máscara dinâmica, validação on-blur, lookup ViaCEP (BR) com fallback manual, contatos repetíveis e padrão Save / Save & Close / Cancel no topo.
 
-## Avatar — remover e progresso de upload
+---
+
+## 0.9.7 — Avatar — remover e progresso de upload — 12.06.2026
 
 - Página `/conta`: botão **Remover avatar** (visível apenas quando há avatar) restaura a imagem padrão (iniciais), deleta o arquivo do bucket `avatars` e registra em `audit_log`.
 - Upload de avatar agora exibe barra de progresso (`<Progress>`) com porcentagem durante o envio; botão de upload fica desabilitado enquanto envia.
 
-## Minha conta, reset de senha e auditoria com filtros
+---
+
+## 0.9.6 — Minha conta, reset de senha e auditoria com filtros — 12.06.2026
 
 - Nova página `/conta` para o usuário: editar nome, trocar avatar (upload no bucket `avatars`) e alterar a própria senha (com verificação da senha atual).
 - Coluna `avatar_url` adicionada em `profiles`; políticas RLS no bucket `avatars` (leitura para autenticados, escrita apenas na própria pasta).
@@ -2340,7 +2609,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Em `/admin/usuarios`: nova ação **Redefinir senha** com geração segura de senha temporária (16 chars, `crypto.getRandomValues`), revelação única e cópia. Registrada em `audit_log` como `auth.users / password / reset_by_admin`.
 - Tela `/admin/auditoria` reescrita: filtros por usuário (busca por nome/email), ação (INSERT/UPDATE/DELETE), tabela, intervalo de datas e busca livre. Paginação server-side (50/pág) e modal de detalhes com `old_value` / `new_value` em JSON. Acesso liberado a admin e manager. Export CSV do resultado filtrado.
 
-## Página de Usuários & Permissões
+---
+
+## 0.9.5 — Página de Usuários & Permissões — 12.06.2026
 
 - Implementada a página `/admin/usuarios` (admin-only) substituindo o placeholder.
 - Listagem com busca, filtros por role e status, paginação server-side (50/pág) e contador total.
@@ -2349,7 +2620,9 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Desativar/Reativar com confirmação: soft delete em `profiles`, remoção de roles e bloqueio de login via `ban_duration`; proteção contra autodesativação.
 - Toda mutação validada no backend com `requireSupabaseAuth` + checagem de role admin e registrada em `audit_log`.
 
-## Menu lateral reorganizado
+---
+
+## 0.9.4 — Menu lateral reorganizado — 11.06.2026
 
 - Reestruturado em torno do ciclo CRM → Operação → Pós-venda → Know-how.
 - Novos grupos: **CRM** (Processos, Clientes, Orçamentos), **Suprimentos**, **Produção & Qualidade** (Montagem + FAT), **Pós-venda** (Chamados, Base instalada, NPS), **Know-how** (Base, Documentação técnica, Treinamentos).
@@ -2358,9 +2631,10 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Filtro de visibilidade por role: admin e manager veem tudo (manager exceto Administração); demais roles veem apenas grupos de sua competência.
 - Novas rotas placeholder: `/clientes`, `/pos-vendas/chamados`, `/pos-vendas/base-instalada`, `/pos-vendas/nps`, `/know-how/base`, `/know-how/documentacao`, `/know-how/treinamentos`, `/admin/usuarios`.
 
-# Changelog
+---
 
-## 0.9.3 — Auditoria de segurança
+## 0.9.3 — Auditoria de segurança — 11.06.2026
+
 - **Bucket `avatars`**: limite de 8 MB e whitelist de tipos MIME (PNG/JPEG/WEBP/GIF) aplicados no servidor — antes a validação só existia no cliente.
 - **`brand_settings`**: visitantes anônimos deixaram de ler colunas sensíveis (`support_email`, `updated_by`); permanecem visíveis apenas campos de marca/SEO necessários para a landing.
 - **`reportClientError`**: agora exige sessão autenticada (`requireSupabaseAuth`), valida payload com Zod (tamanhos máximos) e remove quebras de linha de todos os campos antes de logar — fecha vetor de log injection.
@@ -2372,33 +2646,75 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
  - Policies do bucket `avatars` restringem upload/update/delete à pasta `auth.uid()` do próprio usuário.
  - Bundle do client carrega apenas `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`; service-role key fica restrita a `process.env` no runtime do servidor.
 
-## Sidebar
+---
+
+## 0.9.2 — Polimento responsivo do perfil do cliente — 11.06.2026
+
+- Removida barra de rolagem vertical das versões/abas.
+- Abas viram Select em mobile/tablet; barra horizontal no desktop.
+- Grids e tabelas das abas revisados para mobile/tablet com scroll horizontal contido.
+- Labels longas de KPI (ex.: DISPONIBILIDADE) quebram em múltiplas linhas em telas pequenas.
+- Sidebar lateral confirmada (fixa no desktop, drawer no mobile).
+
+---
+
+## 0.9.1 — Perfil 360º do cliente — 11.06.2026
+
+- Nova rota `/clientes/:id` com abas (Visão geral, Equipamentos, Projetos, FAT, Documentos, Chamados, Contatos, Financeiro).
+- Rota legada `/clientes/acme` migrada para o perfil dinâmico.
+
+---
+
+## 0.9.0 — Listagens CRM com paginação server-side — 10.06.2026
+
+- Componente compartilhado `src/components/data/Pagination.tsx` (primeira/anterior/próxima/última + itens por página).
+- `/clientes` (index) com busca, filtros e paginação padronizada.
+- `/processos` migrado para o mesmo padrão.
+- Mocks de CRM centralizados em `src/mocks/crm.ts`.
+
+---
+
+## 0.3.0 — Sidebar com grupos expansíveis — 10.06.2026
+
 - Itens de menu com submenu agora apenas expandem/colapsam ao clicar (não navegam).
 - Estado de expansão dos grupos persiste entre navegações (localStorage).
 
-## Páginas de autenticação
+---
+
+## 0.2.1 — Páginas de autenticação — badge de versão removido — 10.06.2026
+
 - Removido badge de versão "SLTK · v0.3" do painel escuro e do header mobile.
 
+---
 
-## Páginas de autenticação — ajustes
+## 0.2.0 — Páginas de autenticação — logos e rodapé — 10.06.2026
+
 - Logos dobradas de tamanho no painel escuro (h-28 × w-72) e no header mobile (h-24 × w-64).
 - Rodapé do painel do formulário alinhado verticalmente com o painel escuro em telas xl (py-14).
 
-## 2026-06-09
+---
+
+## 0.1.3 — Páginas de autenticação com a logo da marca — 10.06.2026
 
 - Páginas de autenticação (login, esqueci a senha, redefinir senha) agora usam a logo cadastrada em brand_settings em vez da logo antiga estática.
 - Aumentado contraste do link "Esqueci a senha" e demais links auxiliares das páginas de autenticação (cor de marca + peso semibold).
 - Rodapé das páginas de autenticação agora exibe os dois lados alinhados (esquerda e direita) também em telas pequenas.
 
-## 2026-06-09
+---
+
+## 0.1.2 — Logos da landing page ainda maiores — 09.06.2026
 
 - Aumentado novamente o tamanho das logos na landing page: header (h-12 / md:h-14) e footer (h-12).
 
-## 2026-06-09
+---
+
+## 0.1.1 — Logos maiores na landing page — 09.06.2026
 
 - Aumentado tamanho das logos no header (h-10 / md:h-12) e no footer (h-10) da landing page.
 
-## 2026-06-09
+---
+
+## 0.1.0 — Logomarca oficial no site, sidebar e configurações — 09.06.2026
 
 - Corrigido uso da logomarca oficial Solutek no site inteiro, incluindo landing page, sidebar e prévias da tela de configurações.
 - Ajustada landing page para utilizar logo dinâmica via brand_settings com fallback para logo local.
@@ -2407,19 +2723,3 @@ Modelo de dados que sustenta o módulo Comercial real, separando jornada de vend
 - Ajustada exibição da logo recolhida no sidebar quando colapsado.
 - Corrigida leitura pública de `brand_settings` para a página inicial exibir a logo nova cadastrada em vez do fallback antigo.
 - Ajustada permissão da função interna de RBAC para remover chamada direta por usuários autenticados.
-## 0.9.0 — Listagens CRM com paginação server-side
-- Componente compartilhado `src/components/data/Pagination.tsx` (primeira/anterior/próxima/última + itens por página).
-- `/clientes` (index) com busca, filtros e paginação padronizada.
-- `/processos` migrado para o mesmo padrão.
-- Mocks de CRM centralizados em `src/mocks/crm.ts`.
-
-## 0.9.1 — Perfil 360º do cliente
-- Nova rota `/clientes/:id` com abas (Visão geral, Equipamentos, Projetos, FAT, Documentos, Chamados, Contatos, Financeiro).
-- Rota legada `/clientes/acme` migrada para o perfil dinâmico.
-
-## 0.9.2 — Polimento responsivo do perfil do cliente
-- Removida barra de rolagem vertical das versões/abas.
-- Abas viram Select em mobile/tablet; barra horizontal no desktop.
-- Grids e tabelas das abas revisados para mobile/tablet com scroll horizontal contido.
-- Labels longas de KPI (ex.: DISPONIBILIDADE) quebram em múltiplas linhas em telas pequenas.
-- Sidebar lateral confirmada (fixa no desktop, drawer no mobile).

@@ -182,7 +182,7 @@ describe("ações críticas com service role ausente/inválida", () => {
 
   it("toFriendlyServiceRoleError troca o erro técnico por mensagem segura", () => {
     const technical = new Error(
-      "Missing Supabase environment variable(s): SUPABASE_SERVICE_ROLE_KEY. Connect Supabase in Lovable Cloud.",
+      "Missing Supabase environment variable(s): SUPABASE_SERVICE_ROLE_KEY. Set them in the deployment environment (Coolify).",
     );
     expect(toFriendlyServiceRoleError(technical).message).toBe(SERVICE_ROLE_FALLBACK_MESSAGE);
   });

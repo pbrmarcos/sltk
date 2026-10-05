@@ -106,7 +106,7 @@ async function probe(cap: CapabilityDef): Promise<{
       const { getSecret } = await import("@/lib/secrets.server");
       const token = await getSecret("SB_MANAGEMENT_ACCESS_TOKEN");
       if (!token) return { status: "ausente", detalhe: "Token não configurado." };
-      const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || process.env.SUPABASE_PROJECT_ID;
+      const projectRef = process.env.SUPABASE_PROJECT_ID || process.env.VITE_SUPABASE_PROJECT_ID;
       if (!projectRef)
         return { status: "erro", detalhe: "Project ref do Supabase não encontrado." };
       const r = await timedFetch(`https://api.supabase.com/v1/projects/${projectRef}`, {

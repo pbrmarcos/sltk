@@ -1,9 +1,6 @@
 /**
- * Chat/completions com IA, preferindo GEMINI_API_KEY direto (sem depender da
- * Lovable) e caindo para o AI Gateway da Lovable só quando a chave direta
- * não estiver configurada. Mesmo padrão de precedência já usado em
- * `entrevistas-admin.functions.ts`, generalizado aqui para reuso (tradução
- * de documentação, sugestão de nome de arquivo com imagem).
+ * Chat/completions com IA via Google Gemini (GEMINI_API_KEY, cofre ou env).
+ * Ponto único de acesso à IA do sistema: tradução, visão, JSON e busca web.
  */
 
 type UserContentPart =
@@ -14,8 +11,6 @@ export interface AiChatOptions {
   system?: string;
   userContent: string | UserContentPart[];
   jsonMode?: boolean;
-  /** Modelo no formato do AI Gateway da Lovable (usado só no fallback). */
-  lovableModel?: string;
   /** Modelo do Gemini na chamada direta. */
   geminiModel?: string;
   /** Habilita busca no Google (grounding) — só no caminho direto do Gemini. */
@@ -25,11 +20,7 @@ export interface AiChatOptions {
 
 export async function aiConfigured(): Promise<boolean> {
   const { secretExists } = await import("@/lib/secrets.server");
-  const [gemini, lovable] = await Promise.all([
-    secretExists("GEMINI_API_KEY"),
-    secretExists("LOVABLE_API_KEY"),
-  ]);
-  return gemini || lovable;
+  return secretExists("GEMINI_API_KEY");
 }
 
 function partsFromUserContent(
@@ -86,39 +77,12 @@ async function callGeminiDirect(apiKey: string, opts: AiChatOptions): Promise<st
   return out;
 }
 
-async function callLovableGateway(apiKey: string, opts: AiChatOptions): Promise<string> {
-  const messages: Array<Record<string, unknown>> = [];
-  if (opts.system) messages.push({ role: "system", content: opts.system });
-  messages.push({ role: "user", content: opts.userContent });
-
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: opts.lovableModel ?? "google/gemini-2.5-flash",
-      messages,
-      ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
-    }),
-  });
-  if (r.status === 429)
-    throw new Error("Limite de requisições da IA atingido. Tente em alguns segundos.");
-  if (r.status === 402)
-    throw new Error("Créditos de IA esgotados. Adicione créditos no workspace Lovable.");
-  if (!r.ok) throw new Error(`Lovable AI ${r.status}`);
-  const j = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const out = j.choices?.[0]?.message?.content?.trim();
-  if (!out) throw new Error("Sem resposta da IA.");
-  return out;
-}
-
 export async function aiChatComplete(opts: AiChatOptions): Promise<string> {
   const { getSecret } = await import("@/lib/secrets.server");
   const geminiKey = await getSecret("GEMINI_API_KEY");
   if (geminiKey) return callGeminiDirect(geminiKey, opts);
-  const lovableKey = await getSecret("LOVABLE_API_KEY");
-  if (lovableKey) return callLovableGateway(lovableKey, opts);
   throw new Error(
-    "Recurso de IA indisponível — a integração não está configurada. Verifique em Configurações › Chaves & Diagnóstico.",
+    "Recurso de IA indisponível — a integração não está configurada. Cadastre a chave do Gemini em Configurações › Chaves & Diagnóstico.",
   );
 }
 
@@ -159,7 +123,6 @@ export async function aiVisionJson<T>(args: {
   prompt: string;
   imagens: AiVisionImage[];
   geminiModel?: string;
-  lovableModel?: string;
   maxOutputTokens?: number;
 }): Promise<T | null> {
   const userContent: UserContentPart[] = [
@@ -176,7 +139,6 @@ export async function aiVisionJson<T>(args: {
     userContent,
     jsonMode: true,
     geminiModel: args.geminiModel ?? "gemini-flash-latest",
-    lovableModel: args.lovableModel,
     maxOutputTokens: args.maxOutputTokens,
   });
   return extractJsonFromAi<T>(raw);

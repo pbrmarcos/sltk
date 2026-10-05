@@ -615,7 +615,6 @@ export const traduzirTexto = createServerFn({ method: "POST" })
 
     const out = await aiChatComplete({
       userContent: prompt,
-      lovableModel: "google/gemini-flash-lite-latest",
     });
     return { texto: out };
   });

@@ -21,7 +21,10 @@ type EntryType = "feature" | "fix" | "design" | "infra";
 
 type Entry = {
   version: string;
+  /** Data exibida, DD.MM.AAAA. */
   date: string;
+  /** AAAAMMDD, só para ordenar. */
+  sortKey: string;
   type: EntryType;
   title: string;
   items: string[];
@@ -64,13 +67,15 @@ function parseChangelog(raw: string): Entry[] {
     const parts = b.header.split(/\s+[—–]\s+/);
     if (parts.length < 2) continue;
     const version = parts[0].trim();
-    // Se a última parte parece uma data ISO, separa
+    // Se a última parte é uma data (DD.MM.AAAA), separa
     const last = parts[parts.length - 1].trim();
-    const dateMatch = last.match(/^(\d{4}-\d{2}-\d{2})$/);
+    const dateMatch = last.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
     let date = "";
+    let sortKey = "";
     let titleParts: string[];
     if (dateMatch) {
-      date = dateMatch[1];
+      date = last;
+      sortKey = `${dateMatch[3]}${dateMatch[2]}${dateMatch[1]}`;
       titleParts = parts.slice(1, -1);
     } else {
       titleParts = parts.slice(1);
@@ -120,17 +125,18 @@ function parseChangelog(raw: string): Entry[] {
     entries.push({
       version,
       date,
+      sortKey,
       title,
       items,
       type: detectType(title, b.body.join("\n")),
     });
   }
 
-  // Ordena por data DESC; empate → versão DESC (semver-ish).
+  // Ordena por data DESC (chave AAAAMMDD); empate → versão DESC (semver-ish).
   entries.sort((a, b) => {
-    if (a.date && b.date && a.date !== b.date) return a.date < b.date ? 1 : -1;
-    if (a.date && !b.date) return -1;
-    if (!a.date && b.date) return 1;
+    if (a.sortKey && b.sortKey && a.sortKey !== b.sortKey) return a.sortKey < b.sortKey ? 1 : -1;
+    if (a.sortKey && !b.sortKey) return -1;
+    if (!a.sortKey && b.sortKey) return 1;
     return compareVersion(b.version, a.version);
   });
 

@@ -365,9 +365,7 @@ export const restoreBlocoVersao = createServerFn({ method: "POST" })
   });
 
 // ============================================================
-// Tradução automática PT → ES / EN — ver src/lib/ai-gateway.server.ts
-// (prefere GEMINI_API_KEY direto; cai para o AI Gateway da Lovable
-// só se a chave direta não estiver configurada)
+// Tradução automática PT → ES / EN via Gemini — ver src/lib/ai-gateway.server.ts
 // ============================================================
 
 export const translateBloco = createServerFn({ method: "POST" })
