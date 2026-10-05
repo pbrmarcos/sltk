@@ -31,6 +31,7 @@ const GROUPS: NavGroup[] = [
       { label: "Migrations", to: "/admin/migrations", roles: ADMIN_ONLY },
       { label: "Dados de Demonstração", to: "/admin/dados-demo", roles: ADMIN_ONLY },
       { label: "Modo Manutenção", to: "/admin/manutencao", roles: ADMIN_ONLY },
+      { label: "Critérios de Prospecção", to: "/admin/prospeccao", roles: ["admin", "manager"] },
     ],
   },
   {

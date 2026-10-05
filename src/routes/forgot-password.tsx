@@ -73,7 +73,7 @@ function ForgotPasswordPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="voce@sltkamercias.com"
+                placeholder="voce@sltkamericas.com"
                 autoFocus
                 disabled={submitting}
                 className="h-11 pl-10 text-sm"

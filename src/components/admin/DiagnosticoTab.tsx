@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IntegracoesTab } from "@/components/admin/IntegracoesTab";
-import { GroqConfigCard } from "@/components/admin/GroqConfigCard";
+import { GeminiConfigCard } from "@/components/admin/GeminiConfigCard";
 import { EnriquecimentoLogsTab } from "@/components/admin/EnriquecimentoLogsTab";
 import { BancoTab } from "@/components/admin/BancoTab";
 import { ConfigurarCapacidadeDialog } from "@/components/admin/ConfigurarCapacidadeDialog";
@@ -234,9 +234,9 @@ export function DiagnosticoTab() {
       <TabsContent value="fiscal" className="mt-4 space-y-6">
         <section className="space-y-2">
           <h3 className="text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-            Conta Groq
+            Conta Gemini
           </h3>
-          <GroqConfigCard />
+          <GeminiConfigCard />
         </section>
 
         <section className="space-y-2">

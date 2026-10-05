@@ -722,22 +722,41 @@ export const buscarOperacoes = createServerFn({ method: "POST" })
     if (campErr) throw friendlyDbError(campErr);
     const campanhaId = (campanha as { id: string }).id;
 
+    let idsInseridos: string[] = [];
     if (leads.length) {
-      const { error: resErr } = await admin.from("mineracao_resultados").insert(
-        leads.map((l) => ({
-          campanha_id: campanhaId,
-          empresa: l.empresa,
-          contraparte: l.contraparte,
-          parceiros: l.parceiros,
-          pais: modo === "rota" ? (data.paisDestinoNome ?? data.keyCountry) : data.keyCountry,
-          operacoes: l.operacoes,
-          valor_total: l.valor_total,
-          rubros: l.rubros,
-          primeira_operacao: l.primeira_operacao,
-          ultima_operacao: l.ultima_operacao,
-        })),
-      );
+      const { data: inseridos, error: resErr } = await admin
+        .from("mineracao_resultados")
+        .insert(
+          leads.map((l) => ({
+            campanha_id: campanhaId,
+            empresa: l.empresa,
+            contraparte: l.contraparte,
+            parceiros: l.parceiros,
+            pais: modo === "rota" ? (data.paisDestinoNome ?? data.keyCountry) : data.keyCountry,
+            operacoes: l.operacoes,
+            valor_total: l.valor_total,
+            rubros: l.rubros,
+            primeira_operacao: l.primeira_operacao,
+            ultima_operacao: l.ultima_operacao,
+          })),
+        )
+        .select("id");
       if (resErr) throw friendlyDbError(resErr);
+      idsInseridos = ((inseridos ?? []) as Array<{ id: string }>).map((r) => r.id);
+    }
+
+    // Qualificação automática por IA (grade A/B/C), em segundo plano até o cap
+    // configurado em Critérios de Prospecção — a busca retorna na hora.
+    try {
+      const { loadProspeccaoConfig } = await import("@/lib/lead-qualify.server");
+      const { dispararAnaliseLeads } = await import("@/lib/mineracao-analise.functions");
+      const { aiConfigured } = await import("@/lib/ai-gateway.server");
+      const cfg = await loadProspeccaoConfig();
+      if (cfg.max_leads_auto > 0 && idsInseridos.length > 0 && (await aiConfigured())) {
+        dispararAnaliseLeads(idsInseridos.slice(0, cfg.max_leads_auto), context.userId);
+      }
+    } catch (e) {
+      console.warn("[mineracao] análise automática não iniciada", e);
     }
 
     return {
@@ -935,7 +954,7 @@ export const listarResultados = createServerFn({ method: "POST" })
     let q = db
       .from("mineracao_resultados")
       .select(
-        "id, empresa, contraparte, parceiros, documento, pais, operacoes, valor_total, rubros, primeira_operacao, ultima_operacao, anotacao, papel, enviado_para_pipeline, convertido_oportunidade_id, convertido_at",
+        "id, empresa, contraparte, parceiros, documento, pais, operacoes, valor_total, rubros, primeira_operacao, ultima_operacao, anotacao, papel, enviado_para_pipeline, convertido_oportunidade_id, convertido_at, analise_grade, analise_status, analise_ia, analisado_em",
       )
       .eq("campanha_id", data.campanha_id)
       .order("valor_total", { ascending: false })

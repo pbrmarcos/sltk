@@ -17,29 +17,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
-type GroqStatus = {
+type GeminiStatus = {
   conectado: boolean;
   detalhe: string;
   latencia_ms?: number;
   chave_mascarada: string | null;
 };
 
-export function GroqConfigCard() {
+export function GeminiConfigCard() {
   const qc = useQueryClient();
   const fn = useServerFn(runDiagnostico);
-  const testGroq = async (): Promise<GroqStatus> => {
-    const res = await fn({ data: { ids: ["groq"] } });
+  const testGemini = async (): Promise<GeminiStatus> => {
+    const res = await fn({ data: { ids: ["gemini"] } });
     const cap = res.itens[0];
     return {
       conectado: cap?.status === "ok",
       detalhe: cap?.detalhe ?? "Sem resposta.",
       latencia_ms: cap?.latencia_ms,
-      chave_mascarada: cap?.envs.find((e) => e.nome === "GROQ_API_KEY")?.mascara ?? null,
+      chave_mascarada: cap?.envs.find((e) => e.nome === "GEMINI_API_KEY")?.mascara ?? null,
     };
   };
   const qo = queryOptions({
-    queryKey: ["admin", "groq-config"],
-    queryFn: testGroq,
+    queryKey: ["admin", "gemini-config"],
+    queryFn: testGemini,
     staleTime: 30_000,
   });
   const q = useQuery(qo);
@@ -51,10 +51,10 @@ export function GroqConfigCard() {
   });
 
   const test = useMutation({
-    mutationFn: testGroq,
+    mutationFn: testGemini,
     onSuccess: (d) => {
       qc.setQueryData(qo.queryKey, d);
-      if (d.conectado) toast.success(`Groq OK — ${d.latencia_ms ?? 0}ms`);
+      if (d.conectado) toast.success(`Gemini OK — ${d.latencia_ms ?? 0}ms`);
       else toast.error(`Falha: ${d.detalhe}`);
     },
     onError: (e) => toast.error((e as Error).message),
@@ -70,9 +70,10 @@ export function GroqConfigCard() {
             <Sparkles className="h-5 w-5 text-[var(--primary)]" />
           </div>
           <div>
-            <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">Groq</h3>
+            <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">Google Gemini</h3>
             <p className="text-[12.5px] text-[var(--text-muted)]">
-              OCR de cartões/folders + enriquecimento web para cadastro de fornecedores.
+              IA principal do sistema: scan de fornecedores, suspect por foto, qualificação de leads
+              e traduções.
             </p>
           </div>
         </div>
@@ -92,7 +93,7 @@ export function GroqConfigCard() {
       <div className="space-y-3">
         <div>
           <Label className="flex items-center gap-1.5 text-[12px]">
-            <KeyRound className="h-3.5 w-3.5" /> GROQ_API_KEY
+            <KeyRound className="h-3.5 w-3.5" /> GEMINI_API_KEY
           </Label>
           <div className="mt-1 flex gap-2">
             <Input
@@ -136,15 +137,15 @@ export function GroqConfigCard() {
 
         <p className="text-[11.5px] text-[var(--text-muted)]">
           Para rotacionar a chave, atualize o segredo{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono">GROQ_API_KEY</code> nas
+          <code className="rounded bg-muted px-1 py-0.5 font-mono">GEMINI_API_KEY</code> nas
           configurações do projeto.{" "}
           <a
-            href="https://console.groq.com/keys"
+            href="https://aistudio.google.com/apikey"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-0.5 text-[var(--primary)] hover:underline"
           >
-            Obter chave no console Groq <ExternalLink className="h-3 w-3" />
+            Obter chave no Google AI Studio <ExternalLink className="h-3 w-3" />
           </a>
         </p>
 

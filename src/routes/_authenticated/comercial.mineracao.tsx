@@ -13,6 +13,7 @@ import {
   Building2,
   SlidersHorizontal,
   ChevronDown,
+  Sparkles,
   Globe2,
   AlertTriangle,
   Download,
@@ -37,6 +38,7 @@ import {
   solicitarSincronizacaoBases,
   statusSincronizacaoBases,
 } from "@/lib/mineracao.functions";
+import { reanalisarLeads } from "@/lib/mineracao-analise.functions";
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -357,6 +359,7 @@ function MineracaoPage() {
   const [busca, setBusca] = React.useState("");
   const [expandido, setExpandido] = React.useState<string | null>(null);
   const [notaAberta, setNotaAberta] = React.useState<string | null>(null);
+  const [analiseAberta, setAnaliseAberta] = React.useState<string | null>(null);
   const [notaTexto, setNotaTexto] = React.useState("");
   const resultadosRef = React.useRef<HTMLElement | null>(null);
 
@@ -586,6 +589,13 @@ function MineracaoPage() {
     queryFn: () =>
       fetchResultados({ data: { campanha_id: campanhaId!, busca: busca || undefined } }),
     enabled: Boolean(campanhaId),
+    // Enquanto houver análise de IA pendente, acompanha o progresso.
+    refetchInterval: (q) =>
+      ((q.state.data ?? []) as Array<Record<string, unknown>>).some(
+        (r) => r["analise_status"] === "pendente",
+      )
+        ? 6000
+        : false,
   });
 
   const linhas = resultados.data ?? [];
@@ -691,6 +701,16 @@ function MineracaoPage() {
         `${r.criadas.length} suspect(s) criado(s) no pipeline${r.ignorados ? ` · ${r.ignorados} já convertido(s)` : ""}.`,
       );
       setSelecionados([]);
+      void qc.invalidateQueries({ queryKey: ["mineracao-resultados"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reanalisar = useServerFn(reanalisarLeads);
+  const reanalisarMut = useMutation({
+    mutationFn: (ids: string[]) => reanalisar({ data: { ids } }),
+    onSuccess: (r) => {
+      toast.success(`${r.enfileirados} lead(s) na fila de análise da IA.`);
       void qc.invalidateQueries({ queryKey: ["mineracao-resultados"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1494,6 +1514,19 @@ function MineracaoPage() {
               )}
               Enviar como suspect
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!selecionados.length || reanalisarMut.isPending}
+              onClick={() => reanalisarMut.mutate(selecionados)}
+            >
+              {reanalisarMut.isPending ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-1 h-4 w-4" />
+              )}
+              Analisar com IA
+            </Button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
@@ -1507,6 +1540,7 @@ function MineracaoPage() {
                     />
                   </th>
                   <th className="p-2">Empresa</th>
+                  <th className="p-2">IA</th>
                   <th className="p-2">Contraparte</th>
                   <th className="p-2">NCMs</th>
                   <th className="p-2 text-right">Operações</th>
@@ -1520,7 +1554,7 @@ function MineracaoPage() {
               <tbody>
                 {resultados.isLoading && (
                   <tr>
-                    <td colSpan={10} className="p-6 text-center text-[var(--text-muted)]">
+                    <td colSpan={11} className="p-6 text-center text-[var(--text-muted)]">
                       Carregando resultados…
                     </td>
                   </tr>
@@ -1551,6 +1585,38 @@ function MineracaoPage() {
                         </td>
                         <td className="p-2 font-medium text-[var(--text-primary)]">
                           {r["empresa"]}
+                        </td>
+                        <td className="p-2">
+                          {r["analise_status"] === "pendente" ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
+                              <Loader2 className="h-3 w-3 animate-spin" /> IA…
+                            </span>
+                          ) : r["analise_status"] === "erro" ? (
+                            <button
+                              type="button"
+                              title="Reanalisar"
+                              onClick={() => reanalisarMut.mutate([id])}
+                              className="rounded-full border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--danger)] hover:bg-[var(--danger)]/20"
+                            >
+                              erro ↻
+                            </button>
+                          ) : r["analise_grade"] ? (
+                            <button
+                              type="button"
+                              onClick={() => setAnaliseAberta(analiseAberta === id ? null : id)}
+                              className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                                r["analise_grade"] === "A"
+                                  ? "bg-emerald-500/15 text-emerald-600"
+                                  : r["analise_grade"] === "B"
+                                    ? "bg-amber-500/15 text-amber-600"
+                                    : "bg-slate-500/15 text-slate-500"
+                              }`}
+                            >
+                              {String(r["analise_grade"])}
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-[var(--text-muted)]">—</span>
+                          )}
                         </td>
                         <td className="p-2 text-[var(--text-muted)]">
                           {r["contraparte"] ? (
@@ -1600,7 +1666,7 @@ function MineracaoPage() {
                       {notaAberta === id && (
                         <tr className="border-b border-[var(--bg-border)] bg-[var(--bg-base)]">
                           <td />
-                          <td colSpan={9} className="p-2">
+                          <td colSpan={10} className="p-2">
                             <div className="flex flex-wrap items-center gap-2">
                               <Input
                                 value={notaTexto}
@@ -1624,10 +1690,76 @@ function MineracaoPage() {
                           </td>
                         </tr>
                       )}
+                      {analiseAberta === id && r["analise_ia"] ? (
+                        <tr className="border-b border-[var(--bg-border)] bg-[var(--bg-base)]">
+                          <td />
+                          <td colSpan={10} className="p-3">
+                            {(() => {
+                              const a = r["analise_ia"] as {
+                                motivo?: string;
+                                abordagem_sugerida?: string | null;
+                                produtos_sltk?: string[];
+                                ja_cliente?: { id: string; nome: string } | null;
+                                dados?: {
+                                  documento_verificado?: string | null;
+                                  receita?: {
+                                    razao_social?: string;
+                                    cnae_principal?: string;
+                                  } | null;
+                                  site?: { resumo?: string | null } | null;
+                                  telefone?: string | null;
+                                  email?: string | null;
+                                };
+                                etapas?: string[];
+                              };
+                              return (
+                                <div className="space-y-1.5 text-[12.5px]">
+                                  {a.motivo && (
+                                    <p className="text-[var(--text-primary)]">
+                                      <strong>Análise:</strong> {a.motivo}
+                                    </p>
+                                  )}
+                                  {a.abordagem_sugerida && (
+                                    <p className="text-[var(--text-secondary)]">
+                                      <strong>Abordagem:</strong> {a.abordagem_sugerida}
+                                    </p>
+                                  )}
+                                  {!!a.produtos_sltk?.length && (
+                                    <p className="text-[var(--text-secondary)]">
+                                      <strong>Produtos SLTK aderentes:</strong>{" "}
+                                      {a.produtos_sltk.join(", ")}
+                                    </p>
+                                  )}
+                                  <p className="text-[var(--text-muted)]">
+                                    {a.dados?.documento_verificado
+                                      ? `CNPJ verificado: ${a.dados.documento_verificado}`
+                                      : "CNPJ não verificado"}
+                                    {a.dados?.receita?.cnae_principal
+                                      ? ` · CNAE ${a.dados.receita.cnae_principal}`
+                                      : ""}
+                                    {a.dados?.telefone ? ` · Tel ${a.dados.telefone}` : ""}
+                                    {a.dados?.email ? ` · ${a.dados.email}` : ""}
+                                  </p>
+                                  {a.dados?.site?.resumo && (
+                                    <p className="text-[var(--text-muted)]">
+                                      <strong>Site:</strong> {a.dados.site.resumo}
+                                    </p>
+                                  )}
+                                  {!!a.etapas?.length && (
+                                    <p className="text-[11px] text-[var(--text-muted)]">
+                                      Trilha: {a.etapas.join(" → ")}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </td>
+                        </tr>
+                      ) : null}
                       {aberto && parceiros.length > 0 && (
                         <tr className="border-b border-[var(--bg-border)] bg-[var(--bg-base)]">
                           <td />
-                          <td colSpan={9} className="p-2">
+                          <td colSpan={10} className="p-2">
                             <ul className="space-y-1 text-[12.5px] text-[var(--text-muted)]">
                               {parceiros.map((p) => (
                                 <li key={p.nome} className="flex justify-between gap-4">
@@ -1646,7 +1778,7 @@ function MineracaoPage() {
                 })}
                 {!resultados.isLoading && linhas.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="p-6 text-center text-[var(--text-muted)]">
+                    <td colSpan={11} className="p-6 text-center text-[var(--text-muted)]">
                       Nenhuma empresa nesta busca.
                     </td>
                   </tr>

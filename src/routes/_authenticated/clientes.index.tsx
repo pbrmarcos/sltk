@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Plus, Star, Building2, AlertTriangle, Upload } from "lucide-react";
+import { Plus, Star, Building2, AlertTriangle, Upload, Camera } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
@@ -127,6 +127,15 @@ function ClientesListPage() {
               className="h-9"
             >
               <Upload className="mr-1 h-4 w-4" /> Importar CSV
+            </PermissionLinkButton>
+            <PermissionLinkButton
+              module="clientes"
+              to="/clientes/suspect-foto"
+              variant="outline"
+              size="sm"
+              className="h-9"
+            >
+              <Camera className="mr-1 h-4 w-4" /> Suspect por foto
             </PermissionLinkButton>
             <PermissionLinkButton module="clientes" to="/clientes/novo" size="sm" className="h-9">
               <Plus className="mr-1 h-4 w-4" /> Novo cliente

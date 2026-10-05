@@ -75,7 +75,16 @@ function DashboardPage() {
       {role === "assembly" && <AssemblyDashboard userName={userName} />}
       {role === "purchasing" && <PurchasingDashboard userName={userName} />}
       {role === "field" && <FieldDashboard userName={userName} />}
-      {!role && <SalesDashboard userName={userName} />}
+      {!role && (
+        <div className="mx-auto mt-16 max-w-md rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 text-center">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+            Sua conta ainda não tem módulos atribuídos
+          </h2>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
+            Peça a um administrador para atribuir seu papel em Usuários &amp; Permissões.
+          </p>
+        </div>
+      )}
     </PageContainer>
   );
 }

@@ -22,7 +22,7 @@ export const runDiagnostico = createServerFn({ method: "POST" })
  */
 const LOW_SENSITIVITY_IDS = new Set([
   "resend",
-  "groq",
+  "gemini",
   "google_drive",
   "google_calendar",
   "firecrawl",

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { friendlyDbError } from "@/lib/db-errors";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Bloco, DocumentoLayoutConfig } from "./types";
@@ -37,10 +38,24 @@ export const getLayoutConfig = createServerFn({ method: "GET" })
     return (layout ?? null) as unknown as DocumentoLayoutConfig | null;
   });
 
+const layoutConfigSchema = z.object({
+  tipo_codigo: z.string().min(1).max(60),
+  accent_color: z.string().max(20).optional(),
+  logo_url: z.string().max(2000).nullable().optional(),
+  empresa_nome: z.string().max(200).optional(),
+  empresa_endereco: z.string().max(400).nullable().optional(),
+  empresa_contato: z.string().max(400).nullable().optional(),
+  rodape_extra: z.string().max(1000).nullable().optional(),
+});
+
 export const updateLayoutConfig = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: Partial<DocumentoLayoutConfig> & { tipo_codigo: string }) => d)
-  .handler(async ({ data }) => {
+  .inputValidator((d: Partial<DocumentoLayoutConfig> & { tipo_codigo: string }) =>
+    layoutConfigSchema.parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { assertAdminOrManager } = await import("@/lib/admin-guard");
+    await assertAdminOrManager(context.supabase, context.userId);
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const { error } = await (supabaseAdmin as any)

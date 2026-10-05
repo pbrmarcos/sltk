@@ -746,44 +746,24 @@ Analise as imagens enviadas e devolva APENAS um JSON válido (sem markdown, sem 
 
 Se algum campo não estiver presente, devolva null. Não invente dados. Não traduza nomes próprios.`;
 
-// Somente modelos que realmente aceitam conteúdo multimodal (image_url).
-const GROQ_VISION_CANDIDATES = [
-  "meta-llama/llama-4-scout-17b-16e-instruct",
-  "meta-llama/llama-4-maverick-17b-128e-instruct",
-  "qwen/qwen3.6-27b",
-];
-const GROQ_TEXT_CANDIDATES = [
-  "llama-3.3-70b-versatile",
-  "openai/gpt-oss-120b",
-  "qwen/qwen3.6-27b",
-  "openai/gpt-oss-20b",
-];
-
-let groqModelCache: { at: number; ids: string[] } | null = null;
-
-async function listGroqModels(apiKey: string): Promise<string[]> {
-  if (groqModelCache && Date.now() - groqModelCache.at < 10 * 60 * 1000) {
-    return groqModelCache.ids;
+/** Converte erro do gateway de IA (Gemini/Lovable) em ScanFailure amigável. */
+function scanFailureFromError(err: unknown): ScanFailure {
+  const raw = err instanceof Error ? err.message : "Falha na leitura por IA.";
+  if (/limite de requisi/i.test(raw)) {
+    return { status: 429, code: "RATE_LIMITED", message: raw };
   }
-  try {
-    const r = await fetch("https://api.groq.com/openai/v1/models", {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!r.ok) return [];
-    const j = (await r.json()) as { data?: Array<{ id?: string }> };
-    const ids = (j.data ?? []).map((m) => m.id ?? "").filter(Boolean);
-    groqModelCache = { at: Date.now(), ids };
-    return ids;
-  } catch {
-    return [];
+  if (/chave do gemini/i.test(raw)) {
+    return { status: 401, code: "UNAUTHORIZED", message: raw };
   }
-}
-
-/** Retorna o primeiro candidato liberado na chave, ou null se nenhum estiver disponível. */
-async function pickGroqModel(apiKey: string, candidates: string[]): Promise<string | null> {
-  const available = await listGroqModels(apiKey);
-  if (!available.length) return candidates[0] ?? null;
-  return candidates.find((c) => available.includes(c)) ?? null;
+  if (/não está configurada|indispon/i.test(raw)) {
+    return { status: null as unknown as number, code: "MISSING_AI_KEY", message: raw };
+  }
+  return {
+    status: 500,
+    code: "AI_ERROR",
+    message: "A leitura por IA falhou. Tente novamente ou siga com o cadastro manual.",
+    action: raw.slice(0, 240),
+  };
 }
 
 function hasCJK(s: string | null | undefined): boolean {
@@ -791,78 +771,14 @@ function hasCJK(s: string | null | undefined): boolean {
   return /[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/.test(s);
 }
 
-async function groqJson<T>(apiKey: string, prompt: string, maxTokens = 600): Promise<T | null> {
+/** JSON via gateway de IA (Gemini direto ou fallback Lovable), tolerante a falha. */
+async function iaJsonSeguro<T>(prompt: string, maxTokens = 600): Promise<T | null> {
   try {
-    const textModel = await pickGroqModel(apiKey, GROQ_TEXT_CANDIDATES);
-    if (!textModel) return null;
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        model: textModel,
-
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.1,
-        response_format: { type: "json_object" },
-        max_completion_tokens: maxTokens,
-      }),
-    });
-    if (!r.ok) return null;
-    const j = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    return extractJson<T>(j.choices?.[0]?.message?.content ?? "");
+    const { aiJson } = await import("@/lib/ai-gateway.server");
+    return await aiJson<T>({ userContent: prompt, maxOutputTokens: maxTokens });
   } catch {
     return null;
   }
-}
-
-function buildScanFailure(status: number, body: string, model = "de visão"): ScanFailure {
-  let code: string | undefined;
-  let providerMessage = body.slice(0, 240);
-  try {
-    const parsed = JSON.parse(body) as {
-      error?: { type?: string; code?: string; message?: string };
-    };
-    code = parsed.error?.code ?? parsed.error?.type;
-    providerMessage = parsed.error?.message ?? providerMessage;
-  } catch {
-    // Mantém o texto bruto.
-  }
-
-  if (status === 401 || status === 403) {
-    return {
-      status,
-      code: code ?? "UNAUTHORIZED",
-      message:
-        "A conta Groq configurada é inválida ou foi revogada. Atualize a chave em Configurações › Chaves & Diagnóstico e tente novamente.",
-      action: providerMessage,
-    };
-  }
-
-  if (status === 429) {
-    return {
-      status,
-      code: code ?? "RATE_LIMITED",
-      message:
-        "Limite de requisições do Groq atingido (tier gratuito ~30 req/min). Aguarde alguns segundos e tente novamente.",
-      action: providerMessage,
-    };
-  }
-
-  if (status === 404) {
-    return {
-      status,
-      code: code ?? "NOT_FOUND",
-      message: `Modelo ${model} indisponível para esta chave Groq. Ajuste o conector Groq nas Configurações.`,
-      action: providerMessage,
-    };
-  }
-
-  return {
-    status,
-    code,
-    message: `Groq falhou (${status}). Verifique o conector e tente novamente.`,
-    action: providerMessage || "Sem detalhes retornados pela API.",
-  };
 }
 
 async function logGeminiScan(row: {
@@ -966,102 +882,27 @@ export const scanFornecedorDocs = createServerFn({ method: "POST" })
       .maybeSingle();
     const userEmail = prof?.email ?? null;
 
-    const { getSecret } = await import("@/lib/secrets.server");
-    const apiKey = await getSecret("GROQ_API_KEY");
-    if (!apiKey) {
+    const { aiVisionJson } = await import("@/lib/ai-gateway.server");
+    const prompt = data.contexto ? `${SCAN_PROMPT}\n\nContexto: ${data.contexto}` : SCAN_PROMPT;
+
+    let extracted: ScanExtracted = {} as ScanExtracted;
+    let text = "";
+    try {
+      const visao = await aiVisionJson<ScanExtracted>({
+        prompt,
+        imagens: data.imagens,
+        maxOutputTokens: 1500,
+      });
+      if (!visao) throw new Error("A IA não devolveu dados legíveis das imagens.");
+      extracted = visao;
+      text = JSON.stringify(visao);
+    } catch (err) {
+      const failure = scanFailureFromError(err);
       const log = await logGeminiScan({
         user_id: userId,
         user_email: userEmail,
         ok: false,
-        status: null,
-        code: "MISSING_GROQ_API_KEY",
-        message: "Leitura por IA indisponível — a conta Groq não está configurada.",
-        provider_message: null,
-        duration_ms: Date.now() - started,
-        imagens_count: data.imagens.length,
-        request_context: data.contexto ?? null,
-      });
-      const error: ScanFailure = {
-        message:
-          "Leitura por IA indisponível — configure a conta Groq em Configurações › Chaves & Diagnóstico.",
-        code: "MISSING_GROQ_API_KEY",
-        logged_at: log.created_at,
-        log_id: log.id ?? undefined,
-      };
-      return {
-        ok: false as const,
-        raw: "",
-        extracted: {} as ScanExtracted,
-        web: null,
-        error,
-      };
-    }
-
-    const userContent: Array<Record<string, unknown>> = [{ type: "text", text: SCAN_PROMPT }];
-    if (data.contexto) {
-      userContent.push({ type: "text", text: `Contexto: ${data.contexto}` });
-    }
-    for (const img of data.imagens) {
-      userContent.push({
-        type: "image_url",
-        image_url: { url: `data:${img.mime};base64,${img.base64}` },
-      });
-    }
-
-    const visionModel = await pickGroqModel(apiKey, GROQ_VISION_CANDIDATES);
-    if (!visionModel) {
-      const msg =
-        "Leitura por IA indisponível — nenhum modelo com leitura de imagem está liberado nesta conta Groq. Habilite um modelo de visão no console Groq ou siga com o cadastro manual.";
-      const log = await logGeminiScan({
-        user_id: userId,
-        user_email: userEmail,
-        ok: false,
-        status: null,
-        code: "NO_VISION_MODEL",
-        message: msg,
-        provider_message: null,
-        duration_ms: Date.now() - started,
-        imagens_count: data.imagens.length,
-        request_context: data.contexto ?? null,
-      });
-      return {
-        ok: false as const,
-        raw: "",
-        extracted: {} as ScanExtracted,
-        web: null,
-        error: {
-          message: msg,
-          code: "NO_VISION_MODEL",
-          logged_at: log.created_at,
-          log_id: log.id ?? undefined,
-        } as ScanFailure,
-      };
-    }
-
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: visionModel,
-        messages: [{ role: "user", content: userContent }],
-        temperature: 0.1,
-        response_format: { type: "json_object" },
-        max_completion_tokens: 1500,
-      }),
-    });
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      const failure = buildScanFailure(res.status, txt, visionModel);
-
-      const log = await logGeminiScan({
-        user_id: userId,
-        user_email: userEmail,
-        ok: false,
-        status: res.status,
+        status: failure.status ?? null,
         code: failure.code ?? null,
         message: failure.message,
         provider_message: failure.action ?? null,
@@ -1080,22 +921,15 @@ export const scanFornecedorDocs = createServerFn({ method: "POST" })
       };
     }
 
-    const json = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const text = json.choices?.[0]?.message?.content ?? "";
-    const extracted = extractJson<ScanExtracted>(text) ?? {};
-
     // ===== Tradução automática (CJK → PT) =====
     const needsTranslation =
       hasCJK(extracted.endereco) || hasCJK(extracted.cidade) || hasCJK(extracted.nome_fantasia);
     if (needsTranslation) {
-      const translated = await groqJson<{
+      const translated = await iaJsonSeguro<{
         endereco_pt?: string;
         cidade_pt?: string;
         nome_fantasia_pt?: string;
       }>(
-        apiKey,
         `Traduza os seguintes campos do chinês para português brasileiro. Mantenha nomes próprios em pinyin quando aplicável. Retorne APENAS JSON válido sem markdown:
 {"endereco_pt":"...","cidade_pt":"...","nome_fantasia_pt":"..."}
 
@@ -1134,11 +968,12 @@ nome_fantasia: ${extracted.nome_fantasia ?? ""}`,
       .map((c) => `${c.slug}=${c.nome_pt}${c.nome_en ? ` / ${c.nome_en}` : ""}`)
       .join(", ");
 
-    // Enriquecimento web: Firecrawl busca + Groq sumariza em JSON estruturado.
+    // Enriquecimento web: Firecrawl busca + Gemini sumariza em JSON estruturado.
     let web: WebEnrichment | null = null;
     let webError: string | null = null;
     const pista = extracted.nome || extracted.nome_fantasia || extracted.site;
-    const firecrawlKey = process.env.FIRECRAWL_API_KEY;
+    const { getSecret } = await import("@/lib/secrets.server");
+    const firecrawlKey = await getSecret("FIRECRAWL_API_KEY");
     if (data.enriquecer_web && pista && firecrawlKey) {
       try {
         const q = [
@@ -1196,7 +1031,7 @@ Dados já conhecidos: nome="${extracted.nome ?? ""}" fantasia="${extracted.nome_
 CONTEÚDO:
 ${markdown.slice(0, 12000)}`;
 
-          web = await groqJson<WebEnrichment>(apiKey, enrichPrompt, 1400);
+          web = await iaJsonSeguro<WebEnrichment>(enrichPrompt, 1400);
           if (web && (!web.fontes || web.fontes.length === 0) && sources.length) {
             web.fontes = sources;
           }
@@ -1513,7 +1348,7 @@ export const listScanSubmissoes = createServerFn({ method: "GET" })
   });
 
 /* =============================================================
- * Re-enriquecer fornecedor: re-roda enriquecimento web (Firecrawl + Groq)
+ * Re-enriquecer fornecedor: re-roda enriquecimento web (Firecrawl + Gemini)
  * usando dados atuais do fornecedor. Atualiza categorias e observações
  * e grava entrada no histórico de submissões.
  * ============================================================= */
@@ -1524,8 +1359,9 @@ export const reenriquecerFornecedor = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { getSecret } = await import("@/lib/secrets.server");
-    const [apiKey, firecrawlKey] = await Promise.all([
-      getSecret("GROQ_API_KEY"),
+    const { aiConfigured } = await import("@/lib/ai-gateway.server");
+    const [iaOk, firecrawlKey] = await Promise.all([
+      aiConfigured(),
       getSecret("FIRECRAWL_API_KEY"),
     ]);
 
@@ -1537,9 +1373,9 @@ export const reenriquecerFornecedor = createServerFn({ method: "POST" })
     if (fErr) throw friendlyDbError(fErr);
     if (!f) throw new Error("Fornecedor não encontrado");
 
-    if (!apiKey || !firecrawlKey) {
-      const msg = !apiKey
-        ? "Leitura por IA indisponível — configure a conta Groq em Configurações › Chaves & Diagnóstico."
+    if (!iaOk || !firecrawlKey) {
+      const msg = !iaOk
+        ? "Leitura por IA indisponível — configure a chave do Gemini em Configurações › Chaves & Diagnóstico."
         : "Busca web indisponível — configure o Firecrawl em Configurações › Chaves & Diagnóstico.";
       return { ok: false as const, error: msg, web: null as WebEnrichment | null };
     }
@@ -1607,7 +1443,7 @@ Campos não encontrados = null. NÃO invente. Para "categorias_match", apenas sl
 Dados conhecidos: nome="${f.nome ?? ""}" fantasia="${f.nome_fantasia ?? ""}" site="${f.site ?? ""}" pais="${f.pais ?? ""}".
 CONTEÚDO:
 ${markdown.slice(0, 12000)}`;
-      web = await groqJson<WebEnrichment>(apiKey, enrichPrompt, 1400);
+      web = await iaJsonSeguro<WebEnrichment>(enrichPrompt, 1400);
       if (web && (!web.fontes || web.fontes.length === 0) && sources.length) {
         web.fontes = sources;
       }

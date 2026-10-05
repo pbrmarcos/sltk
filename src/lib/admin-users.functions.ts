@@ -426,6 +426,13 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
 
+    // Snapshot das roles antes de apagá-las — a reativação restaura.
+    const { data: rolesAtuais } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.id);
+    const snapshot = (rolesAtuais ?? []).map((r) => r.role);
+
     // Marca perfil como disabled (defense in depth) + soft delete.
     // Cast: colunas disabled_* recém-adicionadas; types.ts regenera após migration.
     const { error: upErr } = await admin
@@ -435,6 +442,7 @@ export const deactivateAdminUser = createServerFn({ method: "POST" })
         disabled: true,
         disabled_at: new Date().toISOString(),
         disabled_by: context.userId,
+        roles_snapshot: snapshot,
       } as never)
       .eq("id", data.id);
     if (upErr) throw friendlyDbError(upErr);
@@ -487,6 +495,15 @@ export const reactivateAdminUser = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId);
 
+    // Restaura as roles salvas na desativação (se houver snapshot).
+    const { data: perfil } = await admin
+      .from("profiles")
+      .select("roles_snapshot" as never)
+      .eq("id", data.id)
+      .maybeSingle();
+    const snapRaw = (perfil as unknown as { roles_snapshot?: unknown })?.roles_snapshot;
+    const snapshot = Array.isArray(snapRaw) ? (snapRaw as string[]) : [];
+
     const { error: upErr } = await admin
       .from("profiles")
       .update({
@@ -495,9 +512,20 @@ export const reactivateAdminUser = createServerFn({ method: "POST" })
         disabled_at: null,
         disabled_by: null,
         disabled_reason: null,
+        roles_snapshot: null,
       } as never)
       .eq("id", data.id);
     if (upErr) throw friendlyDbError(upErr);
+
+    if (snapshot.length > 0) {
+      const { error: rolesErr } = await admin.from("user_roles").upsert(
+        snapshot.map((role) => ({ user_id: data.id, role }) as never),
+        { onConflict: "user_id,role" },
+      );
+      if (rolesErr) {
+        console.error("[admin] restauração de roles falhou — atribua manualmente", rolesErr);
+      }
+    }
 
     const { error: banErr } = await admin.auth.admin.updateUserById(data.id, {
       ban_duration: "none",

@@ -63,6 +63,15 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Error("Unauthorized: No user ID found in token");
     }
 
+    // Usuário desativado/soft-deleted com JWT ainda válido não opera o servidor.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: ativo, error: ativoErr } = await (supabase.rpc as any)("is_user_active", {
+      _user_id: data.claims.sub,
+    });
+    if (!ativoErr && ativo === false) {
+      throw new Error("Unauthorized: Conta desativada. Fale com um administrador.");
+    }
+
     return next({
       context: {
         supabase,

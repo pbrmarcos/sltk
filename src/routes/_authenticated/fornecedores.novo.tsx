@@ -435,7 +435,7 @@ function NovoFornecedorPage() {
         categorias: matched.length
           ? Array.from(new Set([...prev.categorias, ...matched]))
           : prev.categorias,
-        // ===== Mescla campos avançados extraídos pelo Groq/Firecrawl =====
+        // ===== Mescla campos avançados extraídos pela IA/Firecrawl =====
         tax_id: prev.tax_id || (w as { tax_id?: string | null } | null)?.tax_id || prev.tax_id,
         tax_id_tipo:
           prev.tax_id_tipo ||
@@ -706,7 +706,7 @@ function NovoFornecedorPage() {
           { label: "Novo" },
         ]}
         title="Novo fornecedor"
-        subtitle="Cadastro manual ou scan automático (Groq Llama 4 Scout) de cartões/folders."
+        subtitle="Cadastro manual ou scan automático com IA (Gemini) de cartões/folders."
         actions={
           <Button variant="outline" onClick={() => navigate({ to: "/fornecedores" })}>
             <ArrowLeft className="h-4 w-4" /> Voltar
@@ -731,8 +731,8 @@ function NovoFornecedorPage() {
               Envie cartões de visita, folders ou catálogos
             </p>
             <p className="mt-1 text-[12.5px] text-[var(--text-muted)]">
-              JPG/PNG/WEBP até 6 imagens — OCR via Groq Llama 4 Scout vision + enriquecimento web
-              (Firecrawl + Llama 3.3 70B).
+              JPG/PNG/WEBP até 6 imagens — OCR via Gemini (visão) + enriquecimento web (Firecrawl +
+              Llama 3.3 70B).
             </p>
 
             <p className="mt-2 text-[11.5px] text-[var(--text-muted)]">
@@ -855,7 +855,7 @@ function NovoFornecedorPage() {
           {scanError ? (
             <Alert variant="destructive" className="mt-4">
               <AlertTitle>
-                Groq não conseguiu analisar as imagens
+                A IA não conseguiu analisar as imagens
                 {scanError.status ? ` — HTTP ${scanError.status}` : ""}
                 {scanError.code ? ` (${scanError.code})` : ""}
               </AlertTitle>
@@ -863,7 +863,7 @@ function NovoFornecedorPage() {
                 <p>{scanError.message}</p>
                 {scanError.action ? (
                   <p className="rounded bg-black/10 px-2 py-1 font-mono text-[11.5px] leading-relaxed">
-                    Detalhe Groq: {scanError.action}
+                    Detalhe do provedor: {scanError.action}
                   </p>
                 ) : null}
                 {scanError.logged_at ? (
@@ -874,8 +874,8 @@ function NovoFornecedorPage() {
                 ) : null}
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Button type="button" variant="outline" size="sm" asChild>
-                    <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">
-                      Gerenciar chave no console Groq ↗
+                    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">
+                      Gerenciar chave no Google AI Studio ↗
                     </a>
                   </Button>
                   <Button
@@ -1909,7 +1909,7 @@ function ScanProgress({
 }
 
 // ============================================================
-// Review AI Panel — confirmação dos campos preenchidos pelo Groq
+// Review AI Panel — confirmação dos campos preenchidos pela IA
 // ============================================================
 const AI_FIELD_LABELS: Record<string, string> = {
   nome: "Razão social",

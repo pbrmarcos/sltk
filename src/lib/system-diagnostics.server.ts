@@ -124,12 +124,13 @@ async function probe(cap: CapabilityDef): Promise<{
             latencia_ms: r.ms,
           };
     }
-    case "groq": {
-      const key = process.env.GROQ_API_KEY;
+    case "gemini": {
+      const { getSecret } = await import("@/lib/secrets.server");
+      const key = await getSecret("GEMINI_API_KEY");
       if (!key) return { status: "ausente", detalhe: "Chave não configurada." };
-      const r = await timedFetch("https://api.groq.com/openai/v1/models", {
-        headers: { Authorization: `Bearer ${key}` },
-      });
+      const r = await timedFetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=1`,
+      );
       return r.ok
         ? { status: "ok", detalhe: "Chave válida.", latencia_ms: r.ms }
         : {
@@ -139,7 +140,8 @@ async function probe(cap: CapabilityDef): Promise<{
           };
     }
     case "firecrawl": {
-      const key = process.env.FIRECRAWL_API_KEY;
+      const { getSecret } = await import("@/lib/secrets.server");
+      const key = await getSecret("FIRECRAWL_API_KEY");
       if (!key) return { status: "ausente", detalhe: "Chave não configurada." };
       const r = await timedFetch("https://api.firecrawl.dev/v2/team/credit-usage", {
         headers: { Authorization: `Bearer ${key}` },
@@ -153,7 +155,8 @@ async function probe(cap: CapabilityDef): Promise<{
           };
     }
     case "resend": {
-      const key = process.env.RESEND_API_KEY;
+      const { getSecret } = await import("@/lib/secrets.server");
+      const key = await getSecret("RESEND_API_KEY");
       if (!key) return { status: "ausente", detalhe: "Chave não configurada." };
       const r = await timedFetch("https://api.resend.com/domains", {
         headers: { Authorization: `Bearer ${key}` },

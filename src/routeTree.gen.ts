@@ -64,6 +64,7 @@ import { Route as AuthenticatedComercialPipelineRouteImport } from './routes/_au
 import { Route as AuthenticatedComercialMineracaoRouteImport } from './routes/_authenticated/comercial.mineracao'
 import { Route as AuthenticatedComercialEntrevistasRouteImport } from './routes/_authenticated/comercial.entrevistas'
 import { Route as AuthenticatedComercialChecklistsRouteImport } from './routes/_authenticated/comercial.checklists'
+import { Route as AuthenticatedClientesSuspectFotoRouteImport } from './routes/_authenticated/clientes.suspect-foto'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes.novo'
 import { Route as AuthenticatedClientesCodigoRouteImport } from './routes/_authenticated/clientes.$codigo'
 import { Route as AuthenticatedAjudaFaqRouteImport } from './routes/_authenticated/ajuda.faq'
@@ -75,6 +76,7 @@ import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminSuporteRouteImport } from './routes/_authenticated/admin.suporte'
 import { Route as AuthenticatedAdminSlaChamadosRouteImport } from './routes/_authenticated/admin.sla-chamados'
 import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
+import { Route as AuthenticatedAdminProspeccaoRouteImport } from './routes/_authenticated/admin.prospeccao'
 import { Route as AuthenticatedAdminPaginasEquipamentosRouteImport } from './routes/_authenticated/admin.paginas-equipamentos'
 import { Route as AuthenticatedAdminOrigensLeadRouteImport } from './routes/_authenticated/admin.origens-lead'
 import { Route as AuthenticatedAdminModelosFormularioRouteImport } from './routes/_authenticated/admin.modelos-formulario'
@@ -438,6 +440,12 @@ const AuthenticatedComercialChecklistsRoute =
     path: '/comercial/checklists',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientesSuspectFotoRoute =
+  AuthenticatedClientesSuspectFotoRouteImport.update({
+    id: '/clientes/suspect-foto',
+    path: '/clientes/suspect-foto',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedClientesNovoRoute =
   AuthenticatedClientesNovoRouteImport.update({
     id: '/clientes/novo',
@@ -501,6 +509,12 @@ const AuthenticatedAdminSeoRoute = AuthenticatedAdminSeoRouteImport.update({
   path: '/seo',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminProspeccaoRoute =
+  AuthenticatedAdminProspeccaoRouteImport.update({
+    id: '/prospeccao',
+    path: '/prospeccao',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPaginasEquipamentosRoute =
   AuthenticatedAdminPaginasEquipamentosRouteImport.update({
     id: '/paginas-equipamentos',
@@ -897,6 +911,7 @@ export interface FileRoutesByFullPath {
   '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
   '/admin/origens-lead': typeof AuthenticatedAdminOrigensLeadRoute
   '/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
+  '/admin/prospeccao': typeof AuthenticatedAdminProspeccaoRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/sla-chamados': typeof AuthenticatedAdminSlaChamadosRoute
   '/admin/suporte': typeof AuthenticatedAdminSuporteRoute
@@ -908,6 +923,7 @@ export interface FileRoutesByFullPath {
   '/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
   '/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/suspect-foto': typeof AuthenticatedClientesSuspectFotoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
   '/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
@@ -1021,6 +1037,7 @@ export interface FileRoutesByTo {
   '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
   '/admin/origens-lead': typeof AuthenticatedAdminOrigensLeadRoute
   '/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
+  '/admin/prospeccao': typeof AuthenticatedAdminProspeccaoRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/sla-chamados': typeof AuthenticatedAdminSlaChamadosRoute
   '/admin/suporte': typeof AuthenticatedAdminSuporteRoute
@@ -1031,6 +1048,7 @@ export interface FileRoutesByTo {
   '/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
   '/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/suspect-foto': typeof AuthenticatedClientesSuspectFotoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
   '/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
@@ -1146,6 +1164,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
   '/_authenticated/admin/origens-lead': typeof AuthenticatedAdminOrigensLeadRoute
   '/_authenticated/admin/paginas-equipamentos': typeof AuthenticatedAdminPaginasEquipamentosRoute
+  '/_authenticated/admin/prospeccao': typeof AuthenticatedAdminProspeccaoRoute
   '/_authenticated/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/_authenticated/admin/sla-chamados': typeof AuthenticatedAdminSlaChamadosRoute
   '/_authenticated/admin/suporte': typeof AuthenticatedAdminSuporteRoute
@@ -1157,6 +1176,7 @@ export interface FileRoutesById {
   '/_authenticated/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
   '/_authenticated/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/_authenticated/clientes/suspect-foto': typeof AuthenticatedClientesSuspectFotoRoute
   '/_authenticated/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/_authenticated/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
   '/_authenticated/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
@@ -1274,6 +1294,7 @@ export interface FileRouteTypes {
     | '/admin/modelos-formulario'
     | '/admin/origens-lead'
     | '/admin/paginas-equipamentos'
+    | '/admin/prospeccao'
     | '/admin/seo'
     | '/admin/sla-chamados'
     | '/admin/suporte'
@@ -1285,6 +1306,7 @@ export interface FileRouteTypes {
     | '/ajuda/faq'
     | '/clientes/$codigo'
     | '/clientes/novo'
+    | '/clientes/suspect-foto'
     | '/comercial/checklists'
     | '/comercial/entrevistas'
     | '/comercial/mineracao'
@@ -1398,6 +1420,7 @@ export interface FileRouteTypes {
     | '/admin/modelos-formulario'
     | '/admin/origens-lead'
     | '/admin/paginas-equipamentos'
+    | '/admin/prospeccao'
     | '/admin/seo'
     | '/admin/sla-chamados'
     | '/admin/suporte'
@@ -1408,6 +1431,7 @@ export interface FileRouteTypes {
     | '/ajuda/faq'
     | '/clientes/$codigo'
     | '/clientes/novo'
+    | '/clientes/suspect-foto'
     | '/comercial/checklists'
     | '/comercial/entrevistas'
     | '/comercial/mineracao'
@@ -1522,6 +1546,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/modelos-formulario'
     | '/_authenticated/admin/origens-lead'
     | '/_authenticated/admin/paginas-equipamentos'
+    | '/_authenticated/admin/prospeccao'
     | '/_authenticated/admin/seo'
     | '/_authenticated/admin/sla-chamados'
     | '/_authenticated/admin/suporte'
@@ -1533,6 +1558,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ajuda/faq'
     | '/_authenticated/clientes/$codigo'
     | '/_authenticated/clientes/novo'
+    | '/_authenticated/clientes/suspect-foto'
     | '/_authenticated/comercial/checklists'
     | '/_authenticated/comercial/entrevistas'
     | '/_authenticated/comercial/mineracao'
@@ -2023,6 +2049,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComercialChecklistsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clientes/suspect-foto': {
+      id: '/_authenticated/clientes/suspect-foto'
+      path: '/clientes/suspect-foto'
+      fullPath: '/clientes/suspect-foto'
+      preLoaderRoute: typeof AuthenticatedClientesSuspectFotoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clientes/novo': {
       id: '/_authenticated/clientes/novo'
       path: '/clientes/novo'
@@ -2098,6 +2131,13 @@ declare module '@tanstack/react-router' {
       path: '/seo'
       fullPath: '/admin/seo'
       preLoaderRoute: typeof AuthenticatedAdminSeoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/prospeccao': {
+      id: '/_authenticated/admin/prospeccao'
+      path: '/prospeccao'
+      fullPath: '/admin/prospeccao'
+      preLoaderRoute: typeof AuthenticatedAdminProspeccaoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/paginas-equipamentos': {
@@ -2552,6 +2592,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminModelosFormularioRoute: typeof AuthenticatedAdminModelosFormularioRoute
   AuthenticatedAdminOrigensLeadRoute: typeof AuthenticatedAdminOrigensLeadRoute
   AuthenticatedAdminPaginasEquipamentosRoute: typeof AuthenticatedAdminPaginasEquipamentosRoute
+  AuthenticatedAdminProspeccaoRoute: typeof AuthenticatedAdminProspeccaoRoute
   AuthenticatedAdminSeoRoute: typeof AuthenticatedAdminSeoRoute
   AuthenticatedAdminSlaChamadosRoute: typeof AuthenticatedAdminSlaChamadosRoute
   AuthenticatedAdminSuporteRoute: typeof AuthenticatedAdminSuporteRoute
@@ -2581,6 +2622,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOrigensLeadRoute: AuthenticatedAdminOrigensLeadRoute,
   AuthenticatedAdminPaginasEquipamentosRoute:
     AuthenticatedAdminPaginasEquipamentosRoute,
+  AuthenticatedAdminProspeccaoRoute: AuthenticatedAdminProspeccaoRoute,
   AuthenticatedAdminSeoRoute: AuthenticatedAdminSeoRoute,
   AuthenticatedAdminSlaChamadosRoute: AuthenticatedAdminSlaChamadosRoute,
   AuthenticatedAdminSuporteRoute: AuthenticatedAdminSuporteRoute,
@@ -2757,6 +2799,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjudaFaqRoute: typeof AuthenticatedAjudaFaqRoute
   AuthenticatedClientesCodigoRoute: typeof AuthenticatedClientesCodigoRouteWithChildren
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
+  AuthenticatedClientesSuspectFotoRoute: typeof AuthenticatedClientesSuspectFotoRoute
   AuthenticatedComercialChecklistsRoute: typeof AuthenticatedComercialChecklistsRoute
   AuthenticatedComercialEntrevistasRoute: typeof AuthenticatedComercialEntrevistasRouteWithChildren
   AuthenticatedComercialMineracaoRoute: typeof AuthenticatedComercialMineracaoRoute
@@ -2819,6 +2862,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesCodigoRoute:
     AuthenticatedClientesCodigoRouteWithChildren,
   AuthenticatedClientesNovoRoute: AuthenticatedClientesNovoRoute,
+  AuthenticatedClientesSuspectFotoRoute: AuthenticatedClientesSuspectFotoRoute,
   AuthenticatedComercialChecklistsRoute: AuthenticatedComercialChecklistsRoute,
   AuthenticatedComercialEntrevistasRoute:
     AuthenticatedComercialEntrevistasRouteWithChildren,
