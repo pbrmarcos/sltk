@@ -80,6 +80,7 @@ import { Route as AuthenticatedAdminOrigensLeadRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminModelosFormularioRouteImport } from './routes/_authenticated/admin.modelos-formulario'
 import { Route as AuthenticatedAdminMineracaoRouteImport } from './routes/_authenticated/admin.mineracao'
 import { Route as AuthenticatedAdminMigrationsRouteImport } from './routes/_authenticated/admin.migrations'
+import { Route as AuthenticatedAdminManutencaoRouteImport } from './routes/_authenticated/admin.manutencao'
 import { Route as AuthenticatedAdminGeralRouteImport } from './routes/_authenticated/admin.geral'
 import { Route as AuthenticatedAdminFormulariosRecebidosRouteImport } from './routes/_authenticated/admin.formularios-recebidos'
 import { Route as AuthenticatedAdminEtapasEquipamentosRouteImport } from './routes/_authenticated/admin.etapas-equipamentos'
@@ -530,6 +531,12 @@ const AuthenticatedAdminMigrationsRoute =
     path: '/migrations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminManutencaoRoute =
+  AuthenticatedAdminManutencaoRouteImport.update({
+    id: '/manutencao',
+    path: '/manutencao',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminGeralRoute = AuthenticatedAdminGeralRouteImport.update({
   id: '/geral',
   path: '/geral',
@@ -884,6 +891,7 @@ export interface FileRoutesByFullPath {
   '/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/admin/geral': typeof AuthenticatedAdminGeralRoute
+  '/admin/manutencao': typeof AuthenticatedAdminManutencaoRoute
   '/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
   '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
@@ -1007,6 +1015,7 @@ export interface FileRoutesByTo {
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/admin/geral': typeof AuthenticatedAdminGeralRoute
+  '/admin/manutencao': typeof AuthenticatedAdminManutencaoRoute
   '/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
   '/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
@@ -1131,6 +1140,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/etapas-equipamentos': typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   '/_authenticated/admin/formularios-recebidos': typeof AuthenticatedAdminFormulariosRecebidosRoute
   '/_authenticated/admin/geral': typeof AuthenticatedAdminGeralRoute
+  '/_authenticated/admin/manutencao': typeof AuthenticatedAdminManutencaoRoute
   '/_authenticated/admin/migrations': typeof AuthenticatedAdminMigrationsRoute
   '/_authenticated/admin/mineracao': typeof AuthenticatedAdminMineracaoRoute
   '/_authenticated/admin/modelos-formulario': typeof AuthenticatedAdminModelosFormularioRoute
@@ -1258,6 +1268,7 @@ export interface FileRouteTypes {
     | '/admin/etapas-equipamentos'
     | '/admin/formularios-recebidos'
     | '/admin/geral'
+    | '/admin/manutencao'
     | '/admin/migrations'
     | '/admin/mineracao'
     | '/admin/modelos-formulario'
@@ -1381,6 +1392,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/formularios-recebidos'
     | '/admin/geral'
+    | '/admin/manutencao'
     | '/admin/migrations'
     | '/admin/mineracao'
     | '/admin/modelos-formulario'
@@ -1504,6 +1516,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/etapas-equipamentos'
     | '/_authenticated/admin/formularios-recebidos'
     | '/_authenticated/admin/geral'
+    | '/_authenticated/admin/manutencao'
     | '/_authenticated/admin/migrations'
     | '/_authenticated/admin/mineracao'
     | '/_authenticated/admin/modelos-formulario'
@@ -2122,6 +2135,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMigrationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/manutencao': {
+      id: '/_authenticated/admin/manutencao'
+      path: '/manutencao'
+      fullPath: '/admin/manutencao'
+      preLoaderRoute: typeof AuthenticatedAdminManutencaoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/geral': {
       id: '/_authenticated/admin/geral'
       path: '/geral'
@@ -2526,6 +2546,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEtapasEquipamentosRoute: typeof AuthenticatedAdminEtapasEquipamentosRouteWithChildren
   AuthenticatedAdminFormulariosRecebidosRoute: typeof AuthenticatedAdminFormulariosRecebidosRoute
   AuthenticatedAdminGeralRoute: typeof AuthenticatedAdminGeralRoute
+  AuthenticatedAdminManutencaoRoute: typeof AuthenticatedAdminManutencaoRoute
   AuthenticatedAdminMigrationsRoute: typeof AuthenticatedAdminMigrationsRoute
   AuthenticatedAdminMineracaoRoute: typeof AuthenticatedAdminMineracaoRoute
   AuthenticatedAdminModelosFormularioRoute: typeof AuthenticatedAdminModelosFormularioRoute
@@ -2552,6 +2573,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFormulariosRecebidosRoute:
     AuthenticatedAdminFormulariosRecebidosRoute,
   AuthenticatedAdminGeralRoute: AuthenticatedAdminGeralRoute,
+  AuthenticatedAdminManutencaoRoute: AuthenticatedAdminManutencaoRoute,
   AuthenticatedAdminMigrationsRoute: AuthenticatedAdminMigrationsRoute,
   AuthenticatedAdminMineracaoRoute: AuthenticatedAdminMineracaoRoute,
   AuthenticatedAdminModelosFormularioRoute:

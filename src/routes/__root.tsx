@@ -17,6 +17,7 @@ import { checkClientEnv } from "@/lib/env-check";
 import { installClientTelemetry, trackClientError } from "@/lib/client-telemetry";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { MaintenanceGate } from "@/components/site/MaintenanceGate";
 
 const faviconUrl = "/site-images/favicon.png";
 
@@ -206,7 +207,9 @@ function RootComponent() {
       <AuthProvider>
         <BrandSettingsProvider>
           <TooltipProvider delayDuration={150}>
-            <Outlet />
+            <MaintenanceGate>
+              <Outlet />
+            </MaintenanceGate>
             <Toaster richColors position="top-right" />
           </TooltipProvider>
         </BrandSettingsProvider>
