@@ -1,4 +1,3 @@
-import { assetUrl } from "@/lib/asset-url";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -8,7 +7,7 @@ import { ChecklistStatusPanel } from "@/components/checklist/ChecklistStatusPane
 import type { Idioma } from "@/lib/checklist.shared";
 import { pickLabel } from "@/lib/checklist.shared";
 import { CheckCircle2, AlertTriangle, Clock, ShieldCheck } from "lucide-react";
-import solutekLogo from "@/assets/favicon.png.asset.json";
+const SOLUTEK_LOGO = "/site-images/favicon.png";
 
 export const Route = createFileRoute("/checklist/$slug")({
   component: PublicChecklistPage,
@@ -202,11 +201,7 @@ function PublicChecklistPage() {
     <div className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background">
       <header className="border-b border-border bg-card/70 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-start gap-4 px-4 py-6">
-          <img
-            src={assetUrl(solutekLogo.url)}
-            alt="Solutek"
-            className="h-10 w-10 shrink-0 rounded-md"
-          />
+          <img src={SOLUTEK_LOGO} alt="Solutek" className="h-10 w-10 shrink-0 rounded-md" />
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold uppercase tracking-wider text-primary">
               {h.kicker} · Solutek

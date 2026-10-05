@@ -1,6 +1,6 @@
-export const STATIC_SUPABASE_URL = "https://zdrjvjwvrxwxztvrxtwp.supabase.co";
-export const STATIC_SUPABASE_PUBLISHABLE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpkcmp2and2cnh3eHp0dnJ4dHdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMzI3MDksImV4cCI6MjA5NjgwODcwOX0.VhyBz09id7RJ4-oYknkxPT5wBRTwNJRHg1eSiZ267FM";
+// Fallback = projeto de produção (SLTK America PBR). Env vars sempre têm precedência.
+export const STATIC_SUPABASE_URL = "https://ehuzvwzonmsqqbpvdyza.supabase.co";
+export const STATIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_e4Lei-_QM1wsUfaS_A1c0A_LJPE-htY";
 
 type SupabasePublicConfig = {
   url: string;

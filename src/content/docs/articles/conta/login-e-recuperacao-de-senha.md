@@ -22,7 +22,7 @@ app_version: "0.99.4"
 ## Entrar no sistema
 
 :::step{n="1" title="Abrir /login"}
-Acesse a URL da sua empresa (ex.: `https://solutek-hub.lovable.app/login`). O formulário pede e-mail corporativo e senha.
+Acesse a URL da sua empresa (ex.: `https://sltkamericas.com/login`). O formulário pede e-mail corporativo e senha.
 :::
 
 :::step{n="2" title="Preencher e enviar"}

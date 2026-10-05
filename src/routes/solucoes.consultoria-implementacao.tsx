@@ -1,4 +1,3 @@
-import { assetUrl } from "@/lib/asset-url";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   LineChart,
@@ -12,12 +11,12 @@ import {
 } from "lucide-react";
 import { PublicSiteShell } from "@/components/site/PublicSiteShell";
 import { SolucaoPageTemplate } from "@/components/site/SolucaoPageTemplate";
-import heroAsset from "@/assets/solucoes/20240525-182910-0.webp.asset.json";
-import gRobot from "@/assets/solucoes/20231114-151233.webp.asset.json";
-import gMont from "@/assets/solucoes/20250317-102758.webp.asset.json";
+const HERO = "/site-images/solucoes/20240525-182910-0.webp";
+const G_ROBOT = "/site-images/solucoes/20231114-151233.webp";
+const G_MONT = "/site-images/solucoes/20250317-102758.webp";
 
 const CANONICAL = "https://sltkamericas.com/solucoes/consultoria-implementacao";
-const HERO_ABS = assetUrl(heroAsset.url);
+const HERO_ABS = `https://sltkamericas.com${HERO}`;
 
 export const Route = createFileRoute("/solucoes/consultoria-implementacao")({
   head: () => ({
@@ -70,7 +69,7 @@ function Page() {
         eyebrow="Soluções Solutek"
         title="Consultoria e implementação para indústria 4.0."
         subtitle="Antes de comprar máquina, é preciso entender o gargalo. Nossa consultoria diagnostica sua operação, propõe o roadmap certo e acompanha a execução até o resultado medido no chão de fábrica."
-        heroImage={assetUrl(heroAsset.url)}
+        heroImage={HERO}
         heroAlt="Showroom Solutek com equipamentos e painéis institucionais"
         ctaAssunto="Consultoria & Implementação"
         intro={
@@ -134,17 +133,17 @@ function Page() {
         ]}
         gallery={[
           {
-            src: assetUrl(heroAsset.url),
+            src: HERO,
             alt: "Showroom Solutek com mapa mundial",
             caption: "Solutek Américas — engenharia e implementação sob o mesmo teto.",
           },
           {
-            src: assetUrl(gRobot.url),
+            src: G_ROBOT,
             alt: "Célula robótica Solutek com robô antropomórfico azul",
             caption: "Célula robótica piloto — PoC antes da escala.",
           },
           {
-            src: assetUrl(gMont.url),
+            src: G_MONT,
             alt: "Estrutura Solutek em fase de comissionamento",
             caption: "Comissionamento assistido em campo, com equipe do cliente.",
           },

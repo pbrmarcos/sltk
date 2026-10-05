@@ -15,7 +15,7 @@ export const SAMPLE_VARS: Record<string, string> = {
   valor: "R$ 42.850,00",
   motivo: "Fornecedor não homologado — aguardando parecer da Qualidade.",
   observacao: "Prazo de entrega antecipado em 3 dias úteis.",
-  link: "https://solutek-hub.lovable.app/compras/ordens/exemplo",
+  link: "https://sltkamericas.com/compras/ordens/exemplo",
   prazo: "28/07/2026",
   data: new Date().toLocaleString("pt-BR"),
   tag_equipamento: "ENV-1014",

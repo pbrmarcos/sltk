@@ -1,4 +1,3 @@
-import { assetUrl } from "@/lib/asset-url";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Package,
@@ -12,13 +11,13 @@ import {
 } from "lucide-react";
 import { PublicSiteShell } from "@/components/site/PublicSiteShell";
 import { SolucaoPageTemplate } from "@/components/site/SolucaoPageTemplate";
-import heroAsset from "@/assets/solucoes/flowpack-101.7.webp.asset.json";
-import gRondo from "@/assets/solucoes/flowpack-100-rondofish.18.webp.asset.json";
-import gVerde from "@/assets/solucoes/verde-valle-100.39.webp.asset.json";
-import gClose from "@/assets/solucoes/close-final-01.webp.asset.json";
+const HERO = "/site-images/solucoes/flowpack-101.7.webp";
+const G_RONDO = "/site-images/solucoes/flowpack-100-rondofish.18.webp";
+const G_VERDE = "/site-images/solucoes/verde-valle-100.39.webp";
+const G_CLOSE = "/site-images/solucoes/close-final-01.webp";
 
 const CANONICAL = "https://sltkamericas.com/solucoes/tecnologia-de-processos";
-const HERO_ABS = assetUrl(heroAsset.url);
+const HERO_ABS = `https://sltkamericas.com${HERO}`;
 
 export const Route = createFileRoute("/solucoes/tecnologia-de-processos")({
   head: () => ({
@@ -72,7 +71,7 @@ function Page() {
         eyebrow="Soluções Solutek"
         title="Tecnologia de processos para embalagem industrial."
         subtitle="Máquinas e linhas de flowpack, case-packing, envase e codificação desenvolvidas com engenharia proprietária Solutek — desempenho, higiene e trocas rápidas por design."
-        heroImage={assetUrl(heroAsset.url)}
+        heroImage={HERO}
         heroAlt="Case-packer Solutek em operação, com esteira de saída"
         ctaAssunto="Tecnologia de Processos"
         intro={
@@ -138,22 +137,22 @@ function Page() {
         ]}
         gallery={[
           {
-            src: assetUrl(heroAsset.url),
+            src: HERO,
             alt: "Case-packer Solutek em vista frontal",
             caption: "Case-packer Solutek — encaixotamento automático de embalagens primárias.",
           },
           {
-            src: assetUrl(gRondo.url),
+            src: G_RONDO,
             alt: "Flowpack Solutek em aço inox",
             caption: "Flowpack inox para linhas de pescado e proteína.",
           },
           {
-            src: assetUrl(gVerde.url),
+            src: G_VERDE,
             alt: "Linha Solutek com esteira longa e wrapping",
             caption: "Linha completa com esteira de acumulação e wrapper.",
           },
           {
-            src: assetUrl(gClose.url),
+            src: G_CLOSE,
             alt: "Detalhe da envasadora rotativa Solutek",
             caption: "Detalhe: tanque de alimentação e envase rotativo.",
           },

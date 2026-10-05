@@ -14,7 +14,7 @@
  */
 
 const BRAND = "SLTK Americas";
-const BRAND_URL = "https://solutek-hub.lovable.app";
+const BRAND_URL = "https://sltkamericas.com";
 const SENDER = "system@sltkamericas.com";
 
 export interface EmailLayoutOptions {

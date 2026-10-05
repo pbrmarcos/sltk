@@ -1,4 +1,3 @@
-import { assetUrl } from "@/lib/asset-url";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -32,9 +31,8 @@ import {
   isValidEmail,
   type Idioma,
 } from "@/lib/entrevistas-shared";
-import fallbackLogoAsset from "@/assets/brand-logo-dark.svg.asset.json";
 
-const FALLBACK_LOGO_URL: string = assetUrl(fallbackLogoAsset.url);
+const FALLBACK_LOGO_URL = "/site-images/brand-logo-dark.svg";
 
 export const Route = createFileRoute("/entrevista/$codigo")({
   component: PublicInterviewPage,

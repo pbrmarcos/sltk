@@ -1,14 +1,14 @@
-import { assetUrl } from "@/lib/asset-url";
 import { createFileRoute } from "@tanstack/react-router";
 import { Cpu, Cog, Network, Wrench, Zap, ShieldCheck, BarChart3, Rocket } from "lucide-react";
 import { PublicSiteShell } from "@/components/site/PublicSiteShell";
 import { SolucaoPageTemplate } from "@/components/site/SolucaoPageTemplate";
-import heroAsset from "@/assets/solucoes/20250317-102758.webp.asset.json";
-import gAliace from "@/assets/solucoes/aliace-com-adesivos-01.10.webp.asset.json";
-import gFachada from "@/assets/solucoes/20240525-182910-0.webp.asset.json";
+
+const HERO = "/site-images/solucoes/20250317-102758.webp";
+const G_ALIACE = "/site-images/solucoes/aliace-com-adesivos-01.10.webp";
+const G_FACHADA = "/site-images/solucoes/20240525-182910-0.webp";
 
 const CANONICAL = "https://sltkamericas.com/solucoes/projetos-industriais-automacao";
-const HERO_ABS = assetUrl(heroAsset.url);
+const HERO_ABS = `https://sltkamericas.com${HERO}`;
 
 export const Route = createFileRoute("/solucoes/projetos-industriais-automacao")({
   head: () => ({
@@ -62,7 +62,7 @@ function Page() {
         eyebrow="Soluções Solutek"
         title="Projetos industriais e automação turn-key."
         subtitle="Da concepção do layout ao start-up assistido. Engenharia mecânica, elétrica, automação e integração de dados, entregues por um único time responsável pelo desempenho da linha."
-        heroImage={assetUrl(heroAsset.url)}
+        heroImage={HERO}
         heroAlt="Montagem de estrutura Solutek em campo, com técnicos operando"
         ctaAssunto="Projeto Industrial & Automação"
         intro={
@@ -128,12 +128,12 @@ function Page() {
         ]}
         gallery={[
           {
-            src: assetUrl(gAliace.url),
+            src: G_ALIACE,
             alt: "Linha completa de envase de bombonas com automação Solutek",
             caption: "Linha automatizada de envase e rotulagem — projeto turn-key.",
           },
           {
-            src: assetUrl(gFachada.url),
+            src: G_FACHADA,
             alt: "Fábrica Solutek com backdrop institucional",
             caption: "Fábrica Solutek — engenharia e integração sob o mesmo teto.",
           },
