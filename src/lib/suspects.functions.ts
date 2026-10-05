@@ -204,9 +204,8 @@ export const createSuspectRapido = createServerFn({ method: "POST" })
       .select("codigo, documento_nome, moeda_padrao, idioma_padrao")
       .eq("codigo", data.pais)
       .maybeSingle();
-    const moedaPais = (paisCfg?.moeda_padrao as string) ?? "BRL";
-    // clientes.moeda tem CHECK restrito (BRL/USD/EUR/PYG) — fora disso usa USD.
-    const moeda = ["BRL", "USD", "EUR", "PYG"].includes(moedaPais) ? moedaPais : "USD";
+    const { toMoedaISO } = await import("@/lib/moedas");
+    const moeda = toMoedaISO(paisCfg?.moeda_padrao ?? "BRL", "USD");
     const idioma = (paisCfg?.idioma_padrao as string) ?? "pt";
     const docTipo = (paisCfg?.documento_nome as string) ?? "CNPJ";
 

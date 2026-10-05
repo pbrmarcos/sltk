@@ -24,6 +24,9 @@ export const Route = createFileRoute("/api/public/checklist/status")({
         }),
       GET: async ({ request }) => {
         try {
+          const { limiteRotaPublica } = await import("@/lib/rate-limit.server");
+          const bloqueio = await limiteRotaPublica(request, "checklist-status", 60, 60_000, {});
+          if (bloqueio) return bloqueio;
           const url = new URL(request.url);
           const parsed = q.safeParse({
             slug: url.searchParams.get("slug"),

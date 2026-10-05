@@ -432,6 +432,20 @@ export function ConvertWizardDialog({
       toast.success(
         `Cliente ${r.cliente_codigo} ativado. ${r.processos.length} processo(s) criado(s).`,
       );
+      const semTemplate = r.processos.filter(
+        (p) =>
+          !p.template_aplicado &&
+          Object.values(plans).some((pl) => pl.action === "win" && pl.template_id),
+      );
+      if (semTemplate.length > 0) {
+        toast.warning(
+          `Template de etapas não aplicado em ${semTemplate.map((p) => p.processo_codigo).join(", ")}.`,
+          {
+            description:
+              "O processo foi criado sem etapas/tarefas. Aplique o template manualmente.",
+          },
+        );
+      }
       qc.invalidateQueries({ queryKey: ["oportunidades", "pipeline"] });
       qc.invalidateQueries({ queryKey: ["clientes"] });
       if (clienteId) {

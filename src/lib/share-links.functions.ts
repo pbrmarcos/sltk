@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { getRequestHeader } from "@tanstack/react-start/server";
+import { clientIpFromHeaders } from "@/lib/request-meta.server";
+import { rateLimitPorIp } from "@/lib/rate-limit.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasRole } from "@/lib/admin-guard";
@@ -229,19 +231,34 @@ function shareErr(
   return e;
 }
 
-function readRequestMeta(): { ip: string | null; user_agent: string | null } {
+/** Limites por escopo para as rotas públicas de relatório (por IP, janela de 1 min). */
+const LIMITES_PUBLICOS = {
+  ler: 60,
+  escrever: 120,
+  upload: 30,
+  assinar: 10,
+  pdf: 5,
+} as const;
+
+function readRequestMeta(escopo?: keyof typeof LIMITES_PUBLICOS): {
+  ip: string | null;
+  user_agent: string | null;
+} {
+  let meta: { ip: string | null; user_agent: string | null };
   try {
-    const ua = getRequestHeader("user-agent") ?? null;
-    const xff = getRequestHeader("x-forwarded-for");
-    const ip =
-      xff?.split(",")[0]?.trim() ||
-      getRequestHeader("cf-connecting-ip") ||
-      getRequestHeader("x-real-ip") ||
-      null;
-    return { ip: ip ?? null, user_agent: ua };
+    const h = new Headers();
+    for (const nome of ["user-agent", "x-real-ip", "x-forwarded-for", "cf-connecting-ip"]) {
+      const v = getRequestHeader(nome);
+      if (v) h.set(nome, v);
+    }
+    meta = { ip: clientIpFromHeaders(h), user_agent: h.get("user-agent") };
   } catch {
-    return { ip: null, user_agent: null };
+    meta = { ip: null, user_agent: null };
   }
+  if (escopo) {
+    rateLimitPorIp(`relatorio-${escopo}`, meta.ip, LIMITES_PUBLICOS[escopo], 60_000);
+  }
+  return meta;
 }
 
 async function loadActiveLink(token: string) {
@@ -349,7 +366,7 @@ async function logVisualizacaoSeguro(
 export const publicGetRelatorio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ token: z.string().min(10) }).parse(input))
   .handler(async ({ data }) => {
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("ler");
     let loaded;
     try {
       loaded = await loadActiveLink(data.token);
@@ -549,7 +566,7 @@ const setRespInput = z.object({
 export const publicSetChecklistResposta = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => setRespInput.parse(input))
   .handler(async ({ data }) => {
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("escrever");
     const { payload, link } = await loadActiveLink(data.token);
     if (payload.tipo !== "fat") throw new Error("Token não é de um relatório FAT.");
     if (!payload.scope.includes("checklist")) throw new Error("Link sem permissão de checklist.");
@@ -611,19 +628,28 @@ const FAT_FOTO_MIME_LIMITS: Record<string, number> = {
   "image/heic": 25 * 1024 * 1024,
 };
 
+const FAT_FOTO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/heic": "heic",
+};
+
 const uploadFatFotoInput = z.object({
   token: z.string().min(10),
   template_id: z.string().uuid(),
   filename: z.string().min(1).max(200),
   mime_type: z.string().min(3).max(100),
   size_bytes: z.number().int().positive(),
-  data_base64: z.string().min(20),
+  // 25MB em base64 ≈ 34M caracteres — corta payload abusivo antes de decodificar.
+  data_base64: z.string().min(20).max(35_000_000),
 });
 
 export const publicUploadFatFoto = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => uploadFatFotoInput.parse(input))
   .handler(async ({ data }) => {
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("upload");
     const { payload, link } = await loadActiveLink(data.token);
     if (payload.tipo !== "fat") throw new Error("Token não é de um relatório FAT.");
     if (!payload.scope.includes("checklist")) throw new Error("Link sem permissão de checklist.");
@@ -637,9 +663,13 @@ export const publicUploadFatFoto = createServerFn({ method: "POST" })
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
 
-    const ext = data.filename.includes(".") ? data.filename.split(".").pop() : "jpg";
+    // Extensão vem do tipo validado, nunca do nome enviado pelo cliente.
+    const ext = FAT_FOTO_EXT[data.mime_type] ?? "jpg";
     const path = `${payload.rid}/${data.template_id}-${Date.now()}.${ext}`;
     const bytes = Uint8Array.from(atob(data.data_base64), (c) => c.charCodeAt(0));
+    if (bytes.byteLength > limit) {
+      throw new Error(`Imagem excede o limite (${(limit / 1024 / 1024).toFixed(0)}MB).`);
+    }
     const { error: upErr } = await (supabaseAdmin as any).storage
       .from("fat-evidencias")
       .upload(path, bytes, { contentType: data.mime_type, upsert: true });
@@ -681,7 +711,8 @@ const publicUploadSatAnexoInput = z.object({
   filename: z.string().min(1).max(200),
   mime_type: z.string().min(3).max(100),
   size_bytes: z.number().int().positive(),
-  data_base64: z.string().min(20),
+  // 50MB (zip) em base64 ≈ 67M caracteres.
+  data_base64: z.string().min(20).max(70_000_000),
   descricao: z.string().max(500).optional(),
 });
 
@@ -689,7 +720,7 @@ export const publicUploadSatAnexo = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => publicUploadSatAnexoInput.parse(input))
   .handler(async ({ data }) => {
     const { performSatAnexoUpload } = await import("@/lib/sat-relatorios.functions");
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("upload");
     const { payload, link } = await loadActiveLink(data.token);
     if (payload.tipo !== "sat") throw new Error("Token não é de um relatório SAT.");
     if (!payload.scope.includes("checklist")) throw new Error("Link sem permissão de checklist.");
@@ -736,7 +767,7 @@ const setSatRespInput = z.object({
 export const publicSetSatResposta = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => setSatRespInput.parse(input))
   .handler(async ({ data }) => {
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("escrever");
     const { payload, link } = await loadActiveLink(data.token);
     if (payload.tipo !== "sat") throw new Error("Token não é de um relatório SAT.");
     if (!payload.scope.includes("checklist")) throw new Error("Link sem permissão de checklist.");
@@ -788,7 +819,7 @@ const assInput = z.object({
 export const publicSubmitAssinatura = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => assInput.parse(input))
   .handler(async ({ data }) => {
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("assinar");
     const { payload, link } = await loadActiveLink(data.token);
     if (!payload.scope.includes("assinatura")) throw new Error("Link sem permissão de assinatura.");
     const { createHash } = await import("node:crypto");
@@ -911,7 +942,7 @@ export const publicSubmitAssinatura = createServerFn({ method: "POST" })
 export const publicExportRelatorioPdf = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ token: z.string().min(10) }).parse(input))
   .handler(async ({ data }) => {
-    const meta = readRequestMeta();
+    const meta = readRequestMeta("pdf");
     const { payload, link } = await loadActiveLink(data.token);
     const res =
       payload.tipo === "fat"

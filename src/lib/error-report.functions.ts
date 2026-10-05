@@ -21,6 +21,15 @@ const stripNewlines = (s: string | undefined) => (s ?? "").replace(/[\r\n]+/g, "
 export const reportClientError = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => schema.parse(input))
   .handler(async ({ data }) => {
+    // Endpoint público: sem limite, qualquer um inunda o log do servidor.
+    // Excedente é descartado em silêncio (o cliente não precisa saber).
+    const { clientIp } = await import("@/lib/request-meta.server");
+    const { rateLimitPorIp } = await import("@/lib/rate-limit.server");
+    try {
+      rateLimitPorIp("client-error", clientIp(), 20, 60_000);
+    } catch {
+      return { ok: true, incidentId: data.incidentId };
+    }
     // Surfaces in server/edge logs. Keep concise to avoid log truncation.
     // Newlines are stripped from all client-supplied fields to prevent log injection.
     console.error(

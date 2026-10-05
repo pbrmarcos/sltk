@@ -7,9 +7,10 @@ import { assertCanAccessModule } from "@/lib/admin-guard";
 
 const CODIGO_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; // sem 0/O/1/I
 function genCodigo(len = 6): string {
+  // Aleatoriedade criptográfica: o código dá acesso público à entrevista.
+  const bytes = crypto.getRandomValues(new Uint8Array(len));
   let s = "";
-  for (let i = 0; i < len; i++)
-    s += CODIGO_ALPHABET[Math.floor(Math.random() * CODIGO_ALPHABET.length)];
+  for (let i = 0; i < len; i++) s += CODIGO_ALPHABET[bytes[i]! % CODIGO_ALPHABET.length];
   return s;
 }
 
@@ -148,6 +149,8 @@ export const criarEntrevista = createServerFn({ method: "POST" })
         lead_email: data.lead_email ?? null,
         lead_empresa: data.lead_empresa ?? null,
         idioma_default: data.idioma_default,
+        // Link público vale 30 dias (as RPCs públicas já checam expires_at).
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select("id, codigo")
       .single();
@@ -324,8 +327,8 @@ export const expirarEntrevista = createServerFn({ method: "POST" })
         vars: { codigo: e.codigo, segmento: seg?.nome_pt ?? "—" },
         extraTo: prof?.email ? [prof.email] : [],
       });
-    } catch {
-      /* noop */
+    } catch (e) {
+      console.error("[entrevistas] e-mail de entrevista expirada não enviado", e);
     }
     return { ok: true };
   });

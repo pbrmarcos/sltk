@@ -192,7 +192,8 @@ export function ClienteForm({
     form.setValue("pais", codigo);
     const p = paises.data?.find((x) => x.codigo === codigo);
     if (p) {
-      form.setValue("moeda", p.moeda_padrao);
+      // Moeda local fora do catálogo (ARS, CLP, MXN…) vira USD, padrão de exportação.
+      form.setValue("moeda", toMoedaISO(p.moeda_padrao, "USD"));
       const idioma = (CLIENTE_IDIOMAS as readonly string[]).includes(p.idioma_padrao)
         ? (p.idioma_padrao as ClienteInput["idioma"])
         : "pt";

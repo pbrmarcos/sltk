@@ -574,10 +574,69 @@ export const listFornecedoresParaCotacao = createServerFn({ method: "POST" })
     return (rows ?? []) as any[];
   });
 
+/** Revoga (ou restaura) o link público de um convite de cotação. */
+export const revogarConvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({ convite_id: z.string().uuid(), revogar: z.boolean() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    const sb = context.supabase as unknown as SB;
+    const { data: convite, error } = await sb
+      .from("cotacao_fornecedores")
+      .update({ revogado_em: data.revogar ? new Date().toISOString() : null })
+      .eq("id", data.convite_id)
+      .select("cotacao_id")
+      .maybeSingle();
+    if (error) throw friendlyDbError(error);
+    if (!convite) throw new Error("Convite não encontrado.");
+    await sb.from("cotacao_historico").insert({
+      cotacao_id: (convite as { cotacao_id: string }).cotacao_id,
+      evento: data.revogar ? "convite_revogado" : "convite_restaurado",
+      ator: context.userId,
+      detalhes: { convite_id: data.convite_id },
+    });
+    return { ok: true as const };
+  });
+
 /* ============ PUBLIC PORTAL (sem auth) ============ */
+
+const CONVITE_VALIDADE_PADRAO_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Convite de cotação vale até o fim do dia do prazo de resposta (ou 30 dias
+ * após criado, se não houver prazo), e deixa de valer se revogado.
+ */
+function assertConviteValido(
+  convite: { created_at?: string | null; revogado_em?: string | null },
+  cotacao: { prazo_resposta?: string | null } | null,
+) {
+  if (convite.revogado_em) {
+    throw new Error("Este convite foi revogado pelo comprador.");
+  }
+  let limite: number;
+  if (cotacao?.prazo_resposta) {
+    limite = new Date(`${cotacao.prazo_resposta}T23:59:59`).getTime();
+  } else {
+    const criado = convite.created_at ? new Date(convite.created_at).getTime() : Date.now();
+    limite = criado + CONVITE_VALIDADE_PADRAO_MS;
+  }
+  if (Date.now() > limite) {
+    throw new Error("O prazo deste convite expirou. Fale com o comprador para receber um novo.");
+  }
+}
+
+async function limitarPortalCotacao(escopo: string, max: number) {
+  const { clientIp } = await import("@/lib/request-meta.server");
+  const { rateLimitPorIp } = await import("@/lib/rate-limit.server");
+  rateLimitPorIp(escopo, clientIp(), max, 60_000);
+}
+
 export const publicGetCotacao = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ token: z.string().min(8) }).parse(i))
   .handler(async ({ data }) => {
+    await limitarPortalCotacao("cotacao-get", 60);
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const sb = supabaseAdmin as unknown as SB;
@@ -587,7 +646,14 @@ export const publicGetCotacao = createServerFn({ method: "POST" })
       .eq("token", data.token)
       .maybeSingle();
     if (error || !convite) throw new Error("Convite inválido");
-    const c = convite as { id: string; cotacao_id: string; fornecedor_id: string; status: string };
+    const c = convite as {
+      id: string;
+      cotacao_id: string;
+      fornecedor_id: string;
+      status: string;
+      created_at?: string | null;
+      revogado_em?: string | null;
+    };
     const { data: cot } = await sb
       .from("cotacoes")
       .select(
@@ -595,6 +661,7 @@ export const publicGetCotacao = createServerFn({ method: "POST" })
       )
       .eq("id", c.cotacao_id)
       .single();
+    assertConviteValido(c, cot as { prazo_resposta?: string | null } | null);
     const { data: itens } = await sb
       .from("cotacao_itens")
       .select("id, descricao_snapshot, spec_snapshot, part_number_snapshot, unidade, quantidade")
@@ -640,30 +707,39 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
               observacao: z.string().max(500).optional().nullable(),
             }),
           )
-          .min(1),
+          .min(1)
+          .max(500),
       })
       .parse(i),
   )
   .handler(async ({ data }) => {
+    await limitarPortalCotacao("cotacao-submit", 10);
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const sb = supabaseAdmin as unknown as SB;
     const { data: convite, error } = await sb
       .from("cotacao_fornecedores")
-      .select("id, cotacao_id, status")
+      .select("id, cotacao_id, status, created_at, revogado_em")
       .eq("token", data.token)
       .maybeSingle();
     if (error || !convite) throw new Error("Convite inválido");
-    const c = convite as { id: string; cotacao_id: string; status: string };
+    const c = convite as {
+      id: string;
+      cotacao_id: string;
+      status: string;
+      created_at?: string | null;
+      revogado_em?: string | null;
+    };
 
     // Bloqueia envio/edição depois que a cotação já saiu do "respondível" —
     // sem isso, um link já fechado (vencedor escolhido/encerrada/cancelada)
     // continuava aceitando alteração de preço indefinidamente.
     const { data: cotAtual } = await sb
       .from("cotacoes")
-      .select("status")
+      .select("status, prazo_resposta")
       .eq("id", c.cotacao_id)
       .maybeSingle();
+    assertConviteValido(c, cotAtual as { prazo_resposta?: string | null } | null);
     const statusFechado = ["escolhida", "encerrada", "cancelada"];
     if (cotAtual && statusFechado.includes((cotAtual as { status: string }).status)) {
       throw new Error("Esta cotação já foi encerrada e não aceita mais respostas.");

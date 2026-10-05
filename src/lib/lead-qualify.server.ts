@@ -100,7 +100,8 @@ export async function loadProspeccaoConfig(): Promise<ProspeccaoConfig> {
       regras_duras: { ...DEFAULT_CONFIG.regras_duras, ...(d.regras_duras ?? {}) },
       max_leads_auto: d.max_leads_auto ?? DEFAULT_CONFIG.max_leads_auto,
     };
-  } catch {
+  } catch (e) {
+    console.warn("[lead-qualify] config de prospecção indisponível — usando padrão", e);
     return DEFAULT_CONFIG;
   }
 }
@@ -148,7 +149,8 @@ async function lerSite(site: string, pais?: string | null): Promise<QualifySiteI
       ),
     ]);
     return r.ok ? r.data : null;
-  } catch {
+  } catch (e) {
+    console.warn("[lead-qualify] leitura do site falhou", e);
     return null;
   }
 }
@@ -167,7 +169,8 @@ async function descobrirCnpjViaBusca(
     });
     const digits = onlyDigits(raw);
     return digits.length === 14 ? digits : null;
-  } catch {
+  } catch (e) {
+    console.warn("[lead-qualify] busca de CNPJ falhou", e);
     return null;
   }
 }
@@ -197,7 +200,8 @@ async function verificarNaReceita(
       return null; // documento achado não é desta empresa — descarta
     }
     return r;
-  } catch {
+  } catch (e) {
+    console.warn("[lead-qualify] consulta à Receita falhou", e);
     return null;
   }
 }
@@ -244,7 +248,8 @@ async function buscarClienteExistente(
     }
     void telefone;
     return null;
-  } catch {
+  } catch (e) {
+    console.warn("[lead-qualify] checagem de cliente existente falhou", e);
     return null;
   }
 }
@@ -278,7 +283,8 @@ async function clientesDeComparacao(): Promise<string[]> {
       .order("valor_ganho_total", { ascending: false })
       .limit(5);
     return (data ?? []).map((c) => c.razao_social);
-  } catch {
+  } catch (e) {
+    console.warn("[lead-qualify] clientes de comparação indisponíveis", e);
     return [];
   }
 }

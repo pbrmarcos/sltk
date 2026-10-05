@@ -1572,8 +1572,8 @@ ${markdown.slice(0, 12000)}`;
           created_by: userId,
           created_by_email: prof?.email ?? null,
         });
-    } catch {
-      // best-effort
+    } catch (e) {
+      console.error("[fornecedores] histórico de enriquecimento não gravado", e);
     }
 
     return { ok: true as const, web };

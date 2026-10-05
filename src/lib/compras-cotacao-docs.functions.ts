@@ -188,8 +188,9 @@ export const gerarDocumentoCotacaoInsumo = createServerFn({ method: "POST" })
         await (supabaseAdmin as any).storage
           .from("documentos")
           .upload(bucketPath, buffer, { contentType: "application/pdf", upsert: true });
-      } catch {
-        // não bloqueia o fluxo do Drive
+      } catch (e) {
+        // Não bloqueia o fluxo do Drive, mas o backup se perde — registra.
+        console.error("[compras-cotacao-docs] backup do PDF no bucket falhou", e);
       }
 
       let driveFileId: string | null = null;

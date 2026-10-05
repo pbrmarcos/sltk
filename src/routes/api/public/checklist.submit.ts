@@ -33,6 +33,17 @@ export const Route = createFileRoute("/api/public/checklist/submit")({
         }),
       POST: async ({ request }) => {
         try {
+          const { limiteRotaPublica } = await import("@/lib/rate-limit.server");
+          // 2MB de respostas é muito acima de qualquer formulário real.
+          const bloqueio = await limiteRotaPublica(
+            request,
+            "checklist-submit",
+            10,
+            60_000,
+            {},
+            2 * 1024 * 1024,
+          );
+          if (bloqueio) return bloqueio;
           const body = await request.json().catch(() => ({}));
           const parsed = submitSchema.safeParse(body);
           if (!parsed.success) {

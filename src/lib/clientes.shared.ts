@@ -1,4 +1,11 @@
 import { z } from "zod";
+import { MOEDAS, type MoedaISO } from "@/lib/moedas";
+
+/** Data opcional: campo de data em branco no formulário chega como "" e o Postgres rejeita. */
+const dataOpcional = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+  z.string().trim().max(20).optional().nullable(),
+);
 
 /**
  * Status do cliente — fonte de verdade única (coluna `clientes.status`).
@@ -142,7 +149,7 @@ export const socioInputSchema = z.object({
   id: z.string().uuid().optional(),
   nome: z.string().trim().min(1).max(180),
   qualificacao: z.string().trim().max(120).optional().nullable(),
-  desde: z.string().trim().max(20).optional().nullable(),
+  desde: dataOpcional,
 });
 export type SocioInput = z.infer<typeof socioInputSchema>;
 
@@ -156,7 +163,9 @@ export const clienteInputSchema = z.object({
   pais: z.string().length(2),
   documento_fiscal_numero: z.string().min(1).max(40),
   inscricao_estadual: z.string().trim().max(40).optional().nullable(),
-  moeda: z.string().length(3),
+  moeda: z.enum(MOEDAS.map((m) => m.codigo) as [MoedaISO, ...MoedaISO[]], {
+    message: "Moeda não suportada (use USD, EUR, BRL ou PYG).",
+  }),
   idioma: z.enum(CLIENTE_IDIOMAS),
   status: z.enum(CLIENTE_STATUS).default("prospect"),
   segmento_id: z.string().uuid().optional().nullable(),
@@ -200,9 +209,9 @@ export const clienteInputSchema = z.object({
   natureza_juridica_codigo: z.string().trim().max(20).optional().nullable(),
   natureza_juridica_descricao: z.string().trim().max(255).optional().nullable(),
   situacao_cadastral: z.string().trim().max(60).optional().nullable(),
-  data_situacao: z.string().trim().max(20).optional().nullable(),
+  data_situacao: dataOpcional,
   motivo_situacao: z.string().trim().max(255).optional().nullable(),
-  data_abertura: z.string().trim().max(20).optional().nullable(),
+  data_abertura: dataOpcional,
   capital_social: z.number().nonnegative().optional().nullable(),
   porte: z.string().trim().max(60).optional().nullable(),
   // Redes sociais (opcional)

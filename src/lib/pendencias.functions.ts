@@ -4,13 +4,23 @@ import { ETP_STATUS_ABERTO, REVISAO_STATUS_PENDENTE } from "@/lib/dashboard-stat
 
 type AnySb = any;
 
+/**
+ * Badge do menu: sem acesso (RLS/permissão) é 0 de verdade. Qualquer outro
+ * erro também vira 0 para não quebrar o menu, mas fica registrado no log —
+ * antes um bug de query aparecia como "nenhuma pendência" sem rastro.
+ */
 async function countHead(sb: AnySb, table: string, apply: (q: any) => any) {
   try {
     const base = sb.from(table).select("*", { count: "exact", head: true });
     const { count, error } = await apply(base);
-    if (error) return 0;
+    if (error) {
+      const semPermissao = error.code === "42501" || /permission|policy/i.test(error.message ?? "");
+      if (!semPermissao) console.error(`[pendencias] contagem falhou em ${table}`, error);
+      return 0;
+    }
     return count ?? 0;
-  } catch {
+  } catch (e) {
+    console.error(`[pendencias] contagem falhou em ${table}`, e);
     return 0;
   }
 }
@@ -50,7 +60,9 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
         q.or("documento_fiscal_numero.is.null,documento_fiscal_numero.eq."),
       ),
       countHead(sb, "fornecedores", (q) => q.or("tax_id.is.null,tax_id.eq.")),
-      countHead(sb, "oportunidades", (q) => q.eq("status", "aberto")),
+      countHead(sb, "oportunidades", (q) =>
+        q.not("pipeline_stage", "in", "(ganho,perdido)").is("deleted_at", null),
+      ),
       countHead(sb, "ordens_compra", (q) => q.eq("status", "rascunho")),
       countHead(sb, "cotacoes", (q) => q.eq("status", "aberta")),
       countHead(sb, "chamados", (q) => q.not("status", "in", "(resolvido,arquivado)")),
@@ -68,7 +80,7 @@ export const getPendenciasSidebar = createServerFn({ method: "GET" })
       ),
       countHead(sb, "fat_relatorios", (q) => q.eq("status", "rascunho")),
       countHead(sb, "sat_relatorio", (q) => q.eq("status", "rascunho")),
-      countHead(sb, "documentos", (q) => q.eq("tipo", "orcamento").eq("status", "rascunho")),
+      countHead(sb, "documentos", (q) => q.eq("tipo_codigo", "orcamento").eq("status", "rascunho")),
       countHead(sb, "equipamento_montagens", (q) =>
         q.eq("status", "nao_iniciada").is("deleted_at", null),
       ),

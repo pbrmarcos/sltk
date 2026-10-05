@@ -124,23 +124,38 @@ async function checkModules(): Promise<ModuleStatus[]> {
   ]);
 }
 
-/** Leitura leve pro gate — só a configuração, sem pings. Pública. */
-export const getMaintenanceGate = createServerFn({ method: "GET" }).handler(async () => {
+// Endpoints públicos chamados em todo carregamento de página: cache curto em
+// memória evita um SELECT por visita e 5 pings externos por refresh.
+let configCache: { at: number; value: MaintenanceConfig } | null = null;
+let modulesCache: { at: number; value: ModuleStatus[]; checked_at: string } | null = null;
+const CONFIG_TTL_MS = 5_000;
+const MODULES_TTL_MS = 15_000;
+
+async function readConfigCached(): Promise<MaintenanceConfig> {
+  if (configCache && Date.now() - configCache.at < CONFIG_TTL_MS) return configCache.value;
   try {
-    return await readConfig();
+    const value = await readConfig();
+    configCache = { at: Date.now(), value };
+    return value;
   } catch {
     // Nunca derruba o site por falha na leitura do flag.
     return { enabled: false, message: null, ends_at: null, updated_at: null };
   }
+}
+
+/** Leitura leve pro gate — só a configuração, sem pings. Pública. */
+export const getMaintenanceGate = createServerFn({ method: "GET" }).handler(async () => {
+  return readConfigCached();
 });
 
 /** Estado completo pra página de manutenção e painel admin. Pública. */
 export const getMaintenanceStatus = createServerFn({ method: "GET" }).handler(async () => {
-  const [config, modules] = await Promise.all([
-    getMaintenanceGate(),
-    checkModules().catch(() => [] as ModuleStatus[]),
-  ]);
-  return { ...config, modules, checked_at: new Date().toISOString() };
+  const config = await readConfigCached();
+  if (!modulesCache || Date.now() - modulesCache.at >= MODULES_TTL_MS) {
+    const value = await checkModules().catch(() => [] as ModuleStatus[]);
+    modulesCache = { at: Date.now(), value, checked_at: new Date().toISOString() };
+  }
+  return { ...config, modules: modulesCache.value, checked_at: modulesCache.checked_at };
 });
 
 const setSchema = z.object({
@@ -176,6 +191,7 @@ export const setMaintenanceConfig = createServerFn({ method: "POST" })
       .update(patch)
       .eq("id", 1);
     if (error) throw new Error(error.message);
+    configCache = null;
 
     await logAuditServer(admin, context.userId, {
       table_name: "maintenance_config",

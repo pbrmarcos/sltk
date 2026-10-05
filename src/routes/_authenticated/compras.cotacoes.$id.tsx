@@ -18,6 +18,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   escolherVencedor,
+  revogarConvite,
   getCotacao,
   inviteFornecedores,
   listFornecedoresParaCotacao,
@@ -40,6 +41,7 @@ type Convite = {
   fornecedor_id: string;
   token: string;
   status: string;
+  revogado_em?: string | null;
   fornecedores?: {
     codigo: string;
     nome_fantasia: string;
@@ -78,6 +80,7 @@ function CotacaoDetailPage() {
   const inviteFn = useServerFn(inviteFornecedores);
   const statusFn = useServerFn(setCotacaoStatus);
   const escolherFn = useServerFn(escolherVencedor);
+  const revogarFn = useServerFn(revogarConvite);
   const fornsFn = useServerFn(listFornecedoresParaCotacao);
 
   const q = useQuery({
@@ -133,6 +136,16 @@ function CotacaoDetailPage() {
       qc.invalidateQueries({ queryKey: ["cotacoes", "detail", id] });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao convidar");
+    }
+  }
+
+  async function alternarRevogacao(conviteId: string, revogar: boolean) {
+    try {
+      await revogarFn({ data: { convite_id: conviteId, revogar } });
+      toast.success(revogar ? "Link revogado" : "Link restaurado");
+      qc.invalidateQueries({ queryKey: ["cotacoes", "detail", id] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha");
     }
   }
 
@@ -258,7 +271,18 @@ function CotacaoDetailPage() {
                             <ExternalLink className="size-3" />
                           </a>
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => alternarRevogacao(c.id, !c.revogado_em)}
+                        >
+                          {c.revogado_em ? "Restaurar" : "Revogar"}
+                        </Button>
                       </div>
+                      {c.revogado_em && (
+                        <div className="mt-0.5 text-[11px] text-[var(--danger)]">Link revogado</div>
+                      )}
                     </td>
                   </tr>
                 );

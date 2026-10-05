@@ -228,7 +228,12 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
       .select("status, valor_total, aprovado_em, created_at")
       .is("deleted_at", null),
     sb.from("fornecedores").select("id, status").limit(500),
-    sb.from("oportunidades").select("id, valor").eq("status", "aberto").limit(500),
+    sb
+      .from("oportunidades")
+      .select("id, valor_estimado")
+      .not("pipeline_stage", "in", "(ganho,perdido)")
+      .is("deleted_at", null)
+      .limit(500),
     sb.from("clientes").select("id, status").limit(1000),
   ]);
 
@@ -636,7 +641,7 @@ export async function buildRoleDashboards(sb: SB): Promise<RoleDashboards> {
   const clientesPorStatus = (s: string) => rowsClientes.filter((c: any) => c.status === s).length;
 
   const valorOportunidadesAbertas = rowsOportunidadesAbertas.reduce(
-    (sum: number, o: any) => sum + Number(o.valor ?? 0),
+    (sum: number, o: any) => sum + Number(o.valor_estimado ?? 0),
     0,
   );
 

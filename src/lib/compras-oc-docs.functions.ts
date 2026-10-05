@@ -131,8 +131,9 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
         `v${versao}`,
       ]);
       folderUrl = await getFolderUrl(folderId);
-    } catch {
+    } catch (e) {
       driveOk = false;
+      console.error("[compras-oc-docs] pasta do Drive indisponível", e);
     }
 
     const codigoDoc = `OC-${oc.numero}`;
@@ -202,8 +203,8 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
         await (supabaseAdmin as any).storage
           .from("documentos")
           .upload(bucketPath, buffer, { contentType: "application/pdf", upsert: true });
-      } catch {
-        /* backup opcional */
+      } catch (e) {
+        console.error("[compras-oc-docs] backup do PDF no bucket falhou", e);
       }
 
       if (driveOk && folderId) {

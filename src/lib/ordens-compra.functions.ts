@@ -416,9 +416,11 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
       );
 
     // Preço unitário: se houver orçamento anexado do fornecedor escolhido, usar.
+    // Sem orçamento anexado o item nasce a 0 (OC é rascunho, preço editável);
+    // erro de consulta não pode ser confundido com "sem orçamento".
     let valorUnitInicial = 0;
     try {
-      const { data: orc } = await (sb as any)
+      const { data: orc, error: orcErr } = await (sb as any)
         .from("insumo_anexos")
         .select("valor")
         .eq("insumo_id", insumo.id)
@@ -427,9 +429,10 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
         .order("criado_em", { ascending: false })
         .limit(1)
         .maybeSingle();
+      if (orcErr) console.error("[ordens-compra] falha ao ler orçamento do insumo", orcErr);
       if (orc?.valor != null) valorUnitInicial = Number(orc.valor) || 0;
-    } catch {
-      /* opcional */
+    } catch (e) {
+      console.error("[ordens-compra] falha ao ler orçamento do insumo", e);
     }
 
     const created = await createOrdemCompra({
@@ -441,7 +444,7 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
       },
     });
 
-    await sb.from("ordem_compra_itens").insert({
+    const { error: itemErr } = await sb.from("ordem_compra_itens").insert({
       ordem_compra_id: created.id,
       insumo_id: insumo.id,
       ordem: 1,
@@ -451,6 +454,7 @@ export const createOrdemDeInsumo = createServerFn({ method: "POST" })
       quantidade: Number(insumo.quantidade ?? 1),
       valor_unitario: valorUnitInicial,
     });
+    if (itemErr) throw friendlyDbError(itemErr);
 
     await sb
       .from("projeto_insumos")

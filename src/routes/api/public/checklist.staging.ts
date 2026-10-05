@@ -25,6 +25,16 @@ export const Route = createFileRoute("/api/public/checklist/staging")({
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
         try {
+          const { limiteRotaPublica } = await import("@/lib/rate-limit.server");
+          const bloqueio = await limiteRotaPublica(
+            request,
+            "checklist-staging",
+            20,
+            60_000,
+            {},
+            2 * 1024 * 1024,
+          );
+          if (bloqueio) return bloqueio;
           const body = await request.json().catch(() => ({}));
           const parsed = schema.safeParse(body);
           if (!parsed.success) {

@@ -301,7 +301,7 @@ export const removerInsumo = createServerFn({ method: "POST" })
     });
 
     // Purga oportunista de itens > 30 dias (best-effort)
-    void purgarAntigos(sb).catch(() => {});
+    void purgarAntigos(sb).catch((e) => console.error("[projeto-insumos] purga falhou", e));
 
     return { ok: true as const };
   });

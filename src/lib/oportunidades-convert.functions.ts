@@ -275,8 +275,12 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
               opp.responsavel_id,
             );
             aplicado = true;
-          } catch {
-            // ignora erro de template, processo já está criado
+          } catch (e) {
+            // Processo já está criado; a UI avisa via template_aplicado=false.
+            console.error(
+              `[oportunidades-convert] template ${item.template_id} não aplicado ao processo ${proc.id}`,
+              e,
+            );
           }
         }
 

@@ -409,13 +409,30 @@ export async function performSatAnexoUpload(
     yyyymm,
   });
 
-  const ext = params.filename.includes(".") ? "." + params.filename.split(".").pop() : "";
+  // Extensão derivada do tipo validado — o nome do arquivo vem do cliente.
+  const EXT_POR_MIME: Record<string, string> = {
+    "application/zip": ".zip",
+    "application/x-zip-compressed": ".zip",
+    "application/pdf": ".pdf",
+    "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/heic": ".heic",
+  };
+  const ext = EXT_POR_MIME[params.mime_type] ?? "";
   const base = params.filename.replace(/\.[^.]+$/, "");
   const safe = base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
   const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
   const finalName = `${safe}_${stamp}${ext}`;
 
-  const bytes = Uint8Array.from(atob(params.data_base64), (c) => c.charCodeAt(0)).buffer;
+  const decoded = Uint8Array.from(atob(params.data_base64), (c) => c.charCodeAt(0));
+  // size_bytes é declarado pelo cliente; confere o tamanho real.
+  if (decoded.byteLength > limit) {
+    const mb = (limit / 1024 / 1024).toFixed(0);
+    throw new Error(`Arquivo excede o limite (${mb}MB).`);
+  }
+  const bytes = decoded.buffer;
   const up = await driveUploadMultipart({
     parentId,
     name: finalName,

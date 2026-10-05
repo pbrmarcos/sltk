@@ -8,10 +8,12 @@ import { assertCanAccessModule } from "@/lib/admin-guard";
 import { logAuditServer } from "@/lib/audit.server";
 import type { FormularioSchema, Idioma } from "@/lib/checklist.shared";
 
-function randomToken(len = 6): string {
+function randomToken(len = 10): string {
+  // Aleatoriedade criptográfica: o slug dá acesso público ao formulário.
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(len));
   let s = "";
-  for (let i = 0; i < len; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < len; i++) s += alphabet[bytes[i]! % alphabet.length];
   return s;
 }
 
@@ -32,7 +34,7 @@ function slugify(input: string, max = 24): string {
 function buildReadableSlug(clienteCodigo: string | null, tipoCodigo: string | null): string {
   const c = slugify(clienteCodigo ?? "", 16);
   const t = slugify(tipoCodigo ?? "form", 22);
-  return `${c ? c + "-" : ""}${t}-${randomToken(6)}`;
+  return `${c ? c + "-" : ""}${t}-${randomToken(10)}`;
 }
 
 async function hasAny(sb: any, uid: string, roles: string[]): Promise<boolean> {

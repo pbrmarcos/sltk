@@ -16,24 +16,6 @@ const contactSchema = z.object({
   website: z.string().max(0).optional().default(""),
 });
 
-// Rate-limit por IP em memória (best-effort — dev/worker).
-const RATE: Map<string, { count: number; resetAt: number }> = new Map();
-const WINDOW_MS = 15 * 60 * 1000;
-const MAX_PER_WINDOW = 5;
-
-function checkRate(ip: string) {
-  const now = Date.now();
-  const entry = RATE.get(ip);
-  if (!entry || entry.resetAt < now) {
-    RATE.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return;
-  }
-  entry.count += 1;
-  if (entry.count > MAX_PER_WINDOW) {
-    throw new Error("Muitas mensagens recentes deste IP. Aguarde alguns minutos.");
-  }
-}
-
 export const enviarContato = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => contactSchema.parse(data))
   .handler(async ({ data }) => {
@@ -44,11 +26,16 @@ export const enviarContato = createServerFn({ method: "POST" })
 
     const req = getRequest();
     const headers = req?.headers;
-    const ip =
-      headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      headers?.get("cf-connecting-ip") ||
-      "unknown";
-    checkRate(ip);
+    const { clientIpFromHeaders } = await import("@/lib/request-meta.server");
+    const { rateLimitPorIp } = await import("@/lib/rate-limit.server");
+    const ip = clientIpFromHeaders(headers) ?? "unknown";
+    rateLimitPorIp(
+      "contato",
+      ip,
+      5,
+      15 * 60_000,
+      "Muitas mensagens recentes deste IP. Aguarde alguns minutos.",
+    );
     const userAgent = headers?.get("user-agent") ?? null;
 
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
@@ -126,8 +113,8 @@ export const enviarContato = createServerFn({ method: "POST" })
           link: appUrl("/admin/formularios-recebidos"),
         },
       });
-    } catch {
-      /* noop */
+    } catch (e) {
+      console.error("[contato] alerta de formulário não enviado", e);
     }
 
     return { ok: true } as const;

@@ -8,6 +8,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { getRequest } from "@tanstack/react-start/server";
 import { patchParaStatusChamado, eventoDeEmail } from "@/lib/suporte-status";
+import { clientIpFromHeaders } from "@/lib/request-meta.server";
+import { rateLimitPorIp } from "@/lib/rate-limit.server";
 import { z } from "zod";
 
 const abrirSchema = z.object({
@@ -39,16 +41,27 @@ const getSchema = z.object({ token: z.string().min(10).max(200) });
 
 function clientIp(): string | null {
   try {
-    const req = getRequest();
-    const h = req?.headers;
-    if (!h) return null;
-    const xff = h.get("x-forwarded-for");
-    if (xff) return xff.split(",")[0]!.trim();
-    return h.get("cf-connecting-ip") ?? h.get("x-real-ip") ?? null;
+    return clientIpFromHeaders(getRequest()?.headers);
   } catch {
     return null;
   }
 }
+/** Link do chamado expira 90 dias após resolvido e deixa de valer se arquivado. */
+const LINK_POS_RESOLUCAO_MS = 90 * 24 * 60 * 60 * 1000;
+
+function assertLinkChamadoValido(chamado: { status?: string; resolvido_em?: string | null }) {
+  if (chamado.status === "arquivado") {
+    throw new Error("Este chamado foi arquivado. Abra um novo chamado se precisar de ajuda.");
+  }
+  if (
+    chamado.status === "resolvido" &&
+    chamado.resolvido_em &&
+    Date.now() - new Date(chamado.resolvido_em).getTime() > LINK_POS_RESOLUCAO_MS
+  ) {
+    throw new Error("Este link expirou. Abra um novo chamado se precisar de ajuda.");
+  }
+}
+
 function clientUA(): string | null {
   try {
     return getRequest()?.headers.get("user-agent") ?? null;
@@ -231,6 +244,7 @@ export const publicAbrirChamado = createServerFn({ method: "POST" })
 export const publicGetChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => getSchema.parse(i))
   .handler(async ({ data }) => {
+    rateLimitPorIp("chamado-get", clientIp(), 60, 60_000);
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const { hashToken } = await import("@/lib/suporte-token.server");
@@ -244,6 +258,7 @@ export const publicGetChamado = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw friendlyDbError(error);
     if (!chamado) throw new Error("Chamado não encontrado. Verifique o link.");
+    assertLinkChamadoValido(chamado);
 
     const { data: msgs } = await sb
       .from("chamado_mensagens")
@@ -265,13 +280,14 @@ export const publicEnviarMensagem = createServerFn({ method: "POST" })
     const { hashToken } = await import("@/lib/suporte-token.server");
     const sb = supabaseAdmin as any;
 
+    rateLimitPorIp("chamado-msg", clientIp(), 20, 60_000);
     const { data: chamado } = await sb
       .from("chamados")
-      .select("id, visitante_nome, status")
+      .select("id, visitante_nome, status, resolvido_em")
       .eq("token_hash", hashToken(data.token))
       .maybeSingle();
     if (!chamado) throw new Error("Chamado não encontrado.");
-    if (chamado.status === "arquivado") throw new Error("Este chamado foi arquivado.");
+    assertLinkChamadoValido(chamado);
 
     // Rate-limit: 30 mensagens do visitante nesta última hora.
     const desde = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -330,14 +346,16 @@ export const publicAcaoChamado = createServerFn({ method: "POST" })
     const { hashToken } = await import("@/lib/suporte-token.server");
     const sb = supabaseAdmin as any;
 
+    rateLimitPorIp("chamado-acao", clientIp(), 10, 60_000);
     const { data: chamado } = await sb
       .from("chamados")
       .select(
-        "id, status, codigo, assunto, visitante_nome, visitante_email, cliente_id, clientes(razao_social, nome_fantasia)",
+        "id, status, resolvido_em, codigo, assunto, visitante_nome, visitante_email, cliente_id, clientes(razao_social, nome_fantasia)",
       )
       .eq("token_hash", hashToken(data.token))
       .maybeSingle();
     if (!chamado) throw new Error("Chamado não encontrado.");
+    assertLinkChamadoValido(chamado);
 
     // Rate-limit: no máximo 5 mudanças de status por chamado a cada 5 min
     // (o portador do token não tem login, então evita alternar resolver/
@@ -400,6 +418,14 @@ export const publicAcaoChamado = createServerFn({ method: "POST" })
 export const publicResolverCodigo = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => resolverCodigoSchema.parse(i))
   .handler(async ({ data }) => {
+    // Sem limite, dá para adivinhar pares código+e-mail por força bruta.
+    rateLimitPorIp(
+      "chamado-resolver",
+      clientIp(),
+      10,
+      15 * 60_000,
+      "Muitas tentativas de consulta. Aguarde 15 minutos.",
+    );
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
     const supabaseAdmin = await getCriticalClient();
     const { normalizarCodigo } = await import("@/lib/suporte-token.server");

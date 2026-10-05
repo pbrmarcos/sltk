@@ -8,7 +8,6 @@ import {
   moveProcesso,
   concluirTarefa,
   createProcesso,
-  runSlaAutomations,
   listChecklist,
   toggleChecklistItem,
   marcarComoPerdido,
@@ -180,22 +179,6 @@ export function useCreateProcesso() {
   return useMutation({
     mutationFn: (input: CreateProcessoInput) => fn({ data: input }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["processos", "list"] }),
-  });
-}
-
-export function useRunSlaAutomations() {
-  const qc = useQueryClient();
-  const fn = useServerFn(runSlaAutomations);
-  return useMutation({
-    mutationFn: () => fn(),
-    onSuccess: (r) => {
-      if (r?.tratados && r.tratados > 0) {
-        qc.invalidateQueries({ queryKey: ["processos"] });
-        toast.warning(`${r.tratados} processo(s) com SLA estourado`, {
-          description: "Follow-ups criados e e-mails registrados.",
-        });
-      }
-    },
   });
 }
 

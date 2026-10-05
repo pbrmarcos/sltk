@@ -52,6 +52,16 @@ export const Route = createFileRoute("/api/public/entrevista/submit")({
       OPTIONS: async () => new Response(null, { status: 204, headers: cors }),
       POST: async ({ request }) => {
         try {
+          const { limiteRotaPublica } = await import("@/lib/rate-limit.server");
+          const bloqueio = await limiteRotaPublica(
+            request,
+            "entrevista-submit",
+            10,
+            60_000,
+            {},
+            2 * 1024 * 1024,
+          );
+          if (bloqueio) return bloqueio;
           const body = await request.json().catch(() => ({}));
           const parsed = submitSchema.safeParse(body);
           if (!parsed.success)

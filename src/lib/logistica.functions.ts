@@ -814,7 +814,8 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
           mime_type: a.mime_type,
           dataUrl: `data:${a.mime_type};base64,${b64}`,
         });
-      } catch {
+      } catch (e) {
+        console.error(`[logistica] anexo ${a.nome_arquivo} não incluído no documento`, e);
         anexosResolved.push({
           categoria: a.categoria,
           nome_arquivo: a.nome_arquivo,

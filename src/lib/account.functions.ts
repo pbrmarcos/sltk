@@ -75,8 +75,11 @@ export const removeMyAvatar = createServerFn({ method: "POST" })
       try {
         const url = new URL(before.avatar_url);
         const pathMatch = url.pathname.match(/\/avatars\/(.*)/);
-        if (pathMatch?.[1]) {
-          await db.storage.from("avatars").remove([decodeURIComponent(pathMatch[1])]);
+        const path = pathMatch?.[1] ? decodeURIComponent(pathMatch[1]) : null;
+        // Só apaga arquivo dentro da pasta do próprio usuário — avatar_url é
+        // editável pelo usuário e o client aqui pode ser service role.
+        if (path && path.startsWith(`${context.userId}/`) && !path.includes("..")) {
+          await db.storage.from("avatars").remove([path]);
         }
       } catch (e) {
         console.warn("[account] falha ao remover avatar antigo do storage", e);

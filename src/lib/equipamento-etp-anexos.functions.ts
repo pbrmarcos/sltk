@@ -257,8 +257,9 @@ export const removerEtpAnexo = createServerFn({ method: "POST" })
     if (driveId) {
       try {
         await driveTrash(driveId);
-      } catch {
-        // segue para soft-delete mesmo se falhar no Drive
+      } catch (e) {
+        // Segue para o soft-delete; o arquivo pode ficar órfão no Drive.
+        console.error(`[etp-anexos] falha ao mover ${driveId} para a lixeira do Drive`, e);
       }
     }
 

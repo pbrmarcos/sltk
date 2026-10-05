@@ -28,6 +28,9 @@ export const Route = createFileRoute("/api/public/entrevista/get")({
       OPTIONS: async () => new Response(null, { status: 204, headers: cors }),
       GET: async ({ request }) => {
         try {
+          const { limiteRotaPublica } = await import("@/lib/rate-limit.server");
+          const bloqueio = await limiteRotaPublica(request, "entrevista-get", 30, 60_000, {});
+          if (bloqueio) return bloqueio;
           const url = new URL(request.url);
           const codigo = z
             .string()

@@ -59,6 +59,16 @@ export const Route = createFileRoute("/api/public/checklist/upload")({
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
         try {
+          const { limiteRotaPublica } = await import("@/lib/rate-limit.server");
+          const bloqueio = await limiteRotaPublica(
+            request,
+            "checklist-upload",
+            30,
+            60_000,
+            CORS,
+            MAX_BYTES + 1024 * 1024,
+          );
+          if (bloqueio) return bloqueio;
           const form = await request.formData();
           const slug = String(form.get("slug") || "");
           const submissaoId = String(form.get("submissao_id") || "");
