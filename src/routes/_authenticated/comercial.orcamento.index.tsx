@@ -86,10 +86,10 @@ function OrcamentosListPage() {
               <TableHead>Código</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Título</TableHead>
-              <TableHead>Versão</TableHead>
-              <TableHead>Idiomas</TableHead>
+              <TableHead className="hidden md:table-cell">Versão</TableHead>
+              <TableHead className="hidden md:table-cell">Idiomas</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Emitido em</TableHead>
+              <TableHead className="hidden md:table-cell">Emitido em</TableHead>
               <TableHead className="text-right">Download</TableHead>
             </TableRow>
           </TableHeader>
@@ -163,8 +163,10 @@ function OrcamentosListPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-sm">{d.titulo || "—"}</TableCell>
-                    <TableCell className="font-mono text-xs">v{d.versao}</TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="hidden md:table-cell font-mono text-xs">
+                      v{d.versao}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-xs">
                       {(d.idiomas_gerados || []).map((l: string) => (
                         <Badge key={l} variant="outline" className="mr-1 uppercase">
                           {l}
@@ -176,7 +178,7 @@ function OrcamentosListPage() {
                         {sm.label}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-[var(--text-muted)]">
+                    <TableCell className="hidden md:table-cell text-xs text-[var(--text-muted)]">
                       {new Date(d.created_at).toLocaleDateString("pt-BR")}
                     </TableCell>
                     <TableCell className="text-right">

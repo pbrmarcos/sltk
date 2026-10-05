@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Plus, Star, Building2, AlertTriangle, Upload, Camera } from "lucide-react";
+import { Plus, Star, Building2, AlertTriangle, Upload } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { clientesListQueryOptions, paisesQueryOptions } from "@/lib/clientes.queries";
 import { formatDocumento, CLIENTE_STATUS } from "@/lib/clientes.shared";
@@ -126,16 +125,8 @@ function ClientesListPage() {
               size="sm"
               className="h-9"
             >
-              <Upload className="mr-1 h-4 w-4" /> Importar CSV
-            </PermissionLinkButton>
-            <PermissionLinkButton
-              module="clientes"
-              to="/clientes/suspect-foto"
-              variant="outline"
-              size="sm"
-              className="h-9"
-            >
-              <Camera className="mr-1 h-4 w-4" /> Suspect por foto
+              <Upload className="h-4 w-4 lg:mr-1" />
+              <span className="hidden lg:inline">Importar CSV</span>
             </PermissionLinkButton>
             <PermissionLinkButton module="clientes" to="/clientes/novo" size="sm" className="h-9">
               <Plus className="mr-1 h-4 w-4" /> Novo cliente
@@ -143,7 +134,6 @@ function ClientesListPage() {
           </div>
         }
       />
-      <ProcessoComercialGuia destaque="ganho" />
 
       <Toolbar>
         <ToolbarSearch

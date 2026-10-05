@@ -15,6 +15,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -52,6 +58,7 @@ import {
   Phone,
   Building2,
   Trophy,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   PIPELINE_STAGES,
@@ -59,7 +66,6 @@ import {
   type OportunidadeLite,
   type PipelineStage,
 } from "@/lib/oportunidades.functions";
-import { enrichDocumento } from "@/lib/enrich.functions";
 import { ConvertWizardDialog } from "./ConvertWizardDialog";
 import { RestoredOportunidadeBadge } from "./RestoredOportunidadeBadge";
 import { ClienteStatusBadge } from "@/components/clientes/ClienteStatusBadge";
@@ -121,19 +127,6 @@ function formatCurrencyBRL(v: number | null | undefined) {
   });
 }
 
-const PAIS_OPTIONS: Array<{ value: string; label: string; doc: string }> = [
-  { value: "BR", label: "Brasil", doc: "CNPJ" },
-  { value: "AR", label: "Argentina", doc: "CUIT" },
-  { value: "PY", label: "Paraguai", doc: "RUC" },
-  { value: "PE", label: "Peru", doc: "RUC" },
-  { value: "UY", label: "Uruguai", doc: "RUT" },
-  { value: "CL", label: "Chile", doc: "RUT" },
-  { value: "CO", label: "Colômbia", doc: "NIT" },
-  { value: "EC", label: "Equador", doc: "RUC" },
-  { value: "CR", label: "Costa Rica", doc: "Cédula" },
-  { value: "PA", label: "Panamá", doc: "RUC" },
-];
-
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
@@ -146,7 +139,8 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-type OportunidadeTab = "dados" | "agenda" | "orcamentos" | "notas" | "colaboradores" | "anexos";
+type OportunidadeTab = "dados" | "agenda" | "orcamentos" | "notas";
+const TABS_VALIDAS: OportunidadeTab[] = ["dados", "agenda", "orcamentos", "notas"];
 
 export function EditOportunidadeDialog({
   opp,
@@ -174,8 +168,6 @@ export function EditOportunidadeDialog({
   const [lostReason, setLostReason] = useState("");
   const [tab, setTab] = useState<OportunidadeTab>(initialTab);
   const [novoColabId, setNovoColabId] = useState<string>("");
-  const [pais, setPais] = useState<string>("BR");
-  const [documento, setDocumento] = useState<string>("");
   const [novaNota, setNovaNota] = useState("");
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -201,30 +193,6 @@ export function EditOportunidadeDialog({
       },
     });
   }
-
-  // Enriquecimento
-  const enrichFn = useServerFn(enrichDocumento);
-  const enrichMut = useMutation({
-    mutationFn: () => enrichFn({ data: { pais, documento } }),
-    onSuccess: (res) => {
-      if (!res.ok) {
-        toast.error(res.error);
-        return;
-      }
-      const d = res.data;
-      const nextEmpresa = d.razao_social || d.nome_fantasia || empresa;
-      if (nextEmpresa) setEmpresa(nextEmpresa);
-      if (!email && d.email_corporativo) setEmail(d.email_corporativo);
-      const tel = [d.telefone_corporativo_ddi, d.telefone_corporativo_numero]
-        .filter(Boolean)
-        .join(" ");
-      if (!telefone && tel) setTelefone(tel);
-      toast.success(
-        `Dados preenchidos (${d._source ?? "fonte oficial"}${res.cached ? " · cache" : ""})`,
-      );
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   // Wizard "promover a cliente"
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -266,7 +234,7 @@ export function EditOportunidadeDialog({
   const salesUsersQ = useQuery({
     queryKey: ["sales-users-comercial"],
     queryFn: () => listSalesFn(),
-    enabled: tab === "colaboradores",
+    enabled: !!opp?.id,
   });
   const colabAtivos = (colabQ.data ?? []).filter((c) => !c.revogado_em);
   const convidarColabMut = useMutation({
@@ -341,8 +309,6 @@ export function EditOportunidadeDialog({
     setTab(initialTab);
     setNovaNota("");
     setNovoColabId("");
-    setPais("BR");
-    setDocumento("");
     setWizardOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opp]);
@@ -360,8 +326,6 @@ export function EditOportunidadeDialog({
       stage: opp?.pipeline_stage ?? ("novo" as PipelineStage),
       obs: opp?.observacoes ?? "",
       tab: "dados" as const,
-      pais: "BR",
-      documento: "",
       novaNota: "",
     }),
     [opp],
@@ -378,8 +342,6 @@ export function EditOportunidadeDialog({
     stage,
     obs,
     tab,
-    pais,
-    documento,
     novaNota,
   };
   const { clearDraft, isDirty } = useFormDraft({
@@ -398,9 +360,11 @@ export function EditOportunidadeDialog({
       setExpected(saved.expected);
       setStage(saved.stage);
       setObs(saved.obs);
-      setTab(saved.tab);
-      setPais(saved.pais);
-      setDocumento(saved.documento);
+      setTab(
+        TABS_VALIDAS.includes(saved.tab as OportunidadeTab)
+          ? (saved.tab as OportunidadeTab)
+          : "dados",
+      );
       setNovaNota(saved.novaNota);
     },
   });
@@ -463,7 +427,7 @@ export function EditOportunidadeDialog({
         if (!next) requestClose();
       }}
     >
-      <DialogContent className="w-[95vw] max-w-[1400px] max-h-[96vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[1400px] max-h-[96dvh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between gap-2 pr-6">
             <div className="flex items-center gap-2 min-w-0">
@@ -480,72 +444,63 @@ export function EditOportunidadeDialog({
               </Badge>
             </div>
           </div>
-          <DialogDescription>Visualize e edite os dados da oportunidade.</DialogDescription>
+          <DialogDescription className="sr-only">Dados da oportunidade.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Button size="sm" disabled={locked || update.isPending} onClick={() => handleSave(false)}>
-            Save
+        <div className="flex items-center gap-2">
+          <Button size="sm" disabled={locked || update.isPending} onClick={() => handleSave(true)}>
+            {update.isPending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+            Salvar
           </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={locked || update.isPending}
-            onClick={() => handleSave(true)}
-          >
-            Save &amp; Close
-          </Button>
-          <Button size="sm" variant="ghost" onClick={requestClose}>
-            Cancelar
-          </Button>
-          {!locked && !alreadyLost && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
-              onClick={() => setWizardOpen(true)}
-              title={
-                isCliente
-                  ? "Atualizar ficha do cliente"
-                  : "Promover lead a cliente ativo e abrir ficha completa"
-              }
-            >
-              <Trophy className="w-4 h-4 mr-1" />
-              {isCliente ? "Ficha do cliente" : "Promover a cliente"}
-            </Button>
-          )}
-          {!locked && !alreadyLost && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="ml-auto text-rose-700 border-rose-200 hover:bg-rose-50 hover:text-rose-800"
-              onClick={() => setLostMode((v) => !v)}
-            >
-              <XCircle className="w-4 h-4 mr-1" /> Marcar como perdida
-            </Button>
-          )}
-          {alreadyLost && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="ml-auto text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
-              disabled={restoreMut.isPending}
-              onClick={() =>
-                opp &&
-                restoreMut.mutate(
-                  { id: opp.id },
-                  {
-                    onSuccess: () => {
-                      clearDraft();
-                      onOpenChange(false);
-                    },
-                  },
-                )
-              }
-            >
-              <RotateCcw className="w-4 h-4 mr-1" /> Restaurar
-            </Button>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="px-2" aria-label="Mais ações">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {!locked && !alreadyLost && (
+                <DropdownMenuItem onSelect={() => setWizardOpen(true)}>
+                  <Trophy className="mr-2 h-4 w-4" />
+                  {isCliente ? "Atualizar ficha do cliente" : "Promover a cliente"}
+                </DropdownMenuItem>
+              )}
+              {opp?.cliente_codigo && (
+                <DropdownMenuItem asChild>
+                  <Link to="/clientes/$codigo" params={{ codigo: opp.cliente_codigo }}>
+                    <Building2 className="mr-2 h-4 w-4" /> Abrir ficha do cliente
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {!locked && !alreadyLost && (
+                <DropdownMenuItem
+                  className="text-rose-700 focus:text-rose-800"
+                  onSelect={() => setLostMode(true)}
+                >
+                  <XCircle className="mr-2 h-4 w-4" /> Marcar como perdida
+                </DropdownMenuItem>
+              )}
+              {alreadyLost && (
+                <DropdownMenuItem
+                  disabled={restoreMut.isPending}
+                  onSelect={() =>
+                    opp &&
+                    restoreMut.mutate(
+                      { id: opp.id },
+                      {
+                        onSuccess: () => {
+                          clearDraft();
+                          onOpenChange(false);
+                        },
+                      },
+                    )
+                  }
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" /> Restaurar
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {lostMode && !alreadyLost && (
@@ -648,7 +603,7 @@ export function EditOportunidadeDialog({
 
         <div className="mt-2 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
           <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-            <TabsList>
+            <TabsList className="h-auto flex-wrap">
               <TabsTrigger value="dados" className="gap-1.5">
                 <FileText className="h-3.5 w-3.5" /> Dados
               </TabsTrigger>
@@ -665,18 +620,6 @@ export function EditOportunidadeDialog({
                 <MessageSquare className="h-3.5 w-3.5" /> Anotações
                 <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
                   {notasQ.data?.length ?? 0}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="colaboradores" className="gap-1.5">
-                <UserPlus className="h-3.5 w-3.5" /> Colaboradores
-                <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
-                  {colabAtivos.length}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="anexos" className="gap-1.5">
-                <Paperclip className="h-3.5 w-3.5" /> Anexos
-                <span className="ml-1 rounded-full bg-muted px-1.5 text-[10.5px]">
-                  {anexosQ.data?.length ?? 0}
                 </span>
               </TabsTrigger>
             </TabsList>
@@ -727,51 +670,16 @@ export function EditOportunidadeDialog({
 
             <TabsContent value="dados" className="mt-3">
               <div className="grid gap-3">
-                {!locked && (
-                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
-                    <div className="flex items-center gap-1.5 text-[12px] font-medium text-primary">
-                      <Sparkles className="h-3.5 w-3.5" /> Enriquecer dados da empresa
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(180px,0.7fr)_minmax(240px,1.5fr)_auto] sm:items-center">
-                      <Select value={pais} onValueChange={setPais}>
-                        <SelectTrigger className="h-10 w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PAIS_OPTIONS.map((p) => (
-                            <SelectItem key={p.value} value={p.value}>
-                              {p.label} ({p.doc})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        className="h-10 min-w-0"
-                        placeholder={`Digite o ${PAIS_OPTIONS.find((p) => p.value === pais)?.doc ?? "documento"}`}
-                        value={documento}
-                        onChange={(e) => setDocumento(e.target.value)}
-                        maxLength={40}
-                      />
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="h-10 w-full shrink-0 sm:w-auto sm:px-5"
-                        disabled={!documento.trim() || enrichMut.isPending}
-                        onClick={() => enrichMut.mutate()}
-                      >
-                        {enrichMut.isPending ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-3.5 w-3.5" />
-                        )}
-                        <span className="ml-1">Buscar</span>
-                      </Button>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      Busca razão social, endereço, telefone e e-mail em fontes oficiais. Preenche
-                      somente campos vazios.
-                    </p>
-                  </div>
+                {opp?.cliente_codigo && !locked && (
+                  <Button asChild size="sm" variant="outline" className="w-fit">
+                    <Link
+                      to="/clientes/$codigo"
+                      params={{ codigo: opp.cliente_codigo }}
+                      search={{ minerar: true } as never}
+                    >
+                      <Sparkles className="mr-1 h-3.5 w-3.5" /> Minerar dados da empresa
+                    </Link>
+                  </Button>
                 )}
                 <div className="grid gap-1">
                   <Label htmlFor="ed-titulo">Título *</Label>
@@ -996,157 +904,95 @@ export function EditOportunidadeDialog({
                   </div>
                 ))}
               </div>
-            </TabsContent>
+              <div className="space-y-3 border-t pt-3">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Anexos
+                </div>
 
-            <TabsContent value="colaboradores" className="mt-3 space-y-3">
-              <p className="text-[12px] text-muted-foreground">
-                Convide outro pilar pra ver e comentar esta oportunidade. Só o dono ou admin/manager
-                pode convidar e remover.
-              </p>
-              <div className="flex items-center gap-2">
-                <Select value={novoColabId} onValueChange={setNovoColabId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecione um pilar…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(salesUsersQ.data ?? [])
-                      .filter((u) => !colabAtivos.some((c) => c.user_id === u.id))
-                      .map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.nome} — {u.email}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  size="sm"
-                  disabled={!novoColabId || convidarColabMut.isPending}
-                  onClick={() => convidarColabMut.mutate(novoColabId)}
-                >
-                  {convidarColabMut.isPending && (
-                    <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                <div className="rounded-lg border border-dashed p-4 text-center">
+                  <input
+                    id="op-file"
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadMut.mutate(f);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                  <label htmlFor="op-file" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-1">
+                      <Upload className="h-5 w-5 text-muted-foreground" />
+                      <div className="text-[13px]">
+                        {uploadMut.isPending ? "Enviando…" : "Clique para enviar um arquivo"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        PDF / JPG / PNG até 25MB · ZIP até 50MB
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                <div className="space-y-1.5 max-h-[360px] overflow-auto pr-1">
+                  {anexosQ.isLoading && (
+                    <p className="text-center text-[12px] text-muted-foreground py-4">
+                      <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
+                    </p>
                   )}
-                  Convidar
-                </Button>
-              </div>
-              <div className="space-y-2 max-h-[300px] overflow-auto pr-1">
-                {colabQ.isLoading && (
-                  <p className="text-center text-[12px] text-muted-foreground py-4">
-                    <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
-                  </p>
-                )}
-                {!colabQ.isLoading && colabAtivos.length === 0 && (
-                  <p className="text-center text-[12px] text-muted-foreground py-6">
-                    Nenhum colaborador convidado.
-                  </p>
-                )}
-                {colabAtivos.map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex items-center justify-between rounded-lg border bg-card p-3 text-[13px]"
-                  >
-                    <div>
-                      <div className="font-medium">{c.user_nome ?? "—"}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {c.user_email} • convidado em {formatDateTime(c.convidado_em)}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={revogarColabMut.isPending}
-                      onClick={() => revogarColabMut.mutate(c.id)}
+                  {!anexosQ.isLoading && (anexosQ.data?.length ?? 0) === 0 && (
+                    <p className="text-center text-[12px] text-muted-foreground py-6">
+                      Sem arquivos.
+                    </p>
+                  )}
+                  {(anexosQ.data ?? []).map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center gap-2 rounded-lg border bg-card p-2 text-[13px]"
                     >
-                      <XCircle className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="anexos" className="mt-3 space-y-3">
-              <div className="rounded-lg border border-dashed p-4 text-center">
-                <input
-                  id="op-file"
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) uploadMut.mutate(f);
-                    e.currentTarget.value = "";
-                  }}
-                />
-                <label htmlFor="op-file" className="cursor-pointer">
-                  <div className="flex flex-col items-center gap-1">
-                    <Upload className="h-5 w-5 text-muted-foreground" />
-                    <div className="text-[13px]">
-                      {uploadMut.isPending ? "Enviando…" : "Clique para enviar um arquivo"}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                      PDF / JPG / PNG até 25MB · ZIP até 50MB
-                    </div>
-                  </div>
-                </label>
-              </div>
-              <div className="space-y-1.5 max-h-[360px] overflow-auto pr-1">
-                {anexosQ.isLoading && (
-                  <p className="text-center text-[12px] text-muted-foreground py-4">
-                    <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
-                  </p>
-                )}
-                {!anexosQ.isLoading && (anexosQ.data?.length ?? 0) === 0 && (
-                  <p className="text-center text-[12px] text-muted-foreground py-6">
-                    Sem arquivos.
-                  </p>
-                )}
-                {(anexosQ.data ?? []).map((a) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center gap-2 rounded-lg border bg-card p-2 text-[13px]"
-                  >
-                    <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate font-medium">{a.nome_final}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {a.user_nome ?? "—"} • {formatDateTime(a.created_at)} •{" "}
-                        {formatBytes(a.tamanho_bytes)}
+                      <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium">{a.nome_final}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {a.user_nome ?? "—"} • {formatDateTime(a.created_at)} •{" "}
+                          {formatBytes(a.tamanho_bytes)}
+                        </div>
                       </div>
-                    </div>
-                    {a.drive_view_url && (
-                      <Button size="sm" variant="ghost" asChild>
-                        <a
-                          href={a.drive_view_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="Abrir no Drive"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </a>
+                      {a.drive_view_url && (
+                        <Button size="sm" variant="ghost" asChild>
+                          <a
+                            href={a.drive_view_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Abrir no Drive"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (window.confirm(`Excluir o arquivo "${a.nome_final}"?`)) {
+                            delAnexoMut.mutate(a.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        if (window.confirm(`Excluir o arquivo "${a.nome_final}"?`)) {
-                          delAnexoMut.mutate(a.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  </div>
-                ))}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Os arquivos são salvos no SLTK Drive em{" "}
+                  <code>{"{cliente} / Comercial / {OPP-código} / {AAAAMM}"}</code> ou, sem cliente,
+                  em{" "}
+                  <code>
+                    _Comercial / {"{ano}"} / {"{OPP-código}"}
+                  </code>
+                  .
+                </p>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Os arquivos são salvos no SLTK Drive em{" "}
-                <code>{"{cliente} / Comercial / {OPP-código} / {AAAAMM}"}</code> ou, sem cliente, em{" "}
-                <code>
-                  _Comercial / {"{ano}"} / {"{OPP-código}"}
-                </code>
-                .
-              </p>
             </TabsContent>
           </Tabs>
 
@@ -1241,25 +1087,71 @@ export function EditOportunidadeDialog({
               </div>
             )}
 
-            {!isCliente && !locked && !alreadyLost && (
-              <div className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50/50 p-3 text-[12px] space-y-2">
-                <div className="flex items-center gap-1.5 font-medium text-emerald-800">
-                  <UserPlus className="h-3.5 w-3.5" /> Promover a cliente
-                </div>
-                <p className="text-[11.5px] text-emerald-900/80">
-                  Esta oportunidade ainda é um lead. Preencha a ficha completa para virar cliente
-                  ativo.
-                </p>
+            <div className="rounded-lg border bg-card p-3 space-y-2">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Colaboradores
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Select value={novoColabId} onValueChange={setNovoColabId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Selecione um pilar…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(salesUsersQ.data ?? [])
+                      .filter((u) => !colabAtivos.some((c) => c.user_id === u.id))
+                      .map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.nome} — {u.email}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="w-full border-emerald-300 text-emerald-800 hover:bg-emerald-100"
-                  onClick={() => setWizardOpen(true)}
+                  disabled={!novoColabId || convidarColabMut.isPending}
+                  onClick={() => convidarColabMut.mutate(novoColabId)}
                 >
-                  Abrir ficha completa
+                  {convidarColabMut.isPending && (
+                    <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                  )}
+                  Convidar
                 </Button>
               </div>
-            )}
+              <div className="space-y-2 max-h-[300px] overflow-auto pr-1">
+                {colabQ.isLoading && (
+                  <p className="text-center text-[12px] text-muted-foreground py-4">
+                    <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> Carregando…
+                  </p>
+                )}
+                {!colabQ.isLoading && colabAtivos.length === 0 && (
+                  <p className="text-center text-[12px] text-muted-foreground py-6">
+                    Nenhum colaborador convidado.
+                  </p>
+                )}
+                {colabAtivos.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between rounded-lg border bg-card p-3 text-[13px]"
+                  >
+                    <div>
+                      <div className="font-medium">{c.user_nome ?? "—"}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {c.user_email} • convidado em {formatDateTime(c.convidado_em)}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={revogarColabMut.isPending}
+                      onClick={() => revogarColabMut.mutate(c.id)}
+                    >
+                      <XCircle className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </aside>
         </div>
 

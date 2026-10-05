@@ -75,26 +75,28 @@ function AuthenticatedShell() {
             {brand?.system_name ?? "Solutek Operations"}
           </span>
         </header>
-        <main className="flex-1 overflow-auto flex flex-col">
+        {/* A página cresce com o conteúdo e o documento rola; o rodapé fica
+            dentro do main para sempre vir depois do conteúdo. */}
+        <main className="flex flex-1 flex-col min-w-0">
           <ModuleGuard>
             <Outlet />
           </ModuleGuard>
-        </main>
 
-        {(brand?.footer_text || brand?.support_email) && (
-          <footer className="border-t border-[var(--bg-border)] bg-[var(--bg-surface)] px-6 py-3 text-center text-[11px] text-[var(--text-muted)] flex flex-wrap justify-center items-center gap-x-3 gap-y-1">
-            {brand?.footer_text && <span>{brand.footer_text}</span>}
-            {brand?.footer_text && brand?.support_email && <span className="opacity-40">·</span>}
-            {brand?.support_email && (
-              <a
-                href={`mailto:${brand.support_email}`}
-                className="hover:text-[var(--text-primary)] transition-colors"
-              >
-                {brand.support_email}
-              </a>
-            )}
-          </footer>
-        )}
+          {(brand?.footer_text || brand?.support_email) && (
+            <footer className="mt-auto border-t border-[var(--bg-border)] bg-[var(--bg-surface)] px-6 py-3 text-center text-[11px] text-[var(--text-muted)] flex flex-wrap justify-center items-center gap-x-3 gap-y-1">
+              {brand?.footer_text && <span>{brand.footer_text}</span>}
+              {brand?.footer_text && brand?.support_email && <span className="opacity-40">·</span>}
+              {brand?.support_email && (
+                <a
+                  href={`mailto:${brand.support_email}`}
+                  className="hover:text-[var(--text-primary)] transition-colors"
+                >
+                  {brand.support_email}
+                </a>
+              )}
+            </footer>
+          )}
+        </main>
       </div>
     </div>
   );

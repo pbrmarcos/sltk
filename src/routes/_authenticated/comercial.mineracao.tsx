@@ -42,7 +42,6 @@ import { reanalisarLeads } from "@/lib/mineracao-analise.functions";
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -770,7 +769,6 @@ function MineracaoPage() {
         title="Mineração de leads"
         subtitle="Consulte transações de comércio exterior por NCM, empresa e contraparte — e envie as melhores relações como suspects do pipeline."
       />
-      <ProcessoComercialGuia destaque="suspect" />
 
       {/* Status + medidores (dados reais do GET /restrictions, atualizados sob demanda) */}
       <div className="mb-5 space-y-3">
@@ -1055,7 +1053,7 @@ function MineracaoPage() {
             )}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 lg:grid-cols-4">
             <div className={`space-y-1.5 md:col-span-2 ${modo === "rota" ? "hidden" : ""}`}>
               <div className="flex items-center justify-between gap-2">
                 <Label className="text-[12.5px]">Base de dados</Label>
@@ -1253,7 +1251,7 @@ function MineracaoPage() {
               />
             </button>
             {avancado && (
-              <div className="mt-3 grid gap-4 md:grid-cols-4">
+              <div className="mt-3 grid gap-4 lg:grid-cols-4">
                 <div className="space-y-1.5">
                   <Label className="text-[12.5px]">Empresa local contém</Label>
                   <Input
@@ -1443,7 +1441,7 @@ function MineracaoPage() {
           ref={resultadosRef}
           className="scroll-mt-4 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]"
         >
-          <div className="grid gap-2 border-b border-[var(--bg-border)] p-3 sm:grid-cols-3">
+          <div className="grid gap-2 border-b border-[var(--bg-border)] p-3 md:grid-cols-3">
             <Kpi label="Linhas" valor={String(linhas.length)} />
             <Kpi label="Operações" valor={totalOpsPagina.toLocaleString("pt-BR")} />
             <Kpi label="Valor negociado" valor={usd(totalValorPagina)} />

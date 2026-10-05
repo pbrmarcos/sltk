@@ -6,7 +6,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { gerarDocumentoEntrevista } from "@/lib/entrevistas-docs.functions";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -171,7 +170,6 @@ function EntrevistasListPage() {
           </Button>
         }
       />
-      <ProcessoComercialGuia destaque="entrevista" />
 
       <div className="space-y-4 mt-4">
         <Tabs value={escopo} onValueChange={(v) => setEscopo(v as "ativas" | "lixeira")}>

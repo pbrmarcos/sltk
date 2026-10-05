@@ -28,7 +28,9 @@ export type QualifyInput = {
   documento?: string | null;
   /** Categoria/segmento detectado (foto) ou rubro/NCM (Penta). */
   segmento?: string | null;
-  origem: "penta" | "foto";
+  origem: "penta" | "foto" | "ficha";
+  /** Cliente que está sendo minerado — não conta como "já é cliente". */
+  excluirClienteId?: string | null;
   /** Texto livre com o que mais se sabe (NCMs/valores da Penta, produto da foto). */
   extras?: string | null;
   imagens?: AiVisionImage[];
@@ -210,6 +212,7 @@ async function buscarClienteExistente(
   docDigits: string | null,
   telefone: string | null,
   empresa: string,
+  excluirId?: string | null,
 ): Promise<{ id: string; nome: string } | null> {
   try {
     const { getCriticalClient } = await import("@/lib/supabase-client.server");
@@ -234,8 +237,9 @@ async function buscarClienteExistente(
         .from("clientes")
         .select("id, razao_social")
         .ilike("documento_fiscal_numero", `${raiz}%`)
-        .limit(1);
-      if (data?.[0]) return { id: data[0].id, nome: data[0].razao_social };
+        .limit(3);
+      const hit = data?.find((d) => d.id !== excluirId);
+      if (hit) return { id: hit.id, nome: hit.razao_social };
     }
     const alvo = norm(empresa);
     if (alvo.length >= 6) {
@@ -243,8 +247,9 @@ async function buscarClienteExistente(
         .from("clientes")
         .select("id, razao_social")
         .ilike("razao_social", `%${empresa.slice(0, 40)}%`)
-        .limit(1);
-      if (data?.[0]) return { id: data[0].id, nome: data[0].razao_social };
+        .limit(3);
+      const hit = data?.find((d) => d.id !== excluirId);
+      if (hit) return { id: hit.id, nome: hit.razao_social };
     }
     void telefone;
     return null;
@@ -393,6 +398,7 @@ export async function qualificarLead(input: QualifyInput): Promise<QualifyResult
     dados.documento_verificado ?? null,
     dados.telefone ?? null,
     input.empresa,
+    input.excluirClienteId,
   );
   if (jaCliente) {
     etapas.push("já é cliente");

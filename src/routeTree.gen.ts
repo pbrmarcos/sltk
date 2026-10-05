@@ -64,7 +64,6 @@ import { Route as AuthenticatedComercialPipelineRouteImport } from './routes/_au
 import { Route as AuthenticatedComercialMineracaoRouteImport } from './routes/_authenticated/comercial.mineracao'
 import { Route as AuthenticatedComercialEntrevistasRouteImport } from './routes/_authenticated/comercial.entrevistas'
 import { Route as AuthenticatedComercialChecklistsRouteImport } from './routes/_authenticated/comercial.checklists'
-import { Route as AuthenticatedClientesSuspectFotoRouteImport } from './routes/_authenticated/clientes.suspect-foto'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes.novo'
 import { Route as AuthenticatedClientesCodigoRouteImport } from './routes/_authenticated/clientes.$codigo'
 import { Route as AuthenticatedAjudaFaqRouteImport } from './routes/_authenticated/ajuda.faq'
@@ -438,12 +437,6 @@ const AuthenticatedComercialChecklistsRoute =
   AuthenticatedComercialChecklistsRouteImport.update({
     id: '/comercial/checklists',
     path: '/comercial/checklists',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedClientesSuspectFotoRoute =
-  AuthenticatedClientesSuspectFotoRouteImport.update({
-    id: '/clientes/suspect-foto',
-    path: '/clientes/suspect-foto',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedClientesNovoRoute =
@@ -923,7 +916,6 @@ export interface FileRoutesByFullPath {
   '/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
   '/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
-  '/clientes/suspect-foto': typeof AuthenticatedClientesSuspectFotoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
   '/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
@@ -1048,7 +1040,6 @@ export interface FileRoutesByTo {
   '/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
   '/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
-  '/clientes/suspect-foto': typeof AuthenticatedClientesSuspectFotoRoute
   '/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
   '/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
@@ -1176,7 +1167,6 @@ export interface FileRoutesById {
   '/_authenticated/ajuda/faq': typeof AuthenticatedAjudaFaqRoute
   '/_authenticated/clientes/$codigo': typeof AuthenticatedClientesCodigoRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
-  '/_authenticated/clientes/suspect-foto': typeof AuthenticatedClientesSuspectFotoRoute
   '/_authenticated/comercial/checklists': typeof AuthenticatedComercialChecklistsRoute
   '/_authenticated/comercial/entrevistas': typeof AuthenticatedComercialEntrevistasRouteWithChildren
   '/_authenticated/comercial/mineracao': typeof AuthenticatedComercialMineracaoRoute
@@ -1306,7 +1296,6 @@ export interface FileRouteTypes {
     | '/ajuda/faq'
     | '/clientes/$codigo'
     | '/clientes/novo'
-    | '/clientes/suspect-foto'
     | '/comercial/checklists'
     | '/comercial/entrevistas'
     | '/comercial/mineracao'
@@ -1431,7 +1420,6 @@ export interface FileRouteTypes {
     | '/ajuda/faq'
     | '/clientes/$codigo'
     | '/clientes/novo'
-    | '/clientes/suspect-foto'
     | '/comercial/checklists'
     | '/comercial/entrevistas'
     | '/comercial/mineracao'
@@ -1558,7 +1546,6 @@ export interface FileRouteTypes {
     | '/_authenticated/ajuda/faq'
     | '/_authenticated/clientes/$codigo'
     | '/_authenticated/clientes/novo'
-    | '/_authenticated/clientes/suspect-foto'
     | '/_authenticated/comercial/checklists'
     | '/_authenticated/comercial/entrevistas'
     | '/_authenticated/comercial/mineracao'
@@ -2047,13 +2034,6 @@ declare module '@tanstack/react-router' {
       path: '/comercial/checklists'
       fullPath: '/comercial/checklists'
       preLoaderRoute: typeof AuthenticatedComercialChecklistsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/clientes/suspect-foto': {
-      id: '/_authenticated/clientes/suspect-foto'
-      path: '/clientes/suspect-foto'
-      fullPath: '/clientes/suspect-foto'
-      preLoaderRoute: typeof AuthenticatedClientesSuspectFotoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/clientes/novo': {
@@ -2799,7 +2779,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjudaFaqRoute: typeof AuthenticatedAjudaFaqRoute
   AuthenticatedClientesCodigoRoute: typeof AuthenticatedClientesCodigoRouteWithChildren
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
-  AuthenticatedClientesSuspectFotoRoute: typeof AuthenticatedClientesSuspectFotoRoute
   AuthenticatedComercialChecklistsRoute: typeof AuthenticatedComercialChecklistsRoute
   AuthenticatedComercialEntrevistasRoute: typeof AuthenticatedComercialEntrevistasRouteWithChildren
   AuthenticatedComercialMineracaoRoute: typeof AuthenticatedComercialMineracaoRoute
@@ -2862,7 +2841,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesCodigoRoute:
     AuthenticatedClientesCodigoRouteWithChildren,
   AuthenticatedClientesNovoRoute: AuthenticatedClientesNovoRoute,
-  AuthenticatedClientesSuspectFotoRoute: AuthenticatedClientesSuspectFotoRoute,
   AuthenticatedComercialChecklistsRoute: AuthenticatedComercialChecklistsRoute,
   AuthenticatedComercialEntrevistasRoute:
     AuthenticatedComercialEntrevistasRouteWithChildren,

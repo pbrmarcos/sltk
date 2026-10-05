@@ -22,39 +22,25 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Archive, Trophy, FileText, Plus, MessageSquare } from "lucide-react";
+import { Archive, FileText, Plus, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { pipelineQueryOptions, useUpdateStage } from "@/lib/oportunidades.queries";
 import {
   PIPELINE_STAGES,
   STAGE_LABEL,
-  LIFECYCLE_OF_STAGE,
   type PipelineStage,
   type OportunidadeLite,
 } from "@/lib/oportunidades.functions";
 import { EditOportunidadeDialog } from "./EditOportunidadeDialog";
 import { PipelineTable } from "./PipelineTable";
 import { LostOportunidadesList } from "./LostOportunidadesList";
-import { ClienteStatusBadge } from "@/components/clientes/ClienteStatusBadge";
-import { CLIENTE_LIFECYCLE_LABEL } from "@/lib/clientes.shared";
 import { RestoredOportunidadeBadge } from "./RestoredOportunidadeBadge";
 import { ConvertWizardDialog } from "./ConvertWizardDialog";
-import { NewOportunidadeDialog } from "./NewOportunidadeDialog";
-import {
-  ProcessoComercialGuia,
-  StageHintButton,
-} from "@/components/comercial/ProcessoComercialGuia";
-import { STAGE_GUIA, avisoMover } from "@/lib/comercial/guia";
+import { StageHintButton } from "@/components/comercial/ProcessoComercialGuia";
+import { avisoMover } from "@/lib/comercial/guia";
 import { toast } from "sonner";
 
 const ACTIVE_PIPELINE_STAGES = PIPELINE_STAGES.filter((stage) => stage !== "perdido");
-
-const LIFECYCLE_TONE: Record<string, string> = {
-  suspect:
-    "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
-  prospect: "bg-blue-50 text-blue-700 border-blue-200",
-  cliente: "bg-emerald-50 text-emerald-700 border-emerald-200",
-};
 
 const STAGE_HEADER_TONE: Record<PipelineStage, string> = {
   novo: "border-t-slate-300",
@@ -78,11 +64,9 @@ function ageDays(date: string): number {
 
 function OportunidadeCard({
   opp,
-  onWin,
   onOpen,
 }: {
   opp: OportunidadeLite;
-  onWin: (o: OportunidadeLite) => void;
   onOpen: (o: OportunidadeLite, tab?: "dados" | "notas") => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: opp.id });
@@ -103,25 +87,15 @@ function OportunidadeCard({
         e.stopPropagation();
         onOpen(opp);
       }}
-      className="cursor-grab active:cursor-grabbing p-3 space-y-2 hover:shadow-md transition-shadow"
+      className="cursor-grab active:cursor-grabbing p-3 space-y-1.5 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="text-xs text-muted-foreground font-mono">{opp.codigo}</div>
-          <div className="font-medium text-sm leading-tight line-clamp-2">{opp.titulo}</div>
-        </div>
-        <ClienteStatusBadge status={opp.lifecycle_stage} className="shrink-0" />
+      <div className="font-semibold text-sm leading-tight truncate">
+        {opp.cliente_nome || opp.empresa_lead || opp.nome_lead || "Sem empresa"}
       </div>
-      <div className="text-xs text-muted-foreground truncate">
-        {opp.cliente_nome || opp.empresa_lead || opp.nome_lead || "—"}
-      </div>
+      <div className="text-xs text-muted-foreground truncate">{opp.titulo}</div>
       <RestoredOportunidadeBadge restoredAt={opp.restored_at} restoredBy={opp.restored_by_nome} />
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-semibold">{formatBRL(opp.valor_estimado)}</span>
-        <span className="text-muted-foreground">{opp.probabilidade}%</span>
-      </div>
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="truncate text-muted-foreground">{opp.responsavel_nome}</span>
+      <div className="flex items-center justify-between gap-2 pt-0.5 text-xs">
+        <span className="font-medium">{formatBRL(opp.valor_estimado)}</span>
         <div className="flex items-center gap-2 shrink-0">
           {opp.notas_count > 0 && (
             <button
@@ -137,23 +111,11 @@ function OportunidadeCard({
               <MessageSquare className="h-3 w-3" /> {opp.notas_count}
             </button>
           )}
-          <span className={ageTone}>{age}d</span>
+          <span className={ageTone} title="Dias nesta etapa">
+            {age}d
+          </span>
         </div>
       </div>
-      {opp.pipeline_stage !== "ganho" && opp.pipeline_stage !== "perdido" && (
-        <Button
-          size="sm"
-          variant="outline"
-          className="w-full h-7 text-xs"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation();
-            onWin(opp);
-          }}
-        >
-          <Trophy className="w-3 h-3 mr-1" /> Marcar ganho
-        </Button>
-      )}
       {opp.pipeline_stage === "ganho" && (
         <Button
           asChild
@@ -189,14 +151,12 @@ function StageColumn({
   stage,
   items,
   totalValor,
-  onWin,
   onOpen,
   onNew,
 }: {
   stage: PipelineStage;
   items: OportunidadeLite[];
   totalValor: number;
-  onWin: (o: OportunidadeLite) => void;
   onOpen: (o: OportunidadeLite, tab?: "dados" | "notas") => void;
   onNew: () => void;
 }) {
@@ -205,50 +165,47 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col h-full bg-muted/30 rounded-lg border-t-4 w-[85vw] sm:w-auto sm:min-w-0 shrink-0 sm:shrink",
+        // Abaixo de xl: colunas de largura fixa com rolagem horizontal do quadro.
+        "flex flex-col max-h-[70vh] bg-muted/30 rounded-lg border-t-4 w-[78vw] sm:w-[260px] xl:w-auto shrink-0 xl:shrink",
         STAGE_HEADER_TONE[stage],
         isOver && "ring-2 ring-primary/50",
       )}
     >
-      <div className="p-3 border-b">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <h3 className="font-semibold text-sm truncate">{STAGE_LABEL[stage]}</h3>
-            <StageHintButton stage={stage} />
-          </div>
-          <Badge variant="secondary" className="text-xs">
-            {items.length}
-          </Badge>
+      <div className="flex items-center justify-between gap-2 p-3 border-b">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h3 className="font-semibold text-sm truncate">{STAGE_LABEL[stage]}</h3>
+          <StageHintButton stage={stage} />
         </div>
-        <div className="text-xs text-muted-foreground mt-1">{formatBRL(totalValor)}</div>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          {items.length} · {formatBRL(totalValor)}
+        </span>
       </div>
       <div className="flex-1 p-2 space-y-2 overflow-y-auto min-h-0">
         {items.length === 0 ? (
           stage === "novo" ? (
-            <div className="text-center text-xs text-muted-foreground p-4 space-y-2">
-              <p>
-                Oportunidades nascem de um suspect: crie manualmente, converta um lead da Mineração
-                ou receba pelo formulário público do site.
-              </p>
-              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onNew}>
+            <div className="text-center p-4">
+              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={onNew}>
                 <Plus className="w-3 h-3 mr-1" /> Nova oportunidade
               </Button>
             </div>
           ) : (
-            <div className="text-center text-xs text-muted-foreground py-8 px-3">
-              <div>Vazio</div>
-              <div className="mt-1">{STAGE_GUIA[stage].proximo}</div>
-            </div>
+            <div className="text-center text-xs text-muted-foreground py-6 px-3">Vazio</div>
           )
         ) : (
-          items.map((o) => <OportunidadeCard key={o.id} opp={o} onWin={onWin} onOpen={onOpen} />)
+          items.map((o) => <OportunidadeCard key={o.id} opp={o} onOpen={onOpen} />)
         )}
       </div>
     </div>
   );
 }
 
-export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }) {
+export function PipelineBoard({
+  view = "kanban",
+  onNew,
+}: {
+  view?: "kanban" | "table";
+  onNew: () => void;
+}) {
   const { data } = useSuspenseQuery(pipelineQueryOptions());
   const update = useUpdateStage();
   const [scope, setScope] = useState<"ativas" | "perdidas">("ativas");
@@ -257,23 +214,16 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
   const [winDialog, setWinDialog] = useState<OportunidadeLite | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTab, setEditingTab] = useState<"dados" | "notas">("dados");
-  const [newOpen, setNewOpen] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("solutek:pipeline:editing");
     if (saved) setEditingId(saved);
-    setNewOpen(window.localStorage.getItem("solutek:pipeline:new-open") === "1");
   }, []);
 
   useEffect(() => {
     if (editingId) window.localStorage.setItem("solutek:pipeline:editing", editingId);
     else window.localStorage.removeItem("solutek:pipeline:editing");
   }, [editingId]);
-
-  useEffect(() => {
-    if (newOpen) window.localStorage.setItem("solutek:pipeline:new-open", "1");
-    else window.localStorage.removeItem("solutek:pipeline:new-open");
-  }, [newOpen]);
 
   const editing = editingId ? (data.find((item) => item.id === editingId) ?? null) : null;
 
@@ -343,42 +293,19 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <ProcessoComercialGuia />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="p-3">
-          <div className="text-xs text-muted-foreground">Pipeline ativo</div>
-          <div className="text-xl font-bold">{kpis.count}</div>
-        </Card>
-        <Card className="p-3">
-          <div className="text-xs text-muted-foreground">Valor total</div>
-          <div className="text-xl font-bold">{formatBRL(kpis.total)}</div>
-        </Card>
-        <Card className="p-3">
-          <div className="text-xs text-muted-foreground">Valor ponderado</div>
-          <div className="text-xl font-bold">{formatBRL(kpis.weighted)}</div>
-        </Card>
-        <Card className="p-3">
-          <div className="text-xs text-muted-foreground">Taxa de conversão</div>
-          <div className="text-xl font-bold">{kpis.winRate}%</div>
-        </Card>
-      </div>
-
+    <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          {(["suspect", "prospect", "cliente"] as const).map((lc) => {
-            const count = activeItems.filter(
-              (o) => LIFECYCLE_OF_STAGE[o.pipeline_stage] === lc,
-            ).length;
-            return (
-              <Badge key={lc} variant="outline" className={LIFECYCLE_TONE[lc]}>
-                {CLIENTE_LIFECYCLE_LABEL[lc]}: {count}
-              </Badge>
-            );
-          })}
-        </div>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">{kpis.count} ativas</span>
+          {" · "}
+          {formatBRL(kpis.total)}
+          <span className="hidden sm:inline">
+            {" · "}ponderado {formatBRL(kpis.weighted)}
+            {" · "}conversão {kpis.winRate}%
+          </span>
+        </p>
 
-        <div className="inline-flex rounded-lg border bg-white p-1">
+        <div className="inline-flex rounded-lg border bg-[var(--bg-surface)] p-1">
           <Button
             size="sm"
             variant={scope === "ativas" ? "secondary" : "ghost"}
@@ -399,7 +326,7 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
         </div>
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div>
         {scope === "perdidas" ? (
           <LostOportunidadesList
             items={lostItems}
@@ -410,22 +337,21 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
           />
         ) : view === "kanban" ? (
           <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-            <div className="flex h-full gap-3 overflow-x-auto pb-4 snap-x snap-mandatory sm:grid sm:grid-cols-5 sm:overflow-visible sm:snap-none w-full">
+            <div className="flex w-full items-start gap-3 overflow-x-auto pb-4 snap-x snap-mandatory xl:grid xl:grid-cols-5 xl:overflow-visible xl:snap-none">
               {ACTIVE_PIPELINE_STAGES.map((stage) => {
                 const items = grouped.get(stage) ?? [];
                 const total = items.reduce((s, o) => s + (o.valor_estimado ?? 0), 0);
                 return (
-                  <div key={stage} className="snap-start min-w-0 h-full">
+                  <div key={stage} className="snap-start min-w-0">
                     <StageColumn
                       stage={stage}
                       items={items}
                       totalValor={total}
-                      onWin={(o) => setWinDialog(o)}
                       onOpen={(o, tab) => {
                         setEditingTab(tab ?? "dados");
                         setEditingId(o.id);
                       }}
-                      onNew={() => setNewOpen(true)}
+                      onNew={onNew}
                     />
                   </div>
                 );
@@ -489,8 +415,6 @@ export function PipelineBoard({ view = "kanban" }: { view?: "kanban" | "table" }
           if (!o) setWinDialog(null);
         }}
       />
-
-      <NewOportunidadeDialog open={newOpen} onOpenChange={setNewOpen} />
 
       <EditOportunidadeDialog
         opp={editing}

@@ -1,3 +1,14 @@
+## 1.6.0 — Comercial enxuto no tablet, Suspect por foto na Nova oportunidade e Minerar dados — 05.10.2026
+
+- **Comercial funcionando no tablet**: o pipeline não sobrepõe mais o cabeçalho e o rodapé fica sempre no fim da página. Abaixo de telas largas as colunas rolam na horizontal; todo diálogo cabe na tela, com rolagem própria, e os botões ficam sempre alcançáveis.
+- **Pipeline mais limpo**: os quatro cartões de números viraram uma linha (ativas · total · ponderado · conversão). Os cards mostram a empresa em destaque, o título, o valor e a idade. Saíram o botão "Marcar ganho" de cada card (para ganhar, arraste para a coluna Ganho), o selo de fase repetido e o painel "Como funciona o processo comercial", que também deixou Clientes, Mineração, Entrevistas e Checklists.
+- **Foto direto na Nova oportunidade**: o botão **Foto do produto ou cartão** abre a câmera. A IA lê o rótulo ou o cartão e lista as empresas com o papel de cada uma (fabricante, importador, distribuidor). O vendedor escolhe uma, com o fabricante já marcado, e o **Ramo** (Arroz, Café, Leite em pó…) vem sugerido; dá para trocar ou criar um ramo na hora. Ao criar, o sistema gera o cliente suspect e a oportunidade.
+- **Nova oportunidade direta**: só aparecem Empresa, Ramo, Contato, Telefone e E-mail. O título é gerado sozinho ("Empresa — Ramo"); valor, probabilidade e origem ficam em "Mais detalhes". A página separada de Suspect por foto foi retirada: agora tudo começa na Nova oportunidade.
+- **Minerar dados** na ficha do cliente: um botão pesquisa a empresa no Google, lê o site e descobre e confere o CNPJ na Receita. Só **completa campos vazios** (site, telefone, e-mail, endereço, CNAE, porte, LinkedIn, Instagram) e adiciona sócios novos; nada do que o vendedor digitou é sobrescrito. No fim aparece a nota A/B/C com o motivo e a abordagem sugerida. O ramo do cabeçalho passa a vir do cadastro de ramos.
+- **Oportunidade aberta mais simples**: um único botão **Salvar** e um menu **⋯** (Promover a cliente, Abrir ficha, Marcar como perdida, Restaurar). As 6 abas viraram 4 (Dados · Agenda · Orçamentos · Anotações): os anexos foram para Anotações e os colaboradores para o painel lateral. O bloco "Enriquecer dados" virou o atalho **Minerar dados da empresa**.
+
+---
+
 ## 1.5.3 — Chaves & Diagnóstico enxuto, mineração restaurada e changelog completo — 05.10.2026
 
 - **Lovable AI removida**: o Google Gemini passa a ser o único provedor de IA do sistema. A capacidade "Lovable AI Gateway" saiu da tela de Chaves & Diagnóstico e o fallback interno foi retirado — menos uma chave para manter e nenhum tráfego indo para um provedor que não é mais usado.

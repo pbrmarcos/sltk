@@ -49,6 +49,7 @@ export type OportunidadeLite = {
   titulo: string;
   cliente_id: string | null;
   cliente_nome: string | null;
+  cliente_codigo?: string | null;
   nome_lead: string | null;
   empresa_lead: string | null;
   responsavel_id: string;
@@ -114,11 +115,12 @@ export const listPipeline = createServerFn({ method: "POST" })
       clienteIds.length > 0
         ? context.supabase
             .from("clientes")
-            .select("id,razao_social,nome_fantasia")
+            .select("id,codigo,razao_social,nome_fantasia")
             .in("id", clienteIds)
         : Promise.resolve({
             data: [] as Array<{
               id: string;
+              codigo: string;
               razao_social: string | null;
               nome_fantasia: string | null;
             }>,
@@ -138,6 +140,7 @@ export const listPipeline = createServerFn({ method: "POST" })
     const cliMap = new Map(
       (clientes ?? []).map((c) => [c.id, c.nome_fantasia || c.razao_social || ""]),
     );
+    const cliCodigoMap = new Map((clientes ?? []).map((c) => [c.id, c.codigo]));
     const proMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name || p.email || ""]));
     const notasCountMap = new Map<string, number>();
     for (const n of (notas ?? []) as Array<{ oportunidade_id: string }>) {
@@ -159,6 +162,7 @@ export const listPipeline = createServerFn({ method: "POST" })
         titulo: r.titulo,
         cliente_id: r.cliente_id,
         cliente_nome: r.cliente_id ? (cliMap.get(r.cliente_id) ?? null) : null,
+        cliente_codigo: r.cliente_id ? (cliCodigoMap.get(r.cliente_id) ?? null) : null,
         nome_lead: r.nome_lead,
         empresa_lead: r.empresa_lead,
         responsavel_id: r.responsavel_id,

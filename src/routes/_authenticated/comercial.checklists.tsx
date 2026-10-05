@@ -6,7 +6,6 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ProcessoComercialGuia } from "@/components/comercial/ProcessoComercialGuia";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GerarEtpDialog } from "@/components/checklist/GerarEtpDialog";
@@ -49,7 +48,6 @@ function FormulariosChecklistPage() {
         title="Checklists"
         subtitle="Submissões recebidas dos formulários do time de vendas"
       />
-      <ProcessoComercialGuia destaque="checklist" />
 
       <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
         <section className="rounded-lg border border-border bg-card">

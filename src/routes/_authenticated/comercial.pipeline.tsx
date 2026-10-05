@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Loader2, AlertTriangle, Plus, LayoutGrid, Table as TableIcon } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -18,22 +18,15 @@ export const Route = createFileRoute("/_authenticated/comercial/pipeline")({
 function PipelinePage() {
   const [view, setView] = useState<"kanban" | "table">("kanban");
   const [newOpen, setNewOpen] = useState(false);
-  useEffect(() => {
-    setNewOpen(window.localStorage.getItem("solutek:pipeline:new-open") === "1");
-  }, []);
-  useEffect(() => {
-    if (newOpen) window.localStorage.setItem("solutek:pipeline:new-open", "1");
-    else window.localStorage.removeItem("solutek:pipeline:new-open");
-  }, [newOpen]);
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Comercial" }, { label: "Pipeline" }]}
-        title="Pipeline Comercial"
-        subtitle="Suspect → Prospect → Cliente. Arraste para mover entre estágios."
+        breadcrumbs={[{ label: "Comercial" }, { label: "Pipeline" }]}
+        title="Pipeline"
+        subtitle="Arraste os cards entre as etapas."
         actions={
           <>
-            <div className="hidden sm:inline-flex rounded-md border bg-white p-0.5">
+            <div className="hidden sm:inline-flex rounded-md border bg-[var(--bg-surface)] p-0.5">
               <Button
                 size="sm"
                 variant={view === "kanban" ? "secondary" : "ghost"}
@@ -79,7 +72,7 @@ function PipelinePage() {
           </div>
         }
       >
-        <PipelineBoard view={view} />
+        <PipelineBoard view={view} onNew={() => setNewOpen(true)} />
       </Suspense>
       <NewOportunidadeDialog open={newOpen} onOpenChange={setNewOpen} />
     </PageContainer>

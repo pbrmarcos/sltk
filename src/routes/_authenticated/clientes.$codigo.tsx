@@ -1,5 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MineracaoResumo, useMinerarCliente } from "@/components/clientes/MinerarDados";
+import type { MineracaoIA } from "@/lib/minerar-cliente.functions";
+import { segmentosQueryOptions } from "@/lib/cadastros.queries";
 import { NewOportunidadeDialog } from "@/components/comercial/pipeline/NewOportunidadeDialog";
 import { useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
@@ -179,6 +182,8 @@ const searchSchema = z.object({
     z.enum(["visao", "equipamentos", "checklist", "socios", "documentos", "timeline"]),
     "visao",
   ).default("visao"),
+  /** Vem do "Minerar dados" da oportunidade: dispara a mineração ao abrir. */
+  minerar: fallback(z.boolean(), false).default(false),
 });
 
 export const Route = createFileRoute("/_authenticated/clientes/$codigo")({
@@ -240,7 +245,7 @@ function EmptyState({
 
 function ClientePage() {
   const { codigo } = Route.useParams();
-  const { tab, sec } = Route.useSearch();
+  const { tab, sec, minerar } = Route.useSearch();
   const [showDetalhes, setShowDetalhes] = useState(false);
   const [novaOppOpen, setNovaOppOpen] = useState(false);
   const [arquivarOpen, setArquivarOpen] = useState(false);
@@ -254,6 +259,15 @@ function ClientePage() {
   const paises = useSuspenseQuery(paisesQueryOptions());
   const cliente = data.cliente;
   const contatos = data.contatos;
+  const segmentos = useQuery(segmentosQueryOptions());
+  const segmentoNome =
+    segmentos.data?.find((s) => s.id === cliente.segmento_id)?.nome ?? cliente.segmento;
+  const mineracaoCols = cliente as typeof cliente & {
+    mineracao_ia?: MineracaoIA | null;
+    minerado_em?: string | null;
+  };
+  const minerarMut = useMinerarCliente(cliente.id);
+  const minerarDisparado = useRef(false);
   const paisCfg = paises.data.find((p) => p.codigo === cliente.pais);
   const documentoFmt = paisCfg
     ? formatDocumento(cliente.documento_fiscal_numero, paisCfg.documento_mascara)
@@ -277,6 +291,16 @@ function ClientePage() {
     onSettled: () => setArquivarOpen(false),
   });
 
+  useEffect(() => {
+    if (!minerar || minerarDisparado.current) return;
+    minerarDisparado.current = true;
+    minerarMut.mutate();
+    navigate({
+      search: (prev: Record<string, unknown>) => ({ ...prev, minerar: undefined }),
+      replace: true,
+    });
+  }, [minerar, minerarMut, navigate]);
+
   const setTab = (next: TabId) =>
     navigate({
       search: (prev: Record<string, unknown>) => ({ ...prev, tab: next }),
@@ -290,7 +314,7 @@ function ClientePage() {
 
   return (
     <div className="w-full bg-muted/30 text-foreground">
-      <main className="flex-1 overflow-y-auto">
+      <div>
         {/* Topbar */}
         <div className="sticky top-0 z-20 flex min-h-14 flex-wrap items-center gap-2 border-b border-border bg-card/85 px-4 py-2 backdrop-blur md:gap-3 md:px-6">
           <Link
@@ -317,12 +341,36 @@ function ClientePage() {
             </Badge>
           )}
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setNovaOppOpen(true)}>
-              <Plus className="h-3.5 w-3.5" /> Nova oportunidade
+            <Button
+              size="sm"
+              disabled={minerarMut.isPending}
+              onClick={() => minerarMut.mutate()}
+              title="Pesquisa a empresa na Receita, no site e no Google e completa os campos vazios"
+            >
+              {minerarMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              Minerar dados
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setNovaOppOpen(true)}
+              aria-label="Nova oportunidade"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">Nova oportunidade</span>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link to="/clientes/$codigo/editar" params={{ codigo: cliente.codigo }}>
-                <Pencil className="h-3.5 w-3.5" /> Editar
+              <Link
+                to="/clientes/$codigo/editar"
+                params={{ codigo: cliente.codigo }}
+                aria-label="Editar"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Editar</span>
               </Link>
             </Button>
             {canArquivar && (
@@ -332,7 +380,8 @@ function ClientePage() {
                 className="text-rose-700 hover:bg-rose-50"
                 onClick={() => setArquivarOpen(true)}
               >
-                <Archive className="h-3.5 w-3.5" /> Arquivar
+                <Archive className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Arquivar</span>
               </Button>
             )}
             <NewOportunidadeDialog
@@ -366,7 +415,7 @@ function ClientePage() {
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5">
-                      <Building2 className="h-3.5 w-3.5" /> {cliente.segmento ?? "Segmento —"}
+                      <Building2 className="h-3.5 w-3.5" /> {segmentoNome ?? "Ramo —"}
                     </span>
                     <AddressLine cliente={cliente} paisNome={paisCfg?.nome ?? cliente.pais} />
                     <button
@@ -508,6 +557,16 @@ function ClientePage() {
           </div>
         </div>
 
+        {(minerarMut.isPending || mineracaoCols.mineracao_ia) && (
+          <div className="px-4 pt-3 md:px-6">
+            <MineracaoResumo
+              pending={minerarMut.isPending}
+              mineracao={mineracaoCols.mineracao_ia}
+              mineradoEm={mineracaoCols.minerado_em}
+            />
+          </div>
+        )}
+
         <div className="px-4 py-4 md:px-6 md:py-5">
           {tab === "gestao" && (
             <div className="space-y-4">
@@ -563,7 +622,7 @@ function ClientePage() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       <AlertDialog
         open={arquivarOpen}
@@ -1225,7 +1284,7 @@ function EquipamentosTab({ clienteId }: { clienteId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-3">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-5 md:gap-3">
         <MiniKpi label="Total" value={String(total)} sub="equipamentos" icon={Cog} color="blue" />
         <MiniKpi
           label="Em operação"

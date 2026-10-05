@@ -1,52 +1,81 @@
-// Suspect por foto: o vendedor fotografa um cartão de visita OU a parte do
-// produto que identifica o fabricante; o Gemini extrai os dados, o motor de
-// qualificação dá a nota A/B/C, e o sistema cria cliente (status suspect) +
-// oportunidade no estágio "novo" do pipeline.
+// Suspect por foto: dentro do "Nova oportunidade" o vendedor fotografa um
+// cartão de visita OU o rótulo de um produto (ex.: pacote no supermercado). O
+// Gemini lê a foto (rápido, sem pesquisa), lista as empresas do rótulo com o
+// papel de cada uma e casa o ramo com a tabela `segmentos`. A pesquisa pesada
+// (Receita, site, Google, nota A/B/C) fica para o "Minerar dados" da ficha.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { friendlyDbError } from "@/lib/db-errors";
 import { logAuditServer } from "@/lib/audit.server";
-import type { QualifyResult } from "@/lib/lead-qualify.server";
 
-export type SuspectExtracted = {
-  tipo_detectado?: "cartao_visita" | "produto" | "outro" | null;
-  empresa?: string | null;
-  nome?: string | null;
-  cargo?: string | null;
-  email?: string | null;
-  telefone?: string | null;
-  site?: string | null;
-  endereco?: string | null;
-  cidade?: string | null;
+export type SuspectPapel = "fabricante" | "importador" | "distribuidor" | "marca" | "contato";
+
+export type SuspectEmpresa = {
+  papel: SuspectPapel;
+  nome: string;
+  documento?: string | null;
   pais_iso2?: string | null;
-  documento_fiscal?: string | null;
+  cidade?: string | null;
+  endereco?: string | null;
+  site?: string | null;
+  telefone?: string | null;
+  email?: string | null;
+};
+
+export type SuspectScan = {
+  tipo_detectado: "cartao_visita" | "produto" | "outro";
+  empresas: SuspectEmpresa[];
+  contato: {
+    nome?: string | null;
+    cargo?: string | null;
+    email?: string | null;
+    telefone?: string | null;
+  };
+  produto_descricao: string | null;
+  ramo: { segmento_id: string | null; nome: string | null };
+  observacoes: string | null;
+};
+
+type ScanRaw = {
+  tipo_detectado?: string | null;
+  empresas?: Array<Partial<SuspectEmpresa>> | null;
+  contato?: SuspectScan["contato"] | null;
   produto_descricao?: string | null;
-  segmento_sugerido?: string | null;
+  ramo?: string | null;
   observacoes?: string | null;
 };
 
-const SCAN_SUSPECT_PROMPT = `Você extrai dados de leads industriais para a SLTK Americas (máquinas de envase e embalagem).
-As imagens podem ser: (a) CARTÃO DE VISITA de um contato, ou (b) FOTO DE UM PRODUTO/EMBALAGEM mostrando quem fabrica (rótulo com "fabricado por", marca, CNPJ, site).
-Extraia o MÁXIMO de informação e devolva APENAS JSON válido:
+function scanPrompt(ramos: string[]) {
+  return `Você lê fotos para a SLTK Americas (máquinas de envase e embalagem) e identifica empresas que podem virar clientes.
+A foto pode ser: (a) CARTÃO DE VISITA, ou (b) RÓTULO/EMBALAGEM de produto (ex.: pacote de supermercado) com "fabricado por", "importado por", "distribuído por", CNPJ, SAC, site.
+Liste TODAS as empresas visíveis com o papel de cada uma. Devolva APENAS JSON válido:
 {
   "tipo_detectado": "cartao_visita|produto|outro",
-  "empresa": "nome da empresa/fabricante",
-  "nome": "nome da pessoa (cartão)",
-  "cargo": "cargo da pessoa",
-  "email": "e-mail",
-  "telefone": "telefone com DDD/DDI, só dígitos e +",
-  "site": "site sem http",
-  "endereco": "endereço se visível",
-  "cidade": "cidade",
-  "pais_iso2": "BR|AR|CL|MX|... (deduza pelo idioma/DDI/endereço)",
-  "documento_fiscal": "CNPJ/RUT/RUC se visível no rótulo",
-  "produto_descricao": "o que é o produto da foto (ex.: 'molho de pimenta 150ml vidro, tampa rosca')",
-  "segmento_sugerido": "segmento industrial provável do fabricante (ex.: alimentos - molhos e condimentos)",
-  "observacoes": "qualquer outra informação útil pro vendedor (1-2 frases)"
+  "empresas": [
+    { "papel": "fabricante|importador|distribuidor|marca|contato", "nome": "razão social ou nome", "documento": "CNPJ/RUT/RUC só se visível", "pais_iso2": "BR|CL|AR|...", "cidade": "...", "endereco": "...", "site": "sem http", "telefone": "com DDI/DDD", "email": "..." }
+  ],
+  "contato": { "nome": "pessoa do cartão", "cargo": "...", "email": "...", "telefone": "..." },
+  "produto_descricao": "o que é o produto (ex.: papinha de fruta 120g, sachê stand-up com bico)",
+  "ramo": "ramo do produto/empresa — use EXATAMENTE um nome desta lista se algum servir: ${ramos.join(" | ")}. Se nenhum servir, sugira um nome curto novo (ex.: Arroz, Leite em pó).",
+  "observacoes": "1 frase útil para o vendedor ou null"
 }
-Campos não visíveis = null. NÃO invente dados.`;
+Regras: cartão de visita → a empresa do cartão tem papel "contato". Rótulo → fabricante primeiro. Campos não visíveis = null. NÃO invente dados.`;
+}
+
+const PAPEIS: SuspectPapel[] = ["fabricante", "importador", "distribuidor", "marca", "contato"];
+const ORDEM_PAPEL: Record<SuspectPapel, number> = {
+  fabricante: 0,
+  contato: 1,
+  importador: 2,
+  distribuidor: 3,
+  marca: 4,
+};
+
+function norm(v: string) {
+  return v.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
 
 const scanInput = z.object({
   imagens: z
@@ -62,15 +91,7 @@ export const scanSuspectFoto = createServerFn({ method: "POST" })
     async ({
       data,
       context,
-    }): Promise<
-      | {
-          ok: true;
-          extracted: SuspectExtracted;
-          qualify: QualifyResult | null;
-          qualifyError: string | null;
-        }
-      | { ok: false; error: string }
-    > => {
+    }): Promise<{ ok: true; scan: SuspectScan } | { ok: false; error: string }> => {
       const { assertCanAccessModule } = await import("@/lib/admin-guard");
       await assertCanAccessModule(
         context.supabase,
@@ -79,13 +100,20 @@ export const scanSuspectFoto = createServerFn({ method: "POST" })
         "Acesso restrito ao módulo de clientes.",
       );
 
+      const { data: segs } = await context.supabase
+        .from("segmentos")
+        .select("id, nome")
+        .is("deleted_at", null)
+        .eq("ativo", true);
+      const segmentos = (segs ?? []) as Array<{ id: string; nome: string }>;
+
       const { aiVisionJson } = await import("@/lib/ai-gateway.server");
-      let extracted: SuspectExtracted | null = null;
+      let raw: ScanRaw | null = null;
       try {
-        extracted = await aiVisionJson<SuspectExtracted>({
-          prompt: SCAN_SUSPECT_PROMPT,
+        raw = await aiVisionJson<ScanRaw>({
+          prompt: scanPrompt(segmentos.map((x) => x.nome)),
           imagens: data.imagens,
-          maxOutputTokens: 800,
+          maxOutputTokens: 1200,
         });
       } catch (err) {
         return {
@@ -93,42 +121,42 @@ export const scanSuspectFoto = createServerFn({ method: "POST" })
           error: err instanceof Error ? err.message : "Falha na leitura por IA.",
         };
       }
-      if (!extracted?.empresa && !extracted?.nome && !extracted?.produto_descricao) {
+
+      const empresas: SuspectEmpresa[] = (raw?.empresas ?? [])
+        .filter((e) => !!e?.nome && String(e.nome).trim().length >= 2)
+        .map((e) => ({
+          ...e,
+          nome: String(e.nome).trim(),
+          papel: PAPEIS.includes(e.papel as SuspectPapel) ? (e.papel as SuspectPapel) : "marca",
+          pais_iso2: e.pais_iso2 ? String(e.pais_iso2).slice(0, 2).toUpperCase() : null,
+        }))
+        .sort((x, y) => ORDEM_PAPEL[x.papel] - ORDEM_PAPEL[y.papel]);
+
+      if (!empresas.length && !raw?.contato?.nome) {
         return {
           ok: false as const,
           error:
-            "A IA não conseguiu identificar empresa, contato ou produto nas imagens. Tente uma foto mais nítida ou preencha manualmente.",
+            'Não encontrei empresa na foto. Fotografe mais perto do texto "fabricado por" ou preencha à mão.',
         };
       }
 
-      // Qualificação completa (site → CNPJ/Receita → já-é-cliente → regras → nota).
-      let qualify: QualifyResult | null = null;
-      let qualifyError: string | null = null;
-      if (extracted.empresa) {
-        try {
-          const { qualificarLead } = await import("@/lib/lead-qualify.server");
-          qualify = await qualificarLead({
-            empresa: extracted.empresa,
-            pais: extracted.pais_iso2,
-            cidade: extracted.cidade,
-            telefone: extracted.telefone,
-            email: extracted.email,
-            site: extracted.site,
-            documento: extracted.documento_fiscal,
-            segmento: extracted.segmento_sugerido,
-            origem: "foto",
-            extras: [extracted.produto_descricao, extracted.observacoes]
-              .filter(Boolean)
-              .join(" · "),
-            imagens: data.imagens,
-            userId: context.userId,
-          });
-        } catch (err) {
-          qualifyError = err instanceof Error ? err.message : "Falha na qualificação.";
-        }
-      }
+      const ramoNome = raw?.ramo?.trim() || null;
+      const ramoMatch = ramoNome
+        ? segmentos.find((x) => norm(x.nome) === norm(ramoNome))
+        : undefined;
+      const tipo = raw?.tipo_detectado;
 
-      return { ok: true as const, extracted, qualify, qualifyError };
+      return {
+        ok: true as const,
+        scan: {
+          tipo_detectado: tipo === "cartao_visita" || tipo === "produto" ? tipo : "outro",
+          empresas,
+          contato: raw?.contato ?? {},
+          produto_descricao: raw?.produto_descricao ?? null,
+          ramo: { segmento_id: ramoMatch?.id ?? null, nome: ramoMatch?.nome ?? ramoNome },
+          observacoes: raw?.observacoes ?? null,
+        },
+      };
     },
   );
 
@@ -139,19 +167,23 @@ const createInput = z.object({
   endereco: z.string().trim().max(300).optional().nullable(),
   site: z.string().trim().max(200).optional().nullable(),
   documento_fiscal: z.string().trim().max(40).optional().nullable(),
-  contato_nome: z.string().trim().min(1).max(120),
+  contato_nome: z.string().trim().max(120).optional().nullable(),
   contato_cargo: z.string().trim().max(120).optional().nullable(),
   contato_email: z.string().trim().email().max(255).optional().nullable().or(z.literal("")),
   contato_telefone: z.string().trim().max(40).optional().nullable(),
   observacoes: z.string().trim().max(2000).optional().nullable(),
-  grade: z.enum(["A", "B", "C"]).optional().nullable(),
-  analise_motivo: z.string().max(1000).optional().nullable(),
+  segmento_id: z.string().uuid().optional().nullable(),
+  titulo: z.string().trim().max(200).optional().nullable(),
+  origem_id: z.string().uuid().optional().nullable(),
+  valor_estimado: z.number().min(0).max(99999999).optional().nullable(),
+  valor_estimado_usd: z.number().min(0).max(99999999).optional().nullable(),
+  probabilidade: z.number().int().min(0).max(100).optional().nullable(),
   confirmar_duplicata: z.boolean().optional().default(false),
 });
 
 export const createSuspectRapido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: z.infer<typeof createInput>) => createInput.parse(d))
+  .inputValidator((d: z.input<typeof createInput>) => createInput.parse(d))
   .handler(async ({ data, context }) => {
     const { assertCanAccessModule } = await import("@/lib/admin-guard");
     await assertCanAccessModule(
@@ -224,16 +256,13 @@ export const createSuspectRapido = createServerFn({ method: "POST" })
         moeda,
         idioma,
         status: "suspect",
+        segmento_id: data.segmento_id || null,
+        lead_origem_id: data.origem_id || null,
         site: data.site || null,
         endereco_cidade: data.cidade || null,
         endereco_logradouro: data.endereco || null,
         observacoes:
-          [
-            "Criado via Suspect por foto.",
-            data.grade ? `Qualificação IA: nota ${data.grade}.` : null,
-            data.analise_motivo || null,
-            data.observacoes || null,
-          ]
+          ["Criado por foto no Nova oportunidade.", data.observacoes || null]
             .filter(Boolean)
             .join("\n") || null,
         created_by: context.userId,
@@ -243,43 +272,40 @@ export const createSuspectRapido = createServerFn({ method: "POST" })
     if (cliErr) throw friendlyDbError(cliErr as never);
     const clienteRow = cliente as { id: string; codigo: string; razao_social: string };
 
-    const { error: ctErr } = (await (
-      admin as unknown as {
-        from: (t: string) => { insert: (v: unknown) => Promise<{ error: unknown }> };
-      }
-    )
-      .from("cliente_contatos")
-      .insert({
-        cliente_id: clienteRow.id,
-        nome: data.contato_nome,
-        cargo: data.contato_cargo || null,
-        email: data.contato_email || null,
-        telefone_numero: data.contato_telefone || null,
-        principal: true,
-      })) as { error: unknown };
-    if (ctErr) throw friendlyDbError(ctErr as never);
+    if (data.contato_nome || data.contato_email || data.contato_telefone) {
+      const { error: ctErr } = (await (
+        admin as unknown as {
+          from: (t: string) => { insert: (v: unknown) => Promise<{ error: unknown }> };
+        }
+      )
+        .from("cliente_contatos")
+        .insert({
+          cliente_id: clienteRow.id,
+          nome: data.contato_nome || data.contato_email || data.contato_telefone,
+          cargo: data.contato_cargo || null,
+          email: data.contato_email || null,
+          telefone_numero: data.contato_telefone || null,
+          principal: true,
+        })) as { error: unknown };
+      if (ctErr) throw friendlyDbError(ctErr as never);
+    }
 
     // Oportunidade no pipeline (estágio padrão "novo" = suspect).
     const { data: op, error: opErr } = await admin
       .from("oportunidades")
       .insert({
-        titulo: `Suspect por foto — ${data.empresa}`.slice(0, 200),
+        titulo: (data.titulo || data.empresa).slice(0, 200),
         empresa_lead: data.empresa,
-        nome_lead: data.contato_nome,
+        nome_lead: data.contato_nome || null,
         email: data.contato_email || null,
         telefone: data.contato_telefone || null,
         cliente_id: clienteRow.id,
         responsavel_id: context.userId,
-        probabilidade: 10,
-        observacoes:
-          [
-            "Origem: suspect por foto (cartão de visita / produto).",
-            data.grade ? `Qualificação IA: nota ${data.grade}.` : null,
-            data.analise_motivo || null,
-            data.observacoes || null,
-          ]
-            .filter(Boolean)
-            .join("\n") || null,
+        probabilidade: data.probabilidade ?? 10,
+        valor_estimado: data.valor_estimado ?? null,
+        valor_estimado_usd: data.valor_estimado_usd ?? null,
+        origem_id: data.origem_id || null,
+        observacoes: data.observacoes || null,
         created_by: context.userId,
       })
       .select("id, codigo")
@@ -294,7 +320,7 @@ export const createSuspectRapido = createServerFn({ method: "POST" })
         record_id: clienteRow.id,
         action: "INSERT",
         field_changed: "suspect_por_foto",
-        new_value: { empresa: data.empresa, grade: data.grade ?? null },
+        new_value: { empresa: data.empresa, segmento_id: data.segmento_id ?? null },
       },
     ]);
 
