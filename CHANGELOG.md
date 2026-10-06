@@ -1,6 +1,6 @@
 ## 1.8.0 — Varredura geral: bugs de dados, permissões, layout no tablet e telas mais simples — 06.10.2026
 
-**Funcionalidades que estavam quebradas**
+### Funcionalidades que estavam quebradas
 - **Portal de cotação do fornecedor**: todo primeiro envio de proposta falhava (o sistema gravava campos que não existem). Agora salva validade, moeda, condição de pagamento e observações, e a cotação interna volta a mostrar total e validade de cada proposta.
 - **Logística › Embarques**: lista, detalhe, novo embarque e romaneio em PDF davam erro ao abrir. Corrigido.
 - **Ordem de compra**: histórico e PDF voltam a mostrar o nome de quem criou e de quem aprovou (apareciam como "Usuário"/"Compras").
@@ -15,23 +15,23 @@
 - **Trocar senha** exige estar logado (antes mostrava erro técnico).
 - Uma verificação automática (`bun run check:colunas`) passa a conferir todas as consultas contra o banco, para esse tipo de erro não voltar.
 
-**Permissões coerentes (botão aparece = servidor permite)**
+### Permissões coerentes (botão aparece = servidor permite)
 - Equipamentos na ficha do cliente: criar/remover só para quem tem Engenharia; os demais consultam.
 - Chamados: técnico de campo pode mudar prioridade, reatribuir e ver atendentes.
 - Templates de documentos aparecem no menu para Qualidade e Pós-venda; Etapas dos equipamentos liberadas pelo módulo Engenharia.
 - Varredura de permissões dos 8 papéis guardada no projeto para repetir a cada mudança.
 
-**Erros que sumiam sem aviso**
+### Erros que sumiam sem aviso
 - Qualquer gravação que falhe agora mostra o motivo (antes arquivar fornecedor, editar etapas, revogar acesso e outras falhavam em silêncio).
 - Lista de fornecedores e impressão de OC mostram o erro em vez de "nenhum resultado" ou "Carregando…" para sempre.
 
-**Tablet e celular**
+### Tablet e celular
 - Pipeline: colunas não se sobrepõem mais; ao arrastar, o card inteiro acompanha o dedo, sem barras, com soltura suave (no toque, segure o card por um instante para pegar).
 - Janelas de confirmação e painéis laterais cabem na tela e rolam; alturas consideram a barra do navegador.
 - Barras fixas ficam abaixo do cabeçalho; grades passam por 2–3 colunas antes de 4–6; listas de projetos, montagem, revisões e ETP sem colunas espremidas; tabelas largas rolam na horizontal.
 - Ações que só apareciam com o mouse ficam visíveis no toque; arrastar funciona com o dedo nas listas de ordenação e no Gantt.
 
-**Mais simples**
+### Mais simples
 - **Documentos emitidos** reúne orçamentos/FAT/SAT, cotações de compra e entrevistas; o antigo "Editor de blocos" vira **Modelos de documento**, em Configurações.
 - **Engenharia › Etapas**: sai o Gantt de demonstração; números em uma linha.
 - **Novo fornecedor**: só identificação, contato e observações abertos; o resto (incluindo o que o scan por IA preenche) em seções recolhidas. A ficha mostra **"Cadastro N% completo"**.
