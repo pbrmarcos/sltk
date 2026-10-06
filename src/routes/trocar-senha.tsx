@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +23,11 @@ type Values = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/trocar-senha")({
   ssr: false,
+  // Sem sessão não há como trocar a senha (o updateUser falharia com erro cru).
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "Trocar senha · SLTK App" },
@@ -33,7 +38,6 @@ export const Route = createFileRoute("/trocar-senha")({
 });
 
 function TrocarSenhaPage() {
-  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
   const [show, setShow] = useState(false);
   const form = useForm<Values>({
@@ -56,7 +60,6 @@ function TrocarSenhaPage() {
       return;
     }
     window.location.replace("/dashboard");
-    void navigate;
   };
 
   const submitting = form.formState.isSubmitting;

@@ -11,7 +11,6 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
-  assertEngineerOrHigher,
   hasAnyRole,
   canAccessModule,
   AdminGuardError,
@@ -135,7 +134,7 @@ export const setPrioridadeChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => prioridadeSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
     const { data: atual } = await sb
       .from("chamados")
@@ -170,7 +169,7 @@ export const reatribuirChamado = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => reatribuirSchema.parse(i))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
     const nome = await meuNome(sb, context.userId);
 
     const { data: atual } = await sb
@@ -278,7 +277,7 @@ export const listAtendentes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as any;
-    await assertEngineerOrHigher(sb, context.userId);
+    await assertCanOperateChamado(sb, context.userId);
     const { data: roles } = await sb
       .from("user_roles")
       .select("user_id, role")

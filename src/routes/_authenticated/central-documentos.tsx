@@ -68,8 +68,6 @@ import {
   restoreBlocoVersao,
   translateBloco,
 } from "@/lib/docs/admin-docs.functions";
-import { CotacaoGeradosTab } from "@/components/central-documentos/CotacaoGeradosTab";
-import { EntrevistasGeradasTab } from "@/components/central-documentos/EntrevistasGeradasTab";
 
 export const Route = createFileRoute("/_authenticated/central-documentos")({
   component: AdminDocumentosPage,
@@ -83,8 +81,11 @@ function AdminDocumentosPage() {
     return (
       <PageContainer>
         <PageHeader
-          breadcrumbs={[{ label: "Documentos" }, { label: "Editor de Blocos" }]}
-          title="Editor de Blocos"
+          breadcrumbs={[
+            { label: "Configurações", href: "/admin" },
+            { label: "Modelos de documento" },
+          ]}
+          title="Modelos de documento"
         />
         <AccessDenied message="Esta área é exclusiva para administradores e gestores." />
       </PageContainer>
@@ -94,9 +95,11 @@ function AdminDocumentosPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[{ label: "Documentos" }, { label: "Editor de Blocos" }]}
-        title="Editor de Blocos"
-        subtitle="Configuração do motor de documentos: blocos por tipo, layout, histórico e tradução automática."
+        breadcrumbs={[
+          { label: "Configurações", href: "/admin" },
+          { label: "Modelos de documento" },
+        ]}
+        title="Modelos de documento"
       />
 
       <Tabs defaultValue="blocos">
@@ -104,8 +107,6 @@ function AdminDocumentosPage() {
           <TabsTrigger value="blocos">Blocos</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="tipos">Tipos</TabsTrigger>
-          <TabsTrigger value="cotacao-gerados">Cotações geradas</TabsTrigger>
-          <TabsTrigger value="entrevistas">Entrevistas</TabsTrigger>
         </TabsList>
         <TabsContent value="blocos" className="mt-4">
           <BlocosTab />
@@ -115,12 +116,6 @@ function AdminDocumentosPage() {
         </TabsContent>
         <TabsContent value="tipos" className="mt-4">
           <TiposTab />
-        </TabsContent>
-        <TabsContent value="cotacao-gerados" className="mt-4">
-          <CotacaoGeradosTab />
-        </TabsContent>
-        <TabsContent value="entrevistas" className="mt-4">
-          <EntrevistasGeradasTab />
         </TabsContent>
       </Tabs>
     </PageContainer>

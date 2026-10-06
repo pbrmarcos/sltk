@@ -67,6 +67,8 @@ import {
 } from "@/components/clientes/equipamentos/EquipamentoDrawer";
 import { CriarEquipamentoWizard } from "@/components/clientes/equipamentos/CriarEquipamentoWizard";
 import { cn } from "@/lib/utils";
+import { useMyModules } from "@/hooks/use-my-modules";
+import { useAuth } from "@/hooks/use-auth";
 import { Chip, EmptyState, FichaSection, fmtDate, fmtMoney } from "./ficha-utils";
 
 type NovoEquipamentoInput = {
@@ -88,6 +90,10 @@ type NovoEquipamentoInput = {
 /** Aba Equipamentos: busca + Novo (manual ou de orçamento aprovado), chips de fase, 7 colunas. */
 export function ClienteEquipamentosTab({ clienteId }: { clienteId: string }) {
   const qc = useQueryClient();
+  // Criar/remover exige o módulo Engenharia no servidor; quem não tem só consulta.
+  const { modules } = useMyModules();
+  const { role } = useAuth();
+  const podeEditar = role === "admin" || modules.has("engenharia");
   const { data, isLoading } = useQuery(clienteEquipamentosQueryOptions(clienteId));
   const [faseFilter, setFaseFilter] = useState<EquipamentoFase | "todos">("todos");
   const [categoriaFilter, setCategoriaFilter] = useState<EquipamentoCategoria | "todos">("todos");
@@ -149,21 +155,23 @@ export function ClienteEquipamentosTab({ clienteId }: { clienteId: string }) {
               placeholder="Buscar…"
               className="h-8 w-40 text-[12px] sm:w-52"
             />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="h-8">
-                  <Plus className="h-3.5 w-3.5" /> Novo
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => setOpenNew(true)}>
-                  <Plus className="mr-2 h-4 w-4" /> Cadastrar manualmente
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setOpenWizard(true)}>
-                  <Sparkles className="mr-2 h-4 w-4" /> A partir de orçamento aprovado
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {podeEditar && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" className="h-8">
+                    <Plus className="h-3.5 w-3.5" /> Novo
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={() => setOpenNew(true)}>
+                    <Plus className="mr-2 h-4 w-4" /> Cadastrar manualmente
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setOpenWizard(true)}>
+                    <Sparkles className="mr-2 h-4 w-4" /> A partir de orçamento aprovado
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         }
       >
@@ -172,9 +180,16 @@ export function ClienteEquipamentosTab({ clienteId }: { clienteId: string }) {
             icon={Wrench}
             title="Nenhum equipamento cadastrado"
             action={
-              <Button size="sm" variant="outline" className="mt-1" onClick={() => setOpenNew(true)}>
-                <Plus className="h-3.5 w-3.5" /> Adicionar
-              </Button>
+              podeEditar && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-1"
+                  onClick={() => setOpenNew(true)}
+                >
+                  <Plus className="h-3.5 w-3.5" /> Adicionar
+                </Button>
+              )
             }
           />
         ) : (
@@ -282,16 +297,18 @@ export function ClienteEquipamentosTab({ clienteId }: { clienteId: string }) {
                             {fmtMoney(e.valor_venda)}
                           </td>
                           <td className="px-2 py-2 text-right">
-                            <button
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                setRemoverAlvo({ id: e.id, codigo: e.codigo });
-                              }}
-                              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-rose-700"
-                              title="Remover"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                            {podeEditar && (
+                              <button
+                                onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  setRemoverAlvo({ id: e.id, codigo: e.codigo });
+                                }}
+                                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-rose-700"
+                                title="Remover"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );

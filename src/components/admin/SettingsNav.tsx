@@ -65,6 +65,7 @@ const GROUPS: NavGroup[] = [
         roles: ["admin", "manager"],
       },
       { label: "SLA de Chamados", to: "/admin/sla-chamados" },
+      { label: "Modelos de documento", to: "/central-documentos", roles: ["admin", "manager"] },
       { label: "Origens de Lead", to: "/admin/origens-lead", roles: ADMIN_ONLY },
     ],
   },

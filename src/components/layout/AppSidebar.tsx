@@ -48,7 +48,8 @@ type Item = {
   badge?: string;
   children?: Child[];
   roles?: AppRole[]; // additional roles (admin + manager always allowed unless section adminOnly)
-  module?: AppModule;
+  /** Módulo(s) que liberam o item — basta ter um deles. */
+  module?: AppModule | AppModule[];
 };
 type Section = { title: string; items: Item[]; adminOnly?: boolean; module?: AppModule };
 
@@ -242,22 +243,18 @@ const SECTIONS: Section[] = [
     title: "Documentos",
     items: [
       {
-        label: "Emitidos",
+        label: "Documentos emitidos",
         to: "/documentos",
         icon: FileText,
         exact: true,
       },
       {
-        label: "Editor de blocos",
-        to: "/central-documentos",
-        icon: FileSpreadsheet,
-        module: "admin",
-      },
-      {
+        // Mesmos módulos da rota (route-modules.ts): qualidade e pós-venda
+        // editam os templates de FAT/SAT.
         label: "Templates",
         to: "/template-documentos",
         icon: ClipboardList,
-        module: "admin",
+        module: ["admin", "qualidade", "pos_vendas"],
       },
     ],
   },
@@ -616,10 +613,10 @@ export function AppSidebarContent({
     // While role is loading after sign-in, show everything to avoid an empty sidebar flash.
     if (roleLoading || modulesLoading) return SECTIONS;
     const isAdmin = role === "admin";
-    const moduleVisible = (mod?: AppModule) => {
+    const moduleVisible = (mod?: AppModule | AppModule[]) => {
       if (!mod) return true;
       if (isAdmin) return true;
-      return myModules.has(mod);
+      return (Array.isArray(mod) ? mod : [mod]).some((m) => myModules.has(m));
     };
     const itemVisible = (it: Item) => {
       // Visibility is driven exclusively by role_module_permissions.

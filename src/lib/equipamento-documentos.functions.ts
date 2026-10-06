@@ -70,8 +70,7 @@ async function ensureEquipamentoFolder(opts: {
   yyyymm: string;
 }): Promise<string> {
   const root =
-    (await (await import("@/lib/secrets.server")).getSecret("GOOGLE_DRIVE_ROOT_FOLDER_ID")) ||
-    "root";
+    await (await import("@/lib/docs/drive.server")).driveRootFolder();
   const cliente = await ensureFolder(
     sanitizeFolderName(`${opts.clienteCodigo} - ${opts.clienteNome}`),
     root,

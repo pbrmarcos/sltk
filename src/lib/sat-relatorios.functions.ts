@@ -69,8 +69,7 @@ async function ensureSATFolder(opts: {
   yyyymm: string;
 }): Promise<string> {
   const root =
-    (await (await import("@/lib/secrets.server")).getSecret("GOOGLE_DRIVE_ROOT_FOLDER_ID")) ||
-    "root";
+    await (await import("@/lib/docs/drive.server")).driveRootFolder();
   let base: string;
   if (opts.clienteCodigo && opts.clienteNome) {
     const cliente = await ensureFolder(`${opts.clienteCodigo} - ${opts.clienteNome}`, root);

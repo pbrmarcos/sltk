@@ -7,9 +7,11 @@ import { clienteByCodigoQueryOptions, paisesQueryOptions } from "@/lib/clientes.
 import type { ClienteInput } from "@/lib/clientes.shared";
 
 export const Route = createFileRoute("/_authenticated/clientes/$codigo/editar")({
-  loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(clienteByCodigoQueryOptions(params.codigo));
-    context.queryClient.ensureQueryData(paisesQueryOptions());
+  loader: async ({ context, params }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(clienteByCodigoQueryOptions(params.codigo)),
+      context.queryClient.ensureQueryData(paisesQueryOptions()),
+    ]);
   },
   component: EditarClientePage,
 });

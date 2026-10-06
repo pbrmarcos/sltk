@@ -139,9 +139,11 @@ const filtrosPopularesQueryOptions = queryOptions({
 export const Route = createFileRoute("/_authenticated/fornecedores/")({
   validateSearch: zodValidator(searchSchema),
   staleTime: 1000 * 60 * 5,
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(categoriasQueryOptions);
-    context.queryClient.ensureQueryData(filtrosPopularesQueryOptions);
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(categoriasQueryOptions),
+      context.queryClient.ensureQueryData(filtrosPopularesQueryOptions),
+    ]);
   },
   component: FornecedoresListPage,
 });

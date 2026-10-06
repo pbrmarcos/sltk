@@ -12,7 +12,7 @@ async function gw(path: string, init: RequestInit = {}): Promise<any> {
   });
   if (!r.ok) {
     const body = await r.text().catch(() => "");
-    throw new Error(`Drive ${r.status}: ${body.slice(0, 300)}`);
+    throw new Error(mensagemDrive(r.status, body));
   }
   return r.json();
 }
@@ -97,7 +97,7 @@ export async function uploadFile(opts: {
   });
   if (!r.ok) {
     const t = await r.text().catch(() => "");
-    throw new Error(`Drive upload ${r.status}: ${t.slice(0, 300)}`);
+    throw new Error(mensagemDrive(r.status, t));
   }
   const j = (await r.json()) as { id: string; webViewLink?: string };
   return { id: j.id, webViewLink: j.webViewLink || `https://drive.google.com/file/d/${j.id}/view` };
@@ -105,4 +105,30 @@ export async function uploadFile(opts: {
 
 export async function getFolderUrl(folderId: string): Promise<string> {
   return `https://drive.google.com/drive/folders/${folderId}`;
+}
+
+/** Erro do Google Drive em português (o corpo técnico vai só para o log). */
+export function mensagemDrive(status: number, body: string): string {
+  console.error(`[drive] HTTP ${status}: ${body.slice(0, 500)}`);
+  if (status === 401) return "O acesso ao Google Drive expirou. Reconecte em Configurações › Chaves & Diagnóstico.";
+  if (status === 403)
+    return "O Google Drive recusou o acesso à pasta. Confira se a pasta raiz foi compartilhada com a conta do sistema.";
+  if (status === 404) return "A pasta do Google Drive não foi encontrada. Confira a pasta raiz configurada.";
+  if (status === 429 || status >= 500) return "O Google Drive está instável agora. Tente de novo em instantes.";
+  return `Falha ao enviar para o Google Drive (código ${status}).`;
+}
+
+/**
+ * Pasta raiz do SLTK Drive. Sem ela, os arquivos iriam para o drive privado
+ * da conta de serviço — invisíveis para todo mundo. Melhor recusar com aviso.
+ */
+export async function driveRootFolder(): Promise<string> {
+  const { getSecret } = await import("@/lib/secrets.server");
+  const id = (await getSecret("GOOGLE_DRIVE_ROOT_FOLDER_ID"))?.trim();
+  if (!id) {
+    throw new Error(
+      "A pasta do SLTK Drive não está configurada. Peça ao administrador para informar a pasta raiz em Configurações › Chaves & Diagnóstico.",
+    );
+  }
+  return id;
 }

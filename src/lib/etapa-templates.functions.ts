@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertEngineerOrHigher } from "@/lib/admin-guard";
+import { assertCanAccessModule } from "@/lib/admin-guard";
 import { logAuditServer } from "@/lib/audit.server";
 
 type AnySb = any;
@@ -27,10 +27,14 @@ export const DISCIPLINAS_PROJETO = [
 ] as const;
 export type DisciplinaProjeto = (typeof DISCIPLINAS_PROJETO)[number];
 
+/** Mesmo critério da rota /admin/etapas-equipamentos (módulo engenharia). */
 async function requireManagerRole(sb: AnySb, uid: string) {
-  await assertEngineerOrHigher(sb, uid).catch(() => {
-    throw new Error("Permissão negada (requer admin, manager ou engineer).");
-  });
+  await assertCanAccessModule(
+    sb,
+    uid,
+    "engenharia",
+    "Permissão negada: requer acesso ao módulo de Engenharia.",
+  );
 }
 
 async function actorInfo(sb: AnySb, uid: string) {

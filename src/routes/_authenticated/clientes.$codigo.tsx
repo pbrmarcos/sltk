@@ -55,9 +55,11 @@ export const Route = createFileRoute("/_authenticated/clientes/$codigo")({
       });
     }
   },
-  loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(clienteByCodigoQueryOptions(params.codigo));
-    context.queryClient.ensureQueryData(paisesQueryOptions());
+  loader: async ({ context, params }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(clienteByCodigoQueryOptions(params.codigo)),
+      context.queryClient.ensureQueryData(paisesQueryOptions()),
+    ]);
   },
   component: ClientePage,
 });

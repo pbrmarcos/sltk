@@ -79,8 +79,7 @@ async function ensureOportunidadeFolder(opts: {
   ano: string;
 }): Promise<string> {
   const root =
-    (await (await import("@/lib/secrets.server")).getSecret("GOOGLE_DRIVE_ROOT_FOLDER_ID")) ||
-    "root";
+    await (await import("@/lib/docs/drive.server")).driveRootFolder();
   const oppName = sanitizeFolderName(
     `${opts.oppCodigo} - ${opts.oppTitulo || opts.empresaLead || "Sem título"}`,
   );
