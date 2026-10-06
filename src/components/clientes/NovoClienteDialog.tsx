@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ClienteForm } from "@/components/clientes/ClienteForm";
+import { ClienteRapidoForm } from "@/components/clientes/ClienteRapidoForm";
 import type { ClienteInput } from "@/lib/clientes.shared";
 
 export type NovoClienteDialogProps = {
@@ -16,10 +16,7 @@ export type NovoClienteDialogProps = {
   initialValues?: Partial<ClienteInput>;
 };
 
-/**
- * Cadastro rápido de cliente em modal — reaproveita o mesmo `ClienteForm`
- * da tela cheia, apenas com os campos mínimos obrigatórios.
- */
+/** Cadastro rápido de cliente em modal (usado dentro do orçamento). */
 export function NovoClienteDialog({
   open,
   onOpenChange,
@@ -28,22 +25,21 @@ export function NovoClienteDialog({
 }: NovoClienteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[95vw] max-w-3xl overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo cliente</DialogTitle>
-          <DialogDescription>
-            Preencha apenas o essencial — você pode completar o cadastro depois em Clientes.
-          </DialogDescription>
+          <DialogDescription>Só o essencial — o resto se completa na ficha.</DialogDescription>
         </DialogHeader>
-        <ClienteForm
-          variant="modal"
-          initialValues={initialValues}
-          onCancel={() => onOpenChange(false)}
-          onCreated={(cliente, values) => {
-            onCreated(cliente, values);
-            onOpenChange(false);
-          }}
-        />
+        {open && (
+          <ClienteRapidoForm
+            initialValues={initialValues}
+            onCancel={() => onOpenChange(false)}
+            onCreated={(cliente, values) => {
+              onCreated(cliente, values);
+              onOpenChange(false);
+            }}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

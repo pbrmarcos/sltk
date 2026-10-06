@@ -10,11 +10,15 @@ import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
 
 import {
   clienteInputSchema,
+  clienteRapidoInputSchema,
   contatoInputSchema,
   socioInputSchema,
   normalizeDocumento,
   CLIENTE_STATUS,
+  CLIENTE_IDIOMAS,
+  type ClienteInput,
 } from "@/lib/clientes.shared";
+import { toMoedaISO } from "@/lib/moedas";
 
 const DELETE_ROLES = ["admin", "manager"] as const;
 
@@ -187,16 +191,25 @@ export async function loadPais(admin: SupabaseClient<Database>, codigo: string) 
   return data;
 }
 
-export const createCliente = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => clienteInputSchema.parse(input))
-  .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "clientes");
-    const admin = context.supabase;
+/**
+ * Inserção comum ao cadastro completo e ao rápido. `validarDocumento=false`
+ * aceita o marcador SUSPECT-xxxx do cadastro rápido (ainda sem documento).
+ */
+async function inserirCliente(
+  admin: SupabaseClient<Database>,
+  userId: string,
+  data: ClienteInput,
+  validarDocumento = true,
+) {
+  {
     const pais = await loadPais(admin, data.pais);
 
-    const documento = normalizeDocumento(data.documento_fiscal_numero);
-    const check = validarDocumentoFiscal(data.pais, documento);
+    const documento = validarDocumento
+      ? normalizeDocumento(data.documento_fiscal_numero)
+      : data.documento_fiscal_numero;
+    const check = validarDocumento
+      ? validarDocumentoFiscal(data.pais, documento)
+      : { ok: true as boolean, mensagem: undefined as string | undefined };
     if (!check.ok) {
       const err = new Error(check.mensagem ?? `${pais.documento_nome} inválido.`);
       (err as any).code = "documento_invalido";
@@ -280,8 +293,8 @@ export const createCliente = createServerFn({ method: "POST" })
       social_twitter: data.social_twitter ?? null,
       social_whatsapp: data.social_whatsapp ?? null,
       social_skype: data.social_skype ?? null,
-      created_by: context.userId,
-      updated_by: context.userId,
+      created_by: userId,
+      updated_by: userId,
     };
 
     const { data: inserted, error: insErr } = await admin
@@ -311,14 +324,14 @@ export const createCliente = createServerFn({ method: "POST" })
           nome: s.nome,
           qualificacao: s.qualificacao ?? null,
           desde: s.desde ?? null,
-          created_by: context.userId,
-          updated_by: context.userId,
+          created_by: userId,
+          updated_by: userId,
         })),
       );
       if (sErr) throw friendlyDbError(sErr);
     }
 
-    await logAuditServer(admin, context.userId, {
+    await logAuditServer(admin, userId, {
       table_name: "clientes",
       record_id: inserted.id,
       action: "INSERT",
@@ -326,6 +339,59 @@ export const createCliente = createServerFn({ method: "POST" })
     });
 
     return { id: inserted.id, codigo: inserted.codigo };
+  }
+}
+
+export const createCliente = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => clienteInputSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "clientes");
+    return inserirCliente(context.supabase, context.userId, data);
+  });
+
+/* ===================== createClienteRapido ===================== */
+
+export const createClienteRapido = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => clienteRapidoInputSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertCanAccessModule(context.supabase, context.userId, "clientes");
+    const admin = context.supabase;
+    const { data: cfg } = await admin
+      .from("paises_config")
+      .select("moeda_padrao, idioma_padrao")
+      .eq("codigo", data.pais)
+      .maybeSingle();
+    const idioma = (CLIENTE_IDIOMAS as readonly string[]).includes(cfg?.idioma_padrao ?? "")
+      ? (cfg!.idioma_padrao as ClienteInput["idioma"])
+      : "pt";
+    const doc = (data.documento_fiscal_numero ?? "").trim();
+    const temDoc = doc.length > 0;
+
+    const input: ClienteInput = clienteInputSchema.parse({
+      razao_social: data.razao_social,
+      pais: data.pais,
+      documento_fiscal_numero: temDoc
+        ? doc
+        : `SUSPECT-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      moeda: toMoedaISO(cfg?.moeda_padrao ?? "BRL", "USD"),
+      idioma,
+      status: "prospect",
+      segmento_id: data.segmento_id ?? null,
+      key_account: false,
+      socios: [],
+      contatos: [
+        {
+          nome: data.contato_nome,
+          email: data.contato_email,
+          telefone_numero: data.contato_telefone || null,
+          principal: true,
+        },
+      ],
+    });
+    const r = await inserirCliente(admin, context.userId, input, temDoc);
+    return { ...r, values: input };
   });
 
 /* ===================== updateCliente ===================== */

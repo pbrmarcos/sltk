@@ -688,7 +688,7 @@ export function ClienteForm({
       </Section>
 
       {/* Configuração comercial */}
-      <Section title="Configuração comercial">
+      <CollapsibleSection title="Configuração comercial" defaultOpen={false}>
         <Grid>
           <Field label="Status do cliente">
             <Controller
@@ -770,11 +770,11 @@ export function ClienteForm({
             </>
           )}
         </Grid>
-      </Section>
+      </CollapsibleSection>
 
       {/* Endereço */}
       {!isModal && (
-        <Section title="Endereço">
+        <CollapsibleSection title="Endereço" defaultOpen={false}>
           <Grid>
             <Field label={paisCodigo === "BR" ? "CEP" : "Código postal"}>
               <Controller
@@ -834,7 +834,7 @@ export function ClienteForm({
               />
             </Field>
           </Grid>
-        </Section>
+        </CollapsibleSection>
       )}
 
       {/* Contatos */}
@@ -1075,9 +1075,9 @@ export function ClienteForm({
 
       {/* Observações */}
       {!isModal && (
-        <Section title="Observações">
+        <CollapsibleSection title="Observações" defaultOpen={false}>
           <Textarea rows={4} {...form.register("observacoes")} />
-        </Section>
+        </CollapsibleSection>
       )}
     </form>
   );

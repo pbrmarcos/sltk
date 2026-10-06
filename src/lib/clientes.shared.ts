@@ -228,6 +228,22 @@ export const clienteInputSchema = z.object({
 
 export type ClienteInput = z.infer<typeof clienteInputSchema>;
 
+/**
+ * Cadastro rápido: o essencial para começar a vender. Moeda e idioma vêm do
+ * país; sem documento, o cliente nasce com um marcador SUSPECT-xxxx e o
+ * resto se completa na ficha (ou pelo Minerar dados).
+ */
+export const clienteRapidoInputSchema = z.object({
+  pais: z.string().length(2),
+  razao_social: z.string().trim().min(2).max(255),
+  documento_fiscal_numero: z.string().trim().max(40).optional().nullable(),
+  segmento_id: z.string().uuid().optional().nullable(),
+  contato_nome: z.string().trim().min(1).max(120),
+  contato_email: z.string().trim().email().max(255),
+  contato_telefone: z.string().trim().max(40).optional().nullable(),
+});
+export type ClienteRapidoInput = z.infer<typeof clienteRapidoInputSchema>;
+
 /** Erro de domínio que o servidor sinaliza para o formulário */
 export type ClienteErrorCode =
   | "documento_invalido"
