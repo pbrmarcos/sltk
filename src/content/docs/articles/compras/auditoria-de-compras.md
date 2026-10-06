@@ -55,7 +55,7 @@ Botão **Exportar CSV** no topo direito respeita os filtros atuais. Útil para S
 
 ## Consultar dentro do próprio registro
 
-Em `/compras/ordens/$id`, `/compras/solicitacao/$id` ou `/fornecedores/$id`, a aba **Histórico** mostra a mesma auditoria filtrada só para aquele documento — mais rápido do que passar pelo painel global.
+Em `/compras/ordens/$id`, `/compras/solicitacao` ou `/fornecedores/$id`, a aba **Histórico** mostra a mesma auditoria filtrada só para aquele documento — mais rápido do que passar pelo painel global.
 
 ## Casos de uso
 

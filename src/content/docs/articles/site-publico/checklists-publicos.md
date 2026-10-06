@@ -13,7 +13,7 @@ app_version: "0.99.4"
 
 :::tldr
 - `/checklist/$slug` é um checklist técnico **público por link** — o cliente responde sem precisar de login.
-- Cada **tipo de Checklist** é configurado em `/admin/checklist-tipos` com blocos (dados, uploads, matriz de itens).
+- Cada **tipo de Checklist** é configurado em `/admin/modelos-formulario` com blocos (dados, uploads, matriz de itens).
 - O envio cria uma **cotação staging** que o comercial revisa antes de virar oportunidade.
 - Uploads passam por endpoint público seguro (`/api/public/checklist/upload`) com limite de tamanho e MIME.
 - Todo envio dispara notificação para `sales` e `manager` responsáveis pelo tipo.
@@ -22,7 +22,7 @@ app_version: "0.99.4"
 ## Fluxo end-to-end
 
 :::step{n="1" title="Criar o tipo de Checklist"}
-`admin` cria em `/admin/checklist-tipos` os blocos que aparecem no formulário: dados do cliente, especificações técnicas, matriz de itens, uploads de desenhos/normas. Cada tipo tem um `slug` (ex.: `envasadora-1000ml`).
+`admin` cria em `/admin/modelos-formulario` os blocos que aparecem no formulário: dados do cliente, especificações técnicas, matriz de itens, uploads de desenhos/normas. Cada tipo tem um `slug` (ex.: `envasadora-1000ml`).
 :::
 
 :::step{n="2" title="Compartilhar o link com o cliente"}
@@ -30,7 +30,7 @@ Envie `https://<seu-dominio>/checklist/envasadora-1000ml` por e-mail. Sem autent
 :::
 
 :::step{n="3" title="Cliente preenche e envia"}
-Ele preenche os blocos, anexa desenhos/normas (PDF, DWG, imagens) e clica em **Enviar**. Recebe confirmação e um **token de consulta** para acompanhar o status posteriormente em `/checklist/status/$token`.
+Ele preenche os blocos, anexa desenhos/normas (PDF, DWG, imagens) e clica em **Enviar**. Recebe confirmação e um **token de consulta** para acompanhar o status posteriormente em `/api/public/checklist/status`.
 :::
 
 :::step{n="4" title="Chega no staging"}

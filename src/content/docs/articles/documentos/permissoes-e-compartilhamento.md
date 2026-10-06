@@ -31,7 +31,7 @@ app_version: "0.99.4"
 | production | Evidências das etapas em que atua.                                       |
 | support    | Anexos dos chamados atribuídos.                                          |
 
-Regra adicional: se `sales_liberacao` do cliente é restrita, o acesso é bloqueado mesmo dentro do papel (`/admin/sales-liberacao`).
+Regra adicional: se `sales_liberacao` do cliente é restrita, o acesso é bloqueado mesmo dentro do papel (`/clientes/$codigo` (aba Comercial › Equipe com acesso)).
 
 ## Gerar link público
 

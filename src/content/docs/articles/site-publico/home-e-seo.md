@@ -15,7 +15,7 @@ app_version: "0.99.4"
 - A home é a **primeira impressão** — hero, CTAs e imagens precisam refletir a operação real.
 - Metadados (title, description, canonical, OG) alimentam Google, WhatsApp e LinkedIn.
 - Nunca divulgue link de **preview** em campanha externa — quebra ao subir nova versão.
-- Textos ficam em `brand_settings` (`/admin/marca`); metadados no `head()` da rota `/`.
+- Textos ficam em `brand_settings` (`/admin/geral`); metadados no `head()` da rota `/`.
 :::
 
 :::step{n="1" title="Abrir a home e revisar hero" img="site-home.png" alt="Hero da home com título Packaging engineering for industries that never stop, subtítulo em inglês e CTAs Request a quote/Browse equipment"}

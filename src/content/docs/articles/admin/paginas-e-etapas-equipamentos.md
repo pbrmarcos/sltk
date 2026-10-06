@@ -66,16 +66,16 @@ Salvo o template, ao criar um novo projeto do tipo **Envasadora**, o sistema cop
 :::
 
 :::atencao
-Editar o template **não altera projetos que já foram criados**. Se o H/H orçado do template estava errado num projeto em andamento, atualize o projeto direto em `/engenharia/projetos/$id`, não o template.
+Editar o template **não altera projetos que já foram criados**. Se o H/H orçado do template estava errado num projeto em andamento, atualize o projeto direto em `/engenharia/projetos`, não o template.
 :::
 
 ## Como as duas partes se conectam
 
 O **slug do equipamento** casa as duas telas. Ex.: se você cria `envasadora-rotativa`:
 
-1. Cadastre a **página pública** em `/admin/paginas-equipamentos` (aparece em `/equipamentos/envasadora-rotativa`).
+1. Cadastre a **página pública** em `/admin/paginas-equipamentos` (aparece em `/equipamentos/envasadora`).
 2. Cadastre o **template de etapas** em `/admin/etapas-equipamentos` com o mesmo slug.
-3. Cadastre o **tipo de Checklist** em `/admin/checklist-tipos` apontando para o template de projeto certo.
+3. Cadastre o **tipo de Checklist** em `/admin/modelos-formulario` apontando para o template de projeto certo.
 
 Assim, uma Checklist desse tipo gera projeto com etapas certas e o cliente vê a página pública correspondente.
 

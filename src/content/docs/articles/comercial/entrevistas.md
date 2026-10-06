@@ -22,7 +22,7 @@ app_version: "0.99.4"
 
 | O quê | Onde | Quem edita |
 |---|---|---|
-| **Catálogo de perguntas** (por segmento) | `/admin/entrevistas` | `admin`, `manager` |
+| **Catálogo de perguntas** (por segmento) | `/admin/modelos-formulario` | `admin`, `manager` |
 | **Entrevistas ativas** (criar, copiar link, PDF) | `/comercial/formularios` | `sales`, `manager`, `admin` |
 | **Formulário público** (o cliente enxerga) | `/entrevista/$codigo` | Qualquer visitante |
 | **Lixeira** (30 dias, restore/purge) | `/comercial/formularios` → filtro **Lixeira** | `manager`, `admin` para purge |

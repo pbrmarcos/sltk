@@ -15,7 +15,7 @@ app_version: "0.99.4"
 - Cada documento gerado guarda a **versão do template** ativa no momento da emissão.
 - Blocos são ativáveis, com ordem e largura (50% ou 100%) — permitem PDF lado a lado.
 - FAT/SAT versionam também as seções e itens de checklist.
-- Mudanças de branding (`/admin/brand`) valem para emissões novas, não para PDFs já gerados.
+- Mudanças de branding (`/admin/geral`) valem para emissões novas, não para PDFs já gerados.
 :::
 
 ## Onde configurar
@@ -25,11 +25,11 @@ Em `/template-documentos` você edita orçamento, ETP, Checklist, OC e contratos
 :::
 
 :::step{n="2" title="Templates de FAT e SAT" img="templates-fat.png" alt="Lista de templates de FAT com seções, itens de checklist e versões"}
-Em `/templates-sistema/fat` (e `/sat`) você monta seções e itens de checklist. Cada item tem tipo — Sim/Não + comentário, texto, número, data, checkbox múltiplo, medição paramétrica, cabeçalho — e flags obrigatório / exige anexo.
+Em `/template-documentos` (e `/sat`) você monta seções e itens de checklist. Cada item tem tipo — Sim/Não + comentário, texto, número, data, checkbox múltiplo, medição paramétrica, cabeçalho — e flags obrigatório / exige anexo.
 :::
 
 :::step{n="3" title="Branding global" img="admin-brand.png" alt="Configurações de marca com logo, cores, assinatura e rodapé"}
-Em `/admin/brand` (só `admin`) você define logo, cor primária e secundária, assinatura padrão e rodapé. Aplica a todos os documentos **novos**; PDFs já gerados mantêm o layout que tinham.
+Em `/admin/geral` (só `admin`) você define logo, cor primária e secundária, assinatura padrão e rodapé. Aplica a todos os documentos **novos**; PDFs já gerados mantêm o layout que tinham.
 :::
 
 ## Versionamento

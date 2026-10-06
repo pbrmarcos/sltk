@@ -33,7 +33,7 @@ app_version: "0.99.4"
 | `user`       | Papel neutro — apenas Conta; usado antes de definir função.            |
 
 :::nota
-A tabela completa **papel × módulo** vive em `docs/mapa-sistema.md` e reflete a matriz de `/admin/permissoes`.
+A tabela completa **papel × módulo** vive em `docs/mapa-sistema.md` e reflete a matriz de `/admin/usuarios`.
 :::
 
 ## Como o acesso é aplicado

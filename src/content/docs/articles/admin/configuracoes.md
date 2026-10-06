@@ -18,7 +18,7 @@ app_version: "0.99.4"
 - Segredos de integração (Firecrawl, AI Gateway) vivem em secrets do backend, nunca em `brand_settings`.
 :::
 
-## Marca e site público — `/admin/marca`
+## Marca e site público — `/admin/geral`
 
 - **Logotipo** (claro/escuro), **favicon**, **cores primárias/secundárias**.
 - **E-mail de suporte** — aparece no login, e-mails automáticos e rodapé do site.
@@ -43,8 +43,8 @@ Mudanças só valem para **chamados novos** — chamados existentes mantêm o SL
 
 ## Templates de sistema
 
-- **Projeto** (`/admin/templates-projeto`) — etapas padrão por equipamento, BOM enxuta, checklists.
-- **FAT** (`/admin/templates-fat`) e **SAT** (`/admin/templates-sat`) — seções e itens com tipos (booleano, medição em faixa, texto, evidência).
+- **Projeto** (`/template-documentos`) — etapas padrão por equipamento, BOM enxuta, checklists.
+- **FAT** (`/template-documentos`) e **SAT** (`/template-documentos`) — seções e itens com tipos (booleano, medição em faixa, texto, evidência).
 - Versionamento é automático: emitir novo template preserva relatórios já gerados.
 
 ## Catálogos

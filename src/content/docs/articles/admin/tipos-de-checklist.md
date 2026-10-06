@@ -12,7 +12,7 @@ app_version: "0.99.4"
 ---
 
 :::tldr
-- Menu **ADMIN → Tipos de Checklist** (`/admin/checklist-tipos`).
+- Menu **ADMIN → Tipos de Checklist** (`/admin/modelos-formulario`).
 - Cada **tipo** vira uma URL pública em `/checklist/{slug}` que o cliente preenche.
 - Um tipo tem **blocos** (produto, embalagem, produção, ambiente, extras) com campos configuráveis.
 - Ao publicar, o link pode ser divulgado no site e nas campanhas.
@@ -31,7 +31,7 @@ app_version: "0.99.4"
 ## Passo a passo
 
 :::step{n="1" title="Criar novo tipo"}
-Em `/admin/checklist-tipos`, clique em **+ Novo tipo**. Informe código único, nome em pt-BR (obrigatório), en e zh (opcionais para site multilíngue).
+Em `/admin/modelos-formulario`, clique em **+ Novo tipo**. Informe código único, nome em pt-BR (obrigatório), en e zh (opcionais para site multilíngue).
 :::
 
 :::step{n="2" title="Montar os blocos"}

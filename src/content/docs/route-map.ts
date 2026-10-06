@@ -24,12 +24,7 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/comercial/orcamento/novo", category: "comercial", slug: "novo-orcamento" },
   { route: "/comercial/orcamento/$id", category: "comercial", slug: "novo-orcamento" },
   { route: "/comercial/orcamento/$id/corrigir", category: "comercial", slug: "corrigir-orcamento" },
-  {
-    route: "/comercial/checklists",
-    category: "comercial",
-    slug: "checklist-publico-e-formularios",
-  },
-  { route: "/comercial/entrevistas", category: "comercial", slug: "entrevistas" },
+  // Entrevistas + Checklists (as rotas antigas redirecionam para cá).
   { route: "/comercial/formularios", category: "comercial", slug: "entrevistas" },
 
   // Clientes & Fornecedores
@@ -86,9 +81,10 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
   { route: "/pos-vendas/sat/$id", category: "pos-vendas", slug: "sat-em-campo" },
 
   // Documentos
-  { route: "/central-documentos", category: "documentos", slug: "visao-geral" },
+  // "Modelos de documento" (configuração) e "Documentos emitidos" (lista).
+  { route: "/central-documentos", category: "documentos", slug: "editor-de-blocos" },
   { route: "/documentos", category: "documentos", slug: "visao-geral" },
-  { route: "/documentos/$id", category: "documentos", slug: "editor-de-blocos" },
+  { route: "/documentos/$id", category: "documentos", slug: "visao-geral" },
   { route: "/template-documentos", category: "documentos", slug: "templates-e-versionamento" },
 
   // Know-how
@@ -116,7 +112,6 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
     category: "admin",
     slug: "paginas-e-etapas-equipamentos",
   },
-  { route: "/admin/suporte", category: "admin", slug: "visao-geral" },
 
   // Conta
   { route: "/conta", category: "conta", slug: "editar-perfil-e-avatar" },

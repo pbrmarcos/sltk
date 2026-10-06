@@ -12,7 +12,7 @@ app_version: "0.99.4"
 ---
 
 :::resumo
-- `/admin/entrevistas` lista os **segmentos** (Trigo, Amendoim, Café…) — cada um tem seu próprio conjunto de perguntas.
+- `/admin/modelos-formulario` lista os **segmentos** (Trigo, Amendoim, Café…) — cada um tem seu próprio conjunto de perguntas.
 - Cada pergunta guarda enunciado em **PT/ES/EN**; use o assistente de tradução para preencher ES/EN em massa.
 - Opções podem ter **"Descreva"** habilitado; se o label da opção termina com `:`, ele vira o rótulo do campo (ex.: "Descreva o fluxo atual:").
 - Alterações valem para **entrevistas novas** — as já criadas mantêm o snapshot de perguntas vigente na criação.
@@ -28,7 +28,7 @@ app_version: "0.99.4"
 ## Passo a passo
 
 :::step{n="1" title="Abrir o catálogo" img="formularios-entrevista-1.png" alt="Tela /admin/entrevistas listando os segmentos disponíveis com contadores de perguntas"}
-Em `/admin/entrevistas`, clique no segmento que deseja editar. O editor abre com a lista de perguntas ordenadas.
+Em `/admin/modelos-formulario`, clique no segmento que deseja editar. O editor abre com a lista de perguntas ordenadas.
 :::
 
 :::step{n="2" title="Editar uma pergunta"}

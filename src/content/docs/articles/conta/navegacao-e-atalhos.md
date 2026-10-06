@@ -25,7 +25,7 @@ app_version: "0.99.4"
 |---|---|---|
 | **Visão geral** | `/dashboard` | todos |
 | **Comercial** | `/comercial/pipeline`, `/comercial/orcamento`, `/comercial/formularios?aba=checklists` | `sales`, `manager` |
-| **Operações** | `/clientes`, `/projetos`, `/planejamento`, `/engenharia/etp`, `/engenharia/etapas` | `engineer`, `manager` |
+| **Operações** | `/clientes`, `/engenharia/projetos`, `/engenharia/etapas`, `/engenharia/etp`, `/engenharia/etapas` | `engineer`, `manager` |
 | **Compras** | `/compras/solicitacao`, `/compras/cotacoes`, `/compras/ordens`, `/fornecedores` | `purchasing`, `manager` |
 | **Qualidade** | `/qualidade/revisao-mecanica`, `/qualidade/revisao-eletrica`, `/qualidade/fat` | `quality` |
 | **Pós-venda** | `/pos-vendas/chamados`, `/pos-vendas/sat` | `support`, `field` |

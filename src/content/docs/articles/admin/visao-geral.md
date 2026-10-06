@@ -20,17 +20,17 @@ app_version: "0.99.4"
 
 ## Quem tem acesso
 
-- **admin** — acesso total, inclusive `/admin/permissoes` e `/admin/auditoria`.
+- **admin** — acesso total, inclusive `/admin/usuarios` e `/admin/auditoria`.
 - **manager** — gerência delegada: usuários, papéis e algumas configurações; **não** promove outro a admin.
 - Demais papéis não enxergam a seção Administração na sidebar.
 
 ## O que fica em Administração
 
 - **Usuários** (`/admin/usuarios`) — convidar, desativar, resetar senha, atribuir papéis.
-- **Permissões papel × módulo** (`/admin/permissoes`) — matriz com regras de combinação validadas.
+- **Permissões papel × módulo** (`/admin/usuarios`) — matriz com regras de combinação validadas.
 - **SLA de chamados** (`/admin/sla-chamados`) — matriz origem × prioridade com tempos de resposta/resolução.
 - **Templates de sistema** — projeto, FAT, SAT — versionados.
-- **Marca e site** (`/admin/marca`) — logotipo, cores, textos institucionais.
+- **Marca e site** (`/admin/geral`) — logotipo, cores, textos institucionais.
 - **Auditoria** (`/admin/auditoria`) — trilha imutável de mudanças sensíveis.
 
 :::step{n="1" title="Trilha de auditoria imutável" img="admin-auditoria.png" alt="Tela de auditoria com filtros, contador de 424 registros e tabela de eventos por usuário/tabela/ação"}

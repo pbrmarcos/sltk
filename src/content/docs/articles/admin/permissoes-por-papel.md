@@ -12,7 +12,7 @@ app_version: "0.99.4"
 ---
 
 :::tldr
-- Matriz **papel × módulo** em `/admin/permissoes` — a role `admin` **não aparece** (acesso total por definição).
+- Matriz **papel × módulo** em `/admin/usuarios` — a role `admin` **não aparece** (acesso total por definição).
 - Controla sidebar e roteamento — **não** substitui RLS; a segurança final é no Postgres.
 - Regras de combinação são validadas no servidor antes do salvamento.
 - Alteração é transacional e escreve em `audit_log`; usuários veem o efeito no próximo carregamento de rota.

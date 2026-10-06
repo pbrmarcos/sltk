@@ -14,7 +14,7 @@ app_version: "0.99.4"
 :::tldr
 - Cliente preenche Checklist em `/checklist/$slug` **sem login** e envia anexos.
 - Cada envio vira uma oportunidade automática na coluna **Novo** do pipeline.
-- Formulários são configurados por tipo de equipamento em `/admin/checklist-tipos`.
+- Formulários são configurados por tipo de equipamento em `/admin/modelos-formulario`.
 - Compartilhe por link, QR code ou embed em propostas/e-mails.
 :::
 
@@ -22,7 +22,7 @@ app_version: "0.99.4"
 
 | O quê | Onde | Quem edita |
 |---|---|---|
-| **Tipos de Checklist** (blocos, campos, limites) | `/admin/checklist-tipos` | `admin` |
+| **Tipos de Checklist** (blocos, campos, limites) | `/admin/modelos-formulario` | `admin` |
 | **Formulários vigentes** (link, QR, cópia) | `/comercial/formularios?aba=checklists` | `sales`, `manager`, `admin` |
 | **Página pública** (o cliente enxerga) | `/checklist/$slug` | Qualquer visitante |
 
@@ -75,7 +75,7 @@ O responsável definido no tipo de Checklist recebe notificação por e-mail e n
 ## Erros comuns
 
 :::erro{title="Link público volta 404"}
-O tipo de Checklist está desativado. Volte em `/admin/checklist-tipos` e reative, ou verifique se o slug mudou.
+O tipo de Checklist está desativado. Volte em `/admin/modelos-formulario` e reative, ou verifique se o slug mudou.
 :::
 
 :::erro{title="Cliente diz que upload falhou"}
