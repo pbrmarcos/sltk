@@ -27,7 +27,13 @@ export async function logAuditServer(
       old_value: (e.old_value ?? null) as AuditInsert["old_value"],
       new_value: (e.new_value ?? null) as AuditInsert["new_value"],
     }));
-    const { error } = await supabaseAdmin.from("audit_log").insert(rows);
+    // O log só aceita gravação com a credencial do servidor (usuários não têm
+    // INSERT em audit_log, para que ninguém forje histórico). Muitas chamadas
+    // passam o client do usuário, então gravamos sempre pelo client de serviço
+    // e só caímos para o recebido se a chave de serviço não estiver configurada.
+    const { getAdminClient } = await import("@/lib/supabase-client.server");
+    const writer = (await getAdminClient()) ?? supabaseAdmin;
+    const { error } = await writer.from("audit_log").insert(rows);
     if (error) {
       console.error("[audit] server insert failed", error);
       return { ok: false };
