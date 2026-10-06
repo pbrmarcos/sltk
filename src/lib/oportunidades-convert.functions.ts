@@ -166,11 +166,12 @@ async function applyTemplateInline(
     eCount = rows.length;
   }
 
-  await supabase.from("processo_eventos").insert({
+  const { error: notaErr } = await supabase.from("processo_eventos").insert({
     processo_id,
     kind: "note",
     text: `Template "${t.nome}" aplicado: ${tCount} tarefas, ${eCount} eventos.`,
   });
+  if (notaErr) console.error("[oportunidades-convert] nota do template não gravada", notaErr);
 
   return { tarefas: tCount, eventos: eCount };
 }
@@ -243,10 +244,11 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
       if (item.action === "win") {
         if (opp.processo_id) {
           // já tem processo: apenas garante vínculo do cliente
-          await context.supabase
+          const { error: vincErr } = await context.supabase
             .from("oportunidades")
             .update({ cliente_id: data.cliente_id })
             .eq("id", opp.id);
+          if (vincErr) throw friendlyDbError(vincErr);
           continue;
         }
         const { data: proc, error: procErr } = await context.supabase
@@ -267,14 +269,16 @@ export const convertOportunidadesToCliente = createServerFn({ method: "POST" })
         let aplicado = false;
         if (item.template_id) {
           try {
-            await applyTemplateInline(
+            const r = await applyTemplateInline(
               context.supabase,
               proc.id,
               item.template_id,
               "projeto",
               opp.responsavel_id,
             );
-            aplicado = true;
+            // Template apagado ou de outro tipo devolve 0/0: não conta como aplicado,
+            // senão a tela nunca avisa que o processo ficou sem etapas.
+            aplicado = r.tarefas + r.eventos > 0;
           } catch (e) {
             // Processo já está criado; a UI avisa via template_aplicado=false.
             console.error(

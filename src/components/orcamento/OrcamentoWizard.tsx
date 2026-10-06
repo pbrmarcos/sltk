@@ -35,7 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { listClientes } from "@/lib/clientes.functions";
+import { getCliente, listClientes } from "@/lib/clientes.functions";
 import { generateOrcamento, getSignedUrl } from "@/lib/docs/docs.functions";
 import { uploadOrcamentoImagem, signOrcamentoImagem } from "@/lib/orcamento-imagens.functions";
 import { listBlocos, getLayoutConfig } from "@/lib/docs/admin-docs.functions";
@@ -183,8 +183,9 @@ export function OrcamentoWizard({
       // Garante que o cliente já selecionado esteja na lista mesmo sem busca
       const r = await listClientes({ data: { q: clienteQ, pageSize: 25 } });
       if (clienteId && !r.rows.find((c: any) => c.id === clienteId)) {
-        const extra = await listClientes({ data: { q: clienteId, pageSize: 25 } });
-        return { ...r, rows: [...extra.rows, ...r.rows] };
+        // A busca não casa por id: carrega o cliente escolhido diretamente.
+        const extra = await getCliente({ data: { id: clienteId } }).catch(() => null);
+        return extra?.cliente ? { ...r, rows: [extra.cliente as any, ...r.rows] } : r;
       }
       return r;
     },
@@ -586,8 +587,16 @@ export function OrcamentoWizard({
 
   const handleDownload = async (lang: "pt" | "es" | "en") => {
     if (!result) return;
-    const { url } = await sign({ data: { path: result.arquivos[lang] } });
-    window.open(url, "_blank");
+    // Abre a aba já no clique (antes do await) — senão o bloqueador de pop-up engole.
+    const aba = window.open("about:blank", "_blank");
+    try {
+      const { url } = await sign({ data: { path: result.arquivos[lang] } });
+      if (aba) aba.location.href = url;
+      else window.location.href = url;
+    } catch (e) {
+      aba?.close();
+      toast.error(e instanceof Error ? e.message : "Não foi possível baixar o PDF.");
+    }
   };
 
   const STEPS =

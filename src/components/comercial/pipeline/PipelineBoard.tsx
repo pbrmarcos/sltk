@@ -218,9 +218,12 @@ function StageColumn({
 export function PipelineBoard({
   view = "kanban",
   onNew,
+  abrirId,
 }: {
   view?: PipelineView;
   onNew: () => void;
+  /** Oportunidade a abrir ao carregar (vinda de um link). */
+  abrirId?: string;
 }) {
   const { data } = useSuspenseQuery(pipelineQueryOptions());
   const update = useUpdateStage();
@@ -230,9 +233,9 @@ export function PipelineBoard({
   const [editingTab, setEditingTab] = useState<"dados" | "notas">("dados");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("solutek:pipeline:editing");
+    const saved = abrirId ?? window.localStorage.getItem("solutek:pipeline:editing");
     if (saved) setEditingId(saved);
-  }, []);
+  }, [abrirId]);
 
   useEffect(() => {
     if (editingId) window.localStorage.setItem("solutek:pipeline:editing", editingId);

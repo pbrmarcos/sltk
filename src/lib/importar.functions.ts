@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { loadPais } from "@/lib/clientes.functions";
 import { normalizeDocumento } from "@/lib/clientes.shared";
 import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
+import { toMoedaISO } from "@/lib/moedas";
 
 type AnySb = any;
 
@@ -27,15 +28,21 @@ export const bulkImport = createServerFn({ method: "POST" })
       for (const r of data.rows) {
         const razao = String(r.razao_social ?? "").trim();
         const docRaw = String(r.cnpj ?? r.documento_fiscal_numero ?? "").trim();
-        if (!razao || !docRaw) {
+        if (!razao) {
           results.skipped++;
           continue;
         }
         const paisCodigo = r.pais ? String(r.pais) : "BR";
         try {
           const pais = await loadPais(sb, paisCodigo);
-          const documento = normalizeDocumento(docRaw);
-          const check = validarDocumentoFiscal(paisCodigo, documento);
+          // Sem documento: entra com marcador (igual ao cadastro rápido) e se
+          // completa depois na ficha ou pelo Minerar dados.
+          const documento = docRaw
+            ? normalizeDocumento(docRaw)
+            : `SUSPECT-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+          const check = docRaw
+            ? validarDocumentoFiscal(paisCodigo, documento)
+            : { ok: true, mensagem: undefined as string | undefined };
           if (!check.ok) {
             results.errors.push(`${razao}: ${check.mensagem ?? "documento fiscal inválido"}`);
             continue;
@@ -50,7 +57,8 @@ export const bulkImport = createServerFn({ method: "POST" })
             telefone_corporativo_numero: r.telefone ? String(r.telefone) : null,
             endereco_cidade: r.cidade ? String(r.cidade) : null,
             endereco_estado: r.estado ? String(r.estado) : null,
-            status: "ativo",
+            moeda: toMoedaISO((pais as { moeda_padrao?: string }).moeda_padrao ?? "BRL", "USD"),
+            status: "prospect",
           };
           const { error } = await sb.from("clientes").insert(payload);
           if (error) {

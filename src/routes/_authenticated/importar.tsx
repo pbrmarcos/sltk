@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { bulkImport } from "@/lib/importar.functions";
+import { lerTextoCsv, parseCSV } from "@/lib/csv";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 
@@ -67,37 +68,8 @@ const FIELDS: Record<Entity, { key: string; label: string; required?: boolean }[
   ],
 };
 
-function parseCSV(text: string): { headers: string[]; rows: string[][] } {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length === 0) return { headers: [], rows: [] };
-  const sep = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
-  const parseLine = (line: string) => {
-    const out: string[] = [];
-    let cur = "";
-    let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQ && line[i + 1] === '"') {
-          cur += '"';
-          i++;
-        } else {
-          inQ = !inQ;
-        }
-      } else if (ch === sep && !inQ) {
-        out.push(cur.trim());
-        cur = "";
-      } else {
-        cur += ch;
-      }
-    }
-    out.push(cur.trim());
-    return out;
-  };
-  const headers = parseLine(lines[0]).map((h) => h.replace(/^"|"$/g, ""));
-  const rows = lines.slice(1).map(parseLine);
-  return { headers, rows };
-}
+/** Linhas por chamada ao servidor (ele aceita at\u00E9 500). */
+const LOTE = 400;
 
 function ImportarWizardPage() {
   const search = Route.useSearch();
@@ -181,7 +153,14 @@ function ImportarWizardPage() {
           return obj;
         })
         .filter((r) => (r.razao_social ?? "").trim().length > 0);
-      const res = await importFn({ data: { entity, rows } });
+      // Envia em lotes (o servidor aceita até 500 linhas por chamada).
+      const res = { inserted: 0, skipped: 0, errors: [] as string[] };
+      for (let i = 0; i < rows.length; i += LOTE) {
+        const r = await importFn({ data: { entity, rows: rows.slice(i, i + LOTE) } });
+        res.inserted += r.inserted;
+        res.skipped += r.skipped;
+        res.errors.push(...r.errors);
+      }
       setResult(res);
       toast.success(
         `Importação concluída: ${res.inserted} inseridos, ${res.skipped} ignorados, ${res.errors.length} erros.`,
@@ -198,9 +177,9 @@ function ImportarWizardPage() {
       toast.error("Arquivo acima de 5MB — divida em partes.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setCsvText(String(reader.result ?? ""));
-    reader.readAsText(f);
+    lerTextoCsv(f)
+      .then(setCsvText)
+      .catch(() => toast.error("Não foi possível ler o arquivo."));
   }
 
   return (

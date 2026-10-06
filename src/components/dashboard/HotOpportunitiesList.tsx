@@ -28,8 +28,8 @@ export function HotOpportunitiesList({ items }: { items: DashboardData["hotOppor
         return (
           <li key={o.id} className="group">
             <Link
-              to="/comercial/orcamento/$id"
-              params={{ id: o.id }}
+              to="/comercial/pipeline"
+              search={{ abrir: o.id } as never}
               className="flex items-center gap-3 px-1 py-3 transition-colors hover:bg-[var(--bg-elevated)]/40"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--primary)]/10 text-[var(--primary)]">

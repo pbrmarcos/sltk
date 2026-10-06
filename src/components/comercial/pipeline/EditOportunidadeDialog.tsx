@@ -657,7 +657,7 @@ export function EditOportunidadeDialog({
                     </div>
                   </div>
                   <Button size="sm" variant="ghost" asChild>
-                    <Link to="/comercial/orcamento/$id" params={{ id: d.id }}>
+                    <Link to="/documentos/$id" params={{ id: d.id }}>
                       <ExternalLink className="h-3.5 w-3.5" />
                     </Link>
                   </Button>

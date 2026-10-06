@@ -173,13 +173,10 @@ export function CriarEquipamentoWizard({
       clearDraft();
       toast.success("Equipamento criado. Planejamento iniciado.");
       qc.invalidateQueries({ queryKey: ["clientes", clienteId, "equipamentos"] });
+      // O wizard abre dentro da ficha do cliente (aba Equipamentos): basta
+      // fechar e atualizar a lista. Antes navegava com o UUID no lugar do
+      // código e caía em "Cliente não encontrado".
       onClose();
-      // redireciona para ficha do cliente na aba equipamentos
-      nav({
-        to: "/clientes/$codigo",
-        params: { codigo: clienteId },
-        search: { tab: "equipamentos" } as any,
-      }).catch(() => null);
       return r;
     },
     onError: (e: any) => toast.error(e?.message ?? "Falha ao criar equipamento."),

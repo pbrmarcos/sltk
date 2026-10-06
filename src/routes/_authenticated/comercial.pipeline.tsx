@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 const searchSchema = z.object({
   /** `?novo=1` abre o diálogo de nova oportunidade (atalho do dashboard). */
   novo: fallback(z.boolean(), false).default(false),
+  /** `?abrir=<id>` abre a oportunidade direto (links do dashboard). */
+  abrir: fallback(z.string().uuid().optional(), undefined).default(undefined),
 });
 
 export const Route = createFileRoute("/_authenticated/comercial/pipeline")({
@@ -39,7 +41,7 @@ const VIEWS: Array<{ id: PipelineView; label: string; icon: typeof LayoutGrid }>
 ];
 
 function PipelinePage() {
-  const { novo } = Route.useSearch();
+  const { novo, abrir } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const [view, setView] = useState<PipelineView>("kanban");
   const [newOpen, setNewOpen] = useState(false);
@@ -87,7 +89,7 @@ function PipelinePage() {
           </div>
         }
       >
-        <PipelineBoard view={view} onNew={() => setNewOpen(true)} />
+        <PipelineBoard view={view} onNew={() => setNewOpen(true)} abrirId={abrir} />
       </Suspense>
       <NewOportunidadeDialog open={newOpen} onOpenChange={setNewOpen} />
     </PageContainer>
