@@ -586,10 +586,10 @@ export const listInsumosAguardandoOC = createServerFn({ method: "GET" })
     if (fornIds.length) {
       const { data: f } = await sb
         .from("fornecedores")
-        .select("id, nome_fantasia, razao_social")
+        .select("id, nome_fantasia, nome")
         .in("id", fornIds);
       for (const r of (f ?? []) as any[]) {
-        fornMap.set(r.id, r.nome_fantasia || r.razao_social || "");
+        fornMap.set(r.id, r.nome_fantasia || r.nome || "");
       }
     }
 

@@ -30,7 +30,7 @@ async function getEmbarqueEmailContext(
     .from("logistica_embarques")
     .select(
       `numero, destino,
-       projeto:equipamento_projetos(revisao, cliente:clientes(nome_fantasia, razao_social), equipamento:cliente_equipamentos(apelido, modelo)),
+       projeto:equipamento_projetos(revisao, cliente:clientes(nome_fantasia, razao_social), equipamento:cliente_equipamentos(apelido:tag_cliente, modelo)),
        transportadora:compras_transportadoras(nome)`,
     )
     .eq("id", embarqueId)
@@ -129,7 +129,7 @@ export const listEmbarques = createServerFn({ method: "GET" })
       .from("logistica_embarques")
       .select(
         `id, numero, projeto_id, transportadora_id, status, previsao_saida, data_saida, data_entrega, nf_saida, destino, observacoes, created_at, updated_at,
-         projeto:equipamento_projetos!inner(id, revisao, cliente_id, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)),
+         projeto:equipamento_projetos!inner(id, revisao, cliente_id, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido:tag_cliente, modelo)),
          transportadora:compras_transportadoras(id, nome)`,
         { count: "exact" },
       )
@@ -186,7 +186,7 @@ export const getEmbarque = createServerFn({ method: "GET" })
       .from("logistica_embarques")
       .select(
         `*,
-         projeto:equipamento_projetos(id, revisao, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)),
+         projeto:equipamento_projetos(id, revisao, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido:tag_cliente, modelo)),
          transportadora:compras_transportadoras(id, nome, cnpj, contato, telefone)`,
       )
       .eq("id", data.id)
@@ -221,7 +221,7 @@ export const listProjetosDisponiveis = createServerFn({ method: "GET" })
     const { data, error } = await (context.supabase as any)
       .from("equipamento_projetos")
       .select(
-        "id, revisao, fase, status, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido, modelo)",
+        "id, revisao, fase, status, cliente:clientes(id, nome_fantasia, razao_social), equipamento:cliente_equipamentos(id, apelido:tag_cliente, modelo)",
       )
       .is("deleted_at", null)
       .neq("status", "obsoleto")
@@ -721,8 +721,8 @@ export const generateRomaneioPdf = createServerFn({ method: "POST" })
       .select(
         `id, numero, status, previsao_saida, data_saida, data_entrega, nf_saida, destino, observacoes,
          projeto:equipamento_projetos(id, revisao,
-           cliente:clientes(id, nome_fantasia, razao_social, cnpj),
-           equipamento:cliente_equipamentos(id, apelido, modelo)),
+           cliente:clientes(id, nome_fantasia, razao_social, cnpj:documento_fiscal_numero),
+           equipamento:cliente_equipamentos(id, apelido:tag_cliente, modelo)),
          transportadora:compras_transportadoras(id, nome, cnpj, contato, telefone)`,
       )
       .eq("id", data.embarque_id)

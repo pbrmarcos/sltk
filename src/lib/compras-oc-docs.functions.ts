@@ -87,10 +87,10 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
       if (aprov?.decidido_por) {
         const { data: p } = await sb
           .from("profiles")
-          .select("nome, full_name, email")
+          .select("full_name, email")
           .eq("id", aprov.decidido_por)
           .maybeSingle();
-        aprovadorNome = p?.nome || p?.full_name || p?.email || null;
+        aprovadorNome = p?.full_name || p?.email || null;
       }
     }
 
@@ -98,10 +98,10 @@ export const gerarDocumentoOc = createServerFn({ method: "POST" })
 
     const { data: prof } = await sb
       .from("profiles")
-      .select("nome, full_name, email")
+      .select("full_name, email")
       .eq("id", uid)
       .maybeSingle();
-    const responsavel = prof?.nome || prof?.full_name || prof?.email || "Compras";
+    const responsavel = prof?.full_name || prof?.email || "Compras";
 
     // Versão baseada em documentos anteriores desta OC (bucket documentos)
     const { data: prev } = await sb

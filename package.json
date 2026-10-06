@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "check:colunas": "bun scripts/checar-colunas.ts",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "docs:audit": "bun scripts/docs-audit.mjs --write",

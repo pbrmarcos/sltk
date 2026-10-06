@@ -570,6 +570,117 @@ export type Database = {
         };
         Relationships: [];
       };
+      calendar_event_log: {
+        Row: {
+          attendees: string[];
+          categoria: string;
+          created_at: string;
+          duration_min: number;
+          entity_id: string | null;
+          entity_table: string | null;
+          id: string;
+          mirror_event_error: string | null;
+          mirror_event_id: string | null;
+          mirror_event_status: string;
+          organizer_email: string | null;
+          organizer_event_error: string | null;
+          organizer_event_id: string | null;
+          organizer_event_status: string;
+          organizer_id: string;
+          start_at: string;
+          summary: string;
+        };
+        Insert: {
+          attendees?: string[];
+          categoria: string;
+          created_at?: string;
+          duration_min: number;
+          entity_id?: string | null;
+          entity_table?: string | null;
+          id?: string;
+          mirror_event_error?: string | null;
+          mirror_event_id?: string | null;
+          mirror_event_status?: string;
+          organizer_email?: string | null;
+          organizer_event_error?: string | null;
+          organizer_event_id?: string | null;
+          organizer_event_status?: string;
+          organizer_id: string;
+          start_at: string;
+          summary: string;
+        };
+        Update: {
+          attendees?: string[];
+          categoria?: string;
+          created_at?: string;
+          duration_min?: number;
+          entity_id?: string | null;
+          entity_table?: string | null;
+          id?: string;
+          mirror_event_error?: string | null;
+          mirror_event_id?: string | null;
+          mirror_event_status?: string;
+          organizer_email?: string | null;
+          organizer_event_error?: string | null;
+          organizer_event_id?: string | null;
+          organizer_event_status?: string;
+          organizer_id?: string;
+          start_at?: string;
+          summary?: string;
+        };
+        Relationships: [];
+      };
+      calendar_mirror_categories: {
+        Row: {
+          categoria: string;
+          created_at: string;
+          label: string;
+          mirror_enabled: boolean;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          categoria: string;
+          created_at?: string;
+          label: string;
+          mirror_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          categoria?: string;
+          created_at?: string;
+          label?: string;
+          mirror_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      calendar_mirror_settings: {
+        Row: {
+          id: string;
+          mirror_admin_user_id: string | null;
+          singleton: boolean;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          mirror_admin_user_id?: string | null;
+          singleton?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          mirror_admin_user_id?: string | null;
+          singleton?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
       chamado_eventos: {
         Row: {
           at: string;
@@ -792,6 +903,255 @@ export type Database = {
             columns: ["equipamento_id"];
             isOneToOne: false;
             referencedRelation: "cliente_equipamentos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      checklist_formulario_link: {
+        Row: {
+          cliente_id: string;
+          criado_em: string;
+          expira_em: string | null;
+          id: string;
+          idioma: string;
+          observacoes: string | null;
+          preenchido_em: string | null;
+          sales_id: string;
+          slug: string;
+          status: string;
+          submissao_id: string | null;
+          tipo_id: string;
+          titulo: string | null;
+        };
+        Insert: {
+          cliente_id: string;
+          criado_em?: string;
+          expira_em?: string | null;
+          id?: string;
+          idioma: string;
+          observacoes?: string | null;
+          preenchido_em?: string | null;
+          sales_id: string;
+          slug: string;
+          status?: string;
+          submissao_id?: string | null;
+          tipo_id: string;
+          titulo?: string | null;
+        };
+        Update: {
+          cliente_id?: string;
+          criado_em?: string;
+          expira_em?: string | null;
+          id?: string;
+          idioma?: string;
+          observacoes?: string | null;
+          preenchido_em?: string | null;
+          sales_id?: string;
+          slug?: string;
+          status?: string;
+          submissao_id?: string | null;
+          tipo_id?: string;
+          titulo?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rfq_formulario_link_cliente_id_fkey";
+            columns: ["cliente_id"];
+            isOneToOne: false;
+            referencedRelation: "clientes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rfq_formulario_link_tipo_id_fkey";
+            columns: ["tipo_id"];
+            isOneToOne: false;
+            referencedRelation: "checklist_formulario_tipo";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      checklist_formulario_tipo: {
+        Row: {
+          ativo: boolean;
+          campos_schema: Json;
+          codigo: string;
+          codigo_formulario: string | null;
+          created_at: string;
+          descricao: string | null;
+          familia: string | null;
+          id: string;
+          nome_en: string | null;
+          nome_es: string | null;
+          nome_pt: string;
+          slug: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          ativo?: boolean;
+          campos_schema?: Json;
+          codigo: string;
+          codigo_formulario?: string | null;
+          created_at?: string;
+          descricao?: string | null;
+          familia?: string | null;
+          id?: string;
+          nome_en?: string | null;
+          nome_es?: string | null;
+          nome_pt: string;
+          slug?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          ativo?: boolean;
+          campos_schema?: Json;
+          codigo?: string;
+          codigo_formulario?: string | null;
+          created_at?: string;
+          descricao?: string | null;
+          familia?: string | null;
+          id?: string;
+          nome_en?: string | null;
+          nome_es?: string | null;
+          nome_pt?: string;
+          slug?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      checklist_submissao: {
+        Row: {
+          cliente_id: string;
+          criado_em: string;
+          id: string;
+          idioma: string;
+          ip: unknown;
+          lida_em: string | null;
+          lida_por: string | null;
+          link_id: string;
+          observacoes_internas: string | null;
+          oportunidade_id: string | null;
+          preenchido_por_email: string | null;
+          preenchido_por_nome: string | null;
+          preenchido_por_telefone: string | null;
+          processo_id: string | null;
+          respostas: Json;
+          tipo_id: string;
+          user_agent: string | null;
+        };
+        Insert: {
+          cliente_id: string;
+          criado_em?: string;
+          id?: string;
+          idioma: string;
+          ip?: unknown;
+          lida_em?: string | null;
+          lida_por?: string | null;
+          link_id: string;
+          observacoes_internas?: string | null;
+          oportunidade_id?: string | null;
+          preenchido_por_email?: string | null;
+          preenchido_por_nome?: string | null;
+          preenchido_por_telefone?: string | null;
+          processo_id?: string | null;
+          respostas?: Json;
+          tipo_id: string;
+          user_agent?: string | null;
+        };
+        Update: {
+          cliente_id?: string;
+          criado_em?: string;
+          id?: string;
+          idioma?: string;
+          ip?: unknown;
+          lida_em?: string | null;
+          lida_por?: string | null;
+          link_id?: string;
+          observacoes_internas?: string | null;
+          oportunidade_id?: string | null;
+          preenchido_por_email?: string | null;
+          preenchido_por_nome?: string | null;
+          preenchido_por_telefone?: string | null;
+          processo_id?: string | null;
+          respostas?: Json;
+          tipo_id?: string;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rfq_submissao_cliente_id_fkey";
+            columns: ["cliente_id"];
+            isOneToOne: false;
+            referencedRelation: "clientes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rfq_submissao_link_id_fkey";
+            columns: ["link_id"];
+            isOneToOne: false;
+            referencedRelation: "checklist_formulario_link";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rfq_submissao_tipo_id_fkey";
+            columns: ["tipo_id"];
+            isOneToOne: false;
+            referencedRelation: "checklist_formulario_tipo";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      checklist_submissao_anexo: {
+        Row: {
+          campo_id: string | null;
+          criado_em: string;
+          drive_file_id: string | null;
+          drive_folder_id: string | null;
+          drive_view_url: string | null;
+          id: string;
+          mime: string | null;
+          nome: string;
+          nome_original: string | null;
+          storage_bucket: string | null;
+          storage_path: string | null;
+          submissao_id: string;
+          tamanho_bytes: number | null;
+        };
+        Insert: {
+          campo_id?: string | null;
+          criado_em?: string;
+          drive_file_id?: string | null;
+          drive_folder_id?: string | null;
+          drive_view_url?: string | null;
+          id?: string;
+          mime?: string | null;
+          nome: string;
+          nome_original?: string | null;
+          storage_bucket?: string | null;
+          storage_path?: string | null;
+          submissao_id: string;
+          tamanho_bytes?: number | null;
+        };
+        Update: {
+          campo_id?: string | null;
+          criado_em?: string;
+          drive_file_id?: string | null;
+          drive_folder_id?: string | null;
+          drive_view_url?: string | null;
+          id?: string;
+          mime?: string | null;
+          nome?: string;
+          nome_original?: string | null;
+          storage_bucket?: string | null;
+          storage_path?: string | null;
+          submissao_id?: string;
+          tamanho_bytes?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rfq_submissao_anexo_submissao_id_fkey";
+            columns: ["submissao_id"];
+            isOneToOne: false;
+            referencedRelation: "checklist_submissao";
             referencedColumns: ["id"];
           },
         ];
@@ -1282,6 +1642,9 @@ export type Database = {
           lifecycle_stage: Database["public"]["Enums"]["cliente_lifecycle"];
           longitude: number | null;
           matriz_filial: string | null;
+          mineracao_grade: string | null;
+          mineracao_ia: Json | null;
+          minerado_em: string | null;
           moeda: string;
           motivo_situacao: string | null;
           natureza_juridica_codigo: string | null;
@@ -1346,6 +1709,9 @@ export type Database = {
           lifecycle_stage?: Database["public"]["Enums"]["cliente_lifecycle"];
           longitude?: number | null;
           matriz_filial?: string | null;
+          mineracao_grade?: string | null;
+          mineracao_ia?: Json | null;
+          minerado_em?: string | null;
           moeda?: string;
           motivo_situacao?: string | null;
           natureza_juridica_codigo?: string | null;
@@ -1410,6 +1776,9 @@ export type Database = {
           lifecycle_stage?: Database["public"]["Enums"]["cliente_lifecycle"];
           longitude?: number | null;
           matriz_filial?: string | null;
+          mineracao_grade?: string | null;
+          mineracao_ia?: Json | null;
+          minerado_em?: string | null;
           moeda?: string;
           motivo_situacao?: string | null;
           natureza_juridica_codigo?: string | null;
@@ -1660,6 +2029,7 @@ export type Database = {
           escolhido_em: string;
           escolhido_por: string | null;
           id: string;
+          insumo_anexo_id: string | null;
           justificativa: string | null;
           proposta_item_id: string;
         };
@@ -1668,6 +2038,7 @@ export type Database = {
           escolhido_em?: string;
           escolhido_por?: string | null;
           id?: string;
+          insumo_anexo_id?: string | null;
           justificativa?: string | null;
           proposta_item_id: string;
         };
@@ -1676,6 +2047,7 @@ export type Database = {
           escolhido_em?: string;
           escolhido_por?: string | null;
           id?: string;
+          insumo_anexo_id?: string | null;
           justificativa?: string | null;
           proposta_item_id?: string;
         };
@@ -1685,6 +2057,13 @@ export type Database = {
             columns: ["cotacao_item_id"];
             isOneToOne: true;
             referencedRelation: "cotacao_itens";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "cotacao_escolhas_insumo_anexo_id_fkey";
+            columns: ["insumo_anexo_id"];
+            isOneToOne: false;
+            referencedRelation: "insumo_anexos";
             referencedColumns: ["id"];
           },
           {
@@ -1705,6 +2084,7 @@ export type Database = {
           fornecedor_id: string;
           id: string;
           respondido_em: string | null;
+          revogado_em: string | null;
           status: Database["public"]["Enums"]["cotacao_convite_status"];
           token: string;
           visualizado_em: string | null;
@@ -1717,6 +2097,7 @@ export type Database = {
           fornecedor_id: string;
           id?: string;
           respondido_em?: string | null;
+          revogado_em?: string | null;
           status?: Database["public"]["Enums"]["cotacao_convite_status"];
           token?: string;
           visualizado_em?: string | null;
@@ -1729,6 +2110,7 @@ export type Database = {
           fornecedor_id?: string;
           id?: string;
           respondido_em?: string | null;
+          revogado_em?: string | null;
           status?: Database["public"]["Enums"]["cotacao_convite_status"];
           token?: string;
           visualizado_em?: string | null;
@@ -2081,6 +2463,24 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      demo_seed_registry: {
+        Row: {
+          created_at: string;
+          record_id: string;
+          table_name: string;
+        };
+        Insert: {
+          created_at?: string;
+          record_id: string;
+          table_name: string;
+        };
+        Update: {
+          created_at?: string;
+          record_id?: string;
+          table_name?: string;
+        };
+        Relationships: [];
       };
       documento_aprovacoes: {
         Row: {
@@ -3634,6 +4034,76 @@ export type Database = {
           },
         ];
       };
+      equipamento_montagem_etapas: {
+        Row: {
+          cliente_id: string;
+          concluida_em: string | null;
+          concluida_por: string | null;
+          created_at: string;
+          equipamento_id: string;
+          id: string;
+          montagem_id: string;
+          ordem: number;
+          prazo: string | null;
+          responsavel_id: string | null;
+          status: Database["public"]["Enums"]["montagem_etapa_status"];
+          tipo: Database["public"]["Enums"]["montagem_etapa_tipo"];
+          updated_at: string;
+        };
+        Insert: {
+          cliente_id: string;
+          concluida_em?: string | null;
+          concluida_por?: string | null;
+          created_at?: string;
+          equipamento_id: string;
+          id?: string;
+          montagem_id: string;
+          ordem: number;
+          prazo?: string | null;
+          responsavel_id?: string | null;
+          status?: Database["public"]["Enums"]["montagem_etapa_status"];
+          tipo: Database["public"]["Enums"]["montagem_etapa_tipo"];
+          updated_at?: string;
+        };
+        Update: {
+          cliente_id?: string;
+          concluida_em?: string | null;
+          concluida_por?: string | null;
+          created_at?: string;
+          equipamento_id?: string;
+          id?: string;
+          montagem_id?: string;
+          ordem?: number;
+          prazo?: string | null;
+          responsavel_id?: string | null;
+          status?: Database["public"]["Enums"]["montagem_etapa_status"];
+          tipo?: Database["public"]["Enums"]["montagem_etapa_tipo"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "equipamento_montagem_etapas_cliente_id_fkey";
+            columns: ["cliente_id"];
+            isOneToOne: false;
+            referencedRelation: "clientes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "equipamento_montagem_etapas_equipamento_id_fkey";
+            columns: ["equipamento_id"];
+            isOneToOne: false;
+            referencedRelation: "cliente_equipamentos";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "equipamento_montagem_etapas_montagem_id_fkey";
+            columns: ["montagem_id"];
+            isOneToOne: false;
+            referencedRelation: "equipamento_montagens";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       equipamento_montagens: {
         Row: {
           cliente_id: string;
@@ -3757,7 +4227,7 @@ export type Database = {
             foreignKeyName: "equipamento_pagina_tipo_id_fkey";
             columns: ["tipo_id"];
             isOneToOne: true;
-            referencedRelation: "rfq_formulario_tipo";
+            referencedRelation: "checklist_formulario_tipo";
             referencedColumns: ["id"];
           },
         ];
@@ -3975,7 +4445,7 @@ export type Database = {
             foreignKeyName: "equipamento_planejamento_templates_tipo_rfq_id_fkey";
             columns: ["tipo_rfq_id"];
             isOneToOne: false;
-            referencedRelation: "rfq_formulario_tipo";
+            referencedRelation: "checklist_formulario_tipo";
             referencedColumns: ["id"];
           },
         ];
@@ -4237,7 +4707,7 @@ export type Database = {
             foreignKeyName: "etapa_template_tipo_id_fkey";
             columns: ["tipo_id"];
             isOneToOne: false;
-            referencedRelation: "rfq_formulario_tipo";
+            referencedRelation: "checklist_formulario_tipo";
             referencedColumns: ["id"];
           },
         ];
@@ -4690,12 +5160,14 @@ export type Database = {
           created_by: string | null;
           data_ensaio: string | null;
           deleted_at: string | null;
+          fat_origem_id: string | null;
           homologado_em: string | null;
           homologado_por: string | null;
           hora_inicio: string | null;
           id: string;
           inspetor_id: string | null;
           local_ensaio: string | null;
+          motivo_reprovacao: string | null;
           motivos_viagem: string[];
           na_count: number;
           nok_count: number;
@@ -4706,6 +5178,8 @@ export type Database = {
           periodo_de: string | null;
           processo_id: string;
           progresso: number;
+          reprovado_em: string | null;
+          reprovado_por: string | null;
           status: Database["public"]["Enums"]["fat_status"];
           tag_equipamento: string | null;
           tecnicos: string | null;
@@ -4723,12 +5197,14 @@ export type Database = {
           created_by?: string | null;
           data_ensaio?: string | null;
           deleted_at?: string | null;
+          fat_origem_id?: string | null;
           homologado_em?: string | null;
           homologado_por?: string | null;
           hora_inicio?: string | null;
           id?: string;
           inspetor_id?: string | null;
           local_ensaio?: string | null;
+          motivo_reprovacao?: string | null;
           motivos_viagem?: string[];
           na_count?: number;
           nok_count?: number;
@@ -4739,6 +5215,8 @@ export type Database = {
           periodo_de?: string | null;
           processo_id: string;
           progresso?: number;
+          reprovado_em?: string | null;
+          reprovado_por?: string | null;
           status?: Database["public"]["Enums"]["fat_status"];
           tag_equipamento?: string | null;
           tecnicos?: string | null;
@@ -4756,12 +5234,14 @@ export type Database = {
           created_by?: string | null;
           data_ensaio?: string | null;
           deleted_at?: string | null;
+          fat_origem_id?: string | null;
           homologado_em?: string | null;
           homologado_por?: string | null;
           hora_inicio?: string | null;
           id?: string;
           inspetor_id?: string | null;
           local_ensaio?: string | null;
+          motivo_reprovacao?: string | null;
           motivos_viagem?: string[];
           na_count?: number;
           nok_count?: number;
@@ -4772,6 +5252,8 @@ export type Database = {
           periodo_de?: string | null;
           processo_id?: string;
           progresso?: number;
+          reprovado_em?: string | null;
+          reprovado_por?: string | null;
           status?: Database["public"]["Enums"]["fat_status"];
           tag_equipamento?: string | null;
           tecnicos?: string | null;
@@ -4788,6 +5270,13 @@ export type Database = {
             columns: ["cliente_id"];
             isOneToOne: false;
             referencedRelation: "clientes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "fat_relatorios_fat_origem_id_fkey";
+            columns: ["fat_origem_id"];
+            isOneToOne: false;
+            referencedRelation: "fat_relatorios";
             referencedColumns: ["id"];
           },
           {
@@ -5803,63 +6292,6 @@ export type Database = {
           },
         ];
       };
-      insumo_rfq_envios: {
-        Row: {
-          canal: Database["public"]["Enums"]["insumo_rfq_canal"];
-          created_at: string;
-          data_envio: string;
-          data_resposta: string | null;
-          fornecedor_id: string;
-          id: string;
-          insumo_id: string;
-          notas: string | null;
-          responsavel_id: string | null;
-          status: Database["public"]["Enums"]["insumo_rfq_status"];
-          updated_at: string;
-        };
-        Insert: {
-          canal?: Database["public"]["Enums"]["insumo_rfq_canal"];
-          created_at?: string;
-          data_envio?: string;
-          data_resposta?: string | null;
-          fornecedor_id: string;
-          id?: string;
-          insumo_id: string;
-          notas?: string | null;
-          responsavel_id?: string | null;
-          status?: Database["public"]["Enums"]["insumo_rfq_status"];
-          updated_at?: string;
-        };
-        Update: {
-          canal?: Database["public"]["Enums"]["insumo_rfq_canal"];
-          created_at?: string;
-          data_envio?: string;
-          data_resposta?: string | null;
-          fornecedor_id?: string;
-          id?: string;
-          insumo_id?: string;
-          notas?: string | null;
-          responsavel_id?: string | null;
-          status?: Database["public"]["Enums"]["insumo_rfq_status"];
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "insumo_rfq_envios_fornecedor_id_fkey";
-            columns: ["fornecedor_id"];
-            isOneToOne: false;
-            referencedRelation: "fornecedores";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "insumo_rfq_envios_insumo_id_fkey";
-            columns: ["insumo_id"];
-            isOneToOne: false;
-            referencedRelation: "projeto_insumos";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       integracoes_config: {
         Row: {
           ativo: boolean;
@@ -6360,6 +6792,33 @@ export type Database = {
           },
         ];
       };
+      maintenance_config: {
+        Row: {
+          enabled: boolean;
+          ends_at: string | null;
+          id: number;
+          message: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          enabled?: boolean;
+          ends_at?: string | null;
+          id?: number;
+          message?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          enabled?: boolean;
+          ends_at?: string | null;
+          id?: number;
+          message?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
       mineracao_campanhas: {
         Row: {
           base_titulo: string | null;
@@ -6528,6 +6987,10 @@ export type Database = {
       };
       mineracao_resultados: {
         Row: {
+          analisado_em: string | null;
+          analise_grade: string | null;
+          analise_ia: Json | null;
+          analise_status: string;
           anotacao: string | null;
           campanha_id: string;
           contraparte: string | null;
@@ -6549,6 +7012,10 @@ export type Database = {
           valor_total: number;
         };
         Insert: {
+          analisado_em?: string | null;
+          analise_grade?: string | null;
+          analise_ia?: Json | null;
+          analise_status?: string;
           anotacao?: string | null;
           campanha_id: string;
           contraparte?: string | null;
@@ -6570,6 +7037,10 @@ export type Database = {
           valor_total?: number;
         };
         Update: {
+          analisado_em?: string | null;
+          analise_grade?: string | null;
+          analise_ia?: Json | null;
+          analise_status?: string;
           anotacao?: string | null;
           campanha_id?: string;
           contraparte?: string | null;
@@ -6646,6 +7117,148 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      montagem_etapa_checklist_resposta: {
+        Row: {
+          etapa_id: string;
+          id: string;
+          observacao: string | null;
+          ok: boolean;
+          template_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          etapa_id: string;
+          id?: string;
+          observacao?: string | null;
+          ok?: boolean;
+          template_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          etapa_id?: string;
+          id?: string;
+          observacao?: string | null;
+          ok?: boolean;
+          template_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "montagem_etapa_checklist_resposta_etapa_id_fkey";
+            columns: ["etapa_id"];
+            isOneToOne: false;
+            referencedRelation: "equipamento_montagem_etapas";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "montagem_etapa_checklist_resposta_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "montagem_etapa_checklist_template";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      montagem_etapa_checklist_template: {
+        Row: {
+          ativo: boolean;
+          created_at: string;
+          id: string;
+          ordem: number;
+          tipo: Database["public"]["Enums"]["montagem_etapa_tipo"];
+          titulo: string;
+          updated_at: string;
+        };
+        Insert: {
+          ativo?: boolean;
+          created_at?: string;
+          id?: string;
+          ordem?: number;
+          tipo: Database["public"]["Enums"]["montagem_etapa_tipo"];
+          titulo: string;
+          updated_at?: string;
+        };
+        Update: {
+          ativo?: boolean;
+          created_at?: string;
+          id?: string;
+          ordem?: number;
+          tipo?: Database["public"]["Enums"]["montagem_etapa_tipo"];
+          titulo?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      montagem_etapa_evidencias: {
+        Row: {
+          cliente_id: string;
+          created_at: string;
+          created_by: string | null;
+          deleted_at: string | null;
+          descricao: string | null;
+          equipamento_id: string;
+          etapa_id: string;
+          id: string;
+          mime: string;
+          nome_arquivo: string;
+          storage_path: string;
+          tamanho_bytes: number;
+        };
+        Insert: {
+          cliente_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          deleted_at?: string | null;
+          descricao?: string | null;
+          equipamento_id: string;
+          etapa_id: string;
+          id?: string;
+          mime: string;
+          nome_arquivo: string;
+          storage_path: string;
+          tamanho_bytes: number;
+        };
+        Update: {
+          cliente_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          deleted_at?: string | null;
+          descricao?: string | null;
+          equipamento_id?: string;
+          etapa_id?: string;
+          id?: string;
+          mime?: string;
+          nome_arquivo?: string;
+          storage_path?: string;
+          tamanho_bytes?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "montagem_etapa_evidencias_cliente_id_fkey";
+            columns: ["cliente_id"];
+            isOneToOne: false;
+            referencedRelation: "clientes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "montagem_etapa_evidencias_equipamento_id_fkey";
+            columns: ["equipamento_id"];
+            isOneToOne: false;
+            referencedRelation: "cliente_equipamentos";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "montagem_etapa_evidencias_etapa_id_fkey";
+            columns: ["etapa_id"];
+            isOneToOne: false;
+            referencedRelation: "equipamento_montagem_etapas";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       notificacoes_usuario: {
         Row: {
@@ -6738,6 +7351,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "oportunidade_anexos_oportunidade_id_fkey";
+            columns: ["oportunidade_id"];
+            isOneToOne: false;
+            referencedRelation: "oportunidades";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      oportunidade_colaboradores: {
+        Row: {
+          convidado_em: string;
+          convidado_por: string | null;
+          id: string;
+          oportunidade_id: string;
+          revogado_em: string | null;
+          revogado_por: string | null;
+          user_id: string;
+        };
+        Insert: {
+          convidado_em?: string;
+          convidado_por?: string | null;
+          id?: string;
+          oportunidade_id: string;
+          revogado_em?: string | null;
+          revogado_por?: string | null;
+          user_id: string;
+        };
+        Update: {
+          convidado_em?: string;
+          convidado_por?: string | null;
+          id?: string;
+          oportunidade_id?: string;
+          revogado_em?: string | null;
+          revogado_por?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "oportunidade_colaboradores_oportunidade_id_fkey";
             columns: ["oportunidade_id"];
             isOneToOne: false;
             referencedRelation: "oportunidades";
@@ -6842,6 +7493,7 @@ export type Database = {
       };
       oportunidades: {
         Row: {
+          checklist_submissao_id: string | null;
           cliente_id: string | null;
           codigo: string | null;
           created_at: string;
@@ -6866,7 +7518,6 @@ export type Database = {
           responsavel_id: string;
           restored_at: string | null;
           restored_by: string | null;
-          rfq_submissao_id: string | null;
           segmento_id: string | null;
           stage_entered_at: string;
           telefone: string | null;
@@ -6877,6 +7528,7 @@ export type Database = {
           valor_estimado_usd: number | null;
         };
         Insert: {
+          checklist_submissao_id?: string | null;
           cliente_id?: string | null;
           codigo?: string | null;
           created_at?: string;
@@ -6901,7 +7553,6 @@ export type Database = {
           responsavel_id: string;
           restored_at?: string | null;
           restored_by?: string | null;
-          rfq_submissao_id?: string | null;
           segmento_id?: string | null;
           stage_entered_at?: string;
           telefone?: string | null;
@@ -6912,6 +7563,7 @@ export type Database = {
           valor_estimado_usd?: number | null;
         };
         Update: {
+          checklist_submissao_id?: string | null;
           cliente_id?: string | null;
           codigo?: string | null;
           created_at?: string;
@@ -6936,7 +7588,6 @@ export type Database = {
           responsavel_id?: string;
           restored_at?: string | null;
           restored_by?: string | null;
-          rfq_submissao_id?: string | null;
           segmento_id?: string | null;
           stage_entered_at?: string;
           telefone?: string | null;
@@ -6984,9 +7635,9 @@ export type Database = {
           },
           {
             foreignKeyName: "oportunidades_rfq_submissao_id_fkey";
-            columns: ["rfq_submissao_id"];
+            columns: ["checklist_submissao_id"];
             isOneToOne: false;
-            referencedRelation: "rfq_submissao";
+            referencedRelation: "checklist_submissao";
             referencedColumns: ["id"];
           },
           {
@@ -8072,39 +8723,39 @@ export type Database = {
       processo_templates: {
         Row: {
           ativo: boolean;
+          checklist_tipo_id: string | null;
           created_at: string;
           created_by: string | null;
           deleted_at: string | null;
           descricao: string | null;
           id: string;
           nome: string;
-          rfq_tipo_id: string | null;
           tipo: Database["public"]["Enums"]["processo_tipo"];
           updated_at: string;
           updated_by: string | null;
         };
         Insert: {
           ativo?: boolean;
+          checklist_tipo_id?: string | null;
           created_at?: string;
           created_by?: string | null;
           deleted_at?: string | null;
           descricao?: string | null;
           id?: string;
           nome: string;
-          rfq_tipo_id?: string | null;
           tipo: Database["public"]["Enums"]["processo_tipo"];
           updated_at?: string;
           updated_by?: string | null;
         };
         Update: {
           ativo?: boolean;
+          checklist_tipo_id?: string | null;
           created_at?: string;
           created_by?: string | null;
           deleted_at?: string | null;
           descricao?: string | null;
           id?: string;
           nome?: string;
-          rfq_tipo_id?: string | null;
           tipo?: Database["public"]["Enums"]["processo_tipo"];
           updated_at?: string;
           updated_by?: string | null;
@@ -8112,9 +8763,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "processo_templates_rfq_tipo_id_fkey";
-            columns: ["rfq_tipo_id"];
+            columns: ["checklist_tipo_id"];
             isOneToOne: false;
-            referencedRelation: "rfq_formulario_tipo";
+            referencedRelation: "checklist_formulario_tipo";
             referencedColumns: ["id"];
           },
         ];
@@ -8230,6 +8881,7 @@ export type Database = {
           id: string;
           language: string;
           must_change_password: boolean;
+          roles_snapshot: Json | null;
           updated_at: string;
         };
         Insert: {
@@ -8253,6 +8905,7 @@ export type Database = {
           id: string;
           language?: string;
           must_change_password?: boolean;
+          roles_snapshot?: Json | null;
           updated_at?: string;
         };
         Update: {
@@ -8276,6 +8929,7 @@ export type Database = {
           id?: string;
           language?: string;
           must_change_password?: boolean;
+          roles_snapshot?: Json | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -8498,6 +9152,36 @@ export type Database = {
           },
         ];
       };
+      prospeccao_config: {
+        Row: {
+          id: number;
+          max_leads_auto: number;
+          nichos_proibidos: string[];
+          perfil_ideal: string;
+          regras_duras: Json;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: number;
+          max_leads_auto?: number;
+          nichos_proibidos?: string[];
+          perfil_ideal?: string;
+          regras_duras?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: number;
+          max_leads_auto?: number;
+          nichos_proibidos?: string[];
+          perfil_ideal?: string;
+          regras_duras?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
       relatorio_share_links: {
         Row: {
           created_at: string;
@@ -8598,255 +9282,6 @@ export type Database = {
             columns: ["share_link_id"];
             isOneToOne: false;
             referencedRelation: "relatorio_share_links";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      rfq_formulario_link: {
-        Row: {
-          cliente_id: string;
-          criado_em: string;
-          expira_em: string | null;
-          id: string;
-          idioma: string;
-          observacoes: string | null;
-          preenchido_em: string | null;
-          sales_id: string;
-          slug: string;
-          status: string;
-          submissao_id: string | null;
-          tipo_id: string;
-          titulo: string | null;
-        };
-        Insert: {
-          cliente_id: string;
-          criado_em?: string;
-          expira_em?: string | null;
-          id?: string;
-          idioma: string;
-          observacoes?: string | null;
-          preenchido_em?: string | null;
-          sales_id: string;
-          slug: string;
-          status?: string;
-          submissao_id?: string | null;
-          tipo_id: string;
-          titulo?: string | null;
-        };
-        Update: {
-          cliente_id?: string;
-          criado_em?: string;
-          expira_em?: string | null;
-          id?: string;
-          idioma?: string;
-          observacoes?: string | null;
-          preenchido_em?: string | null;
-          sales_id?: string;
-          slug?: string;
-          status?: string;
-          submissao_id?: string | null;
-          tipo_id?: string;
-          titulo?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "rfq_formulario_link_cliente_id_fkey";
-            columns: ["cliente_id"];
-            isOneToOne: false;
-            referencedRelation: "clientes";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "rfq_formulario_link_tipo_id_fkey";
-            columns: ["tipo_id"];
-            isOneToOne: false;
-            referencedRelation: "rfq_formulario_tipo";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      rfq_formulario_tipo: {
-        Row: {
-          ativo: boolean;
-          campos_schema: Json;
-          codigo: string;
-          codigo_formulario: string | null;
-          created_at: string;
-          descricao: string | null;
-          familia: string | null;
-          id: string;
-          nome_en: string | null;
-          nome_es: string | null;
-          nome_pt: string;
-          slug: string | null;
-          updated_at: string;
-        };
-        Insert: {
-          ativo?: boolean;
-          campos_schema?: Json;
-          codigo: string;
-          codigo_formulario?: string | null;
-          created_at?: string;
-          descricao?: string | null;
-          familia?: string | null;
-          id?: string;
-          nome_en?: string | null;
-          nome_es?: string | null;
-          nome_pt: string;
-          slug?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          ativo?: boolean;
-          campos_schema?: Json;
-          codigo?: string;
-          codigo_formulario?: string | null;
-          created_at?: string;
-          descricao?: string | null;
-          familia?: string | null;
-          id?: string;
-          nome_en?: string | null;
-          nome_es?: string | null;
-          nome_pt?: string;
-          slug?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      rfq_submissao: {
-        Row: {
-          cliente_id: string;
-          criado_em: string;
-          id: string;
-          idioma: string;
-          ip: unknown;
-          lida_em: string | null;
-          lida_por: string | null;
-          link_id: string;
-          observacoes_internas: string | null;
-          oportunidade_id: string | null;
-          preenchido_por_email: string | null;
-          preenchido_por_nome: string | null;
-          preenchido_por_telefone: string | null;
-          processo_id: string | null;
-          respostas: Json;
-          tipo_id: string;
-          user_agent: string | null;
-        };
-        Insert: {
-          cliente_id: string;
-          criado_em?: string;
-          id?: string;
-          idioma: string;
-          ip?: unknown;
-          lida_em?: string | null;
-          lida_por?: string | null;
-          link_id: string;
-          observacoes_internas?: string | null;
-          oportunidade_id?: string | null;
-          preenchido_por_email?: string | null;
-          preenchido_por_nome?: string | null;
-          preenchido_por_telefone?: string | null;
-          processo_id?: string | null;
-          respostas?: Json;
-          tipo_id: string;
-          user_agent?: string | null;
-        };
-        Update: {
-          cliente_id?: string;
-          criado_em?: string;
-          id?: string;
-          idioma?: string;
-          ip?: unknown;
-          lida_em?: string | null;
-          lida_por?: string | null;
-          link_id?: string;
-          observacoes_internas?: string | null;
-          oportunidade_id?: string | null;
-          preenchido_por_email?: string | null;
-          preenchido_por_nome?: string | null;
-          preenchido_por_telefone?: string | null;
-          processo_id?: string | null;
-          respostas?: Json;
-          tipo_id?: string;
-          user_agent?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "rfq_submissao_cliente_id_fkey";
-            columns: ["cliente_id"];
-            isOneToOne: false;
-            referencedRelation: "clientes";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "rfq_submissao_link_id_fkey";
-            columns: ["link_id"];
-            isOneToOne: false;
-            referencedRelation: "rfq_formulario_link";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "rfq_submissao_tipo_id_fkey";
-            columns: ["tipo_id"];
-            isOneToOne: false;
-            referencedRelation: "rfq_formulario_tipo";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      rfq_submissao_anexo: {
-        Row: {
-          campo_id: string | null;
-          criado_em: string;
-          drive_file_id: string | null;
-          drive_folder_id: string | null;
-          drive_view_url: string | null;
-          id: string;
-          mime: string | null;
-          nome: string;
-          nome_original: string | null;
-          storage_bucket: string | null;
-          storage_path: string | null;
-          submissao_id: string;
-          tamanho_bytes: number | null;
-        };
-        Insert: {
-          campo_id?: string | null;
-          criado_em?: string;
-          drive_file_id?: string | null;
-          drive_folder_id?: string | null;
-          drive_view_url?: string | null;
-          id?: string;
-          mime?: string | null;
-          nome: string;
-          nome_original?: string | null;
-          storage_bucket?: string | null;
-          storage_path?: string | null;
-          submissao_id: string;
-          tamanho_bytes?: number | null;
-        };
-        Update: {
-          campo_id?: string | null;
-          criado_em?: string;
-          drive_file_id?: string | null;
-          drive_folder_id?: string | null;
-          drive_view_url?: string | null;
-          id?: string;
-          mime?: string | null;
-          nome?: string;
-          nome_original?: string | null;
-          storage_bucket?: string | null;
-          storage_path?: string | null;
-          submissao_id?: string;
-          tamanho_bytes?: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "rfq_submissao_anexo_submissao_id_fkey";
-            columns: ["submissao_id"];
-            isOneToOne: false;
-            referencedRelation: "rfq_submissao";
             referencedColumns: ["id"];
           },
         ];
@@ -9358,6 +9793,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      admin_set_must_change_password: {
+        Args: { _user_id: string; _value: boolean };
+        Returns: undefined;
+      };
       admin_set_user_password: {
         Args: { _password: string; _user_id: string };
         Returns: undefined;
@@ -9506,6 +9945,13 @@ export type Database = {
       };
       unaccent: { Args: { "": string }; Returns: string };
       user_pode_compras: { Args: { uid: string }; Returns: boolean };
+      vault_delete_secret: { Args: { secret_name: string }; Returns: undefined };
+      vault_get_secret: { Args: { secret_name: string }; Returns: string };
+      vault_secret_exists: { Args: { secret_name: string }; Returns: boolean };
+      vault_upsert_secret: {
+        Args: { secret_name: string; secret_value: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       app_module:
@@ -9647,8 +10093,6 @@ export type Database = {
       fornecedor_ranking: "A" | "B" | "C";
       fornecedor_status: "ativo" | "em_avaliacao" | "inativo" | "bloqueado";
       insumo_criticidade: "baixa" | "media" | "alta" | "critica";
-      insumo_rfq_canal: "email" | "whatsapp" | "wechat" | "telefone" | "portal" | "outro";
-      insumo_rfq_status: "enviado" | "respondido" | "nao_respondeu" | "descartado";
       insumo_status:
         | "rascunho"
         | "pronto_aprovacao"
@@ -9670,6 +10114,8 @@ export type Database = {
         | "cliente_desistiu"
         | "tecnico"
         | "outro";
+      montagem_etapa_status: "pendente" | "em_andamento" | "concluida";
+      montagem_etapa_tipo: "pre_montagem" | "mecanica" | "eletrica" | "testes" | "embalagem";
       montagem_status: "nao_iniciada" | "em_andamento" | "concluida" | "bloqueada";
       oc_status:
         | "rascunho"
@@ -9982,8 +10428,6 @@ export const Constants = {
       fornecedor_ranking: ["A", "B", "C"],
       fornecedor_status: ["ativo", "em_avaliacao", "inativo", "bloqueado"],
       insumo_criticidade: ["baixa", "media", "alta", "critica"],
-      insumo_rfq_canal: ["email", "whatsapp", "wechat", "telefone", "portal", "outro"],
-      insumo_rfq_status: ["enviado", "respondido", "nao_respondeu", "descartado"],
       insumo_status: [
         "rascunho",
         "pronto_aprovacao",
@@ -10007,6 +10451,8 @@ export const Constants = {
         "tecnico",
         "outro",
       ],
+      montagem_etapa_status: ["pendente", "em_andamento", "concluida"],
+      montagem_etapa_tipo: ["pre_montagem", "mecanica", "eletrica", "testes", "embalagem"],
       montagem_status: ["nao_iniciada", "em_andamento", "concluida", "bloqueada"],
       oc_status: [
         "rascunho",

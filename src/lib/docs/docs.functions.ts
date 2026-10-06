@@ -1787,11 +1787,14 @@ export async function generateSatDocumentInternal(args: {
   if (Array.isArray(sat.equipamento_ids) && sat.equipamento_ids.length > 0) {
     const { data: eqs } = await (supabaseAdmin as any)
       .from("cliente_equipamentos")
-      .select("tag, descricao, modelo, fabricante")
+      .select("codigo, tag_cliente, numero_serie, modelo, fabricante")
       .in("id", sat.equipamento_ids);
     equipamentos = (eqs || []).map((e: any) => ({
-      tag: e.tag || null,
-      descricao: [e.descricao, e.modelo, e.fabricante].filter(Boolean).join(" · ") || null,
+      tag: e.tag_cliente || e.codigo || null,
+      descricao:
+        [e.modelo, e.fabricante, e.numero_serie ? `S/N ${e.numero_serie}` : null]
+          .filter(Boolean)
+          .join(" · ") || null,
     }));
   }
 

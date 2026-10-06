@@ -17,10 +17,10 @@ type SB = { from: (t: string) => any; rpc: (n: string, p?: any) => any }; // esl
 async function getUserName(supabase: any, uid: string): Promise<string> {
   const { data } = await supabase
     .from("profiles")
-    .select("nome, email")
+    .select("full_name, email")
     .eq("id", uid)
     .maybeSingle();
-  return data?.nome || data?.email || "Usuário";
+  return data?.full_name || data?.email || "Usuário";
 }
 
 async function logHistorico(
@@ -239,115 +239,7 @@ export const createOrdemCompra = createServerFn({ method: "POST" })
   });
 
 /* ============ CREATE FROM COTAÇÃO ============ */
-export const createOrdemDeCotacao = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ cotacao_id: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as unknown as SB;
-    const uid = context.userId;
-    await assertCanAccessModule(context.supabase, uid, "compras");
 
-    // Busca escolhas (vencedores) da cotação
-    const { data: cot } = await sb
-      .from("cotacoes")
-      .select("id, codigo, titulo, moeda, incoterm, condicoes_pagamento, observacoes")
-      .eq("id", data.cotacao_id)
-      .single();
-
-    const { data: escolhas } = await sb
-      .from("cotacao_escolhas")
-      .select(
-        "cotacao_item_id, proposta_item_id, justificativa, cotacao_proposta_itens(id, proposta_id, preco_unit, prazo_entrega_dias, part_number_oferecido, marca_oferecida, cotacao_propostas(convite_id, cotacao_fornecedores(fornecedor_id)))",
-      )
-      .eq("cotacao_id", data.cotacao_id);
-
-    if (!escolhas || escolhas.length === 0)
-      throw new Error(
-        "Esta cotação não tem vencedores escolhidos. Selecione os vencedores primeiro.",
-      );
-
-    // Agrupa por fornecedor
-    type Row = {
-      cotacao_item_id: string;
-      proposta_item_id: string;
-      preco_unit: number;
-      prazo: number | null;
-      part_number: string | null;
-      fornecedor_id: string;
-    };
-    const porFornecedor = new Map<string, Row[]>();
-    for (const e of escolhas as any[]) {
-      const pi = e.cotacao_proposta_itens;
-      const forn = pi?.cotacao_propostas?.cotacao_fornecedores?.fornecedor_id;
-      if (!forn) continue;
-      const row: Row = {
-        cotacao_item_id: e.cotacao_item_id,
-        proposta_item_id: e.proposta_item_id,
-        preco_unit: Number(pi.preco_unit ?? 0),
-        prazo: pi.prazo_entrega_dias ?? null,
-        part_number: pi.part_number_oferecido ?? null,
-        fornecedor_id: forn,
-      };
-      const arr = porFornecedor.get(forn) ?? [];
-      arr.push(row);
-      porFornecedor.set(forn, arr);
-    }
-
-    const ocsCriadas: { id: string; numero: string; fornecedor_id: string }[] = [];
-
-    for (const [fornecedor_id, rows] of porFornecedor) {
-      // Busca itens originais da cotação
-      const itensIds = rows.map((r) => r.cotacao_item_id);
-      const { data: cotItens } = await sb
-        .from("cotacao_itens")
-        .select("id, descricao_snapshot, part_number_snapshot, quantidade, unidade, insumo_id")
-        .in("id", itensIds);
-
-      const created = await createOrdemCompra({
-        data: { fornecedor_id, cotacao_id: data.cotacao_id, tipo: "normal" as const },
-      });
-
-      // Inserir itens
-      const itensInsert = rows.map((r, idx) => {
-        const ci = (cotItens ?? []).find((x: any) => x.id === r.cotacao_item_id);
-        return {
-          ordem_compra_id: created.id,
-          insumo_id: ci?.insumo_id ?? null,
-          cotacao_item_id: r.cotacao_item_id,
-          proposta_item_id: r.proposta_item_id,
-          ordem: idx + 1,
-          codigo_produto: r.part_number ?? null,
-          descricao: ci?.descricao_snapshot ?? "Item",
-          unidade: ci?.unidade ?? "UN",
-          quantidade: Number(ci?.quantidade ?? 1),
-          valor_unitario: r.preco_unit,
-        };
-      });
-
-      if (itensInsert.length) await sb.from("ordem_compra_itens").insert(itensInsert);
-
-      // Atualiza header com moeda/incoterm/pagamento da cotação
-      await sb
-        .from("ordens_compra")
-        .update({
-          moeda: cot?.moeda ?? "BRL",
-          incoterm: cot?.incoterm ?? null,
-          condicao_pagamento: cot?.condicoes_pagamento ?? null,
-          observacoes: cot ? `O.C. conforme cotação ${cot.codigo}.` : null,
-        })
-        .eq("id", created.id);
-
-      await logHistorico(sb, created.id, uid, "OC gerada a partir da cotação", {
-        detalhes: { cotacao_codigo: cot?.codigo, itens: itensInsert.length },
-      });
-
-      ocsCriadas.push({ id: created.id, numero: created.numero, fornecedor_id });
-    }
-
-    return { ocs: ocsCriadas };
-  });
-
-/* ============ CREATE FROM INSUMO (Cotação direto) ============ */
 export const createOrdemDeInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>

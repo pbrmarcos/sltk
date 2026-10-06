@@ -74,6 +74,42 @@ async function dispatchCotacaoInviteEmails(
 }
 
 /* ============ LIST ============ */
+
+/**
+ * cotacao_propostas usa validade / observacoes_fornecedor / submetido_em /
+ * condicao_pagamento; as telas (portal do fornecedor e cotação interna) usam
+ * valido_ate / observacoes / enviada_em / condicoes_pagamento / total. Antes o
+ * código gravava os nomes das telas direto no banco e todo envio falhava.
+ */
+function propostaColunas(d: {
+  moeda?: string | null;
+  valido_ate?: string | null;
+  observacoes?: string | null;
+  condicoes_pagamento?: string | null;
+}) {
+  return {
+    moeda: d.moeda ?? null,
+    validade: d.valido_ate || null,
+    observacoes_fornecedor: d.observacoes ?? null,
+    condicao_pagamento: d.condicoes_pagamento ?? null,
+    submetido_em: new Date().toISOString(),
+  };
+}
+
+function propostaParaTela(p: Record<string, unknown>, itens: Array<Record<string, unknown>>): any {
+  const meus = itens.filter((i) => i.proposta_id === p.id);
+  const total = meus.reduce((s, i) => s + Number(i.valor_total ?? 0), 0);
+  return {
+    ...p,
+    valido_ate: p.validade ?? null,
+    observacoes: p.observacoes_fornecedor ?? null,
+    condicoes_pagamento: p.condicao_pagamento ?? null,
+    enviada_em: p.submetido_em ?? null,
+    status: p.submetido_em ? "enviada" : "rascunho",
+    total: meus.length ? total : null,
+  };
+}
+
 export const listCotacoes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
@@ -169,6 +205,7 @@ export const getCotacao = createServerFn({ method: "POST" })
           .in("proposta_id", propIds);
         propostaItens = pi ?? [];
       }
+      propostas = propostas.map((p) => propostaParaTela(p, propostaItens));
     }
     const { data: escolhas } = await sb
       .from("cotacao_escolhas")
@@ -684,7 +721,9 @@ export const publicGetCotacao = createServerFn({ method: "POST" })
       convite,
       cotacao: cot,
       itens: itens ?? [],
-      proposta,
+      proposta: proposta
+        ? propostaParaTela(proposta as Record<string, unknown>, propostaItens)
+        : null,
       proposta_itens: propostaItens,
     };
   });
@@ -746,6 +785,7 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
     }
 
     const total = data.itens.reduce((s, i) => s + Number(i.preco_unitario), 0);
+    void total;
 
     // Upsert proposta
     const { data: existing } = await sb
@@ -756,31 +796,20 @@ export const publicSubmitProposta = createServerFn({ method: "POST" })
     let propostaId: string;
     if (existing) {
       propostaId = (existing as { id: string }).id;
-      await sb
+      const { error: eUp } = await sb
         .from("cotacao_propostas")
         .update({
-          moeda: data.moeda,
-          valido_ate: data.valido_ate,
-          observacoes: data.observacoes,
-          condicoes_pagamento: data.condicoes_pagamento,
-          total,
-          status: "enviada",
-          enviada_em: new Date().toISOString(),
+          ...propostaColunas(data),
         })
         .eq("id", propostaId);
+      if (eUp) throw friendlyDbError(eUp);
       await sb.from("cotacao_proposta_itens").delete().eq("proposta_id", propostaId);
     } else {
       const { data: prop, error: e2 } = await sb
         .from("cotacao_propostas")
         .insert({
           convite_id: c.id,
-          moeda: data.moeda,
-          valido_ate: data.valido_ate,
-          observacoes: data.observacoes,
-          condicoes_pagamento: data.condicoes_pagamento,
-          total,
-          status: "enviada",
-          enviada_em: new Date().toISOString(),
+          ...propostaColunas(data),
         })
         .select("id")
         .single();
