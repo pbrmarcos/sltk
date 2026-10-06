@@ -3,11 +3,15 @@ import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   DndContext,
-  PointerSensor,
+  DragOverlay,
+  MouseSensor,
+  TouchSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
+  type DropAnimation,
 } from "@dnd-kit/core";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { Card } from "@/components/ui/card";
@@ -34,6 +38,12 @@ import { toast } from "sonner";
 
 export type PipelineView = "kanban" | "table" | "perdidas";
 
+/** Soltar: o card "assenta" no lugar com uma curva suave. */
+const DROP_ANIMATION: DropAnimation = {
+  duration: 220,
+  easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+};
+
 const ACTIVE_PIPELINE_STAGES = PIPELINE_STAGES.filter((stage) => stage !== "perdido");
 
 const STAGE_HEADER_TONE: Record<PipelineStage, string> = {
@@ -56,33 +66,18 @@ function ageDays(date: string): number {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
 }
 
-function OportunidadeCard({
+/** Visual do card — usado no lugar e no "fantasma" que acompanha o dedo/mouse. */
+function OportunidadeCardBody({
   opp,
-  onOpen,
+  onOpenNotas,
 }: {
   opp: OportunidadeLite;
-  onOpen: (o: OportunidadeLite, tab?: "dados" | "notas") => void;
+  onOpenNotas?: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: opp.id });
   const age = ageDays(opp.stage_entered_at);
   const ageTone = age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
-
   return (
-    <Card
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={{
-        transform: transform ? `translate3d(${transform.x}px,${transform.y}px,0)` : undefined,
-        opacity: isDragging ? 0.4 : 1,
-      }}
-      onClick={(e) => {
-        if (isDragging) return;
-        e.stopPropagation();
-        onOpen(opp);
-      }}
-      className="cursor-grab active:cursor-grabbing p-3 space-y-1.5 hover:shadow-md transition-shadow"
-    >
+    <>
       <div className="font-semibold text-sm leading-tight truncate">
         {opp.cliente_nome || opp.empresa_lead || opp.nome_lead || "Sem empresa"}
       </div>
@@ -98,7 +93,7 @@ function OportunidadeCard({
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
-                onOpen(opp, "notas");
+                onOpenNotas?.();
               }}
               className="inline-flex items-center gap-0.5 text-muted-foreground hover:text-foreground"
             >
@@ -137,6 +132,36 @@ function OportunidadeCard({
           Processo criado
         </Badge>
       )}
+    </>
+  );
+}
+
+function OportunidadeCard({
+  opp,
+  onOpen,
+}: {
+  opp: OportunidadeLite;
+  onOpen: (o: OportunidadeLite, tab?: "dados" | "notas") => void;
+}) {
+  // Sem transform aqui: o card no lugar vira um "espaço reservado" e quem se
+  // move é o DragOverlay, desenhado por cima de tudo (nunca é cortado pela coluna).
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: opp.id });
+  return (
+    <Card
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={(e) => {
+        if (isDragging) return;
+        e.stopPropagation();
+        onOpen(opp);
+      }}
+      className={cn(
+        "cursor-grab touch-manipulation select-none p-3 space-y-1.5 transition-[opacity,box-shadow] duration-150 hover:shadow-md",
+        isDragging && "opacity-30 border-dashed shadow-none",
+      )}
+    >
+      <OportunidadeCardBody opp={opp} onOpenNotas={() => onOpen(opp, "notas")} />
     </Card>
   );
 }
@@ -160,9 +185,9 @@ function StageColumn({
       ref={setNodeRef}
       className={cn(
         // Abaixo de xl: colunas de largura fixa com rolagem horizontal do quadro.
-        "flex flex-col max-h-[70dvh] bg-muted/30 rounded-lg border-t-4 w-[78vw] sm:w-[260px] xl:w-auto shrink-0 xl:shrink",
+        "flex flex-col max-h-[70dvh] bg-muted/30 rounded-lg border-t-4 w-[78vw] sm:w-[260px] xl:w-auto shrink-0 xl:shrink transition-colors duration-150",
         STAGE_HEADER_TONE[stage],
-        isOver && "ring-2 ring-primary/50",
+        isOver && "bg-primary/5 ring-2 ring-primary/40",
       )}
     >
       <div className="flex items-center justify-between gap-2 p-3 border-b">
@@ -171,7 +196,7 @@ function StageColumn({
           {items.length} · {formatBRL(totalValor)}
         </span>
       </div>
-      <div className="flex-1 p-2 space-y-2 overflow-y-auto min-h-0">
+      <div className="no-scrollbar flex-1 p-2 space-y-2 overflow-y-auto overscroll-contain min-h-0">
         {items.length === 0 ? (
           stage === "novo" ? (
             <div className="text-center p-4">
@@ -217,7 +242,8 @@ export function PipelineBoard({
   const editing = editingId ? (data.find((item) => item.id === editingId) ?? null) : null;
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
     useSensor(KeyboardSensor),
   );
 
@@ -263,7 +289,16 @@ export function PipelineBoard({
     setEditingId(o.id);
   };
 
+  const [arrastandoId, setArrastandoId] = useState<string | null>(null);
+  const arrastando = arrastandoId ? (data.find((o) => o.id === arrastandoId) ?? null) : null;
+
+  function onDragStart(e: DragStartEvent) {
+    setArrastandoId(String(e.active.id));
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(8);
+  }
+
   function onDragEnd(e: DragEndEvent) {
+    setArrastandoId(null);
     if (!e.over) return;
     const id = String(e.active.id);
     const newStage = String(e.over.id) as PipelineStage;
@@ -301,8 +336,14 @@ export function PipelineBoard({
       {view === "perdidas" ? (
         <LostOportunidadesList items={lostItems} onOpen={(o) => abrir(o)} />
       ) : view === "kanban" ? (
-        <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-          <div className="flex w-full items-start gap-3 overflow-x-auto pb-4 snap-x snap-mandatory xl:grid xl:grid-cols-5 xl:overflow-visible xl:snap-none">
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragCancel={() => setArrastandoId(null)}
+          autoScroll={{ threshold: { x: 0.15, y: 0.2 }, acceleration: 12 }}
+        >
+          <div className="no-scrollbar flex w-full items-start gap-3 overflow-x-auto pb-4 snap-x snap-mandatory xl:grid xl:grid-cols-5 xl:overflow-visible xl:snap-none">
             {ACTIVE_PIPELINE_STAGES.map((stage) => {
               const items = grouped.get(stage) ?? [];
               const total = items.reduce((s, o) => s + (o.valor_estimado ?? 0), 0);
@@ -320,6 +361,13 @@ export function PipelineBoard({
               );
             })}
           </div>
+          <DragOverlay dropAnimation={DROP_ANIMATION} zIndex={60}>
+            {arrastando ? (
+              <Card className="h-full cursor-grabbing p-3 space-y-1.5 rotate-[1.5deg] scale-[1.03] shadow-2xl ring-1 ring-primary/30">
+                <OportunidadeCardBody opp={arrastando} />
+              </Card>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       ) : (
         <PipelineTable items={activeItems} onRowClick={(o) => abrir(o)} />

@@ -241,3 +241,12 @@
 }
 
 #lovable-badge { display: none !important; }
+
+/* Rolagem sem barra visível (kanban): continua rolando com dedo, trackpad e roda. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
