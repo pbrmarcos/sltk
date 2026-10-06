@@ -106,6 +106,7 @@ export function OrcamentoWizard({
     initialPayload?.cliente?.id ?? prefillClienteId ?? null,
   );
   const [clienteQ, setClienteQ] = useState("");
+  const [buscaAberta, setBuscaAberta] = useState(false);
   const [titulo, setTitulo] = useState(initialTitulo ?? "");
 
   const [moeda, setMoeda] = useState<Moeda>(initialPayload?.moeda ?? MOEDA_PADRAO);
@@ -759,48 +760,93 @@ export function OrcamentoWizard({
               )}
 
               {(!opp || trocandoCliente) && (
-                <>
-                  <div>
-                    <Label>Buscar cliente</Label>
-                    <div className="flex items-end gap-2">
-                      <Input
-                        className="flex-1"
-                        placeholder="Razão social, código…"
-                        value={clienteQ}
-                        onChange={(e) => setClienteQ(e.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setNovoClienteOpen(true)}
-                      >
-                        + Novo cliente
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="max-h-72 overflow-auto rounded border border-[var(--bg-border)]">
-                    {clienteRows.map((c: any) => (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          setClienteId(c.id);
-                          void vincularOportunidade(c.id, c.codigo);
-                        }}
-                        className={`flex w-full items-center justify-between border-b border-[var(--bg-border)] px-3 py-2 text-left text-sm hover:bg-[var(--bg-base)] ${clienteId === c.id ? "bg-[var(--bg-base)]" : ""}`}
-                      >
-                        <span>
+                <div>
+                  <Label>Cliente</Label>
+                  <div className="flex items-start gap-2">
+                    <div className="relative flex-1">
+                      {clienteId && clienteRow && !clienteQ ? (
+                        // Cliente escolhido: o campo mostra o nome, sem lista aberta.
+                        <div className="flex h-9 items-center gap-2 rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] px-3 text-sm">
                           <span className="font-mono text-xs text-[var(--text-muted)]">
-                            {c.codigo}
-                          </span>{" "}
-                          <span className="font-medium">{c.razao_social}</span>
-                        </span>
-                        <span className="text-xs text-[var(--text-muted)]">
-                          {c.endereco_cidade} / {c.pais}
-                        </span>
-                      </button>
-                    ))}
+                            {(clienteRow as any).codigo}
+                          </span>
+                          <span className="truncate font-medium">
+                            {(clienteRow as any).razao_social}
+                          </span>
+                          <span className="ml-auto shrink-0 text-xs text-[var(--text-muted)]">
+                            {(clienteRow as any).pais}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="Trocar cliente"
+                            title="Trocar cliente"
+                            className="shrink-0 rounded p-0.5 text-[var(--text-muted)] hover:bg-[var(--bg-base)] hover:text-[var(--text-primary)]"
+                            onClick={() => {
+                              setClienteId(null);
+                              setBuscaAberta(true);
+                            }}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Input
+                          autoFocus={!clienteId}
+                          placeholder="Digite a razão social ou o código…"
+                          value={clienteQ}
+                          onChange={(e) => {
+                            setClienteQ(e.target.value);
+                            setBuscaAberta(true);
+                          }}
+                          onFocus={() => setBuscaAberta(true)}
+                          onBlur={() => setTimeout(() => setBuscaAberta(false), 150)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setBuscaAberta(false);
+                          }}
+                        />
+                      )}
+                      {buscaAberta && !(clienteId && !clienteQ) && clienteRows.length > 0 && (
+                        <div className="absolute inset-x-0 top-full z-30 mt-1 max-h-64 overflow-auto rounded-md border border-[var(--bg-border)] bg-[var(--bg-surface)] py-1 shadow-lg">
+                          {clienteRows.slice(0, 8).map((c: any) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              // onMouseDown: escolhe antes do blur do campo fechar a lista.
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setClienteId(c.id);
+                                setClienteQ("");
+                                setBuscaAberta(false);
+                                void vincularOportunidade(c.id, c.codigo);
+                              }}
+                              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] hover:bg-[var(--bg-base)]"
+                            >
+                              <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                                {c.codigo}
+                              </span>
+                              <span className="truncate">{c.razao_social}</span>
+                              <span className="ml-auto shrink-0 text-[11px] text-[var(--text-muted)]">
+                                {[c.endereco_cidade, c.pais].filter(Boolean).join(" · ")}
+                              </span>
+                            </button>
+                          ))}
+                          {clienteRows.length > 8 && (
+                            <div className="px-3 py-1 text-[11px] text-[var(--text-muted)]">
+                              Mais {clienteRows.length - 8} — continue digitando para filtrar.
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setNovoClienteOpen(true)}
+                    >
+                      + Novo cliente
+                    </Button>
                   </div>
-                </>
+                </div>
               )}
 
               {opp && !trocandoCliente && clienteId && clienteRow && (
