@@ -1,9 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assertAdminOrManager, assertCanAccessModule } from "@/lib/admin-guard";
+import { assertAdminOrManager, assertCanAccessModule, canAccessModule } from "@/lib/admin-guard";
 import { friendlyDbError } from "@/lib/db-errors";
 import { logAuditServer } from "@/lib/audit.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+/** BOM do projeto: a Engenharia monta a lista e Compras cota/compra. */
+async function assertPodeEditarInsumos(sb: any, uid: string) {
+  if ((await canAccessModule(sb, uid, "engenharia")) || (await canAccessModule(sb, uid, "compras")))
+    return;
+  throw new Error("Sem permissão: requer o módulo Engenharia ou Compras.");
+}
+
 import {
   INSUMO_CRITICIDADE,
   INSUMO_DISCIPLINAS,
@@ -167,7 +175,7 @@ export const upsertInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => upsertInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    await assertPodeEditarInsumos(context.supabase, context.userId);
     const sb = context.supabase as unknown as SB;
     // Carrega projeto para preencher equipamento_id/cliente_id
     const { data: proj, error: pe } = await sb
@@ -215,7 +223,7 @@ export const setInsumoStatus = createServerFn({ method: "POST" })
     if (data.status === "aprovado") {
       await assertAdminOrManager(context.supabase, context.userId);
     } else {
-      await assertCanAccessModule(context.supabase, context.userId, "compras");
+      await assertPodeEditarInsumos(context.supabase, context.userId);
     }
     const sb = context.supabase as unknown as SB;
     const patch: Record<string, unknown> = {
@@ -250,7 +258,7 @@ export const removerInsumo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => removerInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    await assertPodeEditarInsumos(context.supabase, context.userId);
     const sb = context.supabase as unknown as SB;
     const now = new Date().toISOString();
 
@@ -331,7 +339,7 @@ export const restaurarInsumo = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), justificativa: z.string().min(3).max(500) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    await assertPodeEditarInsumos(context.supabase, context.userId);
     const sb = context.supabase as unknown as SB;
     const { error } = await sb
       .from("projeto_insumos")
@@ -853,7 +861,7 @@ export const enviarInsumosParaAprovacao = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    await assertPodeEditarInsumos(context.supabase, context.userId);
     const sb = context.supabase as unknown as SB;
     const uid = context.userId;
 
@@ -1044,7 +1052,7 @@ export const exportInsumosXlsx = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projeto_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    await assertPodeEditarInsumos(context.supabase, context.userId);
     const { default: ExcelJS } = await import("exceljs");
     const sb = context.supabase as unknown as SB;
 
@@ -1156,7 +1164,7 @@ export const applyInsumosExcel = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertCanAccessModule(context.supabase, context.userId, "compras");
+    await assertPodeEditarInsumos(context.supabase, context.userId);
     const sb = context.supabase as unknown as SB;
 
     const { data: proj } = await sb

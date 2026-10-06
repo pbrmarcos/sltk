@@ -70,10 +70,7 @@ export function ProjetosListPage({
   );
   const hasFilters = !!q || status !== "todos" || !!revisao;
 
-  // Show DEMO content when DB is empty and no filters are applied
-  const showDemo = !isLoading && realRows.length === 0 && !hasFilters;
-  const demoRows = showDemo ? buildDemoProjetos(disciplina) : [];
-  const rowsFiltered = showDemo ? demoRows : realRows;
+  const rowsFiltered = realRows;
 
   function clearFilters() {
     setQ("");
@@ -82,7 +79,7 @@ export function ProjetosListPage({
     setPage(1);
   }
 
-  const baseForKpis = showDemo ? demoRows : (data?.rows ?? []);
+  const baseForKpis = data?.rows ?? [];
   const kpis = baseForKpis.reduce(
     (acc: Record<ProjetoStatus, number>, r: any) => {
       acc[r.status as ProjetoStatus] = (acc[r.status as ProjetoStatus] ?? 0) + 1;
@@ -114,16 +111,6 @@ export function ProjetosListPage({
         subtitle={subtitle}
         actions={<Button onClick={() => setOpenNovo(true)}>Nova revisão</Button>}
       />
-
-      {showDemo && (
-        <div className="mb-4 flex items-center gap-2 rounded-[var(--radius-lg)] border border-dashed border-[var(--bg-border)] bg-[var(--gantt-header-bg)] px-4 py-2 text-xs text-[var(--gantt-text-muted)]">
-          <span className="inline-flex items-center rounded-sm bg-[var(--gantt-text)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-            Demo
-          </span>
-          Nenhuma revisão cadastrada ainda — exibindo exemplos. Clique em "Nova revisão" para criar
-          a primeira.
-        </div>
-      )}
 
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {PROJETO_STATUS.map((s) => (
@@ -191,24 +178,23 @@ export function ProjetosListPage({
           <div className="p-8 text-center text-sm text-[var(--text-muted)]">Carregando…</div>
         ) : !rowsFiltered.length ? (
           <div className="p-8 text-center text-sm text-[var(--text-muted)]">
-            Nenhuma revisão encontrada.
+            {hasFilters
+              ? "Nenhuma revisão encontrada com esses filtros."
+              : 'Nenhuma revisão cadastrada ainda. Use "Nova revisão" para criar a primeira.'}
           </div>
         ) : (
           <ul className="divide-y divide-[var(--bg-border)]">
             {rowsFiltered.map((r: any) => {
-              const isDemoRow = !!r.__demo;
               return (
                 <li
                   key={r.id}
                   className={cn(
                     "grid grid-cols-[1fr_auto_auto_auto] md:grid-cols-[120px_1fr_80px_auto_auto_auto] items-center gap-3 p-4 text-sm transition-colors",
-                    !isDemoRow && "cursor-pointer hover:bg-[var(--gantt-row-hover)]",
+                    "cursor-pointer hover:bg-[var(--gantt-row-hover)]",
                   )}
                   onClick={() => {
-                    if (!isDemoRow) {
-                      setDetalhe(r);
-                      setDetalheViaDeepLink(false);
-                    }
+                    setDetalhe(r);
+                    setDetalheViaDeepLink(false);
                   }}
                 >
                   <span className="hidden font-mono text-xs md:block">
@@ -217,11 +203,6 @@ export function ProjetosListPage({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="truncate font-medium">{r.cliente_equipamentos?.modelo}</span>
-                      {isDemoRow && (
-                        <span className="rounded-sm bg-[var(--gantt-text)] px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-                          Demo
-                        </span>
-                      )}
                     </div>
                     <div className="truncate text-xs text-[var(--text-muted)]">
                       {r.clientes?.razao_social}
@@ -246,14 +227,14 @@ export function ProjetosListPage({
                     <Link
                       to="/engenharia/etapas"
                       search={{
-                        eqp: isDemoRow ? undefined : r.equipamento_id,
-                        fase: isDemoRow ? undefined : "engenharia",
+                        eqp: r.equipamento_id,
+                        fase: "engenharia",
                       }}
                     >
                       <CalendarRange className="h-3.5 w-3.5" /> Gantt
                     </Link>
                   </Button>
-                  {!isDemoRow && (r.status === "em_elaboracao" || r.status === "em_aprovacao") ? (
+                  {r.status === "em_elaboracao" || r.status === "em_aprovacao" ? (
                     <Button
                       size="sm"
                       variant="outline"
@@ -318,64 +299,6 @@ export function ProjetosListPage({
   );
 }
 
-/* ============= DEMO data ============= */
-function buildDemoProjetos(disciplina: ProjetoDisciplina) {
-  const base = [
-    {
-      codigo: "DEMO-ENV-001",
-      modelo: "Envasadora rotativa 12 bicos",
-      cliente: "Indústria Alfa Bebidas S/A",
-      revisao: "R02",
-      status: "liberado_producao" as ProjetoStatus,
-      hh: 248,
-    },
-    {
-      codigo: "DEMO-ENV-002",
-      modelo: "Esteira transportadora 6m",
-      cliente: "Beta Alimentos Ltda",
-      revisao: "R01",
-      status: "em_aprovacao" as ProjetoStatus,
-      hh: 96,
-    },
-    {
-      codigo: "DEMO-MIX-003",
-      modelo: "Misturador horizontal 500L",
-      cliente: "Gamma Farma",
-      revisao: "R00",
-      status: "em_elaboracao" as ProjetoStatus,
-      hh: 32,
-    },
-    {
-      codigo: "DEMO-ROT-004",
-      modelo: "Rotuladora autoadesiva",
-      cliente: "Delta Cosméticos",
-      revisao: "R03",
-      status: "em_elaboracao" as ProjetoStatus,
-      hh: 18,
-    },
-    {
-      codigo: "DEMO-PAL-005",
-      modelo: "Paletizador automático",
-      cliente: "Indústria Alfa Bebidas S/A",
-      revisao: "R01",
-      status: "obsoleto" as ProjetoStatus,
-      hh: 410,
-    },
-  ];
-  return base.map((b, i) => ({
-    __demo: true,
-    id: `demo-${disciplina}-${i}`,
-    equipamento_id: `demo-eqp-${i}`,
-    revisao: b.revisao,
-    status: b.status,
-    hh_consumida: b.hh,
-    cliente_equipamentos: { codigo: b.codigo, modelo: b.modelo },
-    clientes: { razao_social: b.cliente },
-    disciplina,
-    observacoes: "Conteúdo de demonstração — crie uma revisão real para substituir.",
-  }));
-}
-
 /* ============= Detalhe inline ============= */
 function ProjetoDetalheDialog({
   projeto,
@@ -404,9 +327,7 @@ function ProjetoDetalheDialog({
           <Tabs defaultValue={initialTab ?? "resumo"} className="w-full">
             <TabsList>
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
-              <TabsTrigger value="insumos" disabled={!!projeto.__demo}>
-                Insumos &amp; Materiais
-              </TabsTrigger>
+              <TabsTrigger value="insumos">Insumos &amp; Materiais</TabsTrigger>
             </TabsList>
             <TabsContent value="resumo" className="space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-3">
@@ -450,17 +371,15 @@ function ProjetoDetalheDialog({
                 <Button variant="outline" onClick={onClose}>
                   Fechar
                 </Button>
-                {!projeto.__demo && (
-                  <Button asChild>
-                    <Link
-                      to="/engenharia/etapas"
-                      search={{ eqp: projeto.equipamento_id, fase: "engenharia" }}
-                    >
-                      Abrir Gantt
-                    </Link>
-                  </Button>
-                )}
-                {!projeto.__demo && projeto.montagem_id && (
+                <Button asChild>
+                  <Link
+                    to="/engenharia/etapas"
+                    search={{ eqp: projeto.equipamento_id, fase: "engenharia" }}
+                  >
+                    Abrir Gantt
+                  </Link>
+                </Button>
+                {projeto.montagem_id && (
                   <Button asChild variant="outline">
                     <Link to="/producao/montagem">Ver montagem</Link>
                   </Button>
@@ -468,16 +387,10 @@ function ProjetoDetalheDialog({
               </div>
             </TabsContent>
             <TabsContent value="insumos">
-              {projeto.__demo ? (
-                <div className="text-xs text-[var(--text-secondary)] p-4">
-                  Insumos só ficam disponíveis em projetos reais (não DEMO).
-                </div>
-              ) : (
-                <ProjetoInsumosPanel
-                  projetoId={projeto.id}
-                  defaultDisciplina={disciplina as InsumoDisciplina}
-                />
-              )}
+              <ProjetoInsumosPanel
+                projetoId={projeto.id}
+                defaultDisciplina={disciplina as InsumoDisciplina}
+              />
             </TabsContent>
           </Tabs>
         )}

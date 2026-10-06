@@ -3,11 +3,10 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { titleCasePtBR } from "@/lib/text-case";
-import { hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
+import { assertCanAccessModule, hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-const ALLOWED_ROLES = ["admin", "manager", "sales"] as const;
 const ADMIN_ROLES = ["admin", "manager"] as const;
 
 export type LeadOrigemRow = {
@@ -72,7 +71,9 @@ export const createLeadOrigem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
-    const db = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
+    // Quem tem o módulo Comercial cria origem ao cadastrar a oportunidade.
+    await assertCanAccessModule(context.supabase, context.userId, "comercial", "Acesso restrito.");
+    const db = context.supabase;
     const nome = titleCasePtBR(data.nome);
     const alvo = normalizeOrigem(nome);
 

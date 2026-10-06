@@ -1,3 +1,19 @@
+## 1.8.1 — Conteúdo de demonstração removido e permissões de criação por papel — 06.10.2026
+
+### Dados de demonstração
+- Removidos todos os registros de demonstração: clientes, oportunidades, processos, equipamentos, projetos, montagens, FAT, SAT, chamados e embarques fictícios, incluindo o projeto interno "Envasadora Linear 1014".
+- Projetos Mecânicos e Elétricos não mostram mais exemplos fictícios quando a lista está vazia.
+
+### Cadastros básicos que estavam vazios
+- Tipos de documento Orçamento, Relatório FAT e Relatório SAT restaurados com os blocos padrão. Sem eles, gerar orçamento falhava.
+- Restaurados também os segmentos de cliente, as unidades e o local padrão do almoxarifado, as condições de pagamento de compras e as categorias de fornecedor. Sem unidades, cadastrar item no almoxarifado falhava.
+
+### Permissões de criação e edição
+- Comercial e Clientes agora seguem a matriz de permissões, e não um papel fixo. Compras, que tem esses módulos liberados, volta a criar cliente, oportunidade, processo, entrevista, segmento e origem de lead.
+- O vendedor continua vendo e editando só as próprias oportunidades.
+- Engenharia volta a montar a lista de insumos do projeto: adicionar, editar, remover, anexar, importar do Excel e enviar para aprovação. Antes, só quem tinha Compras conseguia.
+- A varredura de permissões cria os próprios registros de teste e compara cada papel com a matriz. Resultado: nenhum papel é bloqueado em algo que o seu módulo libera.
+
 ## 1.8.0 — Varredura geral: bugs de dados, permissões, layout no tablet e telas mais simples — 06.10.2026
 
 ### Funcionalidades que estavam quebradas

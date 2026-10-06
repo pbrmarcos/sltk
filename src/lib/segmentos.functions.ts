@@ -3,18 +3,15 @@ import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { titleCasePtBR } from "@/lib/text-case";
-import { hasAnyRole, type AppRoleName } from "@/lib/admin-guard";
+import { canAccessModule } from "@/lib/admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-const ALLOWED_ROLES = ["admin", "manager", "sales"] as const;
-
-async function assertRole(
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  allowed: readonly string[],
-) {
-  const ok = await hasAnyRole(supabase, userId, allowed as AppRoleName[]);
+/** Segmento nasce no cadastro do cliente ou da oportunidade. */
+async function assertPodeCriarSegmento(supabase: SupabaseClient<Database>, userId: string) {
+  const ok =
+    (await canAccessModule(supabase, userId, "clientes")) ||
+    (await canAccessModule(supabase, userId, "comercial"));
   if (!ok) throw new Error("Acesso restrito.");
   return supabase;
 }
@@ -40,7 +37,7 @@ export const createSegmento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => createInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertRole(context.supabase, context.userId, ALLOWED_ROLES);
+    const admin = await assertPodeCriarSegmento(context.supabase, context.userId);
     const nome = titleCasePtBR(data.nome);
     const { data: existing } = await admin
       .from("segmentos")
