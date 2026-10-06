@@ -140,7 +140,7 @@ export function AgendarKickoff({
         prefs?.agenda_teams_email ??
         undefined,
     };
-  }, [inicio, titulo, pauta, local, duracao, convidados, equipamento]);
+  }, [inicio, titulo, pauta, local, duracao, convidados, equipamento, prefs]);
 
   const criarEventoFn = useServerFn(agendarEventoReal);
   const criarEvento = useMutation({

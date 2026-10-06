@@ -41,7 +41,13 @@ function ImprimirOcPage() {
     }
   }, [q.data]);
 
-  if (q.isLoading || !q.data) return <div className="p-8">Carregando...</div>;
+  if (q.isError)
+    return (
+      <div className="p-8 text-sm text-red-700">
+        Não foi possível carregar a ordem de compra: {(q.error as Error)?.message ?? "erro desconhecido"}.
+      </div>
+    );
+  if (q.isLoading || !q.data) return <div className="p-8">Carregando…</div>;
   const { oc, itens } = q.data;
 
   return (

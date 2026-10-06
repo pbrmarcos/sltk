@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pagination } from "@/components/data/Pagination";
-import { TableEmpty } from "@/components/data/TableStates";
+import { TableEmpty, TableError } from "@/components/data/TableStates";
 import { Flag } from "@/components/ui/flag";
 import { cn } from "@/lib/utils";
 import {
@@ -615,7 +615,14 @@ function FornecedoresListPage() {
       </div>
 
       {/* Mobile: cards · md+ : tabela */}
-      {listData.rows.length === 0 ? (
+      {list.isError ? (
+        <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+          <TableError
+            description={(list.error as Error)?.message ?? "Não foi possível carregar os fornecedores."}
+            onRetry={() => list.refetch()}
+          />
+        </div>
+      ) : listData.rows.length === 0 ? (
         <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
           <TableEmpty
             title="Sem fornecedores"
