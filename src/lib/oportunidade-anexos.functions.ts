@@ -78,8 +78,7 @@ async function ensureOportunidadeFolder(opts: {
   yyyymm: string;
   ano: string;
 }): Promise<string> {
-  const root =
-    await (await import("@/lib/docs/drive.server")).driveRootFolder();
+  const root = await (await import("@/lib/docs/drive.server")).driveRootFolder();
   const oppName = sanitizeFolderName(
     `${opts.oppCodigo} - ${opts.oppTitulo || opts.empresaLead || "Sem título"}`,
   );

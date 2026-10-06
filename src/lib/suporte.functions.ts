@@ -10,11 +10,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { friendlyDbError } from "@/lib/db-errors";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  hasAnyRole,
-  canAccessModule,
-  AdminGuardError,
-} from "@/lib/admin-guard";
+import { hasAnyRole, canAccessModule, AdminGuardError } from "@/lib/admin-guard";
 import { patchParaStatusChamado, eventoDeEmail } from "@/lib/suporte-status";
 
 async function meuNome(sb: any, uid: string): Promise<string> {

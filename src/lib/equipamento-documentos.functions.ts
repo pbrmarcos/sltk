@@ -69,8 +69,7 @@ async function ensureEquipamentoFolder(opts: {
   equipamentoCodigo: string;
   yyyymm: string;
 }): Promise<string> {
-  const root =
-    await (await import("@/lib/docs/drive.server")).driveRootFolder();
+  const root = await (await import("@/lib/docs/drive.server")).driveRootFolder();
   const cliente = await ensureFolder(
     sanitizeFolderName(`${opts.clienteCodigo} - ${opts.clienteNome}`),
     root,

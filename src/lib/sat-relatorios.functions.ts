@@ -68,8 +68,7 @@ async function ensureSATFolder(opts: {
   relatorioCodigo: string;
   yyyymm: string;
 }): Promise<string> {
-  const root =
-    await (await import("@/lib/docs/drive.server")).driveRootFolder();
+  const root = await (await import("@/lib/docs/drive.server")).driveRootFolder();
   let base: string;
   if (opts.clienteCodigo && opts.clienteNome) {
     const cliente = await ensureFolder(`${opts.clienteCodigo} - ${opts.clienteNome}`, root);

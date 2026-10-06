@@ -155,8 +155,7 @@ export const uploadClienteDocumento = createServerFn({ method: "POST" })
     const now = new Date();
     const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    const root =
-      await (await import("@/lib/docs/drive.server")).driveRootFolder();
+    const root = await (await import("@/lib/docs/drive.server")).driveRootFolder();
     const clienteFolder = await ensureFolder(
       sanitizeFolderName(`${cliente.codigo} - ${cliente.razao_social}`),
       root,

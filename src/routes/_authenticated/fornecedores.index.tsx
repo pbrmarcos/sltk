@@ -618,7 +618,9 @@ function FornecedoresListPage() {
       {list.isError ? (
         <div className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)]">
           <TableError
-            description={(list.error as Error)?.message ?? "Não foi possível carregar os fornecedores."}
+            description={
+              (list.error as Error)?.message ?? "Não foi possível carregar os fornecedores."
+            }
             onRetry={() => list.refetch()}
           />
         </div>

@@ -211,7 +211,9 @@ export function ProjetosListPage({
                     }
                   }}
                 >
-                  <span className="hidden font-mono text-xs md:block">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                  <span className="hidden font-mono text-xs md:block">
+                    {r.cliente_equipamentos?.codigo ?? "—"}
+                  </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="truncate font-medium">{r.cliente_equipamentos?.modelo}</span>

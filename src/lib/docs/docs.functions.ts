@@ -537,7 +537,10 @@ export async function generateOrcamentoImpl(
     if (bErr) throw friendlyDbError(bErr);
     if (lErr) throw friendlyDbError(lErr);
     if (tErr) throw friendlyDbError(tErr);
-    if (!layout) throw new Error(`O modelo do documento "${tipo}" ainda não foi configurado em Modelos de documento.`);
+    if (!layout)
+      throw new Error(
+        `O modelo do documento "${tipo}" ainda não foi configurado em Modelos de documento.`,
+      );
 
     const blocosList = (blocos || []) as Bloco[];
     const layoutCfg = layout as DocumentoLayoutConfig;

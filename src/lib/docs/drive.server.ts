@@ -110,11 +110,14 @@ export async function getFolderUrl(folderId: string): Promise<string> {
 /** Erro do Google Drive em português (o corpo técnico vai só para o log). */
 export function mensagemDrive(status: number, body: string): string {
   console.error(`[drive] HTTP ${status}: ${body.slice(0, 500)}`);
-  if (status === 401) return "O acesso ao Google Drive expirou. Reconecte em Configurações › Chaves & Diagnóstico.";
+  if (status === 401)
+    return "O acesso ao Google Drive expirou. Reconecte em Configurações › Chaves & Diagnóstico.";
   if (status === 403)
     return "O Google Drive recusou o acesso à pasta. Confira se a pasta raiz foi compartilhada com a conta do sistema.";
-  if (status === 404) return "A pasta do Google Drive não foi encontrada. Confira a pasta raiz configurada.";
-  if (status === 429 || status >= 500) return "O Google Drive está instável agora. Tente de novo em instantes.";
+  if (status === 404)
+    return "A pasta do Google Drive não foi encontrada. Confira a pasta raiz configurada.";
+  if (status === 429 || status >= 500)
+    return "O Google Drive está instável agora. Tente de novo em instantes.";
   return `Falha ao enviar para o Google Drive (código ${status}).`;
 }
 

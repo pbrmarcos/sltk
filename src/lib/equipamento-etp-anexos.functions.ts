@@ -157,8 +157,7 @@ export const uploadEtpAnexo = createServerFn({ method: "POST" })
     const now = new Date();
     const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    const root =
-      await (await import("@/lib/docs/drive.server")).driveRootFolder();
+    const root = await (await import("@/lib/docs/drive.server")).driveRootFolder();
     const clienteFolder = await ensureFolder(
       `${cli.codigo} - ${cli.razao_social}`.slice(0, 120),
       root,
@@ -325,8 +324,7 @@ export const reindexEtpAnexos = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw friendlyDbError(error);
 
-    const root =
-      await (await import("@/lib/docs/drive.server")).driveRootFolder();
+    const root = await (await import("@/lib/docs/drive.server")).driveRootFolder();
     const folderCache = new Map<string, string>();
     const ensureCached = async (name: string, parent: string) => {
       const key = `${parent}::${name}`;
