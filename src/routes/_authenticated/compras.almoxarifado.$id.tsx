@@ -221,7 +221,7 @@ function ItemPage() {
         }
       />
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-4">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Total" value={fmtQtd(saldo?.total)} />
         <Kpi label="Reservado" value={fmtQtd(saldo?.reservado)} />
         <Kpi label="Disponível" value={fmtQtd(saldo?.disponivel)} />

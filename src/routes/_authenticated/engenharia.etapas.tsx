@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { StatLine } from "@/components/data/StatLine";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -153,7 +154,9 @@ function EtapasPage() {
           faseFilter={search.fase as EtapaFase | undefined}
         />
       ) : (
-        <DemoGanttPanel faseFilter={search.fase as EtapaFase | undefined} />
+        <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 text-center text-sm text-[var(--text-muted)]">
+          Escolha um equipamento acima para ver e editar o plano de etapas.
+        </div>
       )}
     </PageContainer>
   );
@@ -306,19 +309,25 @@ function EtapasEditor({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Kpi label="Etapas" value={totals.total} />
-        <Kpi label="Concluídas" value={totals.concluidas} />
-        <Kpi label="Atrasadas" value={totals.atrasadas} accent="text-rose-700" />
-        <Kpi
-          label="H/H mec (est/real)"
-          value={`${totals.hhMec.toFixed(1)} / ${totals.hhMecReal.toFixed(1)}`}
-        />
-        <Kpi
-          label="H/H elet (est/real)"
-          value={`${totals.hhElet.toFixed(1)} / ${totals.hhEletReal.toFixed(1)}`}
-        />
-      </div>
+      <StatLine
+        items={[
+          { label: "etapas", value: totals.total },
+          { label: "concluídas", value: totals.concluidas, tone: "success" },
+          {
+            label: "atrasadas",
+            value: totals.atrasadas,
+            tone: totals.atrasadas > 0 ? "danger" : "default",
+          },
+          {
+            label: "H/H mecânica (est/real)",
+            value: `${totals.hhMec.toFixed(1)} / ${totals.hhMecReal.toFixed(1)}`,
+          },
+          {
+            label: "H/H elétrica (est/real)",
+            value: `${totals.hhElet.toFixed(1)} / ${totals.hhEletReal.toFixed(1)}`,
+          },
+        ]}
+      />
 
       {filteredRows.length > 0 && (
         <GanttView
@@ -512,15 +521,6 @@ function EtapasEditor({
   );
 }
 
-function Kpi({ label, value, accent }: { label: string; value: React.ReactNode; accent?: string }) {
-  return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-sm)]">
-      <div className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
-      <div className={cn("mt-0.5 text-xl font-semibold", accent)}>{value}</div>
-    </div>
-  );
-}
-
 function hhRealClass(real: number, est: number): string {
   if (!real) return "text-[var(--text-muted)]";
   if (!est) return "bg-amber-50";
@@ -613,7 +613,7 @@ function GanttView({
     }
   }
 
-  function startDrag(e: React.MouseEvent, row: EtapaRow, mode: "move" | "resize-end") {
+  function startDrag(e: React.PointerEvent, row: EtapaRow, mode: "move" | "resize-end") {
     if (readOnly || !onChange) return;
     e.preventDefault();
     e.stopPropagation();
@@ -623,7 +623,7 @@ function GanttView({
     const startX = e.clientX;
     const startStart = new Date(row.data_inicio_prev!).getTime();
     const startEnd = new Date(row.data_fim_prev!).getTime();
-    function onMove(ev: MouseEvent) {
+    function onMove(ev: PointerEvent) {
       const deltaPx = ev.clientX - startX;
       const deltaMs = (deltaPx / rect.width) * span;
       const dayMs = 86400000;
@@ -640,12 +640,14 @@ function GanttView({
       }
     }
     function onUp() {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
       toast.info("Etapa movida — clique em 'Salvar plano' para confirmar.", { duration: 1800 });
     }
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   const LEFT_COL = 280; // px
@@ -793,8 +795,8 @@ function GanttBar({
   min: number;
   span: number;
   readOnly?: boolean;
-  onMouseDownMove: (e: React.MouseEvent) => void;
-  onMouseDownResize: (e: React.MouseEvent) => void;
+  onMouseDownMove: (e: React.PointerEvent) => void;
+  onMouseDownResize: (e: React.PointerEvent) => void;
 }) {
   const start = new Date(row.data_inicio_prev!).getTime();
   const end = new Date(row.data_fim_prev!).getTime();
@@ -809,7 +811,7 @@ function GanttBar({
     <div
       className={cn(
         "absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-[3px] text-[10px] text-white shadow-sm transition-shadow",
-        readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing",
+        readOnly ? "cursor-default" : "cursor-grab touch-none active:cursor-grabbing",
         "group-hover:shadow-md",
       )}
       style={{
@@ -819,7 +821,7 @@ function GanttBar({
         background: `linear-gradient(180deg, color-mix(in oklab, ${bg} 92%, white), ${bg})`,
       }}
       title={`${row.nome} · ${ETAPA_FASE_LABEL[row.fase]} · ${startLabel} → ${endLabel} · ${row.progresso}%`}
-      onMouseDown={onMouseDownMove}
+      onPointerDown={onMouseDownMove}
     >
       {/* progress overlay */}
       <div
@@ -831,8 +833,8 @@ function GanttBar({
       </span>
       {!readOnly && (
         <div
-          onMouseDown={onMouseDownResize}
-          className="absolute inset-y-0 right-0 z-[2] w-1.5 cursor-ew-resize bg-white/0 opacity-0 transition-opacity hover:bg-white/40 group-hover:opacity-100"
+          onPointerDown={onMouseDownResize}
+          className="absolute inset-y-0 right-0 z-[2] w-1.5 cursor-ew-resize touch-none bg-white/0 opacity-0 transition-opacity hover:bg-white/40 group-hover:opacity-100 pointer-coarse:w-3 pointer-coarse:bg-white/40 pointer-coarse:opacity-100"
           title="Arraste para alterar o fim"
         />
       )}
@@ -843,231 +845,3 @@ function GanttBar({
 /* ============================================================
  * Demo Gantt (read-only) — shown when no equipamento selected
  * ============================================================ */
-
-function buildDemoEtapas(): EtapaRow[] {
-  const now = new Date();
-  const startBase = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-  function addDays(d: Date, days: number) {
-    const x = new Date(d);
-    x.setDate(x.getDate() + days);
-    return x.toISOString().slice(0, 10);
-  }
-  const seq: Array<{
-    nome: string;
-    fase: EtapaFase;
-    offset: number;
-    dur: number;
-    prog: number;
-    status: EtapaStatus;
-    hhM: number;
-    hhE: number;
-    hhMr: number;
-    hhEr: number;
-  }> = [
-    {
-      nome: "Levantamento de requisitos",
-      fase: "engenharia",
-      offset: 0,
-      dur: 7,
-      prog: 100,
-      status: "concluida",
-      hhM: 24,
-      hhE: 16,
-      hhMr: 26,
-      hhEr: 18,
-    },
-    {
-      nome: "Detalhamento mecânico",
-      fase: "engenharia",
-      offset: 6,
-      dur: 18,
-      prog: 100,
-      status: "concluida",
-      hhM: 120,
-      hhE: 0,
-      hhMr: 132,
-      hhEr: 0,
-    },
-    {
-      nome: "Detalhamento elétrico",
-      fase: "engenharia",
-      offset: 10,
-      dur: 18,
-      prog: 100,
-      status: "concluida",
-      hhM: 0,
-      hhE: 96,
-      hhMr: 0,
-      hhEr: 104,
-    },
-    {
-      nome: "Compra de componentes",
-      fase: "compras",
-      offset: 22,
-      dur: 25,
-      prog: 80,
-      status: "em_andamento",
-      hhM: 8,
-      hhE: 8,
-      hhMr: 8,
-      hhEr: 6,
-    },
-    {
-      nome: "Compra de painel elétrico",
-      fase: "compras",
-      offset: 26,
-      dur: 22,
-      prog: 60,
-      status: "em_andamento",
-      hhM: 0,
-      hhE: 12,
-      hhMr: 0,
-      hhEr: 8,
-    },
-    {
-      nome: "Fabricação da estrutura",
-      fase: "fabricacao",
-      offset: 38,
-      dur: 22,
-      prog: 45,
-      status: "em_andamento",
-      hhM: 220,
-      hhE: 0,
-      hhMr: 110,
-      hhEr: 0,
-    },
-    {
-      nome: "Fabricação de transportadores",
-      fase: "fabricacao",
-      offset: 44,
-      dur: 24,
-      prog: 30,
-      status: "atrasada",
-      hhM: 180,
-      hhE: 0,
-      hhMr: 70,
-      hhEr: 0,
-    },
-    {
-      nome: "Montagem mecânica",
-      fase: "montagem",
-      offset: 62,
-      dur: 18,
-      prog: 10,
-      status: "em_andamento",
-      hhM: 240,
-      hhE: 0,
-      hhMr: 24,
-      hhEr: 0,
-    },
-    {
-      nome: "Montagem elétrica",
-      fase: "montagem",
-      offset: 70,
-      dur: 16,
-      prog: 0,
-      status: "pendente",
-      hhM: 0,
-      hhE: 180,
-      hhMr: 0,
-      hhEr: 0,
-    },
-    {
-      nome: "Testes funcionais",
-      fase: "qualidade",
-      offset: 84,
-      dur: 10,
-      prog: 0,
-      status: "pendente",
-      hhM: 32,
-      hhE: 32,
-      hhMr: 0,
-      hhEr: 0,
-    },
-    {
-      nome: "FAT — Aprovação do cliente",
-      fase: "qualidade",
-      offset: 92,
-      dur: 5,
-      prog: 0,
-      status: "pendente",
-      hhM: 16,
-      hhE: 16,
-      hhMr: 0,
-      hhEr: 0,
-    },
-    {
-      nome: "Embalagem e expedição",
-      fase: "expedicao",
-      offset: 96,
-      dur: 7,
-      prog: 0,
-      status: "pendente",
-      hhM: 24,
-      hhE: 0,
-      hhMr: 0,
-      hhEr: 0,
-    },
-  ];
-  return seq.map((s, i) => ({
-    id: `demo-${i}`,
-    ordem: i,
-    nome: s.nome,
-    fase: s.fase,
-    data_inicio_prev: addDays(startBase, s.offset),
-    data_fim_prev: addDays(startBase, s.offset + s.dur),
-    data_inicio_real: null,
-    data_fim_real: null,
-    hh_mecanica_estimada: s.hhM,
-    hh_eletrica_estimada: s.hhE,
-    hh_mecanica_real: s.hhMr,
-    hh_eletrica_real: s.hhEr,
-    progresso: s.prog,
-    status: s.status,
-  }));
-}
-
-function DemoGanttPanel({ faseFilter }: { faseFilter?: EtapaFase }) {
-  const rows = useMemo(() => buildDemoEtapas(), []);
-  const filtered = faseFilter ? rows.filter((r) => r.fase === faseFilter) : rows;
-  const totals = rows.reduce(
-    (acc, r) => {
-      acc.total += 1;
-      if (r.status === "concluida") acc.concluidas += 1;
-      if (r.status === "atrasada") acc.atrasadas += 1;
-      acc.hhMec += r.hh_mecanica_estimada;
-      acc.hhElet += r.hh_eletrica_estimada;
-      acc.hhMecReal += r.hh_mecanica_real;
-      acc.hhEletReal += r.hh_eletrica_real;
-      return acc;
-    },
-    { total: 0, concluidas: 0, atrasadas: 0, hhMec: 0, hhElet: 0, hhMecReal: 0, hhEletReal: 0 },
-  );
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-[var(--radius-lg)] border border-dashed border-[var(--bg-border)] bg-[var(--gantt-header-bg)] px-4 py-2 text-xs text-[var(--gantt-text-muted)]">
-        <span>
-          <span className="mr-2 inline-flex items-center rounded-sm bg-[var(--gantt-text)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-            Demo
-          </span>
-          Visualização de exemplo — escolha um equipamento acima para editar um plano real.
-        </span>
-      </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Kpi label="Etapas" value={totals.total} />
-        <Kpi label="Concluídas" value={totals.concluidas} />
-        <Kpi label="Atrasadas" value={totals.atrasadas} accent="text-rose-700" />
-        <Kpi
-          label="H/H mec (est/real)"
-          value={`${totals.hhMec.toFixed(0)} / ${totals.hhMecReal.toFixed(0)}`}
-        />
-        <Kpi
-          label="H/H elet (est/real)"
-          value={`${totals.hhElet.toFixed(0)} / ${totals.hhEletReal.toFixed(0)}`}
-        />
-      </div>
-      <GanttView rows={filtered} readOnly />
-    </div>
-  );
-}

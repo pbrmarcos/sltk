@@ -418,7 +418,7 @@ export function ClienteForm({
           </Button>
         </div>
       ) : (
-        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-end gap-2 -mx-4 md:-mx-6 border-b border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 md:px-6 py-3">
+        <div className="sticky top-14 z-10 flex flex-wrap items-center justify-end gap-2 -mx-4 md:-mx-6 border-b border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 md:px-6 py-3">
           <Button type="submit" disabled={mutation.isPending} onClick={() => setCloseAfter(false)}>
             {mutation.isPending && !closeAfter ? (
               <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />

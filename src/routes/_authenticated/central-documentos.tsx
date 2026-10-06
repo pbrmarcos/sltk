@@ -775,7 +775,7 @@ function HistoricoSheet({
                           <RotateCcw className="mr-2 h-4 w-4" /> Restaurar
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
+                      <AlertDialogContent className="max-h-[90dvh] max-w-5xl overflow-y-auto">
                         <AlertDialogHeader>
                           <AlertDialogTitle>Restaurar v{selected.versao_seq}?</AlertDialogTitle>
                           <AlertDialogDescription>

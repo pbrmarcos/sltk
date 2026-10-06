@@ -432,9 +432,9 @@ export function InsumoActionDialog({ insumo, onClose }: Props) {
 
   return (
     <Dialog open={!!insumo} onOpenChange={(o) => !o && requestClose()}>
-      <DialogContent className="max-w-6xl max-h-[92vh] overflow-hidden p-0">
+      <DialogContent className="max-w-6xl max-h-[92dvh] overflow-hidden p-0">
         {insumo ? (
-          <div className="flex flex-col max-h-[92vh]">
+          <div className="flex flex-col max-h-[92dvh]">
             <div className="px-6 pt-5 pb-3 border-b bg-[var(--bg-surface)] shrink-0">
               <DialogHeader>
                 <div className="flex flex-wrap items-center gap-2">

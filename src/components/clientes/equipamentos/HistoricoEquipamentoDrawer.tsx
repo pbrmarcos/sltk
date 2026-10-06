@@ -130,7 +130,7 @@ export function HistoricoEquipamentoDrawer({
 
         <div
           className="mt-4 space-y-2 overflow-y-auto pr-1"
-          style={{ maxHeight: "calc(100vh - 200px)" }}
+          style={{ maxHeight: "calc(100dvh - 200px)" }}
         >
           {isLoading && <p className="text-xs text-muted-foreground">Carregando...</p>}
           {!isLoading && rows.length === 0 && (

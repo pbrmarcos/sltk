@@ -129,7 +129,7 @@ function EstoqueTab() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Itens ativos" value={String(kpis?.itens ?? 0)} icon={Package} />
         <Kpi label="Com saldo" value={String(kpis?.com_saldo ?? 0)} icon={Boxes} />
         <Kpi

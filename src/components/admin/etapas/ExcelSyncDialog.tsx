@@ -367,7 +367,7 @@ export function ExcelSyncDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[92dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {step === "upload" && "Importar planilha Excel"}

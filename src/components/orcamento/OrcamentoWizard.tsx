@@ -659,7 +659,7 @@ export function OrcamentoWizard({
         </div>
       )}
 
-      <div className={previewOn ? "grid gap-4 lg:grid-cols-[1fr_540px]" : ""}>
+      <div className={previewOn ? "grid gap-4 xl:grid-cols-[1fr_540px]" : ""}>
         <div className="min-w-0">
           {step === 0 && (
             <section className="grid gap-4 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-6">
@@ -1379,7 +1379,7 @@ export function OrcamentoWizard({
         </div>
 
         {previewOn && (
-          <aside className="sticky top-4 h-[calc(100vh-6rem)] overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+          <aside className="sticky top-16 h-[calc(100dvh-5rem)] overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
             <div className="flex items-center justify-between border-b border-[var(--bg-border)] px-3 py-2">
               <div className="text-xs font-medium">Prévia do PDF</div>
               <div className="flex gap-1">

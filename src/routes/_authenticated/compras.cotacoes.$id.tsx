@@ -417,7 +417,7 @@ function CotacaoDetailPage() {
           <DialogHeader>
             <DialogTitle>Convidar fornecedores</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[400px] overflow-y-auto rounded border">
+          <div className="max-h-[400px] overflow-auto rounded border">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-[var(--bg-elevated)] text-left text-xs">
                 <tr>

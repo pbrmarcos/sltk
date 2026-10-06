@@ -23,7 +23,7 @@ export function ChamadoChat({ mensagens, viewpoint }: Props) {
   }, [mensagens.length]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-4 max-h-[60vh] overflow-y-auto">
+    <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-4 max-h-[60dvh] overflow-y-auto">
       {mensagens.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-6">Nenhuma mensagem ainda.</p>
       ) : (

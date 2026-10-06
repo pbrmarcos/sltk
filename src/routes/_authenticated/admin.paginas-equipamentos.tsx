@@ -95,7 +95,7 @@ function Inner() {
         title="Páginas dos Equipamentos"
         subtitle="Edite as páginas públicas de cada equipamento por blocos. Somente administradores."
       />
-      <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
+      <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
         <aside className="rounded-lg border border-border bg-card">
           <div className="border-b border-border p-3">
             <div className="relative">
@@ -108,7 +108,7 @@ function Inner() {
               />
             </div>
           </div>
-          <div className="max-h-[70vh] overflow-y-auto">
+          <div className="max-h-[70dvh] overflow-y-auto">
             {listQ.isLoading && (
               <p className="p-6 text-center text-sm text-muted-foreground">Carregando…</p>
             )}

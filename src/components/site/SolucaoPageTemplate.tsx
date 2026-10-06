@@ -107,7 +107,7 @@ export function SolucaoPageTemplate(p: SolucaoPageProps) {
           className="absolute inset-0 h-full w-full object-cover opacity-45"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/60 to-slate-950/90" />
-        <div className="relative mx-auto flex min-h-[70vh] max-w-[1180px] flex-col justify-end px-5 py-24 md:min-h-[80vh] md:px-10 md:py-32">
+        <div className="relative mx-auto flex min-h-[70dvh] max-w-[1180px] flex-col justify-end px-5 py-24 md:min-h-[80dvh] md:px-10 md:py-32">
           <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80 backdrop-blur">
             {eyebrow}
           </span>

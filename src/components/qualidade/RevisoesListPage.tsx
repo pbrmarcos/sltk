@@ -88,7 +88,7 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
         actions={<Button onClick={() => setOpenNovo(true)}>Nova revisão</Button>}
       />
 
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {REVISAO_STATUS.map((s) => (
           <div
             key={s}
@@ -144,9 +144,9 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
             {data.rows.map((r: any) => (
               <li
                 key={r.id}
-                className="grid grid-cols-[120px_1fr_90px_auto_auto] items-center gap-3 p-4 text-sm"
+                className="grid grid-cols-[1fr_auto_auto] md:grid-cols-[120px_1fr_90px_auto_auto] items-center gap-3 p-4 text-sm"
               >
-                <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                <span className="hidden font-mono text-xs md:block">{r.cliente_equipamentos?.codigo ?? "—"}</span>
                 <div className="min-w-0">
                   <div className="truncate font-medium">{r.cliente_equipamentos?.modelo}</div>
                   <div className="truncate text-xs text-[var(--text-muted)]">
@@ -154,7 +154,7 @@ export function RevisoesListPage({ disciplina }: { disciplina: RevisaoDisciplina
                     {r.itens_verificados ?? 0}/{r.itens_totais ?? 0}
                   </div>
                 </div>
-                <Badge variant="outline" className="text-[11px]">
+                <Badge variant="outline" className="hidden text-[11px] md:inline-flex">
                   Rev. {r.numero}
                 </Badge>
                 <Badge

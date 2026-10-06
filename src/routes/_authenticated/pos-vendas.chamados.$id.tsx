@@ -304,7 +304,7 @@ function ChamadoDetalhePage() {
               </TabsContent>
 
               <TabsContent value="internos" className="pt-3 space-y-3">
-                <div className="rounded border bg-amber-50/40 p-3 max-h-[50vh] overflow-y-auto space-y-2">
+                <div className="rounded border bg-amber-50/40 p-3 max-h-[50dvh] overflow-y-auto space-y-2">
                   {mensagens.filter((m) => m.interno).length === 0 ? (
                     <div className="text-sm text-muted-foreground italic">
                       Sem comentários internos.

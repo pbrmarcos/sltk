@@ -55,7 +55,8 @@ import {
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -196,7 +197,10 @@ function AdminEntrevistaEditor() {
     onError: (e: any) => toast.error(e?.message ?? "Falha ao reordenar."),
   });
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
+  );
 
   if (!canManage) {
     return (
@@ -562,7 +566,10 @@ function PerguntaCard(props: {
     transition,
     zIndex: isDragging ? 20 : undefined,
   };
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
+  );
 
   const suportaOpcoes = p.formato === "single_choice" || p.formato === "multi_choice";
 

@@ -547,7 +547,7 @@ function EmbarqueDetalhe() {
             )}
 
             {canEdit && (
-              <div className="grid gap-2 sm:grid-cols-[2fr_60px_120px_80px_80px_auto]">
+              <div className="grid gap-2 lg:grid-cols-[2fr_60px_120px_80px_80px_auto]">
                 <Input
                   placeholder="Descrição"
                   value={newDesc}

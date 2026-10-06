@@ -26,7 +26,7 @@ export function ProductionDashboard({ userName }: { userName: string }) {
         { label: "Know-how", to: "/know-how", icon: BookOpen },
       ]}
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
         <KpiCard
           label="Em execução"
           value={isLoading ? "…" : String(d?.kpis.osExecucao ?? 0)}

@@ -165,8 +165,8 @@ export function EquipamentoDrawer({
         if (!o) onClose();
       }}
     >
-      <DialogContent className="w-full max-w-7xl overflow-hidden p-0 sm:max-w-7xl">
-        <div className="flex h-[90vh] flex-col">
+      <DialogContent className="max-w-7xl overflow-hidden p-0 sm:max-w-7xl">
+        <div className="flex h-[90dvh] flex-col">
           <div className="border-b border-border bg-gradient-to-br from-muted/40 to-transparent p-6 pb-4">
             <DialogHeader className="space-y-2 text-left">
               <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
@@ -228,7 +228,7 @@ export function EquipamentoDrawer({
               </div>
             ) : (
               <Tabs value={tab} onValueChange={(v) => setTab(v as DrawerTab)} className="mt-4">
-                <TabsList className="grid w-full grid-cols-8">
+                <TabsList className="no-scrollbar flex h-auto w-full justify-start overflow-x-auto">
                   <TabsTrigger value="visao">Visão</TabsTrigger>
                   <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
                   <TabsTrigger value="etp">ETP</TabsTrigger>
@@ -632,7 +632,7 @@ function UploadDocumentoDialog({
       onClick={guardedClose}
     >
       <div
-        className="w-full max-w-md rounded-xl border border-border bg-card p-5 shadow-2xl"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-xl border border-border bg-card p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

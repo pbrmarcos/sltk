@@ -93,7 +93,7 @@ export function MontagemDetailDrawer({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] w-full max-w-4xl overflow-y-auto">
+      <DialogContent className="max-h-[90dvh] w-full max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{titulo}</DialogTitle>
           {subtitulo && <DialogDescription>{subtitulo}</DialogDescription>}

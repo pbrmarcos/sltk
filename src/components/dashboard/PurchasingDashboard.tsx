@@ -31,7 +31,7 @@ export function PurchasingDashboard({ userName }: { userName: string }) {
         { label: "Clientes", to: "/clientes", icon: Users },
       ]}
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
         <KpiCard
           label="OCs para aprovar"
           value={isLoading ? "…" : String(d?.kpis.ocsAprovar ?? 0)}

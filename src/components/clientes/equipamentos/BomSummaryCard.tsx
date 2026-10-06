@@ -74,7 +74,7 @@ export function BomSummaryCard({ equipamentoId }: { equipamentoId: string }) {
           Ver em Compras → Necessidades <ExternalLink className="h-3 w-3" />
         </Link>
       </div>
-      <div className="grid grid-cols-2 gap-3 text-[11.5px] sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 text-[11.5px] sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Itens</div>
           <div className="text-[15px] font-semibold">{data.totalItens}</div>

@@ -59,7 +59,8 @@ import {
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -192,7 +193,10 @@ export function TemplateEditorDialog({ templateId, open, onOpenChange }: Props) 
   const reorderTarefasFn = useServerFn(reorderTemplateTarefas);
   const reorderEventosFn = useServerFn(reorderTemplateEventos);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
+  );
 
   const detalheQ = useQuery({
     queryKey: ["template-detalhe", templateId],
@@ -357,7 +361,7 @@ export function TemplateEditorDialog({ templateId, open, onOpenChange }: Props) 
   return (
     <TooltipProvider delayDuration={200}>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl p-0 overflow-hidden">
+        <DialogContent className="max-w-5xl p-0">
           <div className="bg-gradient-to-br from-[var(--accent)]/10 via-transparent to-transparent px-6 pt-6 pb-4 border-b border-[var(--bg-border)]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-lg">

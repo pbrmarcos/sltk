@@ -154,7 +154,7 @@ function BuscarEtpDialog({ equipamentoId, onDone }: { equipamentoId: string; onD
         onChange={(e) => setQ(e.target.value)}
         placeholder="Ex.: DEMO-EQP-004, Verde Valle, v2…"
       />
-      <div className="max-h-[50vh] overflow-y-auto rounded-lg border border-border">
+      <div className="max-h-[50dvh] overflow-y-auto rounded-lg border border-border">
         {buscaQ.isLoading ? (
           <p className="p-4 text-xs text-muted-foreground">Buscando…</p>
         ) : rows.length === 0 ? (

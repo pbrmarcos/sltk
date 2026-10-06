@@ -325,13 +325,13 @@ function MediaPlayer({ tipo, midia }: { tipo: string; midia: string }) {
   if (tipo === "video") {
     return (
       <div className="mb-6 overflow-hidden rounded-lg border border-[var(--bg-border)] bg-black">
-        <video src={url} controls playsInline className="h-auto max-h-[70vh] w-full" />
+        <video src={url} controls playsInline className="h-auto max-h-[70dvh] w-full" />
       </div>
     );
   }
   if (tipo === "pdf") {
     return (
-      <div className="mb-6 h-[70vh] overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
+      <div className="mb-6 h-[70dvh] overflow-hidden rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)]">
         <iframe src={url} title="PDF" className="h-full w-full" />
       </div>
     );

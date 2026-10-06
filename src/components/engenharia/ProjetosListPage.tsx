@@ -125,7 +125,7 @@ export function ProjetosListPage({
         </div>
       )}
 
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {PROJETO_STATUS.map((s) => (
           <div
             key={s}
@@ -201,7 +201,7 @@ export function ProjetosListPage({
                 <li
                   key={r.id}
                   className={cn(
-                    "grid grid-cols-[120px_1fr_80px_auto_auto_auto] items-center gap-3 p-4 text-sm transition-colors",
+                    "grid grid-cols-[1fr_auto_auto_auto] md:grid-cols-[120px_1fr_80px_auto_auto_auto] items-center gap-3 p-4 text-sm transition-colors",
                     !isDemoRow && "cursor-pointer hover:bg-[var(--gantt-row-hover)]",
                   )}
                   onClick={() => {
@@ -211,7 +211,7 @@ export function ProjetosListPage({
                     }
                   }}
                 >
-                  <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                  <span className="hidden font-mono text-xs md:block">{r.cliente_equipamentos?.codigo ?? "—"}</span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="truncate font-medium">{r.cliente_equipamentos?.modelo}</span>
@@ -225,7 +225,7 @@ export function ProjetosListPage({
                       {r.clientes?.razao_social}
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[11px]">
+                  <Badge variant="outline" className="hidden text-[11px] md:inline-flex">
                     {r.revisao}
                   </Badge>
                   <Badge
@@ -388,7 +388,7 @@ function ProjetoDetalheDialog({
 }) {
   return (
     <Dialog open={!!projeto} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-6xl w-[95vw] max-h-[92vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl w-[95vw] max-h-[92dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {disciplina === "mecanico" ? "Projeto Mecânico" : "Projeto Elétrico"} ·{" "}

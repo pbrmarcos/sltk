@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import {
   DndContext,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useDroppable,
   useSensor,
@@ -203,7 +204,8 @@ export function DisciplinaTab({
 
   // Drag handler at parent level — supports cross-group drag (change status).
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
     useSensor(KeyboardSensor),
   );
 
@@ -522,7 +524,7 @@ function SortableEtapa({
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab text-muted-foreground/50 opacity-0 group-hover:opacity-100"
+          className="cursor-grab touch-none text-muted-foreground/50 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100"
           aria-label="Arrastar"
         >
           <GripVertical className="h-3.5 w-3.5" />
@@ -621,7 +623,7 @@ function SortableEtapa({
           </span>
         </div>
 
-        <div className="flex shrink-0 items-center opacity-0 group-hover:opacity-100">
+        <div className="flex shrink-0 items-center opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100">
           <Button
             variant="ghost"
             size="icon"

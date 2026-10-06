@@ -175,7 +175,7 @@ export function ChecklistTiposPanel() {
       </div>
 
       <Dialog open={!!draft} onOpenChange={(v) => !v && setDraft(null)}>
-        <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[92dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {draft?.id ? "Editar tipo de Checklist" : "Novo tipo de Checklist"}

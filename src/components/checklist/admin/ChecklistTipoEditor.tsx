@@ -307,7 +307,7 @@ export function ChecklistTipoEditor({
                         <ChevronDown className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <div className="grid flex-1 gap-2 md:grid-cols-6">
+                    <div className="grid flex-1 gap-2 md:grid-cols-3 lg:grid-cols-6">
                       <div className="md:col-span-1">
                         <Label className="text-[11px]">ID</Label>
                         <Input

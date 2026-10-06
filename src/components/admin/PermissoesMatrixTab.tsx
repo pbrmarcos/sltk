@@ -185,7 +185,7 @@ export function PermissoesMatrixTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center gap-3 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3">
+      <div className="sticky top-14 z-10 -mx-1 flex flex-wrap items-center gap-3 rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
@@ -402,7 +402,7 @@ function AuditLogPanel({
               Recarregar
             </Button>
           </div>
-          <div className="max-h-[360px] overflow-y-auto">
+          <div className="max-h-[360px] overflow-auto">
             <table className="w-full border-collapse text-[12px]">
               <thead className="sticky top-0 bg-[var(--bg-elevated)]">
                 <tr>

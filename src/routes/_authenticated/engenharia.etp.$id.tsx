@@ -761,7 +761,7 @@ function HistoricoPanel({ etpId }: { etpId: string }) {
   });
 
   return (
-    <aside className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-auto">
+    <aside className="rounded-[var(--radius-lg)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] lg:sticky lg:top-16 lg:max-h-[calc(100dvh-5rem)] lg:overflow-auto">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <History className="h-4 w-4 text-[var(--text-muted)]" />
         Histórico de alterações

@@ -154,7 +154,7 @@ export function EtapaDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && tryClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{item.id ? "Editar etapa" : "Nova etapa"}</DialogTitle>
         </DialogHeader>

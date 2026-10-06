@@ -898,7 +898,7 @@ function WizardDialog({
             A OC não pode ser aprovada sem estes campos. Preencha para prosseguir.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-3 md:grid-cols-2 max-h-[60vh] overflow-y-auto">
+        <div className="grid gap-3 md:grid-cols-2 max-h-[60dvh] overflow-y-auto">
           {faltantes
             .filter((f) => f.key !== "itens")
             .map((f) => (

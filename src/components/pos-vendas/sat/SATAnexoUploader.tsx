@@ -133,7 +133,7 @@ export function SATAnexoUploader({
                   onClick={() => {
                     if (confirm("Remover este anexo?")) del.mutate(a.id);
                   }}
-                  className="opacity-0 group-hover:opacity-100 transition text-[var(--danger)]"
+                  className="opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition text-[var(--danger)]"
                   title="Remover"
                 >
                   <X className="h-3.5 w-3.5" />

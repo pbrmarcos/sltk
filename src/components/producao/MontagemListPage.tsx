@@ -146,7 +146,7 @@ export function MontagemListPage() {
         actions={<Button onClick={() => setOpenNovo(true)}>Nova montagem</Button>}
       />
 
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {MONTAGEM_STATUS.map((s) => (
           <div
             key={s}
@@ -206,9 +206,9 @@ export function MontagemListPage() {
                 <li
                   key={r.id}
                   onClick={() => setDetalheId(r.id)}
-                  className="grid cursor-pointer grid-cols-[120px_1fr_120px_auto_auto] items-center gap-3 p-4 text-sm transition-colors hover:bg-[var(--bg-elevated)]"
+                  className="grid cursor-pointer grid-cols-[1fr_auto_auto_auto] md:grid-cols-[120px_1fr_120px_auto_auto] items-center gap-3 p-4 text-sm transition-colors hover:bg-[var(--bg-elevated)]"
                 >
-                  <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                  <span className="hidden font-mono text-xs md:block">{r.cliente_equipamentos?.codigo ?? "—"}</span>
                   <div className="min-w-0">
                     <div className="truncate font-medium">{r.cliente_equipamentos?.modelo}</div>
                     <div className="truncate text-xs text-[var(--text-muted)]">

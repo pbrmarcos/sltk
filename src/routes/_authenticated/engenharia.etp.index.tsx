@@ -59,7 +59,7 @@ function EtpListPage() {
         actions={<Button onClick={() => setOpenNovo(true)}>Novo ETP</Button>}
       />
 
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {ETP_STATUS.map((s) => (
           <div
             key={s}
@@ -117,9 +117,9 @@ function EtpListPage() {
                 <Link
                   to="/engenharia/etp/$id"
                   params={{ id: r.id }}
-                  className="grid grid-cols-[120px_1fr_auto_auto] items-center gap-3 p-4 hover:bg-[var(--bg-elevated)]"
+                  className="grid grid-cols-[1fr_auto] md:grid-cols-[120px_1fr_auto_auto] items-center gap-3 p-4 hover:bg-[var(--bg-elevated)]"
                 >
-                  <span className="font-mono text-xs">{r.cliente_equipamentos?.codigo ?? "—"}</span>
+                  <span className="hidden font-mono text-xs md:block">{r.cliente_equipamentos?.codigo ?? "—"}</span>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium">
                       {r.cliente_equipamentos?.modelo}
@@ -128,7 +128,7 @@ function EtpListPage() {
                       {r.clientes?.razao_social}
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[11px]">
+                  <Badge variant="outline" className="hidden text-[11px] md:inline-flex">
                     v{r.versao}
                   </Badge>
                   <Badge
@@ -221,7 +221,7 @@ function NovoEtpDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg overflow-hidden">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Novo ETP</DialogTitle>
         </DialogHeader>

@@ -592,7 +592,7 @@ function EventEditorDialog({
 
           <div>
             <div className="mb-2 text-sm font-medium">Destinatários por papel</div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {APP_ROLES.map((r) => {
                 const current = modes.get(r) ?? null;
                 return (

@@ -179,7 +179,7 @@ function OcsPainelPage() {
         </Badge>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(320px,420px)_1fr]">
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(320px,420px)_1fr]">
         <Card>
           <CardContent className="p-0">
             <Table>

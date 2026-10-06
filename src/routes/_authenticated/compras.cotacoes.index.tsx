@@ -136,7 +136,7 @@ function CotacoesListPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard label="Total" value={total} />
         <KpiCard label="Abertas" value={abertas} />
         <KpiCard label="Respondidas" value={respondidas} />
@@ -148,7 +148,7 @@ function CotacoesListPage() {
           <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
             placeholder="Buscar por código, título, descrição ou PN..."
-            className="pl-8 w-80"
+            className="pl-8 w-full sm:w-80"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />

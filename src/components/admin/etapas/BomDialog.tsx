@@ -133,7 +133,7 @@ export function BomDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && tryClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{item.id ? "Editar item BOM" : "Novo item BOM"}</DialogTitle>
         </DialogHeader>

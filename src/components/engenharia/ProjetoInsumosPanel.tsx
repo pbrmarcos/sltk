@@ -498,7 +498,7 @@ export function ProjetoInsumosPanel({
 
       {adding ? (
         <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] p-3 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2">
             <div className="md:col-span-3">
               <label className="text-xs text-[var(--text-secondary)]">Descrição *</label>
               <Input
@@ -1264,7 +1264,7 @@ export function ProjetoInsumosPanel({
       </AlertDialog>
 
       <Dialog open={histOpen} onOpenChange={setHistOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl w-[95vw] max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="h-4 w-4" /> Histórico &amp; Timeline do projeto
