@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import type { DashboardData } from "@/lib/dashboard.functions";
 
 const fmtDate = (s: string) => {
@@ -50,15 +50,6 @@ export function TarefasAgendaCard({ tasks }: { tasks: DashboardData["upcomingTas
             })}
           </ul>
         )}
-      </div>
-
-      <div className="rounded-[var(--radius-md)] border border-dashed border-[var(--primary)]/30 bg-gradient-to-br from-[var(--primary)]/10 to-transparent p-3">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[var(--primary)]">
-          <Calendar className="h-3 w-3" /> Google Agenda
-        </div>
-        <div className="mt-1 text-[12px] text-[var(--text-secondary)]">
-          Em breve: reuniões e compromissos sincronizados aqui.
-        </div>
       </div>
     </div>
   );

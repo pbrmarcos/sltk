@@ -12,7 +12,7 @@ const OLD_TAB_TO_ROUTE: Record<string, string> = {
   integracoes: "/admin/diagnostico",
   conectores: "/admin/diagnostico",
   mineracao: "/admin/mineracao",
-  banco: "/admin/banco",
+  banco: "/admin/diagnostico",
   seo: "/admin/seo",
   "enrich-logs": "/admin/diagnostico",
   migrations: "/admin/migrations",

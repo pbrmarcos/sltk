@@ -69,7 +69,12 @@ function TemplateDocumentosPage() {
       <Tabs value={aba} onValueChange={(v) => setAba(v as MainAba)} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <TabsList>
-            <TabsTrigger value="projetos">Projetos</TabsTrigger>
+            <TabsTrigger
+              value="projetos"
+              title="Etapas, tarefas e eventos aplicados ao abrir um processo"
+            >
+              Processos
+            </TabsTrigger>
             <TabsTrigger value="fat">FAT</TabsTrigger>
             <TabsTrigger value="sat">SAT</TabsTrigger>
           </TabsList>

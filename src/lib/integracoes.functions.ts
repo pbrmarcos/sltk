@@ -42,7 +42,9 @@ export const listIntegracoes = createServerFn({ method: "GET" })
 
     // Ordena: por país (nome), depois ordem
     const paisNome = new Map((paises ?? []).map((p) => [p.codigo, p.nome] as const));
-    const all = [...providers, ...placeholders];
+    // Países sem provedor não viram linhas falsas "em breve" na lista.
+    void placeholders;
+    const all = [...providers];
     all.sort((a, b) => {
       const na = paisNome.get(a.pais) ?? a.pais;
       const nb = paisNome.get(b.pais) ?? b.pais;

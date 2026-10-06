@@ -788,21 +788,19 @@ function QuickPreviewDialog({
     staleTime: 60_000,
   });
 
+  // Uma prévia só: carrega com dados de exemplo e reaproveita o PreviewDialog
+  // (assunto, avisos, variáveis usadas e o HTML real do envio).
+  if (data) return <PreviewDialog preview={data} onClose={onClose} />;
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Eye className="h-4 w-4" /> {event.label}
           </DialogTitle>
-          <p className="text-xs text-muted-foreground">
-            Renderizado com dados de exemplo — mesmo layout usado no envio real (header com logo,
-            rodapé e CTA).
-          </p>
         </DialogHeader>
-
         {isLoading && (
-          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Gerando prévia…
           </div>
         )}
@@ -811,42 +809,6 @@ function QuickPreviewDialog({
             {(error as Error).message}
           </div>
         )}
-        {data && (
-          <div className="grid gap-3">
-            <div className="rounded-md border bg-muted/40 p-3 text-sm">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Assunto
-              </div>
-              <div className="font-medium">{data.subject}</div>
-            </div>
-            {data.warnings.length > 0 && (
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-                <div className="mb-1 flex items-center gap-1 font-medium">
-                  <AlertTriangle className="h-3.5 w-3.5" /> Avisos
-                </div>
-                <ul className="list-disc space-y-0.5 pl-4">
-                  {data.warnings.map((w: string, i: number) => (
-                    <li key={i}>{w}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="overflow-hidden rounded-md border bg-white">
-              <iframe
-                title="Prévia do e-mail"
-                sandbox=""
-                srcDoc={data.html}
-                className="h-[560px] w-full border-0"
-              />
-            </div>
-          </div>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            Fechar
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
