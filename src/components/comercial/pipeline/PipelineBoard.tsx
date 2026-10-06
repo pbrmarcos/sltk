@@ -306,8 +306,8 @@ export function PipelineBoard({
             {ACTIVE_PIPELINE_STAGES.map((stage) => {
               const items = grouped.get(stage) ?? [];
               const total = items.reduce((s, o) => s + (o.valor_estimado ?? 0), 0);
+              // shrink-0: sem isso o wrapper encolhe e as colunas de largura fixa se sobrepõem (tablet).
               return (
-                {/* shrink-0: sem isso o wrapper encolhe e as colunas de largura fixa se sobrepõem (tablet). */}
                 <div key={stage} className="snap-start shrink-0 xl:min-w-0 xl:shrink">
                   <StageColumn
                     stage={stage}
