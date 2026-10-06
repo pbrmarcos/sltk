@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { completudeFornecedor } from "@/lib/fornecedor-completude";
 import {
   Dialog,
   DialogContent,
@@ -100,14 +101,16 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/fornecedores/$id")({
   loader: async ({ params, context }) => {
-    await context.queryClient.prefetchQuery({
-      queryKey: ["fornecedor", params.id],
-      queryFn: () => getFornecedor({ data: { id: params.id } }),
-    });
-    await context.queryClient.prefetchQuery({
-      queryKey: ["fornecedores", "categorias"],
-      queryFn: () => listCategoriasFornecedor(),
-    });
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["fornecedor", params.id],
+        queryFn: () => getFornecedor({ data: { id: params.id } }),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["fornecedores", "categorias"],
+        queryFn: () => listCategoriasFornecedor(),
+      }),
+    ]);
   },
   component: FornecedorDetailPage,
 });
@@ -127,6 +130,10 @@ function FornecedorDetailPage() {
   });
 
   const f = detail.data.fornecedor;
+  const completude = completudeFornecedor(f as never, {
+    categorias: detail.data.categorias.length,
+    contatos: detail.data.contatos.length,
+  });
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FornecedorInput>(() => toForm(f, detail.data.categorias));
@@ -395,6 +402,29 @@ function FornecedorDetailPage() {
           </div>
         }
       />
+
+      {completude.pct < 100 && !editing && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="mb-4 flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 py-2.5 text-left text-[12.5px] hover:bg-[var(--bg-elevated)]"
+          title={`Falta: ${completude.faltantes.join(", ")}`}
+        >
+          <span className="shrink-0 text-[var(--text-muted)]">Cadastro</span>
+          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+            <span
+              className="block h-full rounded-full bg-[var(--brand-blue,#1e40af)]"
+              style={{ width: `${completude.pct}%` }}
+            />
+          </span>
+          <span className="shrink-0 font-semibold tabular-nums">{completude.pct}%</span>
+          <span className="hidden shrink-0 text-[var(--text-muted)] sm:inline">
+            falta {completude.faltantes.slice(0, 3).join(", ")}
+            {completude.faltantes.length > 3 ? "…" : ""}
+          </span>
+          <span className="shrink-0 font-medium text-[var(--brand-blue,#1e40af)]">Completar</span>
+        </button>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* ===== Coluna principal ===== */}

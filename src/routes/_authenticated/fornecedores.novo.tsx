@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FormCollapsibleSection } from "@/components/form/FormCollapsibleSection";
 import { Badge } from "@/components/ui/badge";
 import {
   scanFornecedorDocs,
@@ -1069,10 +1070,7 @@ function NovoFornecedorPage() {
             </div>
           </section>
 
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Classificação
-            </h3>
+          <FormCollapsibleSection title="Classificação">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <Label>Status</Label>
@@ -1243,13 +1241,10 @@ function NovoFornecedorPage() {
                 ))}
               </div>
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           {/* ============ Identidade legal & fiscal ============ */}
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Identidade legal & fiscal
-            </h3>
+          <FormCollapsibleSection title="Identidade legal & fiscal">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <Label>{paisAtual?.documento_nome ?? "Tax ID"}</Label>
@@ -1411,13 +1406,10 @@ function NovoFornecedorPage() {
                 </>
               )}
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           {/* ============ Comercial ============ */}
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Comercial
-            </h3>
+          <FormCollapsibleSection title="Comercial">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <Label>Moeda padrão</Label>
@@ -1514,13 +1506,10 @@ function NovoFornecedorPage() {
                 />
               </div>
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           {/* ============ Capacidade & qualidade ============ */}
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Capacidade & qualidade
-            </h3>
+          <FormCollapsibleSection title="Capacidade & qualidade">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <Label>Funcionários (faixa)</Label>
@@ -1673,13 +1662,10 @@ function NovoFornecedorPage() {
                 </div>
               )}
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           {/* ============ Canais & links ============ */}
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Canais & links
-            </h3>
+          <FormCollapsibleSection title="Canais & links">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <Label>WhatsApp corporativo</Label>
@@ -1726,13 +1712,10 @@ function NovoFornecedorPage() {
                 </>
               )}
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           {/* ============ Logística & operacional ============ */}
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-            <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-              Logística & operacional
-            </h3>
+          <FormCollapsibleSection title="Logística & operacional">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <Label>CEP / Postal</Label>
@@ -1772,10 +1755,10 @@ function NovoFornecedorPage() {
                 />
               </div>
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           {/* ============ Palavras-chave (busca) ============ */}
-          <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
+          <FormCollapsibleSection title="Palavras-chave de busca">
             <Label>Palavras-chave de busca</Label>
             <p className="mt-1 text-[11.5px] text-[var(--text-muted)]">
               Alimentam a busca full-text — separe por Enter.
@@ -1813,7 +1796,7 @@ function NovoFornecedorPage() {
                 </Badge>
               ))}
             </div>
-          </section>
+          </FormCollapsibleSection>
 
           <section className="rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
             <Label>Observações</Label>
