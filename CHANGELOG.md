@@ -1,5 +1,9 @@
 ## 1.8.1 — Conteúdo de demonstração removido e permissões de criação por papel — 06.10.2026
 
+### Contas da equipe
+- Criadas as contas comercial@, campo@, montagem@, compras@, producao@ e engenharia@sltkamericas.com, com os papéis Vendas, Campo, Montagem, Compras, Produção e Engenharia.
+- No primeiro acesso, cada conta precisa trocar a senha provisória.
+
 ### Dados de demonstração
 - Removidos todos os registros de demonstração: clientes, oportunidades, processos, equipamentos, projetos, montagens, FAT, SAT, chamados e embarques fictícios, incluindo o projeto interno "Envasadora Linear 1014".
 - Projetos Mecânicos e Elétricos não mostram mais exemplos fictícios quando a lista está vazia.
@@ -55,6 +59,7 @@
 - IA (Gemini): quando o Google está sobrecarregado, o sistema tenta de novo e usa modelos alternativos antes de avisar.
 - Saem o card "Google Agenda — Em breve", provedores falsos "em breve" e a prévia de e-mail duplicada; a aba de templates "Projetos" passa a se chamar "Processos".
 - Ajuda: cerca de 25 links para telas que mudaram de lugar foram corrigidos.
+- Configurações › Banco de dados leva direto ao Diagnóstico. A página da envasadora entra no mapa do site.
 
 ---
 
