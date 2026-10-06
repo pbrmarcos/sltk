@@ -28,6 +28,10 @@ function ageDays(date: string): number {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
 }
 
+function ageTone(age: number) {
+  return age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
+}
+
 export function PipelineTable({
   items,
   onRowClick,
@@ -50,33 +54,31 @@ export function PipelineTable({
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-xs text-muted-foreground">
               <tr>
-                <th className="text-left font-medium px-3 py-2">Código</th>
-                <th className="text-left font-medium px-3 py-2">Título</th>
-                <th className="text-left font-medium px-3 py-2">Cliente / Lead</th>
-                <th className="text-left font-medium px-3 py-2">Estágio</th>
+                <th className="text-left font-medium px-3 py-2">Empresa</th>
+                <th className="text-left font-medium px-3 py-2">Oportunidade</th>
+                <th className="text-left font-medium px-3 py-2">Etapa</th>
                 <th className="text-right font-medium px-3 py-2">Valor</th>
-                <th className="text-right font-medium px-3 py-2">Prob.</th>
-                <th className="text-left font-medium px-3 py-2 hidden lg:table-cell">Pilar</th>
-                <th className="text-right font-medium px-3 py-2">Idade</th>
+                <th className="text-left font-medium px-3 py-2 hidden lg:table-cell">
+                  Responsável
+                </th>
+                <th className="text-right font-medium px-3 py-2">Na etapa</th>
               </tr>
             </thead>
             <tbody>
               {items.map((o) => {
                 const age = ageDays(o.stage_entered_at);
-                const ageTone =
-                  age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
                 return (
                   <tr
                     key={o.id}
                     onClick={() => onRowClick(o)}
                     className="border-t hover:bg-muted/30 cursor-pointer"
                   >
-                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
-                      {o.codigo}
-                    </td>
-                    <td className="px-3 py-2 font-medium">{o.titulo}</td>
-                    <td className="px-3 py-2 text-muted-foreground truncate max-w-[200px]">
+                    <td className="px-3 py-2 font-medium truncate max-w-[220px]">
                       {o.cliente_nome || o.empresa_lead || o.nome_lead || "—"}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      <span className="font-mono text-[11px] mr-2">{o.codigo}</span>
+                      {o.titulo}
                     </td>
                     <td className="px-3 py-2">
                       <Badge
@@ -86,16 +88,16 @@ export function PipelineTable({
                         {STAGE_LABEL[o.pipeline_stage]}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2 text-right font-semibold">
-                      {formatBRL(o.valor_estimado)}
-                    </td>
-                    <td className="px-3 py-2 text-right text-muted-foreground">
-                      {o.probabilidade}%
+                    <td className="px-3 py-2 text-right whitespace-nowrap">
+                      <span className="font-semibold">{formatBRL(o.valor_estimado)}</span>
+                      <span className="ml-1 text-[11px] text-muted-foreground">
+                        {o.probabilidade}%
+                      </span>
                     </td>
                     <td className="px-3 py-2 text-muted-foreground hidden lg:table-cell truncate max-w-[160px]">
                       {o.responsavel_nome}
                     </td>
-                    <td className={cn("px-3 py-2 text-right", ageTone)}>{age}d</td>
+                    <td className={cn("px-3 py-2 text-right", ageTone(age))}>{age}d</td>
                   </tr>
                 );
               })}
@@ -108,19 +110,16 @@ export function PipelineTable({
       <div className="md:hidden space-y-2">
         {items.map((o) => {
           const age = ageDays(o.stage_entered_at);
-          const ageTone =
-            age > 14 ? "text-rose-600" : age > 7 ? "text-amber-600" : "text-muted-foreground";
           return (
             <button
               key={o.id}
               type="button"
               onClick={() => onRowClick(o)}
-              className="w-full text-left border rounded-lg p-3 bg-white space-y-1.5 active:bg-muted/40"
+              className="w-full text-left border rounded-lg p-3 bg-white space-y-1 active:bg-muted/40"
             >
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-mono text-muted-foreground">{o.codigo}</div>
-                  <div className="font-medium text-sm leading-tight">{o.titulo}</div>
+                <div className="min-w-0 font-medium text-sm leading-tight truncate">
+                  {o.cliente_nome || o.empresa_lead || o.nome_lead || "—"}
                 </div>
                 <Badge
                   variant="outline"
@@ -129,13 +128,13 @@ export function PipelineTable({
                   {STAGE_LABEL[o.pipeline_stage]}
                 </Badge>
               </div>
-              <div className="text-xs text-muted-foreground truncate">
-                {o.cliente_nome || o.empresa_lead || o.nome_lead || "—"}
-              </div>
+              <div className="text-xs text-muted-foreground truncate">{o.titulo}</div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold">{formatBRL(o.valor_estimado)}</span>
-                <span className="text-muted-foreground">{o.probabilidade}%</span>
-                <span className={ageTone}>{age}d</span>
+                <span>
+                  <span className="font-semibold">{formatBRL(o.valor_estimado)}</span>
+                  <span className="ml-1 text-muted-foreground">{o.probabilidade}%</span>
+                </span>
+                <span className={ageTone(age)}>{age}d</span>
               </div>
             </button>
           );

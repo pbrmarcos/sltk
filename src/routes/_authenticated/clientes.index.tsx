@@ -114,7 +114,6 @@ function ClientesListPage() {
       <PageHeader
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Comercial" }, { label: "Clientes" }]}
         title="Clientes"
-        subtitle="Contas, key accounts e prospects"
         actions={
           <div className="flex items-center gap-2">
             <PermissionLinkButton
@@ -200,7 +199,6 @@ function ClientesListPage() {
                 <TableHead className="hidden md:table-cell">Cidade / UF</TableHead>
                 <TableHead>Status do cliente</TableHead>
                 <TableHead className="hidden lg:table-cell">País</TableHead>
-                <TableHead className="hidden lg:table-cell">Segmento</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -271,9 +269,6 @@ function ClientesListPage() {
                         <Flag code={c.pais} size={16} />
                         {paisCfg?.nome ?? c.pais}
                       </span>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell text-[12.5px] text-[var(--text-muted)]">
-                      {c.segmento ?? "—"}
                     </TableCell>
                   </TableRow>
                 );

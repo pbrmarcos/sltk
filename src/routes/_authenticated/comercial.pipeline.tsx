@@ -1,66 +1,81 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
-import { Loader2, AlertTriangle, Plus, LayoutGrid, Table as TableIcon } from "lucide-react";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import { Suspense, useEffect, useState } from "react";
+import {
+  Loader2,
+  AlertTriangle,
+  Plus,
+  LayoutGrid,
+  Table as TableIcon,
+  Archive,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { PipelineBoard } from "@/components/comercial/pipeline/PipelineBoard";
+import { PipelineBoard, type PipelineView } from "@/components/comercial/pipeline/PipelineBoard";
 import { NewOportunidadeDialog } from "@/components/comercial/pipeline/NewOportunidadeDialog";
+import { StageHelpPopover } from "@/components/comercial/pipeline/StageHelpPopover";
 import { pipelineQueryOptions } from "@/lib/oportunidades.queries";
+import { cn } from "@/lib/utils";
+
+const searchSchema = z.object({
+  /** `?novo=1` abre o diálogo de nova oportunidade (atalho do dashboard). */
+  novo: fallback(z.boolean(), false).default(false),
+});
 
 export const Route = createFileRoute("/_authenticated/comercial/pipeline")({
+  validateSearch: zodValidator(searchSchema),
   loader: ({ context }) => context.queryClient.ensureQueryData(pipelineQueryOptions()),
   component: PipelinePage,
   errorComponent: PipelineError,
   notFoundComponent: () => <div className="p-8">Não encontrado</div>,
 });
 
+const VIEWS: Array<{ id: PipelineView; label: string; icon: typeof LayoutGrid }> = [
+  { id: "kanban", label: "Kanban", icon: LayoutGrid },
+  { id: "table", label: "Tabela", icon: TableIcon },
+  { id: "perdidas", label: "Perdidas", icon: Archive },
+];
+
 function PipelinePage() {
-  const [view, setView] = useState<"kanban" | "table">("kanban");
+  const { novo } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const [view, setView] = useState<PipelineView>("kanban");
   const [newOpen, setNewOpen] = useState(false);
+
+  useEffect(() => {
+    if (!novo) return;
+    setNewOpen(true);
+    navigate({ search: { novo: undefined } as never, replace: true });
+  }, [novo, navigate]);
+
   return (
     <PageContainer>
       <PageHeader
         breadcrumbs={[{ label: "Comercial" }, { label: "Pipeline" }]}
         title="Pipeline"
-        subtitle="Arraste os cards entre as etapas."
         actions={
           <>
-            <div className="hidden sm:inline-flex rounded-md border bg-[var(--bg-surface)] p-0.5">
-              <Button
-                size="sm"
-                variant={view === "kanban" ? "secondary" : "ghost"}
-                className="h-7 px-2"
-                onClick={() => setView("kanban")}
-              >
-                <LayoutGrid className="w-4 h-4 mr-1" /> Kanban
-              </Button>
-              <Button
-                size="sm"
-                variant={view === "table" ? "secondary" : "ghost"}
-                className="h-7 px-2"
-                onClick={() => setView("table")}
-              >
-                <TableIcon className="w-4 h-4 mr-1" /> Tabela
-              </Button>
+            <div className="inline-flex rounded-md border bg-[var(--bg-surface)] p-0.5">
+              {VIEWS.map((v) => (
+                <Button
+                  key={v.id}
+                  size="sm"
+                  variant={view === v.id ? "secondary" : "ghost"}
+                  className={cn("h-7 px-2", view !== v.id && "text-muted-foreground")}
+                  onClick={() => setView(v.id)}
+                  aria-label={v.label}
+                >
+                  <v.icon className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">{v.label}</span>
+                </Button>
+              ))}
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="sm:hidden h-8 px-2"
-              onClick={() => setView(view === "kanban" ? "table" : "kanban")}
-              aria-label="Alternar visualização"
-            >
-              {view === "kanban" ? (
-                <TableIcon className="w-4 h-4" />
-              ) : (
-                <LayoutGrid className="w-4 h-4" />
-              )}
-            </Button>
+            <StageHelpPopover />
             <Button size="sm" onClick={() => setNewOpen(true)}>
-              <Plus className="w-4 h-4 mr-1" />{" "}
+              <Plus className="w-4 h-4 sm:mr-1" />
               <span className="hidden sm:inline">Nova oportunidade</span>
-              <span className="sm:hidden">Nova</span>
             </Button>
           </>
         }

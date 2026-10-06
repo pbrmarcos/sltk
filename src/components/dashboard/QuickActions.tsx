@@ -4,6 +4,8 @@ import type { LucideIcon } from "lucide-react";
 export type QuickAction = {
   label: string;
   to: string;
+  /** Parâmetros de busca da rota (ex.: `{ novo: true }` abre um diálogo ao chegar). */
+  search?: Record<string, unknown>;
   icon: LucideIcon;
   color?: string;
 };
@@ -24,6 +26,7 @@ export function QuickActions({
           <Link
             key={a.to + a.label}
             to={a.to}
+            search={a.search as never}
             className="group relative flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--bg-border)] bg-[var(--bg-surface)] px-2.5 py-1.5 transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-elevated)]"
           >
             <span

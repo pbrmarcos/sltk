@@ -8,13 +8,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarPlus, Download, Loader2, Mail } from "lucide-react";
+import { CalendarPlus, ChevronDown, Loader2 } from "lucide-react";
 import {
   buildGoogleCalendarUrl,
   buildOutlookUrl,
@@ -27,6 +41,7 @@ import {
 import { addOportunidadeNota } from "@/lib/oportunidade-notas.functions";
 import { agendarEventoReal } from "@/lib/calendar.functions";
 import type { OportunidadeLite } from "@/lib/oportunidades.functions";
+import { cn } from "@/lib/utils";
 
 const DURACOES = [30, 45, 60, 90, 120];
 
@@ -39,6 +54,11 @@ function fmt(d: Date): string {
   return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
+/**
+ * Agendar entrevista técnica: 4 campos (data, hora, duração, convidados), um
+ * botão principal (agenda Google) e as outras agendas num menu. Título, local e
+ * pauta já vêm preenchidos e ficam em "Mais detalhes".
+ */
 export function AgendarEntrevista({
   opp,
   onRegistrada,
@@ -56,6 +76,7 @@ export function AgendarEntrevista({
   const [pauta, setPauta] = useState(
     `Levantamento inicial para ${empresa} (${opp.codigo}).\n\nPauta:\n- Entendimento do processo e volumes\n- Requisitos técnicos e restrições de layout\n- Prazos, orçamento e próximos passos (Checklist / ETP)`,
   );
+  const [maisDetalhes, setMaisDetalhes] = useState(false);
 
   const getPrefs = useServerFn(getMyAgendaPrefs);
   const { data: prefs } = useQuery({ queryKey: ["agenda-prefs"], queryFn: () => getPrefs({}) });
@@ -143,8 +164,9 @@ export function AgendarEntrevista({
             ? "Evento criado na sua agenda — a cópia na agenda do administrador falhou."
             : "Evento criado na sua agenda Google.",
         );
+        registrar.mutate();
       } else {
-        toast.error(res.organizerEvent.detail ?? "Não foi possível criar o evento real.");
+        toast.error(res.organizerEvent.detail ?? "Não foi possível criar o evento.");
       }
     },
     onError: (e: Error) => toast.error(e.message),
@@ -160,75 +182,74 @@ export function AgendarEntrevista({
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <Label className="text-xs">Título</Label>
-          <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={160} />
-        </div>
-        <div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid gap-1 col-span-2 sm:col-span-1">
           <Label className="text-xs">Data</Label>
           <Input type="date" value={data} onChange={(e) => setData(e.target.value)} />
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label className="text-xs">Hora</Label>
-            <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Duração</Label>
-            <Select value={duracao} onValueChange={setDuracao}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DURACOES.map((d) => (
-                  <SelectItem key={d} value={String(d)}>
-                    {d} min
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="grid gap-1">
+          <Label className="text-xs">Hora</Label>
+          <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
         </div>
-        <div className="sm:col-span-2">
-          <Label className="text-xs">Local / link da reunião</Label>
-          <Input value={local} onChange={(e) => setLocal(e.target.value)} maxLength={300} />
+        <div className="grid gap-1">
+          <Label className="text-xs">Duração</Label>
+          <Select value={duracao} onValueChange={setDuracao}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DURACOES.map((d) => (
+                <SelectItem key={d} value={String(d)}>
+                  {d} min
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="sm:col-span-2">
-          <Label className="text-xs">Convidados (e-mails separados por vírgula)</Label>
+        <div className="grid gap-1 col-span-2 sm:col-span-4">
+          <Label className="text-xs">Convidados</Label>
           <Input
             value={convidados}
             onChange={(e) => setConvidados(e.target.value)}
             placeholder="cliente@empresa.com, engenharia@sltkamericas.com"
           />
         </div>
-        <div className="sm:col-span-2">
-          <Label className="text-xs">Pauta / descrição</Label>
-          <Textarea
-            value={pauta}
-            onChange={(e) => setPauta(e.target.value)}
-            rows={5}
-            maxLength={3000}
-          />
+      </div>
+
+      <button
+        type="button"
+        className="flex w-fit items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground"
+        onClick={() => setMaisDetalhes((v) => !v)}
+        aria-expanded={maisDetalhes}
+      >
+        <ChevronDown className={cn("h-4 w-4 transition-transform", maisDetalhes && "rotate-180")} />
+        Título, local e pauta
+      </button>
+      {maisDetalhes && (
+        <div className="grid gap-3">
+          <div className="grid gap-1">
+            <Label className="text-xs">Título</Label>
+            <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={160} />
+          </div>
+          <div className="grid gap-1">
+            <Label className="text-xs">Local / link da reunião</Label>
+            <Input value={local} onChange={(e) => setLocal(e.target.value)} maxLength={300} />
+          </div>
+          <div className="grid gap-1">
+            <Label className="text-xs">Pauta</Label>
+            <Textarea
+              value={pauta}
+              onChange={(e) => setPauta(e.target.value)}
+              rows={4}
+              maxLength={3000}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="rounded-lg border bg-muted/40 p-3 text-[12px] text-muted-foreground">
-        {evento ? (
-          <>
-            Reunião em <strong className="text-foreground">{fmt(evento.start)}</strong> até{" "}
-            <strong className="text-foreground">{fmt(eventEnd(evento))}</strong>. O convite abre na
-            conta que você já usa no navegador.
-          </>
-        ) : (
-          "Informe uma data e hora válidas para gerar o convite."
-        )}
-      </div>
-
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           size="sm"
-          variant="default"
           disabled={!evento || criarEvento.isPending}
           onClick={() => criarEvento.mutate()}
         >
@@ -237,58 +258,73 @@ export function AgendarEntrevista({
           ) : (
             <CalendarPlus className="mr-1.5 h-3.5 w-3.5" />
           )}
-          Criar evento real (Google)
+          Agendar no Google
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline" disabled={!evento}>
+              Outras agendas <ChevronDown className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onSelect={() => evento && abrir(buildGoogleCalendarUrl(evento))}>
+              Google Agenda (navegador)
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => evento && abrir(buildOutlookUrl(evento, "office"))}>
+              Teams / Outlook (trabalho)
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => evento && abrir(buildOutlookUrl(evento, "web"))}>
+              Outlook.com
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => evento && downloadIcs(evento, `${opp.codigo}-entrevista.ics`)}
+            >
+              Baixar .ics
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!splitEmails(convidados).length} onSelect={mailto}>
+              Enviar convite por e-mail
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           size="sm"
-          variant="outline"
-          disabled={!evento}
-          onClick={() => evento && abrir(buildGoogleCalendarUrl(evento))}
-        >
-          <CalendarPlus className="mr-1.5 h-3.5 w-3.5" /> Google Agenda
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!evento}
-          onClick={() => evento && abrir(buildOutlookUrl(evento, "office"))}
-        >
-          <CalendarPlus className="mr-1.5 h-3.5 w-3.5" /> Teams / Outlook (trabalho)
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!evento}
-          onClick={() => evento && abrir(buildOutlookUrl(evento, "web"))}
-        >
-          <CalendarPlus className="mr-1.5 h-3.5 w-3.5" /> Outlook.com
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!evento}
-          onClick={() => evento && downloadIcs(evento, `${opp.codigo}-entrevista.ics`)}
-        >
-          <Download className="mr-1.5 h-3.5 w-3.5" /> Baixar .ics
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!evento || !splitEmails(convidados).length}
-          onClick={mailto}
-        >
-          <Mail className="mr-1.5 h-3.5 w-3.5" /> Enviar por e-mail
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
+          variant="ghost"
+          className="ml-auto text-muted-foreground"
           disabled={!evento || registrar.isPending}
           onClick={() => registrar.mutate()}
         >
           {registrar.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-          Registrar na oportunidade
+          Só registrar na oportunidade
         </Button>
       </div>
     </div>
+  );
+}
+
+export function AgendarEntrevistaDialog({
+  open,
+  onOpenChange,
+  opp,
+  onRegistrada,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  opp: OportunidadeLite;
+  onRegistrada?: () => void;
+}) {
+  const empresa = opp.cliente_nome || opp.empresa_lead || opp.nome_lead || "Lead";
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[560px]">
+        <DialogHeader>
+          <DialogTitle>Agendar entrevista</DialogTitle>
+          <DialogDescription>
+            {empresa} · {opp.codigo}. O convite abre na conta que você já usa no navegador.
+          </DialogDescription>
+        </DialogHeader>
+        {open && <AgendarEntrevista opp={opp} onRegistrada={onRegistrada} />}
+        <DialogFooter className="sr-only" />
+      </DialogContent>
+    </Dialog>
   );
 }

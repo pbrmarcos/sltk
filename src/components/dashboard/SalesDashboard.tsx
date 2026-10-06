@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, Target, Users, MessageSquare, ClipboardList } from "lucide-react";
-import { KpiCard } from "./KpiCard";
+import { Target, Pickaxe } from "lucide-react";
 import { DashboardCard } from "./DashboardCard";
 import { DashboardShell } from "./DashboardShell";
 import { StatusList } from "./StatusList";
 import { PipelineFunnel } from "./PipelineFunnel";
-import { ModulesActiveGrid } from "./ModulesActiveGrid";
-import { useRoleDashboards } from "./useRoleDashboards";
+import { StatLine } from "@/components/data/StatLine";
 import { getManagerDashboard } from "@/lib/dashboard.functions";
 
 const fmtBRL = (n: number) =>
@@ -16,7 +14,7 @@ const fmtBRL = (n: number) =>
     currency: "BRL",
     maximumFractionDigits: 0,
   }).format(n);
-const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
+const fmtPct = (n: number) => `${(n * 100).toFixed(0)}%`;
 const fmtDate = (v: string | null) =>
   v ? new Date(v).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) : "sem data";
 
@@ -38,64 +36,56 @@ export function SalesDashboard({ userName }: { userName: string }) {
   });
 
   const loading = isLoading || !d;
-  const { data: roleData } = useRoleDashboards();
 
   return (
     <DashboardShell
       userName={userName}
-      roleLabel="Pilares · Comercial"
-      subtitle="Pipeline, conversão e próximas ações — dados reais do sistema."
+      roleLabel="Comercial"
       actions={[
-        { label: "Nova oportunidade", to: "/comercial/pipeline", icon: Target },
-        { label: "Novo orçamento", to: "/comercial/orcamento", icon: FileText },
-        { label: "Clientes", to: "/clientes", icon: Users },
-        { label: "Entrevistas", to: "/comercial/entrevistas", icon: MessageSquare },
-        { label: "Checklists", to: "/comercial/checklists", icon: ClipboardList },
+        {
+          label: "Nova oportunidade",
+          to: "/comercial/pipeline",
+          search: { novo: true },
+          icon: Target,
+        },
+        { label: "Minerar leads", to: "/comercial/mineracao", icon: Pickaxe },
       ]}
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard
-          label="Pipeline aberto"
-          value={loading ? "…" : fmtBRL(d.kpis.pipelineValor)}
-          hint={loading ? undefined : `${d.kpis.pipelineCount} oportunidade(s)`}
-        />
-        <KpiCard
-          label="Ganho no mês"
-          value={loading ? "…" : fmtBRL(d.kpis.ganhoMes)}
-          delta={d?.kpis.ganhoMesDelta}
-          accent="success"
-        />
-        <KpiCard
-          label="Win rate (90d)"
-          value={loading ? "…" : fmtPct(d.kpis.winRate)}
-          delta={d?.kpis.winRateDelta}
-          deltaSuffix="pp"
-        />
-        <KpiCard
-          label="Ticket médio"
-          value={loading ? "…" : fmtBRL(d.kpis.ticketMedio)}
-          delta={d?.kpis.ticketMedioDelta}
-        />
-      </div>
+      <StatLine
+        className="text-[15px]"
+        items={[
+          {
+            label: "em pipeline",
+            value: loading ? "…" : fmtBRL(d.kpis.pipelineValor),
+            hint: loading ? undefined : `${d.kpis.pipelineCount} oportunidades`,
+          },
+          {
+            label: "ganho no mês",
+            value: loading ? "…" : fmtBRL(d.kpis.ganhoMes),
+            tone: "success",
+          },
+          { label: "conversão 90d", value: loading ? "…" : fmtPct(d.kpis.winRate) },
+          { label: "ticket médio", value: loading ? "…" : fmtBRL(d.kpis.ticketMedio) },
+        ]}
+      />
 
-      <DashboardCard title="Funil comercial" hint="Últimos 90 dias">
-        <PipelineFunnel
-          data={(d?.funnel ?? []).map((f) => ({
-            label: f.stage,
-            valor: f.valor,
-            count: f.count,
-            color: STAGE_COLOR[f.stage] ?? "#94a3b8",
-          }))}
-        />
-      </DashboardCard>
-
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <DashboardCard title="Funil" hint="Últimos 90 dias">
+          <PipelineFunnel
+            data={(d?.funnel ?? []).map((f) => ({
+              label: f.stage,
+              valor: f.valor,
+              count: f.count,
+              color: STAGE_COLOR[f.stage] ?? "#94a3b8",
+            }))}
+          />
+        </DashboardCard>
         <DashboardCard title="Oportunidades quentes" hint="Proposta e negociação">
           <StatusList
             items={(d?.hotOpportunities ?? []).map((o) => ({
               id: o.id,
-              titulo: `${o.codigo ? `${o.codigo} · ` : ""}${o.titulo}`,
-              meta: `${o.cliente ?? "sem cliente"} · ${o.valor ? fmtBRL(o.valor) : "sem valor"} · ${fmtDate(o.expectedClose)}`,
+              titulo: `${o.cliente ?? o.titulo}`,
+              meta: `${o.valor ? fmtBRL(o.valor) : "sem valor"} · ${fmtDate(o.expectedClose)}`,
               status: o.stage === "negociacao" ? "NEGOCIAÇÃO" : "PROPOSTA",
               tone: o.stage === "negociacao" ? ("warning" as const) : ("info" as const),
             }))}
@@ -118,8 +108,6 @@ export function SalesDashboard({ userName }: { userName: string }) {
           />
         </DashboardCard>
       </div>
-
-      <ModulesActiveGrid data={roleData} exclude={["comercial"]} />
     </DashboardShell>
   );
 }

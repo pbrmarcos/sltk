@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { LostReasonField, lostReasonValida } from "./MarcarPerdidaDialog";
+import { ClienteStatusBadge } from "@/components/clientes/ClienteStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import {
   Loader2,
+  ChevronDown,
   Search,
   Building2,
   Sparkles,
@@ -47,7 +49,6 @@ import {
 } from "@/lib/oportunidades-convert.functions";
 import { listClientes, createCliente } from "@/lib/clientes.functions";
 import { paisesQueryOptions } from "@/lib/clientes.queries";
-import { enrichDocumento } from "@/lib/enrich.functions";
 import { listTemplates } from "@/lib/processo-templates.functions";
 import { sugerirTemplateParaOportunidade } from "@/lib/checklist.functions";
 import {
@@ -60,7 +61,7 @@ import {
   nomeFantasiaLabel,
 } from "@/lib/clientes.shared";
 import { validarDocumentoFiscal } from "@/lib/documentos-fiscais";
-import { focusFirstError, focusFieldByName } from "@/lib/form-errors";
+import { focusFirstError } from "@/lib/form-errors";
 
 type Step = 1 | 2 | 3;
 type Mode = "search" | "create";
@@ -103,6 +104,7 @@ export function ConvertWizardDialog({
 
   const [step, setStep] = useState<Step>(1);
   const [mode, setMode] = useState<Mode>("search");
+  const [revisar, setRevisar] = useState(false);
   const [clienteId, setClienteId] = useState<string | null>(null);
   const [clienteLabel, setClienteLabel] = useState<string>("");
   const [clienteLifecycle, setClienteLifecycle] = useState<ClienteLifecycle | null>(null);
@@ -133,41 +135,6 @@ export function ConvertWizardDialog({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const clearFieldError = (name: string) =>
     setFieldErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
-
-  const enrichFn = useServerFn(enrichDocumento);
-  const enrichMut = useMutation({
-    mutationFn: () => enrichFn({ data: { pais, documento: normalizeDocumento(documento) } }),
-    onSuccess: (res) => {
-      const envelope = res as {
-        ok: boolean;
-        data?: Record<string, unknown>;
-        error?: string;
-      } | null;
-      if (!envelope || envelope.ok === false) {
-        toast.message("Sem dados encontrados", {
-          description: envelope?.error ?? "Preencha manualmente.",
-        });
-        return;
-      }
-      const rec = (envelope.data ?? {}) as Record<string, unknown>;
-      const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
-      const rs = str(rec.razao_social);
-      const nf = str(rec.nome_fantasia);
-      const em = str(rec.email_corporativo);
-      const tel = str(rec.telefone_corporativo_numero);
-      if (rs) setRazaoSocial(rs);
-      if (nf) setNomeFantasia(nf);
-      if (em) setEmail(em);
-      if (tel) setTelefone(tel);
-      if (!rs && !nf && !em && !tel) {
-        toast.message("Sem dados encontrados", { description: "Preencha manualmente." });
-        return;
-      }
-      toast.success("Dados preenchidos");
-    },
-
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const createClienteFn = useServerFn(createCliente);
   const createMut = useMutation({
@@ -401,7 +368,7 @@ export function ConvertWizardDialog({
 
   const planValid = useMemo(() => {
     for (const [, p] of Object.entries(plans)) {
-      if (p.action === "lose" && (!p.lost_reason || p.lost_reason.trim().length < 10)) return false;
+      if (p.action === "lose" && !lostReasonValida(p.lost_reason)) return false;
     }
     return counts.win + counts.keep + counts.lose > 0;
   }, [plans, counts]);
@@ -627,27 +594,7 @@ export function ConvertWizardDialog({
                           {c.codigo} · {c.pais} · {c.documento_fiscal_numero}
                         </div>
                       </div>
-                      {c.lifecycle_stage && (
-                        <span
-                          className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
-                            CLIENTE_LIFECYCLE_COLOR[c.lifecycle_stage as ClienteLifecycle],
-                          )}
-                        >
-                          {CLIENTE_LIFECYCLE_LABEL[c.lifecycle_stage as ClienteLifecycle]}
-                        </span>
-                      )}
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-[10px]",
-                          c.status === "ativo"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200",
-                        )}
-                      >
-                        {c.status}
-                      </Badge>
+                      <ClienteStatusBadge status={c.status ?? c.lifecycle_stage} />
                     </button>
                   ))}
                 </div>
@@ -656,69 +603,7 @@ export function ConvertWizardDialog({
 
             {mode === "create" && (
               <div className="grid gap-3">
-                {/* Resumo do que será transferido do lead para o cliente */}
-                <div className="rounded-lg border bg-white p-3 grid gap-2">
-                  <div className="text-xs font-semibold">Dados que serão transferidos do lead</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
-                    {[
-                      {
-                        campo: razaoSocialLabel(pais),
-                        origem: "Empresa do lead",
-                        valor: razaoSocial,
-                        alvo: "razao_social",
-                      },
-                      {
-                        campo: "Documento fiscal",
-                        origem: "Preenchido aqui",
-                        valor: documento,
-                        alvo: "documento_fiscal_numero",
-                      },
-                      {
-                        campo: "Contato principal",
-                        origem: "Nome do lead",
-                        valor: contatoNome,
-                        alvo: "contato_nome",
-                      },
-                      {
-                        campo: "Email",
-                        origem: "Email do lead",
-                        valor: email || contatoEmail,
-                        alvo: null,
-                      },
-                      {
-                        campo: "Telefone",
-                        origem: "Telefone do lead",
-                        valor: telefone,
-                        alvo: null,
-                      },
-                    ].map((l) => {
-                      const faltando = !l.valor.trim() && !!l.alvo;
-                      return (
-                        <div key={l.campo} className="flex items-center justify-between gap-2">
-                          <span className="text-muted-foreground">{l.campo}</span>
-                          {l.valor.trim() ? (
-                            <span className="truncate font-medium">{l.valor}</span>
-                          ) : faltando ? (
-                            <button
-                              type="button"
-                              className="text-destructive font-medium underline underline-offset-2"
-                              onClick={() => focusFieldByName(l.alvo!)}
-                            >
-                              obrigatório — preencher
-                            </button>
-                          ) : (
-                            <span className="text-muted-foreground">— não informado</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Confira e edite abaixo antes de confirmar. Nada é perdido em caso de erro.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_auto] gap-2 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2">
                   <div className="grid gap-1">
                     <Label>País *</Label>
                     <Select
@@ -760,89 +645,73 @@ export function ConvertWizardDialog({
                       </span>
                     )}
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => enrichMut.mutate()}
-                    disabled={!documento.trim() || enrichMut.isPending}
-                  >
-                    {enrichMut.isPending ? (
-                      <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-4 h-4 mr-1" />
-                    )}
-                    Enriquecer
-                  </Button>
-                </div>
-                <div className="grid gap-1">
-                  <Label>{razaoSocialLabel(pais)} *</Label>
-                  <Input
-                    name="razao_social"
-                    data-field="razao_social"
-                    aria-invalid={!!fieldErrors.razao_social}
-                    className={cn(fieldErrors.razao_social && "border-destructive")}
-                    value={razaoSocial}
-                    onChange={(e) => {
-                      setRazaoSocial(e.target.value);
-                      clearFieldError("razao_social");
-                    }}
-                    maxLength={200}
-                  />
-                  {fieldErrors.razao_social && (
-                    <span className="text-[11px] text-destructive">{fieldErrors.razao_social}</span>
-                  )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div className="grid gap-1">
-                    <Label>{nomeFantasiaLabel(pais)}</Label>
+                    <Label>{razaoSocialLabel(pais)} *</Label>
                     <Input
-                      value={nomeFantasia}
-                      onChange={(e) => setNomeFantasia(e.target.value)}
+                      name="razao_social"
+                      data-field="razao_social"
+                      aria-invalid={!!fieldErrors.razao_social}
+                      className={cn(fieldErrors.razao_social && "border-destructive")}
+                      value={razaoSocial}
+                      onChange={(e) => {
+                        setRazaoSocial(e.target.value);
+                        clearFieldError("razao_social");
+                      }}
                       maxLength={200}
                     />
+                    {fieldErrors.razao_social && (
+                      <span className="text-[11px] text-destructive">
+                        {fieldErrors.razao_social}
+                      </span>
+                    )}
                   </div>
                   <div className="grid gap-1">
-                    <Label>Email corporativo</Label>
+                    <Label>Contato principal *</Label>
                     <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      maxLength={200}
+                      name="contato_nome"
+                      data-field="contato_nome"
+                      aria-invalid={!!fieldErrors.contato_nome}
+                      className={cn(fieldErrors.contato_nome && "border-destructive")}
+                      value={contatoNome}
+                      onChange={(e) => {
+                        setContatoNome(e.target.value);
+                        clearFieldError("contato_nome");
+                      }}
+                      maxLength={120}
                     />
-                  </div>
-                  <div className="grid gap-1 sm:col-span-2">
-                    <Label>Telefone corporativo</Label>
-                    <Input
-                      value={telefone}
-                      onChange={(e) => setTelefone(e.target.value)}
-                      maxLength={50}
-                    />
+                    {fieldErrors.contato_nome && (
+                      <span className="text-[11px] text-destructive">
+                        {fieldErrors.contato_nome}
+                      </span>
+                    )}
                   </div>
                 </div>
-                <div className="rounded-lg border bg-muted/30 p-3 grid gap-2">
-                  <div className="text-xs font-medium text-muted-foreground">Contato principal</div>
+
+                <button
+                  type="button"
+                  className="flex w-fit items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground"
+                  onClick={() => setRevisar((v) => !v)}
+                  aria-expanded={revisar}
+                >
+                  <ChevronDown
+                    className={cn("h-4 w-4 transition-transform", revisar && "rotate-180")}
+                  />
+                  Revisar dados transferidos do lead
+                </button>
+                {revisar && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div className="grid gap-1">
-                      <Label>Nome *</Label>
+                      <Label>{nomeFantasiaLabel(pais)}</Label>
                       <Input
-                        name="contato_nome"
-                        data-field="contato_nome"
-                        aria-invalid={!!fieldErrors.contato_nome}
-                        className={cn(fieldErrors.contato_nome && "border-destructive")}
-                        value={contatoNome}
-                        onChange={(e) => {
-                          setContatoNome(e.target.value);
-                          clearFieldError("contato_nome");
-                        }}
-                        maxLength={120}
+                        value={nomeFantasia}
+                        onChange={(e) => setNomeFantasia(e.target.value)}
+                        maxLength={200}
                       />
-                      {fieldErrors.contato_nome && (
-                        <span className="text-[11px] text-destructive">
-                          {fieldErrors.contato_nome}
-                        </span>
-                      )}
                     </div>
                     <div className="grid gap-1">
-                      <Label>Email</Label>
+                      <Label>E-mail do contato</Label>
                       <Input
                         type="email"
                         value={contatoEmail}
@@ -850,12 +719,25 @@ export function ConvertWizardDialog({
                         maxLength={200}
                       />
                     </div>
+                    <div className="grid gap-1">
+                      <Label>E-mail corporativo</Label>
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        maxLength={200}
+                      />
+                    </div>
+                    <div className="grid gap-1">
+                      <Label>Telefone corporativo</Label>
+                      <Input
+                        value={telefone}
+                        onChange={(e) => setTelefone(e.target.value)}
+                        maxLength={50}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="text-[11px] text-muted-foreground">
-                  Você poderá completar endereço, sócios e dados fiscais depois em{" "}
-                  <strong>Clientes</strong>.
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -1021,12 +903,10 @@ export function ConvertWizardDialog({
 
                       {plan.action === "lose" && (
                         <div className="pl-1">
-                          <Textarea
-                            placeholder="Motivo da perda (mín. 10 caracteres)…"
+                          <LostReasonField
                             value={plan.lost_reason ?? ""}
-                            onChange={(e) => setPlan(o.id, { lost_reason: e.target.value })}
+                            onChange={(v) => setPlan(o.id, { lost_reason: v })}
                             rows={2}
-                            maxLength={500}
                             className="text-xs"
                           />
                         </div>

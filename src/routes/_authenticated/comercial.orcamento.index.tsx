@@ -3,6 +3,13 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Plus, Download, FileText, Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { orcamentoStatusMeta } from "@/lib/orcamentos.shared";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -59,7 +66,6 @@ function OrcamentosListPage() {
           { label: "Orçamentos" },
         ]}
         title="Orçamentos"
-        subtitle="Geração de propostas comerciais em PT, ES e EN com versionamento."
         actions={
           <Button onClick={() => navigate({ to: "/comercial/orcamento/novo" })}>
             <Plus className="mr-2 h-4 w-4" /> Novo orçamento
@@ -86,11 +92,10 @@ function OrcamentosListPage() {
               <TableHead>Código</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Título</TableHead>
-              <TableHead className="hidden md:table-cell">Versão</TableHead>
-              <TableHead className="hidden md:table-cell">Idiomas</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Versão</TableHead>
               <TableHead className="hidden md:table-cell">Emitido em</TableHead>
-              <TableHead className="text-right">Download</TableHead>
+              <TableHead className="w-[48px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,30 +123,8 @@ function OrcamentosListPage() {
               </TableRow>
             ) : (
               (list.data ?? []).map((d: any) => {
-                const STATUS_META: Record<string, { label: string; cls: string }> = {
-                  rascunho: {
-                    label: "Rascunho",
-                    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
-                  },
-                  emitido: {
-                    label: "Emitido",
-                    cls: "bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-fg)] border-[var(--badge-neutral-border)]",
-                  },
-                  em_revisao: {
-                    label: "Em revisão",
-                    cls: "bg-amber-50 text-amber-800 border-amber-200",
-                  },
-                  aprovado: {
-                    label: "Aprovado",
-                    cls: "bg-emerald-50 text-emerald-800 border-emerald-200",
-                  },
-                  publicado: { label: "Publicado", cls: "bg-sky-50 text-sky-800 border-sky-200" },
-                  arquivado: {
-                    label: "Arquivado",
-                    cls: "bg-rose-50 text-rose-800 border-rose-200",
-                  },
-                };
-                const sm = STATUS_META[d.status] ?? { label: d.status, cls: "" };
+                const sm = orcamentoStatusMeta(d.status);
+                const idiomas: string[] = d.idiomas_gerados || [];
                 return (
                   <TableRow key={d.id}>
                     <TableCell className="font-mono text-xs">
@@ -163,39 +146,42 @@ function OrcamentosListPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-sm">{d.titulo || "—"}</TableCell>
-                    <TableCell className="hidden md:table-cell font-mono text-xs">
-                      v{d.versao}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-xs">
-                      {(d.idiomas_gerados || []).map((l: string) => (
-                        <Badge key={l} variant="outline" className="mr-1 uppercase">
-                          {l}
-                        </Badge>
-                      ))}
-                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={sm.cls}>
                         {sm.label}
                       </Badge>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell font-mono text-xs">
+                      v{d.versao}
+                    </TableCell>
                     <TableCell className="hidden md:table-cell text-xs text-[var(--text-muted)]">
                       {new Date(d.created_at).toLocaleDateString("pt-BR")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        {(["pt", "es", "en"] as const).map((l) => (
-                          <Button
-                            key={l}
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 px-2 text-xs uppercase"
-                            onClick={() => handleDownload(d.id, l)}
-                          >
-                            <Download className="mr-1 h-3 w-3" />
-                            {l}
-                          </Button>
-                        ))}
-                      </div>
+                      {idiomas.length > 0 && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2"
+                              aria-label="Baixar PDF"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {idiomas.map((l) => (
+                              <DropdownMenuItem
+                                key={l}
+                                onSelect={() => handleDownload(d.id, l as "pt" | "es" | "en")}
+                              >
+                                PDF em {l.toUpperCase()}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

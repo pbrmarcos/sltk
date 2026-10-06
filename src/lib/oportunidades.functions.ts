@@ -43,6 +43,9 @@ export const LIFECYCLE_OF_STAGE: Record<PipelineStage, LifecycleStage> = {
   perdido: "prospect",
 };
 
+/** Tamanho mínimo do motivo ao marcar uma oportunidade como perdida. */
+export const LOST_REASON_MIN = 10;
+
 export type OportunidadeLite = {
   id: string;
   codigo: string;
