@@ -35,8 +35,52 @@ function partsFromUserContent(
   });
 }
 
+/** Erro transitório do Gemini (modelo sobrecarregado/limite) — vale tentar de novo ou trocar de modelo. */
+class GeminiTransientError extends Error {
+  constructor(public status: number) {
+    super(`Gemini ${status}`);
+  }
+}
+
+/** Quando o modelo pedido está sobrecarregado (503), tentamos estes na sequência. */
+const FALLBACK_MODELS: Record<string, string[]> = {
+  "gemini-flash-latest": ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-lite-latest"],
+  "gemini-flash-lite-latest": [
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash-lite",
+    "gemini-2.0-flash",
+  ],
+};
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Chama o Gemini com 2 tentativas por modelo (503/500/429 com espera curta) e
+ * cai para modelos alternativos. Só desiste com uma mensagem em português.
+ */
 async function callGeminiDirect(apiKey: string, opts: AiChatOptions): Promise<string> {
-  const model = opts.geminiModel ?? "gemini-flash-lite-latest";
+  const primeiro = opts.geminiModel ?? "gemini-flash-lite-latest";
+  const modelos = [primeiro, ...(FALLBACK_MODELS[primeiro] ?? [])];
+  let ultimo: GeminiTransientError | null = null;
+  for (const model of modelos) {
+    for (let tentativa = 0; tentativa < 2; tentativa++) {
+      try {
+        return await callGeminiOnce(apiKey, model, opts);
+      } catch (e) {
+        if (!(e instanceof GeminiTransientError)) throw e;
+        ultimo = e;
+        if (tentativa === 0) await sleep(e.status === 429 ? 1500 : 800);
+      }
+    }
+  }
+  throw new Error(
+    ultimo?.status === 429
+      ? "Limite de requisições do Gemini atingido. Tente novamente em instantes."
+      : "A IA do Google está sobrecarregada agora. Tente de novo em alguns segundos.",
+  );
+}
+
+async function callGeminiOnce(apiKey: string, model: string, opts: AiChatOptions): Promise<string> {
   const generationConfig: Record<string, unknown> = {};
   if (opts.jsonMode && !opts.webSearch) generationConfig.responseMimeType = "application/json";
   if (opts.maxOutputTokens) generationConfig.maxOutputTokens = opts.maxOutputTokens;
@@ -62,10 +106,20 @@ async function callGeminiDirect(apiKey: string, opts: AiChatOptions): Promise<st
       "Chave do Gemini inválida ou sem permissão. Confira em Configurações › Chaves & Diagnóstico.",
     );
   }
-  if (r.status === 429) {
-    throw new Error("Limite de requisições do Gemini atingido. Tente novamente em instantes.");
+  if (
+    r.status === 429 ||
+    r.status === 500 ||
+    r.status === 502 ||
+    r.status === 503 ||
+    r.status === 504
+  ) {
+    throw new GeminiTransientError(r.status);
   }
-  if (!r.ok) throw new Error(`Gemini ${r.status}`);
+  if (r.status === 404) {
+    // Modelo inexistente nesta conta/região — tenta o próximo da lista.
+    throw new GeminiTransientError(404);
+  }
+  if (!r.ok) throw new Error(`Gemini respondeu ${r.status}. Tente novamente.`);
   const j = (await r.json()) as {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
   };
