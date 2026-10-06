@@ -25,7 +25,7 @@ Clique no card na coluna **Negociação** ou **Proposta**. Confirme se dados de 
 :::
 
 :::step{n="2" title="Marcar como ganho"}
-Arraste o card para a coluna **Ganho** ou use o botão **Gerar orçamento / Marcar ganho** direto no card. O sistema abre o wizard de conversão para escolher o orçamento vigente aceito e a data prevista de faturamento.
+Arraste o card para a coluna **Ganho** ou abra a oportunidade e use **Marcar como ganho** na linha de próximo passo. O sistema abre o wizard de conversão para escolher o orçamento vigente aceito e a data prevista de faturamento.
 :::
 
 :::step{n="3" title="Anexar o pedido do cliente"}

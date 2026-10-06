@@ -26,7 +26,7 @@ app_version: "0.99.4"
 ## Passo a passo
 
 :::step{n="1" title="Marcar como ganho" img="01-pipeline.png" alt="Kanban do pipeline com coluna Ganho à direita e cards com botão Gerar orçamento"}
-No pipeline, arraste o card até a coluna **Ganho** ou clique **Gerar orçamento / Marcar ganho** direto no card.
+No pipeline, arraste o card até a coluna **Ganho** ou abra a oportunidade e use **Marcar como ganho** na linha de próximo passo.
 :::
 
 :::step{n="2" title="Revisar o wizard de conversão"}
@@ -58,7 +58,7 @@ Clique **Concluir**. Você é levado à tela do orçamento em rascunho para revi
 
 ## Erros comuns
 
-:::erro{title='Sem opção "Marcar ganho"'}
+:::erro{title='Sem opção "Marcar como ganho"'}
 O card precisa estar em **Proposta** ou **Negociação**. Se está em **Novo** ou **Qualificado**, mova antes.
 :::
 

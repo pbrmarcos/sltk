@@ -23,7 +23,7 @@ app_version: "0.99.4"
 | O quê | Onde | Quem edita |
 |---|---|---|
 | **Tipos de Checklist** (blocos, campos, limites) | `/admin/checklist-tipos` | `admin` |
-| **Formulários vigentes** (link, QR, cópia) | `/comercial/checklists` | `sales`, `manager`, `admin` |
+| **Formulários vigentes** (link, QR, cópia) | `/comercial/formularios?aba=checklists` | `sales`, `manager`, `admin` |
 | **Página pública** (o cliente enxerga) | `/checklist/$slug` | Qualquer visitante |
 
 ## Passo a passo — publicar um Checklist

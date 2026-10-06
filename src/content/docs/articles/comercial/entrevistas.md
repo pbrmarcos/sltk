@@ -12,7 +12,7 @@ app_version: "0.99.4"
 ---
 
 :::tldr
-- Crie uma entrevista em `/comercial/entrevistas` escolhendo o **segmento** (ex.: Trigo, Amendoim, Café).
+- Crie uma entrevista em `/comercial/formularios` escolhendo o **segmento** (ex.: Trigo, Amendoim, Café).
 - O sistema gera um **código curto** (ex.: `5CTFHG`) e um link público `entrevista/$codigo`.
 - O cliente responde **sem login**, em PT/ES/EN, com autosave — as respostas ficam gravadas em português canônico.
 - Depois de respondida, baixe o **PDF** direto do card; entrevistas excluídas ficam 30 dias na **Lixeira**.
@@ -23,14 +23,14 @@ app_version: "0.99.4"
 | O quê | Onde | Quem edita |
 |---|---|---|
 | **Catálogo de perguntas** (por segmento) | `/admin/entrevistas` | `admin`, `manager` |
-| **Entrevistas ativas** (criar, copiar link, PDF) | `/comercial/entrevistas` | `sales`, `manager`, `admin` |
+| **Entrevistas ativas** (criar, copiar link, PDF) | `/comercial/formularios` | `sales`, `manager`, `admin` |
 | **Formulário público** (o cliente enxerga) | `/entrevista/$codigo` | Qualquer visitante |
-| **Lixeira** (30 dias, restore/purge) | `/comercial/entrevistas` → aba **Lixeira** | `manager`, `admin` para purge |
+| **Lixeira** (30 dias, restore/purge) | `/comercial/formularios` → filtro **Lixeira** | `manager`, `admin` para purge |
 
 ## Passo a passo — criar e compartilhar
 
-:::step{n="1" title="Nova entrevista" img="entrevistas-lista.png" alt="Lista de entrevistas ativas em /comercial/entrevistas, com um card mostrando o código curto, o segmento e o snippet 'Mensagem para colar' com abas PT/ES/EN e os botões Copiar e Abrir"}
-Em `/comercial/entrevistas`, clique **Nova entrevista** e selecione o **segmento**. Opcionalmente informe o nome do lead — ele aparece no cabeçalho do formulário público.
+:::step{n="1" title="Nova entrevista" img="entrevistas-lista.png" alt="Lista de entrevistas ativas em /comercial/entrevistas, com uma linha por entrevista: empresa, segmento, status, botão Copiar link e ícone da mensagem para colar"}
+Em `/comercial/formularios`, clique **Nova entrevista** e selecione o **segmento**. Opcionalmente informe o nome do lead — ele aparece no cabeçalho do formulário público.
 :::
 
 :::step{n="2" title="Copiar o link" img="entrevistas-lista.png" alt="Card da entrevista com o bloco 'Mensagem para colar' selecionado no idioma PT e botão Copiar em destaque"}

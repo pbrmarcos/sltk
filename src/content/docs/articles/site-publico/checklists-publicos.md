@@ -34,7 +34,7 @@ Ele preenche os blocos, anexa desenhos/normas (PDF, DWG, imagens) e clica em **E
 :::
 
 :::step{n="4" title="Chega no staging"}
-A submissão vai para `/api/public/checklist/submit` → tabela de staging. Aparece em `/comercial/checklists` para o comercial revisar.
+A submissão vai para `/api/public/checklist/submit` → tabela de staging. Aparece em `/comercial/formularios?aba=checklists` para o comercial revisar.
 :::
 
 :::step{n="5" title="Comercial promove"}

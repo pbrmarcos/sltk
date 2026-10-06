@@ -1,3 +1,20 @@
+## 1.7.0 — Comercial mais leve: menos telas, menos cards, cadastro rápido — 05.10.2026
+
+- **Sidebar Comercial com 5 itens**: Pipeline, Clientes, Orçamentos, Mineração e **Formulários** (Entrevistas e Checklists juntos, em abas). Os endereços antigos continuam funcionando e redirecionam.
+- **Pipeline**: um só grupo Kanban · Tabela · Perdidas, um só "?" explicando as etapas, e a tabela com 6 colunas. "Marcar como perdida" ficou igual em todo lugar (kanban, oportunidade e conversão).
+- **Oportunidade aberta**: janela mais estreita, uma coluna. Um botão Salvar e um menu ⋯; avisos empilhados viraram uma linha de status; o "próximo passo" é uma linha com um botão; os 9 números do card Insights viraram 3 na linha de fatos; 4 abas viraram 3 (Dados · Orçamentos · Anotações); a agenda abre em diálogo com um botão principal e as outras agendas num menu; colaboradores aparecem como avatares no topo.
+- **Converter em cliente**: sem o resumo e os parágrafos; só os 4 campos obrigatórios visíveis, o resto em "Revisar dados transferidos".
+- **Dashboard de vendas**: dois atalhos (Nova oportunidade abre o diálogo de verdade; Minerar leads), números em uma linha, sem a grade de módulos.
+- **Ficha do cliente em uma linha de abas**: Visão · Comercial · Equipamentos · Contatos · Documentos · Histórico. Saem os dois níveis de navegação, os 3 cards do topo e as 14 fileiras de mini-cards. O cabeçalho mostra **"Cadastro N% completo"** e a Visão traz as seções recolhidas para completar, cada uma com o próprio Salvar.
+- **Cadastro rápido de cliente**: 7 campos (país, razão social, documento opcional, ramo, contato, e-mail, telefone) em /clientes/novo e dentro do orçamento. Moeda e idioma vêm do país; o resto se completa na ficha ou pelo Minerar dados. O formulário completo abre só Identificação e Contatos.
+- **Mineração**: a tela abre com tipo de consulta (seletor pequeno), país/base, período e NCM, e o botão Buscar. Modo rota, filtros de empresa e sincronização ficam em "Mais opções"; consumo do contrato em uma linha; histórico num diálogo; tabela de 11 → 7 colunas (ticket médio, anotação, análise da IA e parceiros no detalhe da linha); ações em lote numa barra que aparece só com seleção.
+- **Entrevistas**: cards de 10 dados viraram linhas com Copiar link + menu; a mensagem para colar fica num popover com um idioma por vez; lixeira vira filtro. O detalhe perdeu o "Voltar" duplicado e as 3 caixas de texto PT/ES/EN.
+- **Checklists**: inbox mais estreita (3 dados por item), respostas em uma coluna; na ficha, uma linha por checklist com uma ação + menu e emissão com 3 campos.
+- **Orçamentos**: os 3 botões de download viraram um menu; 7 colunas. **Clientes**: sai a coluna Segmento repetida.
+- Base compartilhada iniciada: `StatLine` (números em linha), kit de formulário (seção, seção recolhida, grade, campo), status de orçamento em um só lugar; componentes mortos removidos.
+
+---
+
 ## 1.6.0 — Comercial enxuto no tablet, Suspect por foto na Nova oportunidade e Minerar dados — 05.10.2026
 
 - **Comercial funcionando no tablet**: o pipeline não sobrepõe mais o cabeçalho e o rodapé fica sempre no fim da página. Abaixo de telas largas as colunas rolam na horizontal; todo diálogo cabe na tela, com rolagem própria, e os botões ficam sempre alcançáveis.

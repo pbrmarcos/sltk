@@ -58,7 +58,7 @@ Toggle **Ativo → Sim** e salve. A URL pública `/checklist/{codigo}` fica disp
 :::
 
 :::dica
-Antes de publicar, teste como cliente: abra `/checklist/{codigo}` em janela anônima e envie um formulário de teste. Depois exclua a submissão em `/comercial/checklists`.
+Antes de publicar, teste como cliente: abra `/checklist/{codigo}` em janela anônima e envie um formulário de teste. Depois exclua a submissão em `/comercial/formularios?aba=checklists`.
 :::
 
 :::atencao

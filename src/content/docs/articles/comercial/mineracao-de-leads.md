@@ -65,7 +65,7 @@ Abra **Filtros de empresa e contraparte** para restringir por nome (**Empresa lo
 :::
 
 :::step{n="7" title="Buscar e enviar para o pipeline" img="mineracao-de-leads-1.png" alt="Tabela de resultados com colunas Empresa, Contraparte, NCMs, Operações, Valor e Ticket médio e o botão Enviar como suspect"}
-Clique **Buscar transações**. Na tabela, selecione as linhas relevantes, escolha em **Abordar** quem vira lead (Importador, Fornecedor ou As duas pontas) e clique **Enviar como suspect** — os registros entram no pipeline comercial. O campo **Anotação** guarda o contexto da abordagem.
+Clique **Buscar**. Na tabela, selecione as linhas relevantes, escolha na barra de seleção quem vira lead (Importador, Fornecedor ou As duas pontas) e clique **Enviar como suspect** — os registros entram no pipeline comercial. A anotação, no detalhe da linha, guarda o contexto da abordagem.
 :::
 
 ## Limites do contrato
