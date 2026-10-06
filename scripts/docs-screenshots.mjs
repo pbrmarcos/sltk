@@ -39,11 +39,11 @@ const TARGETS = [
     paths: ["/comercial/orcamento", "/comercial/orcamento/novo"],
   },
   { category: "comercial", slug: "mineracao-de-leads", paths: ["/comercial/mineracao"] },
-  { category: "comercial", slug: "entrevistas", paths: ["/comercial/entrevistas"] },
+  { category: "comercial", slug: "entrevistas", paths: ["/comercial/formularios?aba=entrevistas"] },
   {
     category: "comercial",
     slug: "checklist-publico-e-formularios",
-    paths: ["/comercial/checklists"],
+    paths: ["/comercial/formularios?aba=checklists"],
   },
   {
     category: "clientes-fornecedores",

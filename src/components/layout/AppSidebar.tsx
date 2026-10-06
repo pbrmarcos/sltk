@@ -22,7 +22,6 @@ import {
   FileSpreadsheet,
   CalendarRange,
   Wrench,
-  MessageSquare,
   Truck,
   Receipt,
 } from "lucide-react";
@@ -70,14 +69,6 @@ const SECTIONS: Section[] = [
     title: "Comercial",
     items: [
       {
-        label: "Mineração",
-        to: "/comercial/mineracao",
-        icon: Pickaxe,
-        roles: ["sales"],
-
-        module: "comercial",
-      },
-      {
         label: "Pipeline",
         to: "/comercial/pipeline",
         icon: GitBranch,
@@ -92,23 +83,24 @@ const SECTIONS: Section[] = [
         module: "clientes",
       },
       {
-        label: "Entrevistas",
-        to: "/comercial/entrevistas",
-        icon: MessageSquare,
-        roles: ["sales"],
-        module: "comercial",
-      },
-      {
-        label: "Checklists",
-        to: "/comercial/checklists",
-        icon: ClipboardList,
-        roles: ["sales"],
-        module: "comercial",
-      },
-      {
         label: "Orçamentos",
         to: "/comercial/orcamento",
         icon: FileText,
+        roles: ["sales"],
+        module: "comercial",
+      },
+      {
+        label: "Mineração",
+        to: "/comercial/mineracao",
+        icon: Pickaxe,
+        roles: ["sales"],
+        module: "comercial",
+      },
+      {
+        // Entrevistas técnicas + checklists: o que vai ao cliente e volta respondido.
+        label: "Formulários",
+        to: "/comercial/formularios",
+        icon: ClipboardList,
         roles: ["sales"],
         module: "comercial",
       },

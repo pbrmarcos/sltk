@@ -389,7 +389,7 @@ function FormulariosRecebidosPanel({ crumbs }: { crumbs: { label: string; href?:
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Entrevistas técnicas respondidas</CardTitle>
               <Button asChild variant="outline" size="sm">
-                <Link to="/comercial/entrevistas">
+                <Link to="/comercial/formularios" search={{ aba: "entrevistas" } as never}>
                   Ver todas <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>

@@ -30,6 +30,7 @@ export const ROUTE_DOC_MAP: DocRouteEntry[] = [
     slug: "checklist-publico-e-formularios",
   },
   { route: "/comercial/entrevistas", category: "comercial", slug: "entrevistas" },
+  { route: "/comercial/formularios", category: "comercial", slug: "entrevistas" },
 
   // Clientes & Fornecedores
   { route: "/clientes", category: "clientes-fornecedores", slug: "cadastrar-cliente" },
