@@ -1,3 +1,13 @@
+## 1.8.2 — Fornecedores importados e filtros da lista — 07.10.2026
+
+### Fornecedores
+- Pré-cadastrados 82 fornecedores vindos do sistema de compras da Induq, sem duplicatas e com os nomes organizados. Quem tem CNPJ conferido traz os dados oficiais da Receita.
+- Novas categorias de fornecedor: usinagem, corte a laser e dobra, rolamentos e correias, fixadores, ferramentas, pneumática, metais, plásticos e borrachas, embalagens, materiais elétricos, transporte, consumíveis, serviços gerais e marketplace.
+- Etiquetas para revisão: "importado-induq", "confirmar-cnpj" e "sem-cnpj".
+
+### Correções
+- Filtros por palavra-chave, etiqueta e certificação na lista de fornecedores voltam a funcionar. Valores com vírgula, como "rolamentos, correias e correntes", não encontravam nada.
+
 ## 1.8.1 — Conteúdo de demonstração removido e permissões de criação por papel — 06.10.2026
 
 ### Contas da equipe

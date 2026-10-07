@@ -21,6 +21,12 @@ async function assertPurchasingRole(supabase: any, uid: string): Promise<void> {
   );
 }
 
+/** Literal de array do Postgres com cada item entre aspas (aceita vírgula e espaço). */
+function arrayLiteral(values: string[]) {
+  const quote = (v: string) => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+  return `{${values.map(quote).join(",")}}`;
+}
+
 const listInput = z.object({
   q: z.string().max(120).optional().default(""),
   pais: z.string().max(10).optional().default("todos"),
@@ -112,19 +118,11 @@ export const listFornecedores = createServerFn({ method: "GET" })
         data.lead_time_max,
       );
 
-    if (data.tags.length > 0) query = query.overlaps("tags", data.tags);
-    if (data.palavras_chave.length > 0)
-      query = (
-        query as never as {
-          overlaps: (c: string, v: string[]) => typeof query;
-        }
-      ).overlaps("palavras_chave", data.palavras_chave);
-    if (data.certificacoes.length > 0)
-      query = (
-        query as never as {
-          overlaps: (c: string, v: string[]) => typeof query;
-        }
-      ).overlaps("certificacoes", data.certificacoes);
+    // Valores como "rolamentos, correias e correntes" têm vírgula: sem aspas o
+    // PostgREST quebra o valor em pedaços e o filtro nunca encontra nada.
+    for (const col of ["tags", "palavras_chave", "certificacoes"] as const) {
+      if (data[col].length > 0) query = query.filter(col, "ov", arrayLiteral(data[col]));
+    }
 
     const slugs =
       data.categorias.length > 0
