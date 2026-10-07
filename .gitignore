@@ -56,3 +56,6 @@ scripts/role-sweep/screenshots/
 test-results/
 playwright-report/
 blob-report/
+
+# backups de outros sistemas (dados da empresa)
+backup_*.json
