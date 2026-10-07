@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { ComboboxAdd } from "@/components/ui/combobox-add";
 import { useCreateOportunidade } from "@/lib/oportunidades.queries";
+import { LeituraFotoStatus, type EtapaLeitura } from "./LeituraFotoStatus";
 import { leadOrigensQueryOptions, segmentosQueryOptions } from "@/lib/cadastros.queries";
 import { createLeadOrigem } from "@/lib/lead-origens.functions";
 import { createSegmento } from "@/lib/segmentos.functions";
@@ -80,7 +81,8 @@ export function NewOportunidadeDialog({
   // Foto (produto ou cartão)
   const [scan, setScan] = useState<SuspectScan | null>(null);
   const [empresaSel, setEmpresaSel] = useState(0);
-  const [lendo, setLendo] = useState(false);
+  const [etapaLeitura, setEtapaLeitura] = useState<EtapaLeitura | null>(null);
+  const lendo = etapaLeitura !== null;
   const [criandoSuspect, setCriandoSuspect] = useState(false);
   const [suspectDup, setSuspectDup] = useState<Array<{ razao_social: string; codigo: string }>>([]);
 
@@ -176,14 +178,16 @@ export function NewOportunidadeDialog({
   }
 
   async function lerFoto(files: FileList) {
-    setLendo(true);
+    const lista = Array.from(files).slice(0, 3);
     try {
-      const imagens = await Promise.all(
-        Array.from(files)
-          .slice(0, 3)
-          .map((f) => compressImage(f)),
-      );
+      const imagens: Awaited<ReturnType<typeof compressImage>>[] = [];
+      for (let i = 0; i < lista.length; i++) {
+        setEtapaLeitura({ fase: "preparando", atual: i + 1, total: lista.length });
+        imagens.push(await compressImage(lista[i]));
+      }
+      setEtapaLeitura({ fase: "lendo", inicio: Date.now() });
       const r = await scanFn({ data: { imagens } });
+      setEtapaLeitura({ fase: "preenchendo" });
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -198,7 +202,7 @@ export function NewOportunidadeDialog({
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Falha ao ler a foto.");
     } finally {
-      setLendo(false);
+      setEtapaLeitura(null);
     }
   }
 
@@ -370,6 +374,7 @@ export function NewOportunidadeDialog({
                 </>
               )}
             </Button>
+            {etapaLeitura && <LeituraFotoStatus etapa={etapaLeitura} />}
             {scan && scan.empresas.length > 1 && (
               <div className="flex flex-wrap gap-2">
                 {scan.empresas.map((e, i) => (

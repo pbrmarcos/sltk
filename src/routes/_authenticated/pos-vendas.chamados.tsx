@@ -142,7 +142,7 @@ function ChamadosListPage() {
           </SelectContent>
         </Select>
         <Select value={search.prioridade} onValueChange={(v) => update({ prioridade: v })}>
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-44">
             <SelectValue placeholder="Prioridade" />
           </SelectTrigger>
           <SelectContent>
@@ -154,7 +154,7 @@ function ChamadosListPage() {
           </SelectContent>
         </Select>
         <Select value={search.escopo} onValueChange={(v) => update({ escopo: v })}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -209,22 +209,22 @@ function ChamadosListPage() {
           placeholder="Texto nas mensagens…"
           className="max-w-xs"
         />
-        <label className="flex items-center gap-1 text-xs text-muted-foreground">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
           De
           <Input
             type="date"
             value={search.date_from}
             onChange={(e) => update({ date_from: e.target.value })}
-            className="w-36"
+            className="w-40"
           />
         </label>
-        <label className="flex items-center gap-1 text-xs text-muted-foreground">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
           Até
           <Input
             type="date"
             value={search.date_to}
             onChange={(e) => update({ date_to: e.target.value })}
-            className="w-36"
+            className="w-40"
           />
         </label>
         {search.cliente_q ||

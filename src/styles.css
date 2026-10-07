@@ -250,3 +250,12 @@
     display: none;
   }
 }
+
+/* Campo de data: o ícone do calendário não encosta no texto nem na borda. */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  margin-left: 0.5rem;
+  cursor: pointer;
+  opacity: 0.6;
+}

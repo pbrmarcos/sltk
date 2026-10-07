@@ -1,3 +1,13 @@
+## 1.8.3 — Leitura de foto com status e filtros de Chamados — 07.10.2026
+
+### Nova oportunidade
+- Ao enviar a foto do produto ou do cartão, um status mostra o que está acontecendo: reduzindo a foto, leitura pela IA (com os segundos decorridos) e preenchimento dos campos. Se a IA demorar, o aviso explica que o serviço está lento e que o sistema tenta de novo sozinho.
+
+### Layout
+- Listas de seleção: a seta não encosta mais no texto, que é cortado com reticências quando não cabe. Vale para o sistema todo.
+- Campos de data: o ícone do calendário ganhou espaço em relação ao texto.
+- Chamados: filtros de atendente, prioridade e datas mais largos, sem texto espremido.
+
 ## 1.8.2 — Fornecedores importados e filtros da lista — 07.10.2026
 
 ### Fornecedores
