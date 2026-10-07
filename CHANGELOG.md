@@ -1,3 +1,18 @@
+## 1.8.5 — Logs de acesso e login com mensagens claras — 07.10.2026
+
+### Usuários & Permissões › Logs de acesso (admin)
+- Cada acesso mostra quem entrou, a hora de entrada, quanto tempo ficou, se ainda está online, o dispositivo e o IP.
+- Ao abrir um acesso aparece a linha do tempo: as páginas abertas e as ações feitas, como criar, alterar, arquivar, gerar ou enviar. Ações recusadas aparecem em vermelho, com o motivo.
+- A lista de logins recusados mostra o e-mail, o motivo e a hora.
+- Filtros por usuário e período (hoje, 7, 30 ou 90 dias). Os registros ficam guardados por 180 dias.
+
+### Login
+- A tela de entrada diz o motivo real da recusa: senha errada, excesso de tentativas, conta desativada ou falta de conexão. Antes, tudo aparecia como "Email ou senha inválidos".
+- Senha colada com espaço no começo ou no fim passa a funcionar.
+
+### Contas
+- Criadas as contas gestor@, pablo@ e wilson@sltkamericas.com, com o papel Gestor.
+
 ## 1.8.4 — Arquivar volta a funcionar — 07.10.2026
 
 ### Correções

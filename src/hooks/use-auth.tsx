@@ -3,6 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { encerrarSessaoAcesso } from "@/lib/acesso-log";
 
 export type AppRole =
   | "admin"
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         /* ignore */
       }
       localStorage.removeItem(LOGIN_AT_KEY);
+      await encerrarSessaoAcesso();
       try {
         await supabase.auth.signOut();
       } catch {

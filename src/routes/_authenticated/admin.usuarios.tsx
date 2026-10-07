@@ -70,6 +70,7 @@ import { ALL_ROLES, UserFormDialog } from "@/components/admin/UserFormDialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PermissoesMatrixTab } from "@/components/admin/PermissoesMatrixTab";
 import { SupportPasswordResetPanel } from "@/components/admin/SupportPasswordResetPanel";
+import { AcessosTab } from "@/components/admin/AcessosTab";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
@@ -113,13 +114,13 @@ function UsuariosPanel({
   const [roleFilter, setRoleFilter] = useState<AppRole | "all">("all");
   const [status, setStatus] = useState<"active" | "inactive" | "all">("active");
   const [page, setPage] = useState(1);
-  const [tab, setTab] = useState<"usuarios" | "permissoes" | "senha">(() => {
+  const [tab, setTab] = useState<"usuarios" | "permissoes" | "acessos" | "senha">(() => {
     if (!isAdmin) return "senha";
     if (typeof window === "undefined") return "usuarios";
     const p = new URLSearchParams(window.location.search).get("tab");
     // Admin já tem a ação de reset por linha na aba "Usuários" — a aba
     // "Redefinir senha" só existe pra manager/engineer, que não veem essa ação.
-    return p === "permissoes" ? p : "usuarios";
+    return p === "permissoes" || p === "acessos" ? p : "usuarios";
   });
 
   useEffect(() => {
@@ -251,12 +252,13 @@ function UsuariosPanel({
 
       <Tabs
         value={tab}
-        onValueChange={(v) => setTab(v as "usuarios" | "permissoes" | "senha")}
+        onValueChange={(v) => setTab(v as "usuarios" | "permissoes" | "acessos" | "senha")}
         className="w-full"
       >
         <TabsList>
           {isAdmin && <TabsTrigger value="usuarios">Usuários</TabsTrigger>}
           {isAdmin && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="acessos">Logs de acesso</TabsTrigger>}
           {!isAdmin && <TabsTrigger value="senha">Redefinir senha</TabsTrigger>}
         </TabsList>
         {isAdmin && (
@@ -472,6 +474,11 @@ function UsuariosPanel({
         {isAdmin && (
           <TabsContent value="permissoes" className="mt-4">
             <PermissoesMatrixTab />
+          </TabsContent>
+        )}
+        {isAdmin && (
+          <TabsContent value="acessos" className="mt-4">
+            <AcessosTab />
           </TabsContent>
         )}
         {!isAdmin && (

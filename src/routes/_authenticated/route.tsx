@@ -12,6 +12,7 @@ import { reportClientError } from "@/lib/error-report.functions";
 import { Button } from "@/components/ui/button";
 import { useBrandSettingsOptional } from "@/hooks/use-brand-settings";
 import { useAuth } from "@/hooks/use-auth";
+import { useRegistroAcesso } from "@/hooks/use-registro-acesso";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -41,7 +42,8 @@ function AuthenticatedShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   useCloseOnNavigate(() => setMobileOpen(false));
   const { settings: brand } = useBrandSettingsOptional();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  useRegistroAcesso(user?.id);
 
   useEffect(() => {
     void runStartupCheck();

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useBrandSettingsOptional } from "@/hooks/use-brand-settings";
+import { registrarFalhaLogin } from "@/lib/acesso-log";
 
 const searchSchema = z.object({
   redirect: z.string().optional().catch(undefined),
@@ -41,6 +42,22 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+/** O motivo real da recusa, sem revelar se o e-mail existe. */
+function mensagemErroLogin(codigo: string, status?: number) {
+  if (
+    codigo === "over_request_rate_limit" ||
+    codigo === "over_email_send_rate_limit" ||
+    status === 429
+  )
+    return "Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.";
+  if (codigo === "email_not_confirmed")
+    return "E-mail ainda não confirmado. Fale com o administrador.";
+  if (codigo === "user_banned") return "Acesso desativado. Fale com o administrador.";
+  if (codigo === "AuthRetryableFetchError" || status === 0 || (status ?? 0) >= 500)
+    return "Sem conexão com o servidor. Verifique a internet e tente de novo.";
+  return "Email ou senha inválidos. Confira maiúsculas, minúsculas e símbolos da senha.";
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/login" });
@@ -55,9 +72,19 @@ function LoginPage() {
 
   const onSubmit = async (values: LoginValues) => {
     setServerError(null);
-    const { error } = await supabase.auth.signInWithPassword(values);
+    const email = values.email.trim().toLowerCase();
+    let { error } = await supabase.auth.signInWithPassword({ email, password: values.password });
+    // Senha colada com espaço no começo/fim (comum ao copiar de mensagem).
+    if (error && values.password !== values.password.trim()) {
+      ({ error } = await supabase.auth.signInWithPassword({
+        email,
+        password: values.password.trim(),
+      }));
+    }
     if (error) {
-      setServerError("Email ou senha inválidos.");
+      const codigo = (error as { code?: string }).code ?? error.name ?? "erro";
+      setServerError(mensagemErroLogin(codigo, (error as { status?: number }).status));
+      void registrarFalhaLogin(email, codigo);
       return;
     }
     localStorage.setItem(LOGIN_AT_KEY, String(Date.now()));
