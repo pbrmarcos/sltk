@@ -1,3 +1,13 @@
+## 1.8.4 — Arquivar volta a funcionar — 07.10.2026
+
+### Correções
+- Arquivar cliente, oportunidade, fornecedor, contato, equipamento, projeto, FAT, SAT, anexos e outros registros falhava para todos, inclusive o admin, com "sem permissão". O banco escondia o registro arquivado de quem estava arquivando e por isso recusava a gravação. Agora quem pode editar o registro também pode arquivá-lo.
+- O registro arquivado continua fora das listas.
+- A varredura de permissões passou a testar também o arquivamento de cliente, oportunidade e fornecedor.
+
+### Dados
+- Excluídos o cliente de teste "Agroindustrias Alimenticias de Veraguas" e a oportunidade dele no pipeline.
+
 ## 1.8.3 — Leitura de foto com status e filtros de Chamados — 07.10.2026
 
 ### Nova oportunidade

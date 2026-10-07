@@ -22,6 +22,8 @@ declare
   ops text[][] := array[
     ['cli_criar',        'clientes',  $q$insert into public.clientes(codigo, razao_social, pais, documento_fiscal_tipo, documento_fiscal_numero, moeda, idioma, created_by) values ('', 'T RLS', 'BR', 'CNPJ', 'SUSPECT-' || {rnd}, 'USD', 'pt', auth.uid()) returning id$q$],
     ['cli_editar',       'clientes',  $q$update public.clientes set observacoes = 'x' where id = {cli}$q$],
+    ['cli_arquivar',     'clientes',  $q$update public.clientes set deleted_at = now() where id = {cli}$q$],
+    ['opp_arquivar',     'comercial', $q$update public.oportunidades set deleted_at = now() where id = {opp}$q$],
     ['contato_criar',    'clientes',  $q$insert into public.cliente_contatos(cliente_id, nome) values ({cli}, 't') returning id$q$],
     ['segmento_criar',   'clientes|comercial', $q$insert into public.segmentos(nome) values ('T ' || {rnd}) returning id$q$],
     ['opp_criar',        'comercial', $q$insert into public.oportunidades(titulo, responsavel_id, created_by, cliente_id) values ('t', auth.uid(), auth.uid(), {cli}) returning id$q$],
@@ -51,6 +53,7 @@ declare
     ['embarque_editar',  'logistica', $q$update public.logistica_embarques set updated_at = now() where id = {emb}$q$],
     ['forn_criar',       'fornecedores', $q$insert into public.fornecedores(codigo, nome) values ('', 'T RLS') returning id$q$],
     ['forn_editar',      'fornecedores', $q$update public.fornecedores set nome = nome where id = {forn}$q$],
+    ['forn_arquivar',    'fornecedores', $q$update public.fornecedores set deleted_at = now() where id = {forn}$q$],
     ['cotacao_criar',    'compras',   $q$insert into public.cotacoes(titulo) values ('T RLS') returning id$q$],
     ['oc_criar',         'compras',   $q$insert into public.ordens_compra(fornecedor_id) values ({forn}) returning id$q$],
     ['almox_criar',      'compras',   $q$insert into public.almox_itens(codigo, descricao, unidade_estoque) values ('T' || substr(md5(random()::text),1,6), 't', 'UN') returning id$q$]
